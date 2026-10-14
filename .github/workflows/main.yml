@@ -1,8 +1,13 @@
 name: Fetch Keiba Data
 
 on:
-  push:
   workflow_dispatch:
+    inputs:
+      race_id:
+        description: "netkeiba race ID (12 digits)"
+        required: true
+        default: "202605040502"
+        type: string
 
 permissions:
   contents: write
@@ -24,12 +29,14 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Fetch race data
-        run: python main.py
+        env:
+          RACE_ID: ${{ inputs.race_id }}
+        run: python main_new.py
 
       - name: Save race.json
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add race.json
-          git diff --cached --quiet || git commit -m "Update race data"
+          git diff --cached --quiet || git commit -m "Update race data ${{ inputs.race_id }}"
           git push
