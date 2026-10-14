@@ -41,10 +41,10 @@ for index, row in enumerate(soup.select(".HorseList"), start=1):
 
     # 馬名
     horse_name = horse.get_text(strip=True)
-            # 馬ID
-        horse_href = horse.get("href", "")
-        horse_id_match = re.search(r"/horse/(\d+)/?", horse_href)
-        horse_id = horse_id_match.group(1) if horse_id_match else ""
+    # 馬ID
+    horse_href = horse.get("href", "")
+    horse_id_match = re.search(r"/horse/(\d+)/?", horse_href)
+    horse_id = horse_id_match.group(1) if horse_id_match else ""
     # 性齢
     sex_age_el = row.select_one(".Barei")
     sex_age = (
