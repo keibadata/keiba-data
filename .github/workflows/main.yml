@@ -10,6 +10,7 @@ on:
 
   schedule:
     - cron: "0 * * * *"
+
 permissions:
   contents: write
 
@@ -29,18 +30,26 @@ jobs:
       - name: Install packages
         run: pip install -r requirements.txt
 
-      - name: Fetch race data
-        env:
-          RACE_ID: ${{ inputs.race_id }}
-        run: python main_v3.py
+      - name: Fetch current race
+        run: python main.py "${{ github.event.inputs.race_id || '202605040502' }}"
 
-      - name: Fetch pedigree data
+      - name: Fetch pedigree
         run: python pedigree.py
 
-      - name: Save data
+      - name: Fetch historical result
+        run: python history.py "${{ github.event.inputs.race_id || '202605040502' }}"
+
+      - name: Save generated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add race.json pedigree.json
-          git diff --cached --quiet || git commit -m "Update race and pedigree data"
+
+          git add race.json pedigree.json history.json
+
+          if git diff --cached --quiet; then
+            echo "No data changes"
+            exit 0
+          fi
+
+          git commit -m "Update race, pedigree and history data"
           git push
