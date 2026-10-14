@@ -7,7 +7,6 @@ on:
         description: "netkeiba race ID (12 digits)"
         required: true
         default: "202605040502"
-        type: string
 
 permissions:
   contents: write
@@ -32,11 +31,11 @@ jobs:
         env:
           RACE_ID: ${{ inputs.race_id }}
         run: python main_v3.py
+
       - name: Fetch pedigree data
         run: python pedigree.py
-        
 
-      -       - name: Save data
+      - name: Save data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
