@@ -1,55 +1,10 @@
-name: Fetch Keiba Data
+name: Disabled old workflow
 
 on:
   workflow_dispatch:
-    inputs:
-      race_id:
-        description: "netkeiba race ID (12 digits)"
-        required: true
-        default: "202605040502"
-
-  schedule:
-    - cron: "0 * * * *"
-
-permissions:
-  contents: write
 
 jobs:
-  fetch:
+  disabled:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install packages
-        run: pip install -r requirements.txt
-
-      - name: Fetch current race
-        run: python main.py "${{ github.event.inputs.race_id || '202605040502' }}"
-
-      - name: Fetch pedigree
-        run: python pedigree.py
-
-      - name: Fetch historical result
-        run: python history.py "${{ github.event.inputs.race_id || '202605040502' }}"
-
-      - name: Save generated data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add race.json pedigree.json history.json
-
-          if git diff --cached --quiet; then
-            echo "No data changes"
-            exit 0
-          fi
-
-          git commit -m "Update race, pedigree and history data"
-          git push
+      - run: echo "Old workflow disabled. Use fetch.yml."
