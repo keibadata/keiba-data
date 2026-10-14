@@ -495,4 +495,37 @@ def main():
         "results": results,
     }
 
-    with
+    with open(
+        "history.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    print(
+        "取得件数:",
+        len(results)
+    )
+
+    print(
+        json.dumps(
+            data,
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+    if not results:
+        raise RuntimeError(
+            "結果行を取得できませんでした。"
+        )
+
+
+if __name__ == "__main__":
+    main()
