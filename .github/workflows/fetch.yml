@@ -31,7 +31,7 @@ jobs:
         run: python main.py "${{ inputs.race_id }}"
 
       - name: Fetch pedigree
-        run: python pedigree.py
+        run: python pedigree.py "${{ inputs.race_id }}"
 
       - name: Fetch historical result
         id: history
@@ -44,18 +44,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -A
+          git add race.json pedigree.json history.json history_debug.html 2>/dev/null || true
 
-          if ! git diff --cached --quiet; then
-            git commit -m "Update race data and debug files"
-            git push
-          else
+          if git diff --cached --quiet; then
             echo "No changes to commit"
+          else
+            git commit -m "Update race data ${{ inputs.race_id }}"
+            git push
           fi
-
-      - name: Fail if historical result failed
-        if: steps.history.outcome == 'failure'
-        run: |
-          echo "Historical result fetch failed."
-          echo "history_debug.html should now be saved in the repository."
-          exit 1
