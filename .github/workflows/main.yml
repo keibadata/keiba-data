@@ -31,7 +31,7 @@ jobs:
       - name: Fetch race data
         env:
           RACE_ID: ${{ inputs.race_id }}
-        run: python main_new.py
+        run: python main_v2.py
 
       - name: Save race.json
         run: |
