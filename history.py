@@ -1,258 +1,359 @@
+import sys
 import json
 import re
-import sys
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import datetime, timezone
 
 import requests
 from bs4 import BeautifulSoup
 
 
-def clean_text(value):
-    if value is None:
+BASE_URL = "https://race.netkeiba.com/race/result.html"
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) "
+        "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+        "Version/18.0 Mobile/15E148 Safari/604.1"
+    ),
+    "Accept-Language": "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
+}
+
+
+def clean_text(element):
+    if element is None:
         return ""
-    return re.sub(r"\s+", " ", value.get_text(" ", strip=True)).strip()
+    return element.get_text(" ", strip=True)
 
 
-def get_race_result(race_id):
-    if not re.fullmatch(r"\d{12}", race_id):
-        raise ValueError(f"RaceIDが不正です: {race_id}")
+def first_text(row, selectors):
+    for selector in selectors:
+        element = row.select_one(selector)
+        if element:
+            text = clean_text(element)
+            if text:
+                return text
+    return ""
 
-    url = (
-        "https://race.netkeiba.com/race/result.html"
-        f"?race_id={race_id}"
-    )
 
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) "
-            "AppleWebKit/605.1.15 Version/18.0 "
-            "Mobile/15E148 Safari/604.1"
-        ),
-        "Accept-Language": "ja-JP,ja;q=0.9,en-US;q=0.8",
-    }
+def first_href(row, selectors):
+    for selector in selectors:
+        element = row.select_one(selector)
+        if element and element.get("href"):
+            return element.get("href")
+    return ""
 
+
+def extract_id(url, pattern):
+    if not url:
+        return ""
+    match = re.search(pattern, url)
+    return match.group(1) if match else ""
+
+
+def get_html(race_id):
     response = requests.get(
-        url,
-        headers=headers,
+        BASE_URL,
+        params={"race_id": race_id},
+        headers=HEADERS,
         timeout=30,
     )
     response.raise_for_status()
 
-    response.encoding = response.apparent_encoding
-    soup = BeautifulSoup(response.text, "html.parser")
+    if not response.encoding or response.encoding.lower() == "iso-8859-1":
+        response.encoding = response.apparent_encoding
 
-    # netkeiba結果ページの構造差に対応
-    result_rows = soup.select(
-        "table.RaceTable01 tbody tr, "
-        "table.RaceTable01 tr, "
-        ".RaceTable01 tbody tr, "
-        ".RaceTable01 tr, "
-        "tr.HorseList"
+    html = response.text
+
+    with open("history_debug.html", "w", encoding="utf-8") as f:
+        f.write(html)
+
+    print("HTTP:", response.status_code)
+    print("URL:", response.url)
+    print("HTML bytes:", len(response.content))
+
+    return html
+
+
+def find_result_rows(soup):
+    selectors = [
+        "table.RaceTable01 tbody tr",
+        ".RaceTable01 tbody tr",
+        "table.Shutuba_Table tbody tr",
+        "tr.HorseList",
+    ]
+
+    for selector in selectors:
+        rows = soup.select(selector)
+        if rows:
+            print("結果行selector:", selector)
+            print("結果行数:", len(rows))
+            return rows
+
+    return []
+
+
+def parse_row(row):
+    rank = first_text(
+        row,
+        [
+            ".Rank",
+            ".Rank_Ninki",
+            "td.Result_Num",
+            "td[class*='Rank']",
+        ],
     )
 
-    rows = []
-    seen = set()
+    horse_name = first_text(
+        row,
+        [
+            ".Horse_Name a",
+            ".HorseName a",
+            "td.Horse_Info a",
+            "td[class*='Horse'] a",
+        ],
+    )
 
-    for tr in result_rows:
+    horse_url = first_href(
+        row,
+        [
+            ".Horse_Name a",
+            ".HorseName a",
+            "td.Horse_Info a",
+            "td[class*='Horse'] a",
+        ],
+    )
 
-        # 馬リンク
-        horse_link = tr.select_one(
-            ".Horse_Name a, "
-            ".HorseName a, "
-            "td.Horse_Info a, "
-            "a[href*='/horse/']"
-        )
+    horse_id = extract_id(
+        horse_url,
+        r"/horse/(?:result/)?(\d+)",
+    )
 
-        if not horse_link:
-            continue
-
-        href = horse_link.get("href", "")
-
-        horse_id_match = re.search(
-            r"/horse/(\d+)",
-            href
-        )
-
-        horse_id = (
-            horse_id_match.group(1)
-            if horse_id_match
-            else ""
-        )
-
-        horse_name = clean_text(horse_link)
-
-        if not horse_name:
-            continue
-
-        # 同じ馬の重複取得防止
-        unique_key = horse_id or horse_name
-
-        if unique_key in seen:
-            continue
-
-        seen.add(unique_key)
-
-        def pick(*selectors):
-            for selector in selectors:
-                node = tr.select_one(selector)
-                if node:
-                    text = clean_text(node)
-                    if text:
-                        return text
-            return ""
-
-        # 着順
-        finish = pick(
-            ".Rank",
-            ".Result_Num",
-            "td.Result_Num"
-        )
-
-        # 馬番
-        horse_number = pick(
+    horse_number = first_text(
+        row,
+        [
             ".Num",
             ".Umaban",
-            "td.Num"
-        )
+            "td.Num",
+            "td[class*='Num']",
+        ],
+    )
 
-        # 着差
-        margin = pick(
-            ".着差",
-            ".Margin"
-        )
+    sex_age = first_text(
+        row,
+        [
+            ".Barei",
+            "td.Barei",
+            "td[class*='Barei']",
+        ],
+    )
 
-        # 走破時計
-        time_value = pick(
-            ".Time"
-        )
+    weight = first_text(
+        row,
+        [
+            ".Weight",
+            "td.Weight",
+            "td[class*='Weight']",
+        ],
+    )
 
-        # 斤量
-        carried_weight = pick(
-            ".Weight"
-        )
-
-        # 騎手
-        jockey = pick(
+    jockey = first_text(
+        row,
+        [
             ".Jockey a",
-            ".Jockey"
-        )
+            "td.Jockey a",
+            "td[class*='Jockey'] a",
+        ],
+    )
 
-        # 馬体重
-        body_weight = pick(
-            ".WeightHorse",
-            ".HorseWeight"
-        )
+    time_text = first_text(
+        row,
+        [
+            ".Time",
+            "td.Time",
+            "td[class*='Time']",
+        ],
+    )
 
-        # 通過順位
-        passing = pick(
-            ".通過",
-            ".Passing"
-        )
+    margin = first_text(
+        row,
+        [
+            ".着差",
+            ".Margin",
+            "td.Margin",
+            "td[class*='Margin']",
+        ],
+    )
 
-        # 上がり3F
-        last3f = pick(
-            ".上り",
-            ".Last3F"
-        )
+    passing = first_text(
+        row,
+        [
+            ".Passing",
+            "td.Passing",
+            "td[class*='Passing']",
+            ".Corner",
+        ],
+    )
 
-        # CSSクラスが取れない場合にtdから補完
-        cells = [
-            clean_text(td)
-            for td in tr.select("td")
-        ]
+    last3f = first_text(
+        row,
+        [
+            ".Last3F",
+            "td.Last3F",
+            "td[class*='Last3F']",
+        ],
+    )
 
-        # 最低限、着順・馬番を補完
-        if not finish and cells:
-            for cell in cells[:3]:
-                if re.fullmatch(r"\d+", cell):
-                    finish = cell
-                    break
+    odds = first_text(
+        row,
+        [
+            ".Odds",
+            "td.Odds",
+            "td[class*='Odds']",
+        ],
+    )
 
-        if not horse_number:
-            # 馬番候補を馬名より前のセルから探す
-            for cell in cells[:5]:
-                if re.fullmatch(r"\d{1,2}", cell):
-                    if cell != finish:
-                        horse_number = cell
-                        break
+    popularity = first_text(
+        row,
+        [
+            ".Popular",
+            ".Ninki",
+            "td.Popular",
+            "td[class*='Popular']",
+        ],
+    )
 
-        rows.append({
-            "race_id": race_id,
-            "horse_id": horse_id,
-            "horse_number": horse_number,
-            "horse_name": horse_name,
-            "finish": finish,
-            "margin": margin,
-            "passing": passing,
-            "last3f": last3f,
-            "time": time_value,
-            "carried_weight": carried_weight,
-            "jockey": jockey,
-            "body_weight": body_weight,
-        })
+    if not horse_name:
+        links = row.select("a")
+        for link in links:
+            href = link.get("href", "")
+            if "/horse/" in href:
+                horse_name = clean_text(link)
+                horse_url = href
+                horse_id = extract_id(href, r"/horse/(?:result/)?(\d+)")
+                break
 
-    if not rows:
-        # デバッグ用情報を残す
-        with open(
-            "history_debug.html",
-            "w",
-            encoding="utf-8"
-        ) as f:
-            f.write(response.text)
-
-        raise RuntimeError(
-            "結果行を取得できませんでした。"
-            " history_debug.html を保存しました。"
-        )
+    if not horse_name:
+        return None
 
     return {
-        "race_id": race_id,
-        "source": "netkeiba",
-        "source_url": url,
-        "updated_at": datetime.now(
-            ZoneInfo("Asia/Tokyo")
-        ).isoformat(),
-        "runner_count": len(rows),
-        "runners": rows,
+        "rank": rank,
+        "horse_number": horse_number,
+        "horse_id": horse_id,
+        "horse_name": horse_name,
+        "sex_age": sex_age,
+        "weight": weight,
+        "jockey": jockey,
+        "time": time_text,
+        "margin": margin,
+        "passing": passing,
+        "last3f": last3f,
+        "odds": odds,
+        "popularity": popularity,
     }
 
 
+def get_race_result(race_id):
+    html = get_html(race_id)
+    soup = BeautifulSoup(html, "html.parser")
+
+    rows = find_result_rows(soup)
+
+    results = []
+
+    for row in rows:
+        item = parse_row(row)
+        if item:
+            results.append(item)
+
+    # 通常selectorで取れない場合は馬リンクを基準に最低限復旧
+    if not results:
+        seen = set()
+
+        for link in soup.select('a[href*="/horse/"]'):
+            horse_name = clean_text(link)
+            href = link.get("href", "")
+
+            if not horse_name:
+                continue
+
+            horse_id = extract_id(
+                href,
+                r"/horse/(?:result/)?(\d+)",
+            )
+
+            key = horse_id or horse_name
+
+            if key in seen:
+                continue
+
+            seen.add(key)
+
+            results.append(
+                {
+                    "rank": "",
+                    "horse_number": "",
+                    "horse_id": horse_id,
+                    "horse_name": horse_name,
+                    "sex_age": "",
+                    "weight": "",
+                    "jockey": "",
+                    "time": "",
+                    "margin": "",
+                    "passing": "",
+                    "last3f": "",
+                    "odds": "",
+                    "popularity": "",
+                }
+            )
+
+    return results
+
+
 def main():
-
-    if len(sys.argv) >= 2:
-        race_id = sys.argv[1].strip()
-    else:
-        race_id = "202605040502"
-
-    print(f"取得開始: {race_id}")
-
-    result = get_race_result(race_id)
-
-    with open(
-        "history.json",
-        "w",
-        encoding="utf-8"
-    ) as f:
-        json.dump(
-            result,
-            f,
-            ensure_ascii=False,
-            indent=2
+    if len(sys.argv) < 2:
+        raise SystemExit(
+            '使い方: python history.py "202605040502"'
         )
 
+    race_id = sys.argv[1].strip()
+
+    if not re.fullmatch(r"\d{12}", race_id):
+        raise SystemExit(
+            f"race_id は12桁で指定してください: {race_id}"
+        )
+
+    print("取得開始:", race_id)
+
+    results = get_race_result(race_id)
+
+    data = {
+        "race_id": race_id,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "source": "netkeiba",
+        "result_count": len(results),
+        "results": results,
+    }
+
+    with open("history.json", "w", encoding="utf-8") as f:
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    print("取得件数:", len(results))
     print(
-        f"取得成功: "
-        f"{result['runner_count']}頭"
+        json.dumps(
+            data,
+            ensure_ascii=False,
+            indent=2,
+        )
     )
 
-    for horse in result["runners"]:
-        print(
-            horse["finish"],
-            horse["horse_number"],
-            horse["horse_name"],
-            horse["time"],
-            horse["last3f"]
+    if not results:
+        raise RuntimeError(
+            "結果を1頭も取得できませんでした。"
+            " history_debug.html を確認してください。"
         )
 
 
