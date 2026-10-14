@@ -4,7 +4,13 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-RACE_ID = "202605040502"
+with open("race_id.txt", "r", encoding="utf-8") as f:
+    RACE_ID = f.read().strip()
+
+if not RACE_ID:
+    raise ValueError("race_id.txt が空です")
+
+print(f"Target race ID: {RACE_ID}")
 URL = f"https://race.netkeiba.com/race/shutuba.html?race_id={RACE_ID}"
 
 headers = {
