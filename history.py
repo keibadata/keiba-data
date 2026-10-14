@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 
 BASE_URL = "https://race.sp.netkeiba.com/"
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) "
@@ -66,42 +67,30 @@ def parse_corners(soup):
         "corner_4": "",
     }
 
-    tables = soup.find_all("table")
-
-    target = None
-
-    for table in tables:
-        summary = table.get("summary", "")
-
-        if "コーナー通過順位" in summary:
-            target = table
-            break
+    # 実HTMLで確認済み
+    target = soup.find(
+        "table",
+        attrs={"summary": "コーナー通過順位"}
+    )
 
     if target is None:
-        # summary属性が無い場合の予備処理
-        for table in tables:
-            table_text = txt(table)
-
-            if (
-                "3コーナー" in table_text
-                or "4コーナー" in table_text
-            ):
-                target = table
-                break
-
-    if target is None:
-        print("コーナー通過順位: 見つからず")
+        print("コーナー通過順位テーブル: 見つからず")
         return corners
 
-    for tr in target.select("tr"):
+    print("コーナー通過順位テーブル: 発見")
+
+    for tr in target.find_all("tr"):
         th = tr.find("th")
         td = tr.find("td")
 
-        if not th or not td:
+        if th is None or td is None:
             continue
 
-        label = txt(th)
-        value = td.get_text("", strip=True)
+        label = th.get_text("", strip=True)
+
+        value = "".join(
+            td.stripped_strings
+        )
 
         if "1コーナー" in label:
             corners["corner_1"] = value
@@ -124,19 +113,6 @@ def parse_corners(soup):
 
 
 def corner_position(corner_text, horse_number):
-    """
-    コーナー隊列原文から対象馬が
-    左から何番目に記載されているかを返す。
-
-    例:
-    (*8,12)(3,5)...
-    馬番8  -> 1
-    馬番12 -> 2
-    馬番3  -> 3
-
-    同位置グループ等の記号はcorner原文側に保持する。
-    """
-
     if not corner_text or not horse_number:
         return ""
 
@@ -255,7 +231,7 @@ def parse_result_row(row, corners):
             trainer = parts[-1]
 
 
-    # タイム
+    # 走破タイム
     race_time = txt(
         row.select_one("td.Time dt span")
     )
@@ -301,19 +277,21 @@ def parse_result_row(row, corners):
             break
 
 
-    # オッズ・人気
+    # オッズ
     odds = txt(
         row.select_one(
             "td.Odds .Odds_Ninki"
         )
     ).replace("倍", "")
 
+
+    # 人気
     popularity = txt(
         row.select_one("td.Odds dd")
     ).replace("人気", "")
 
 
-    # 各馬のコーナー位置
+    # コーナー位置
     passing_1c = corner_position(
         corners["corner_1"],
         horse_number
@@ -333,6 +311,7 @@ def parse_result_row(row, corners):
         corners["corner_4"],
         horse_number
     )
+
 
     passing_parts = []
 
@@ -410,20 +389,14 @@ def get_race_result(race_id):
 
     corners = parse_corners(soup)
 
-    rows = find_all_result_rows(
-        soup
-    )
+    rows = find_all_result_rows(soup)
 
-    print(
-        "全結果行:",
-        len(rows)
-    )
+    print("全結果行:", len(rows))
 
     results = []
     seen = set()
 
     for row in rows:
-
         item = parse_result_row(
             row,
             corners
@@ -473,8 +446,8 @@ def main():
         race_id
     )
 
-    results, corners = (
-        get_race_result(race_id)
+    results, corners = get_race_result(
+        race_id
     )
 
     data = {
@@ -500,7 +473,6 @@ def main():
         "w",
         encoding="utf-8"
     ) as f:
-
         json.dump(
             data,
             f,
