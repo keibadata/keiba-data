@@ -1,0 +1,199 @@
+name: Race Full Analysis
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: race-full-analysis
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: |
+          pip install -r requirements.txt
+
+      # 1. 出馬表
+      - name: Collect race
+        run: |
+          python main_v3.py
+
+      # 2. 対象馬の5代血統
+      - name: Collect pedigree
+        run: |
+          python pedigree.py
+
+      # 3. 血統名の正規化
+      - name: Normalize pedigree
+        run: |
+          python normalize_pedigree.py
+
+      # 4. 過去成績
+      - name: Collect runner history
+        run: |
+          python runner_history.py
+
+      # 5. 能力・今回能力発揮率
+      - name: Analyze runners
+        run: |
+          python runner_analysis.py
+
+      # 6. 前走処理・課題・克服材料
+      - name: Analyze previous race
+        run: |
+          python previous_race_analysis.py
+
+      # 7. 展開
+      - name: Analyze pace
+        run: |
+          python pace_analysis.py
+
+      # 8. 条件別血統統計
+      # history_db.json / history_pedigree.json を使用
+      - name: Build bloodline statistics
+        run: |
+          python bloodline_stats.py
+
+      # 9. 今回出走馬の血統評価
+      - name: Score race bloodlines
+        run: |
+          python race_bloodline_score.py
+
+      # 10. 最終統合
+      - name: Run final analysis
+        run: |
+          python final_analysis.py
+
+      # 11. 最低限の完成チェック
+      - name: Validate final analysis
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open(
+              "final_analysis.json",
+              "r",
+              encoding="utf-8"
+          ) as f:
+              data = json.load(f)
+
+          summary = data.get("summary", {})
+
+          runner_count = summary.get(
+              "runner_count",
+              0
+          )
+
+          ranked_count = summary.get(
+              "ranked_count",
+              0
+          )
+
+          checks = {
+              "ability":
+                  summary.get(
+                      "ability_connected_count",
+                      0
+                  ),
+
+              "previous":
+                  summary.get(
+                      "previous_connected_count",
+                      0
+                  ),
+
+              "pace":
+                  summary.get(
+                      "pace_connected_count",
+                      0
+                  ),
+
+              "bloodline":
+                  summary.get(
+                      "bloodline_connected_count",
+                      0
+                  )
+          }
+
+          print(
+              "runner_count:",
+              runner_count
+          )
+
+          print(
+              "ranked_count:",
+              ranked_count
+          )
+
+          for name, value in checks.items():
+              print(
+                  name + ":",
+                  value,
+                  "/",
+                  runner_count
+              )
+
+          if runner_count <= 0:
+              sys.exit(
+                  "ERROR: runner_count = 0"
+              )
+
+          if ranked_count != runner_count:
+              sys.exit(
+                  "ERROR: ranking incomplete"
+              )
+
+          for name, value in checks.items():
+              if value != runner_count:
+                  sys.exit(
+                      "ERROR: "
+                      + name
+                      + " connection incomplete"
+                  )
+
+          print(
+              "FULL ANALYSIS VALIDATION OK"
+          )
+          PY
+
+      # 12. JSONをまとめて保存
+      - name: Save analysis data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add \
+            race.json \
+            pedigree.json \
+            runner_history.json \
+            runner_analysis.json \
+            previous_race_analysis.json \
+            pace_analysis.json \
+            bloodline_stats.json \
+            race_bloodline_score.json \
+            final_analysis.json
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+
+          git commit -m "Run full race analysis"
+          git push
