@@ -29,58 +29,75 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      # 0. race_id.txt → RACE_ID
+      - name: Load race ID
+        run: |
+          RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
+
+          if ! echo "$RACE_ID" | grep -Eq '^[0-9]{12}$'; then
+            echo "ERROR: race_id.txt must contain exactly 12 digits"
+            exit 1
+          fi
+
+          echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
+          echo "Target Race ID: $RACE_ID"
+
       # 1. 出馬表
       - name: Collect race
         run: |
           python main_v3.py
 
-      # 2. 対象馬の5代血統
+      # 2. 今回条件と過去DBの一致確認
+      - name: Select condition history
+        run: |
+          python condition_history.py
+
+      # 3. 対象馬の5代血統
       - name: Collect pedigree
         run: |
           python pedigree.py
 
-      # 3. 血統名の正規化
+      # 4. 血統名の正規化
       - name: Normalize pedigree
         run: |
           python normalize_pedigree.py
 
-      # 4. 過去成績
+      # 5. 過去成績
       - name: Collect runner history
         run: |
           python runner_history.py
 
-      # 5. 能力・今回能力発揮率
+      # 6. 能力・今回能力発揮率
       - name: Analyze runners
         run: |
           python runner_analysis.py
 
-      # 6. 前走処理・課題・克服材料
+      # 7. 前走処理・課題・克服材料
       - name: Analyze previous race
         run: |
           python previous_race_analysis.py
 
-      # 7. 展開
+      # 8. 展開
       - name: Analyze pace
         run: |
           python pace_analysis.py
 
-      # 8. 条件別血統統計
-      # history_db.json / history_pedigree.json を使用
+      # 9. 条件別血統統計
       - name: Build bloodline statistics
         run: |
           python bloodline_stats.py
 
-      # 9. 今回出走馬の血統評価
+      # 10. 今回出走馬の血統評価
       - name: Score race bloodlines
         run: |
           python race_bloodline_score.py
 
-      # 10. 最終統合
+      # 11. 最終統合
       - name: Run final analysis
         run: |
           python final_analysis.py
 
-      # 11. 最低限の完成チェック
+      # 12. 完成チェック
       - name: Validate final analysis
         run: |
           python - <<'PY'
@@ -173,7 +190,7 @@ jobs:
           )
           PY
 
-      # 12. JSONをまとめて保存
+      # 13. JSONをまとめて保存
       - name: Save analysis data
         run: |
           git config user.name "github-actions[bot]"
@@ -181,6 +198,7 @@ jobs:
 
           git add \
             race.json \
+            condition_history.json \
             pedigree.json \
             runner_history.json \
             runner_analysis.json \
