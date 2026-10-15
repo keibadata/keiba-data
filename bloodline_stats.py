@@ -3,13 +3,21 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 
-HISTORY_FILE = "history_db.json"
+# 今回条件で選別済みの過去レース
+HISTORY_FILE = "condition_history.json"
+
+# 過去出走馬の5代血統DB
 PEDIGREE_FILE = "history_pedigree.json"
+
 OUTPUT_FILE = "bloodline_stats.json"
 
 
 def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(
+        path,
+        "r",
+        encoding="utf-8"
+    ) as f:
         return json.load(f)
 
 
@@ -17,25 +25,36 @@ def clean_name(name):
     if not name:
         return ""
 
-    # 現在の血統JSONでは祖先名に生年等が付く場合があるため、
-    # IDがある場合はIDを主キーにする。
-    return " ".join(str(name).split())
+    return " ".join(
+        str(name).split()
+    )
 
 
 def parse_rank(value):
     try:
-        return int(str(value).strip())
-    except (ValueError, TypeError):
+        return int(
+            str(value).strip()
+        )
+    except (
+        ValueError,
+        TypeError
+    ):
         return None
 
 
 def make_ancestor_key(ancestor):
     ancestor_id = str(
-        ancestor.get("ancestor_id", "")
+        ancestor.get(
+            "ancestor_id",
+            ""
+        )
     ).strip()
 
     ancestor_name = clean_name(
-        ancestor.get("ancestor_name", "")
+        ancestor.get(
+            "ancestor_name",
+            ""
+        )
     )
 
     if ancestor_id:
@@ -44,28 +63,172 @@ def make_ancestor_key(ancestor):
     return "name:" + ancestor_name
 
 
-def build_pedigree_map(pedigree_db):
+def build_pedigree_map(
+    pedigree_db
+):
     pedigree_map = {}
 
-    for horse in pedigree_db.get("horses", []):
+    for horse in pedigree_db.get(
+        "horses",
+        []
+    ):
         horse_id = str(
-            horse.get("horse_id", "")
+            horse.get(
+                "horse_id",
+                ""
+            )
         ).strip()
 
         if not horse_id:
             continue
 
-        pedigree_map[horse_id] = horse
+        pedigree_map[
+            horse_id
+        ] = horse
 
     return pedigree_map
 
 
-def main():
-    history_db = load_json(HISTORY_FILE)
-    pedigree_db = load_json(PEDIGREE_FILE)
+def normalize_condition(
+    condition
+):
+    return {
+        "track": str(
+            condition.get(
+                "track",
+                ""
+            )
+        ).strip(),
 
-    pedigree_map = build_pedigree_map(
-        pedigree_db
+        "surface": str(
+            condition.get(
+                "surface",
+                ""
+            )
+        ).strip(),
+
+        "distance": int(
+            condition.get(
+                "distance",
+                0
+            ) or 0
+        ),
+    }
+
+
+def validate_selected_history(
+    history_db
+):
+    """
+    condition_history.py が選別した条件を検査。
+    別条件のレースが混ざっていたら停止する。
+    """
+
+    target = normalize_condition(
+        history_db.get(
+            "target_condition",
+            {}
+        )
+    )
+
+    races = history_db.get(
+        "matched_history",
+        []
+    )
+
+    if not target["track"]:
+        raise RuntimeError(
+            "target_condition.track がありません"
+        )
+
+    if not target["surface"]:
+        raise RuntimeError(
+            "target_condition.surface がありません"
+        )
+
+    if target["distance"] <= 0:
+        raise RuntimeError(
+            "target_condition.distance が不正です"
+        )
+
+    if not races:
+        raise RuntimeError(
+            "今回条件に一致する過去レースが0件です。"
+            "血統評価を続行しません。"
+        )
+
+    for race in races:
+
+        race_track = str(
+            race.get(
+                "racecourse",
+                race.get(
+                    "track",
+                    ""
+                )
+            )
+        ).strip()
+
+        race_surface = str(
+            race.get(
+                "surface",
+                ""
+            )
+        ).strip()
+
+        try:
+            race_distance = int(
+                race.get(
+                    "distance",
+                    0
+                ) or 0
+            )
+        except (
+            TypeError,
+            ValueError
+        ):
+            race_distance = 0
+
+        if (
+            race_track
+            != target["track"]
+            or race_surface
+            != target["surface"]
+            or race_distance
+            != target["distance"]
+        ):
+            raise RuntimeError(
+                "条件不一致レース混入: "
+                + str(
+                    race.get(
+                        "race_id",
+                        ""
+                    )
+                )
+            )
+
+    return target, races
+
+
+def main():
+    history_db = load_json(
+        HISTORY_FILE
+    )
+
+    pedigree_db = load_json(
+        PEDIGREE_FILE
+    )
+
+    target_condition, races = (
+        validate_selected_history(
+            history_db
+        )
+    )
+
+    pedigree_map = (
+        build_pedigree_map(
+            pedigree_db
+        )
     )
 
     stats = defaultdict(
@@ -77,7 +240,8 @@ def main():
             "top3": 0,
             "occurrences": 0,
             "cross_runner_count": 0,
-            "generation_counts": defaultdict(int),
+            "generation_counts":
+                defaultdict(int),
         }
     )
 
@@ -86,79 +250,114 @@ def main():
     total_top3 = 0
 
     matched_starts = 0
+
     unmatched_starts = []
 
     race_count = 0
 
-    for race in history_db.get("races", []):
+    for race in races:
+
         race_count += 1
 
         race_id = str(
-            race.get("race_id", "")
+            race.get(
+                "race_id",
+                ""
+            )
         )
 
         for result in race.get(
             "results",
             []
         ):
+
             total_starts += 1
 
             horse_id = str(
-                result.get("horse_id", "")
+                result.get(
+                    "horse_id",
+                    ""
+                )
             ).strip()
 
             horse_name = str(
-                result.get("horse_name", "")
+                result.get(
+                    "horse_name",
+                    ""
+                )
             ).strip()
 
             rank = parse_rank(
-                result.get("rank")
+                result.get(
+                    "rank"
+                )
             )
 
             if rank == 1:
                 total_wins += 1
 
-            if rank is not None and rank <= 3:
+            if (
+                rank is not None
+                and rank <= 3
+            ):
                 total_top3 += 1
 
-            pedigree = pedigree_map.get(
-                horse_id
+            pedigree = (
+                pedigree_map.get(
+                    horse_id
+                )
             )
 
             if pedigree is None:
-                unmatched_starts.append({
-                    "race_id": race_id,
-                    "horse_id": horse_id,
-                    "horse_name": horse_name,
-                })
+
+                unmatched_starts.append(
+                    {
+                        "race_id":
+                            race_id,
+
+                        "horse_id":
+                            horse_id,
+
+                        "horse_name":
+                            horse_name,
+                    }
+                )
+
                 continue
 
             matched_starts += 1
 
-            # この1出走について祖先別にまとめる。
-            # 同じ祖先がクロスしていてもstartsは1回。
+            # 同一出走内で同じ祖先が
+            # 複数回出てもstartsは1回。
             runner_ancestors = {}
 
-            for ancestor in pedigree.get(
-                "ancestors",
-                []
+            for ancestor in (
+                pedigree.get(
+                    "ancestors",
+                    []
+                )
             ):
+
                 key = make_ancestor_key(
                     ancestor
                 )
 
-                ancestor_name = clean_name(
-                    ancestor.get(
-                        "ancestor_name",
-                        ""
+                ancestor_name = (
+                    clean_name(
+                        ancestor.get(
+                            "ancestor_name",
+                            ""
+                        )
                     )
                 )
 
                 if not ancestor_name:
                     continue
 
-                generation = ancestor.get(
-                    "generation"
+                generation = (
+                    ancestor.get(
+                        "generation"
+                    )
                 )
 
                 ancestor_id = str(
@@ -168,49 +367,81 @@ def main():
                     )
                 ).strip()
 
-                if key not in runner_ancestors:
-                    runner_ancestors[key] = {
-                        "ancestor_id": ancestor_id,
-                        "ancestor_name": ancestor_name,
-                        "occurrences": 0,
+                if (
+                    key
+                    not in runner_ancestors
+                ):
+
+                    runner_ancestors[
+                        key
+                    ] = {
+                        "ancestor_id":
+                            ancestor_id,
+
+                        "ancestor_name":
+                            ancestor_name,
+
+                        "occurrences":
+                            0,
+
                         "generation_counts":
-                            defaultdict(int),
+                            defaultdict(
+                                int
+                            ),
                     }
 
-                item = runner_ancestors[key]
+                item = (
+                    runner_ancestors[
+                        key
+                    ]
+                )
 
-                item["occurrences"] += 1
+                item[
+                    "occurrences"
+                ] += 1
 
                 try:
                     generation_int = int(
                         generation
                     )
+
                     item[
                         "generation_counts"
-                    ][generation_int] += 1
-                except (TypeError, ValueError):
+                    ][
+                        generation_int
+                    ] += 1
+
+                except (
+                    TypeError,
+                    ValueError
+                ):
                     pass
 
-            for key, ancestor_data in (
-                runner_ancestors.items()
-            ):
+            for (
+                key,
+                ancestor_data
+            ) in runner_ancestors.items():
+
                 s = stats[key]
 
-                if not s["ancestor_id"]:
-                    s["ancestor_id"] = (
-                        ancestor_data[
-                            "ancestor_id"
-                        ]
-                    )
+                if not s[
+                    "ancestor_id"
+                ]:
+                    s[
+                        "ancestor_id"
+                    ] = ancestor_data[
+                        "ancestor_id"
+                    ]
 
-                if not s["ancestor_name"]:
-                    s["ancestor_name"] = (
-                        ancestor_data[
-                            "ancestor_name"
-                        ]
-                    )
+                if not s[
+                    "ancestor_name"
+                ]:
+                    s[
+                        "ancestor_name"
+                    ] = ancestor_data[
+                        "ancestor_name"
+                    ]
 
-                # 出走数は1出走につき1回
                 s["starts"] += 1
 
                 if rank == 1:
@@ -232,17 +463,21 @@ def main():
                     "occurrences"
                 ] += occurrence_count
 
-                # 同一祖先が5代内に2回以上ある出走
-                if occurrence_count >= 2:
+                if (
+                    occurrence_count
+                    >= 2
+                ):
                     s[
                         "cross_runner_count"
                     ] += 1
 
-                for generation, count in (
-                    ancestor_data[
-                        "generation_counts"
-                    ].items()
-                ):
+                for (
+                    generation,
+                    count
+                ) in ancestor_data[
+                    "generation_counts"
+                ].items():
+
                     s[
                         "generation_counts"
                     ][generation] += count
@@ -250,6 +485,7 @@ def main():
     output_stats = []
 
     for key, s in stats.items():
+
         starts = s["starts"]
         wins = s["wins"]
         top3 = s["top3"]
@@ -266,30 +502,27 @@ def main():
             else 0
         )
 
-        # 全出走レコード中、
-        # この祖先を持つ馬の割合
         all_runner_prevalence = (
-            starts / matched_starts
+            starts
+            / matched_starts
             if matched_starts
             else 0
         )
 
-        # 勝ち馬の中でこの祖先を持つ割合
         winner_prevalence = (
-            wins / total_wins
+            wins
+            / total_wins
             if total_wins
             else 0
         )
 
-        # 3着以内馬の中でこの祖先を持つ割合
         top3_prevalence = (
-            top3 / total_top3
+            top3
+            / total_top3
             if total_top3
             else 0
         )
 
-        # 1.0 = 全出走馬と同程度
-        # >1.0 = 勝ち馬で過剰出現
         win_overperformance = (
             winner_prevalence
             / all_runner_prevalence
@@ -297,8 +530,6 @@ def main():
             else 0
         )
 
-        # 1.0 = 全出走馬と同程度
-        # >1.0 = 3着以内馬で過剰出現
         top3_overperformance = (
             top3_prevalence
             / all_runner_prevalence
@@ -307,70 +538,100 @@ def main():
         )
 
         generation_counts = {
-            str(g): s[
-                "generation_counts"
-            ].get(g, 0)
-            for g in range(1, 6)
+            str(g):
+                s[
+                    "generation_counts"
+                ].get(
+                    g,
+                    0
+                )
+            for g in range(
+                1,
+                6
+            )
         }
 
-        output_stats.append({
-            "ancestor_key": key,
-            "ancestor_id": s[
-                "ancestor_id"
-            ],
-            "ancestor_name": s[
-                "ancestor_name"
-            ],
+        output_stats.append(
+            {
+                "ancestor_key":
+                    key,
 
-            "starts": starts,
-            "wins": wins,
-            "top3": top3,
+                "ancestor_id":
+                    s[
+                        "ancestor_id"
+                    ],
 
-            "win_rate": round(
-                win_rate,
-                6
-            ),
-            "top3_rate": round(
-                top3_rate,
-                6
-            ),
+                "ancestor_name":
+                    s[
+                        "ancestor_name"
+                    ],
 
-            "all_runner_prevalence": round(
-                all_runner_prevalence,
-                6
-            ),
-            "winner_prevalence": round(
-                winner_prevalence,
-                6
-            ),
-            "top3_prevalence": round(
-                top3_prevalence,
-                6
-            ),
+                "starts":
+                    starts,
 
-            "win_overperformance": round(
-                win_overperformance,
-                4
-            ),
-            "top3_overperformance": round(
-                top3_overperformance,
-                4
-            ),
+                "wins":
+                    wins,
 
-            # 血統表内での総出現回数
-            "pedigree_occurrences":
-                s["occurrences"],
+                "top3":
+                    top3,
 
-            # 5代内クロスを持った出走数
-            "cross_runner_count":
-                s["cross_runner_count"],
+                "win_rate":
+                    round(
+                        win_rate,
+                        6
+                    ),
 
-            "generation_counts":
-                generation_counts,
-        })
+                "top3_rate":
+                    round(
+                        top3_rate,
+                        6
+                    ),
 
-    # 母数が大きい祖先を上へ。
-    # 同数なら複勝率 → 勝率。
+                "all_runner_prevalence":
+                    round(
+                        all_runner_prevalence,
+                        6
+                    ),
+
+                "winner_prevalence":
+                    round(
+                        winner_prevalence,
+                        6
+                    ),
+
+                "top3_prevalence":
+                    round(
+                        top3_prevalence,
+                        6
+                    ),
+
+                "win_overperformance":
+                    round(
+                        win_overperformance,
+                        4
+                    ),
+
+                "top3_overperformance":
+                    round(
+                        top3_overperformance,
+                        4
+                    ),
+
+                "pedigree_occurrences":
+                    s[
+                        "occurrences"
+                    ],
+
+                "cross_runner_count":
+                    s[
+                        "cross_runner_count"
+                    ],
+
+                "generation_counts":
+                    generation_counts,
+            }
+        )
+
     output_stats.sort(
         key=lambda x: (
             x["starts"],
@@ -381,9 +642,10 @@ def main():
     )
 
     output = {
-        "updated_at": datetime.now(
-            timezone.utc
-        ).isoformat(),
+        "updated_at":
+            datetime.now(
+                timezone.utc
+            ).isoformat(),
 
         "source_history":
             HISTORY_FILE,
@@ -391,10 +653,10 @@ def main():
         "source_pedigree":
             PEDIGREE_FILE,
 
-        "condition": history_db.get(
-            "condition",
-            {}
-        ),
+        # race.jsonから選ばれた
+        # 今回の実条件
+        "condition":
+            target_condition,
 
         "summary": {
             "race_count":
@@ -407,10 +669,14 @@ def main():
                 matched_starts,
 
             "unmatched_start_records":
-                len(unmatched_starts),
+                len(
+                    unmatched_starts
+                ),
 
             "unique_pedigree_horses":
-                len(pedigree_map),
+                len(
+                    pedigree_map
+                ),
 
             "total_winners":
                 total_wins,
@@ -419,7 +685,9 @@ def main():
                 total_top3,
 
             "ancestor_count":
-                len(output_stats),
+                len(
+                    output_stats
+                ),
         },
 
         "definitions": {
@@ -466,6 +734,7 @@ def main():
         "w",
         encoding="utf-8"
     ) as f:
+
         json.dump(
             output,
             f,
@@ -474,28 +743,51 @@ def main():
         )
 
     print(
-        "========================"
+        "===== BLOODLINE STATS ====="
     )
+
     print(
-        "レース数:",
+        "condition:",
+        target_condition[
+            "track"
+        ],
+        target_condition[
+            "surface"
+        ],
+        target_condition[
+            "distance"
+        ]
+    )
+
+    print(
+        "race_count:",
         race_count
     )
+
     print(
-        "全出走レコード:",
+        "total_start_records:",
         total_starts
     )
+
     print(
-        "血統照合成功:",
+        "matched_start_records:",
         matched_starts
     )
+
     print(
-        "血統照合失敗:",
-        len(unmatched_starts)
+        "unmatched_start_records:",
+        len(
+            unmatched_starts
+        )
     )
+
     print(
-        "祖先種類数:",
-        len(output_stats)
+        "ancestor_count:",
+        len(
+            output_stats
+        )
     )
+
     print(
         OUTPUT_FILE,
         "作成完了"
