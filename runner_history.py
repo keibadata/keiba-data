@@ -18,9 +18,13 @@ MAX_RETRIES = 3
 
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) "
-        "AppleWebKit/605.1.15 "
-        "(KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/141.0.0.0 Safari/537.36"
+    ),
+    "Accept": (
+        "text/html,application/xhtml+xml,"
+        "application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
     ),
     "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
 }
@@ -60,208 +64,244 @@ def fetch(session, url):
                 timeout=TIMEOUT
             )
 
+            print(
+                "  HTTP:",
+                response.status_code,
+                "bytes:",
+                len(response.content)
+            )
+
             if response.status_code == 200:
                 response.encoding = (
-                    response.apparent_encoding or "EUC-JP"
+                    response.apparent_encoding
+                    or response.encoding
+                    or "EUC-JP"
                 )
                 return response.text
 
-            last_error = f"HTTP {response.status_code}"
+            last_error = (
+                f"HTTP {response.status_code}"
+            )
 
         except Exception as e:
             last_error = str(e)
 
         if attempt < MAX_RETRIES:
-            time.sleep(REQUEST_INTERVAL * attempt)
+            time.sleep(
+                REQUEST_INTERVAL * attempt
+            )
 
-    raise RuntimeError(last_error or "取得失敗")
+    raise RuntimeError(
+        last_error or "取得失敗"
+    )
 
 
 def extract_horses(data):
     candidates = []
 
     if isinstance(data, dict):
-        for key in [
+        for key in (
             "runners",
             "horses",
             "entries",
             "results"
-        ]:
-            value = data.get(key)
-            if isinstance(value, list):
-                candidates = value
+        ):
+            if isinstance(data.get(key), list):
+                candidates = data[key]
                 break
 
         if not candidates:
             race = data.get("race")
 
             if isinstance(race, dict):
-                for key in [
+                for key in (
                     "runners",
                     "horses",
                     "entries",
                     "results"
-                ]:
-                    value = race.get(key)
-                    if isinstance(value, list):
-                        candidates = value
+                ):
+                    if isinstance(
+                        race.get(key),
+                        list
+                    ):
+                        candidates = race[key]
                         break
 
     elif isinstance(data, list):
         candidates = data
 
-    horses = []
+    horses = {}
 
     for item in candidates:
         if not isinstance(item, dict):
             continue
 
         horse_id = clean_text(
-            item.get("horse_id") or item.get("id")
-        )
-
-        horse_name = clean_text(
-            item.get("horse_name") or item.get("name")
-        )
-
-        horse_number = clean_text(
-            item.get("horse_number")
-            or item.get("number")
-            or item.get("umaban")
+            item.get("horse_id")
+            or item.get("id")
         )
 
         if not horse_id:
             continue
 
-        horses.append({
+        horses[horse_id] = {
             "horse_id": horse_id,
-            "horse_name": horse_name,
-            "horse_number": horse_number
-        })
+            "horse_name": clean_text(
+                item.get("horse_name")
+                or item.get("name")
+            ),
+            "horse_number": clean_text(
+                item.get("horse_number")
+                or item.get("number")
+                or item.get("umaban")
+            )
+        }
 
-    unique = {}
-
-    for horse in horses:
-        unique[horse["horse_id"]] = horse
-
-    return list(unique.values())
+    return list(horses.values())
 
 
-def get_table_headers(table):
-    first_row = table.find("tr")
-
-    if not first_row:
-        return []
-
-    return [
-        clean_text(cell.get_text(" ", strip=True))
-        for cell in first_row.find_all(["th", "td"])
+def find_result_table(soup):
+    # netkeibaで過去走表に使われる代表的なclass
+    selectors = [
+        "table.db_h_race_results",
+        "table.race_table_01",
+        "table.nk_tb_common",
     ]
 
+    for selector in selectors:
+        tables = soup.select(selector)
 
-def find_history_table(soup):
-    best_table = None
-    best_score = -1
+        for table in tables:
+            text = clean_text(
+                table.get_text(
+                    " ",
+                    strip=True
+                )
+            )
 
+            if (
+                "日付" in text
+                and "着順" in text
+                and (
+                    "レース名" in text
+                    or "レース" in text
+                )
+            ):
+                return table
+
+    # classに依存しない予備判定
     for table in soup.find_all("table"):
-        headers = get_table_headers(table)
-        header_text = " ".join(headers)
+        text = clean_text(
+            table.get_text(
+                " ",
+                strip=True
+            )
+        )
 
-        score = 0
+        required = 0
 
-        for word in [
+        for word in (
             "日付",
-            "開催",
-            "R",
-            "レース名",
-            "距離",
             "着順",
-            "タイム",
-            "上り",
-            "通過"
-        ]:
-            if word in header_text:
-                score += 1
+            "騎手",
+            "距離"
+        ):
+            if word in text:
+                required += 1
 
-        if score > best_score:
-            best_score = score
-            best_table = table
+        if required >= 3:
+            return table
 
-    if best_score < 4:
-        return None
-
-    return best_table
+    return None
 
 
-def header_index(headers, names):
+def build_header_map(table):
+    rows = table.find_all("tr")
+
+    if not rows:
+        return {}, []
+
+    header_row = None
+    headers = []
+
+    for row_index, row in enumerate(rows):
+        cells = row.find_all(
+            ["th", "td"]
+        )
+
+        values = [
+            clean_text(
+                cell.get_text(
+                    " ",
+                    strip=True
+                )
+            )
+            for cell in cells
+        ]
+
+        joined = " ".join(values)
+
+        if (
+            "日付" in joined
+            and (
+                "着順" in joined
+                or "レース名" in joined
+            )
+        ):
+            header_row = row_index
+            headers = values
+            break
+
+    if header_row is None:
+        return {}, rows
+
+    header_map = {}
+
+    for i, header in enumerate(headers):
+        if header:
+            header_map[header] = i
+
+    return {
+        "map": header_map,
+        "headers": headers,
+        "row_index": header_row
+    }, rows
+
+
+def find_col(headers, *names):
     for name in names:
         for i, header in enumerate(headers):
-            if clean_text(header) == name:
+            if header == name:
                 return i
 
     for name in names:
         for i, header in enumerate(headers):
-            if name in clean_text(header):
+            if name in header:
                 return i
 
     return -1
 
 
-def cell_value(cells, index):
-    if index < 0 or index >= len(cells):
+def get_cell(cells, index):
+    if index < 0:
+        return ""
+
+    if index >= len(cells):
         return ""
 
     return clean_text(
-        cells[index].get_text(" ", strip=True)
+        cells[index].get_text(
+            " ",
+            strip=True
+        )
     )
 
 
-def parse_distance(value):
-    value = clean_text(value)
-
-    match = re.search(r"([芝ダ障])\s*(\d+)", value)
-
-    if not match:
-        return {
-            "surface": "",
-            "distance": None
-        }
-
-    surface_map = {
-        "芝": "芝",
-        "ダ": "ダート",
-        "障": "障害"
-    }
-
-    return {
-        "surface": surface_map.get(
-            match.group(1),
-            match.group(1)
-        ),
-        "distance": int(match.group(2))
-    }
-
-
-def parse_course(value):
-    value = clean_text(value)
-
+def parse_int(value):
     match = re.search(
-        r"(\d+回)?"
-        r"(東京|中山|京都|阪神|中京|札幌|函館|福島|新潟|小倉)"
-        r"(\d+日)?",
-        value
+        r"-?\d+",
+        clean_text(value)
     )
-
-    if match:
-        return match.group(2)
-
-    return value
-
-
-def parse_rank(value):
-    value = clean_text(value)
-
-    match = re.search(r"\d+", value)
 
     if not match:
         return None
@@ -272,19 +312,81 @@ def parse_rank(value):
         return None
 
 
-def parse_weight(value):
-    value = clean_text(value)
+def parse_float(value):
+    value = clean_text(value).replace(
+        ",",
+        ""
+    )
 
     match = re.search(
-        r"(\d+)(?:\(([+-]?\d+)\))?",
+        r"-?\d+(?:\.\d+)?",
         value
     )
 
     if not match:
-        return {
-            "horse_weight": None,
-            "weight_change": None
-        }
+        return None
+
+    try:
+        return float(match.group())
+    except Exception:
+        return None
+
+
+def parse_rank(value):
+    return parse_int(value)
+
+
+def parse_distance(value):
+    value = clean_text(value)
+
+    match = re.search(
+        r"(芝|ダ|ダート|障)\s*([0-9]+)",
+        value
+    )
+
+    if not match:
+        return "", None
+
+    surface = match.group(1)
+
+    if surface == "ダ":
+        surface = "ダート"
+
+    if surface == "障":
+        surface = "障害"
+
+    return surface, int(match.group(2))
+
+
+def parse_course(value):
+    value = clean_text(value)
+
+    match = re.search(
+        r"(東京|中山|京都|阪神|中京|"
+        r"札幌|函館|福島|新潟|小倉|"
+        r"大井|川崎|船橋|浦和|門別|"
+        r"園田|姫路|名古屋|笠松|"
+        r"高知|佐賀|盛岡|水沢)",
+        value
+    )
+
+    if match:
+        return match.group(1)
+
+    return value
+
+
+def parse_weight(value):
+    value = clean_text(value)
+
+    match = re.search(
+        r"(\d+)"
+        r"(?:\(([+-]?\d+)\))?",
+        value
+    )
+
+    if not match:
+        return None, None
 
     weight = int(match.group(1))
 
@@ -294,26 +396,33 @@ def parse_weight(value):
         else None
     )
 
-    return {
-        "horse_weight": weight,
-        "weight_change": change
-    }
+    return weight, change
 
 
-def parse_race_link(cells):
+def extract_race_id(cells):
     for cell in cells:
-        links = cell.find_all("a", href=True)
-
-        for link in links:
-            href = link.get("href", "")
-
-            match = re.search(
-                r"/race/(?:result/)?(\d+)",
-                href
+        for link in cell.find_all(
+            "a",
+            href=True
+        ):
+            href = link.get(
+                "href",
+                ""
             )
 
-            if match:
-                return match.group(1)
+            patterns = [
+                r"/race/(\d{10,14})",
+                r"race_id=(\d{10,14})"
+            ]
+
+            for pattern in patterns:
+                match = re.search(
+                    pattern,
+                    href
+                )
+
+                if match:
+                    return match.group(1)
 
     return ""
 
@@ -324,170 +433,295 @@ def parse_history(html):
         "html.parser"
     )
 
-    table = find_history_table(soup)
+    table = find_result_table(soup)
 
     if table is None:
+        title = clean_text(
+            soup.title.get_text(
+                " ",
+                strip=True
+            )
+            if soup.title
+            else ""
+        )
+
         raise RuntimeError(
-            "過去成績テーブルが見つかりません"
+            "過去成績テーブルなし"
+            f" / title={title}"
+            f" / tables={len(soup.find_all('table'))}"
         )
 
-    rows = table.find_all("tr")
+    header_info, rows = build_header_map(
+        table
+    )
 
-    if not rows:
-        return []
-
-    headers = [
-        clean_text(
-            cell.get_text(" ", strip=True)
+    if not header_info:
+        raise RuntimeError(
+            "過去成績のヘッダーを認識できません"
         )
-        for cell in rows[0].find_all(["th", "td"])
-    ]
 
-    idx_date = header_index(headers, ["日付"])
-    idx_course = header_index(headers, ["開催"])
-    idx_race_number = header_index(headers, ["R"])
-    idx_race_name = header_index(headers, ["レース名"])
-    idx_field = header_index(headers, ["頭数"])
-    idx_frame = header_index(headers, ["枠番"])
-    idx_number = header_index(headers, ["馬番"])
-    idx_odds = header_index(headers, ["オッズ"])
-    idx_popularity = header_index(headers, ["人気"])
-    idx_rank = header_index(headers, ["着順"])
-    idx_jockey = header_index(headers, ["騎手"])
-    idx_weight_carried = header_index(headers, ["斤量"])
-    idx_distance = header_index(headers, ["距離"])
-    idx_track = header_index(headers, ["馬場"])
-    idx_time = header_index(headers, ["タイム"])
-    idx_margin = header_index(headers, ["着差"])
-    idx_passing = header_index(headers, ["通過"])
-    idx_pace = header_index(headers, ["ペース"])
-    idx_last3f = header_index(headers, ["上り"])
-    idx_weight = header_index(headers, ["馬体重"])
+    headers = header_info["headers"]
+    start_index = (
+        header_info["row_index"] + 1
+    )
+
+    idx_date = find_col(
+        headers,
+        "日付"
+    )
+
+    idx_course = find_col(
+        headers,
+        "開催"
+    )
+
+    idx_r = find_col(
+        headers,
+        "R"
+    )
+
+    idx_race = find_col(
+        headers,
+        "レース名",
+        "レース"
+    )
+
+    idx_field = find_col(
+        headers,
+        "頭数"
+    )
+
+    idx_frame = find_col(
+        headers,
+        "枠番",
+        "枠"
+    )
+
+    idx_number = find_col(
+        headers,
+        "馬番"
+    )
+
+    idx_odds = find_col(
+        headers,
+        "オッズ"
+    )
+
+    idx_popularity = find_col(
+        headers,
+        "人気"
+    )
+
+    idx_rank = find_col(
+        headers,
+        "着順"
+    )
+
+    idx_jockey = find_col(
+        headers,
+        "騎手"
+    )
+
+    idx_weight_carried = find_col(
+        headers,
+        "斤量"
+    )
+
+    idx_distance = find_col(
+        headers,
+        "距離"
+    )
+
+    idx_track = find_col(
+        headers,
+        "馬場"
+    )
+
+    idx_time = find_col(
+        headers,
+        "タイム"
+    )
+
+    idx_margin = find_col(
+        headers,
+        "着差"
+    )
+
+    idx_passing = find_col(
+        headers,
+        "通過"
+    )
+
+    idx_pace = find_col(
+        headers,
+        "ペース"
+    )
+
+    idx_last3f = find_col(
+        headers,
+        "上り",
+        "上がり"
+    )
+
+    idx_weight = find_col(
+        headers,
+        "馬体重"
+    )
 
     history = []
 
-    for tr in rows[1:]:
-        cells = tr.find_all(["td", "th"])
+    for row in rows[start_index:]:
+        cells = row.find_all(
+            ["td", "th"]
+        )
 
-        if len(cells) < 5:
+        if not cells:
             continue
 
-        race_date = cell_value(
+        date = get_cell(
             cells,
             idx_date
         )
 
-        rank_raw = cell_value(
+        rank_raw = get_cell(
             cells,
             idx_rank
         )
 
-        if not race_date:
+        if not date:
             continue
 
-        distance_raw = cell_value(
+        # 日付らしくない行を除外
+        if not re.search(
+            r"\d{4}[./-]\d{1,2}[./-]\d{1,2}",
+            date
+        ):
+            continue
+
+        distance_raw = get_cell(
             cells,
             idx_distance
         )
 
-        distance_info = parse_distance(
+        surface, distance = parse_distance(
             distance_raw
         )
 
-        weight_info = parse_weight(
-            cell_value(
-                cells,
-                idx_weight
+        horse_weight, weight_change = (
+            parse_weight(
+                get_cell(
+                    cells,
+                    idx_weight
+                )
             )
         )
 
-        race = {
-            "race_id": parse_race_link(cells),
-            "date": race_date,
+        history.append({
+            "race_id": extract_race_id(
+                cells
+            ),
+            "date": date,
             "racecourse": parse_course(
-                cell_value(cells, idx_course)
+                get_cell(
+                    cells,
+                    idx_course
+                )
             ),
-            "race_number": cell_value(
+            "race_number": get_cell(
                 cells,
-                idx_race_number
+                idx_r
             ),
-            "race_name": cell_value(
+            "race_name": get_cell(
                 cells,
-                idx_race_name
+                idx_race
             ),
-            "field_size": cell_value(
-                cells,
-                idx_field
+            "field_size": parse_int(
+                get_cell(
+                    cells,
+                    idx_field
+                )
             ),
-            "frame_number": cell_value(
-                cells,
-                idx_frame
+            "frame_number": parse_int(
+                get_cell(
+                    cells,
+                    idx_frame
+                )
             ),
-            "horse_number": cell_value(
-                cells,
-                idx_number
+            "horse_number": parse_int(
+                get_cell(
+                    cells,
+                    idx_number
+                )
             ),
-            "odds": cell_value(
-                cells,
-                idx_odds
+            "odds": parse_float(
+                get_cell(
+                    cells,
+                    idx_odds
+                )
             ),
-            "popularity": cell_value(
-                cells,
-                idx_popularity
+            "popularity": parse_int(
+                get_cell(
+                    cells,
+                    idx_popularity
+                )
             ),
-            "rank": parse_rank(rank_raw),
+            "rank": parse_rank(
+                rank_raw
+            ),
             "rank_raw": rank_raw,
-            "jockey": cell_value(
+            "jockey": get_cell(
                 cells,
                 idx_jockey
             ),
-            "carried_weight": cell_value(
-                cells,
-                idx_weight_carried
+            "carried_weight": parse_float(
+                get_cell(
+                    cells,
+                    idx_weight_carried
+                )
             ),
-            "surface": distance_info["surface"],
-            "distance": distance_info["distance"],
+            "surface": surface,
+            "distance": distance,
             "distance_raw": distance_raw,
-            "track_condition": cell_value(
+            "track_condition": get_cell(
                 cells,
                 idx_track
             ),
-            "time": cell_value(
+            "time": get_cell(
                 cells,
                 idx_time
             ),
-            "margin": cell_value(
+            "margin": get_cell(
                 cells,
                 idx_margin
             ),
-            "passing": cell_value(
+            "passing": get_cell(
                 cells,
                 idx_passing
             ),
-            "pace": cell_value(
+            "pace": get_cell(
                 cells,
                 idx_pace
             ),
-            "last3f": cell_value(
-                cells,
-                idx_last3f
+            "last3f": parse_float(
+                get_cell(
+                    cells,
+                    idx_last3f
+                )
             ),
-            "horse_weight": weight_info[
-                "horse_weight"
-            ],
-            "weight_change": weight_info[
-                "weight_change"
-            ]
-        }
+            "horse_weight": horse_weight,
+            "weight_change": weight_change
+        })
 
-        history.append(race)
+    if not history:
+        raise RuntimeError(
+            "過去成績テーブルは存在するが"
+            "レース行を取得できません"
+        )
 
     return history
 
 
 def main():
-    print("Loading race.json...")
-
     race_data = load_json(
         RACE_FILE
     )
@@ -518,10 +752,6 @@ def main():
         horse_id = horse["horse_id"]
         horse_name = horse["horse_name"]
 
-        url = BASE_URL.format(
-            horse_id=horse_id
-        )
-
         print(
             f"[{index}/{len(horses)}] "
             f"{horse_name} "
@@ -531,7 +761,9 @@ def main():
         try:
             html = fetch(
                 session,
-                url
+                BASE_URL.format(
+                    horse_id=horse_id
+                )
             )
 
             history = parse_history(
@@ -549,18 +781,23 @@ def main():
             })
 
             print(
-                "  races:",
+                "  OK races:",
                 len(history)
             )
 
         except Exception as e:
-            error = {
+            message = str(e)
+
+            print(
+                "  ERROR:",
+                message
+            )
+
+            errors.append({
                 "horse_id": horse_id,
                 "horse_name": horse_name,
-                "error": str(e)
-            }
-
-            errors.append(error)
+                "error": message
+            })
 
             collected.append({
                 "horse_id": horse_id,
@@ -572,25 +809,20 @@ def main():
                 "races": []
             })
 
-            print(
-                "  ERROR:",
-                str(e)
-            )
-
         if index < len(horses):
             time.sleep(
                 REQUEST_INTERVAL
             )
 
     total_races = sum(
-        horse["race_count"]
-        for horse in collected
+        x["race_count"]
+        for x in collected
     )
 
-    successful_horses = sum(
+    collected_count = sum(
         1
-        for horse in collected
-        if horse["race_count"] > 0
+        for x in collected
+        if x["race_count"] > 0
     )
 
     output = {
@@ -600,8 +832,12 @@ def main():
         "source": "netkeiba",
         "source_race_file": RACE_FILE,
         "target_horse_count": len(horses),
-        "collected_horse_count": successful_horses,
-        "total_past_race_count": total_races,
+        "collected_horse_count": (
+            collected_count
+        ),
+        "total_past_race_count": (
+            total_races
+        ),
         "error_count": len(errors),
         "errors": errors,
         "horses": collected
@@ -613,25 +849,22 @@ def main():
     )
 
     print("")
-    print(
-        "Saved:",
-        OUTPUT_FILE
-    )
+    print("===== RESULT =====")
     print(
         "target_horse_count:",
-        output["target_horse_count"]
+        len(horses)
     )
     print(
         "collected_horse_count:",
-        output["collected_horse_count"]
+        collected_count
     )
     print(
         "total_past_race_count:",
-        output["total_past_race_count"]
+        total_races
     )
     print(
         "error_count:",
-        output["error_count"]
+        len(errors)
     )
 
 
