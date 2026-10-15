@@ -57,57 +57,62 @@ jobs:
         run: |
           python history_db.py
 
-      # 4. 今回条件だけをDBから抽出
+      # 4. 履歴DBに追加された馬の5代血統を増分取得
+      - name: Update history pedigrees
+        run: |
+          python history_pedigree.py
+
+      # 5. 今回条件だけを履歴DBから抽出
       - name: Select condition history
         run: |
           python condition_history.py
 
-      # 5. 対象馬の5代血統
+      # 6. 今回出走馬の5代血統
       - name: Collect pedigree
         run: |
           python pedigree.py
 
-      # 6. 血統名の正規化
+      # 7. 今回出走馬の血統名を正規化
       - name: Normalize pedigree
         run: |
           python normalize_pedigree.py
 
-      # 7. 過去成績
+      # 8. 今回出走馬の過去成績
       - name: Collect runner history
         run: |
           python runner_history.py
 
-      # 8. 能力・今回能力発揮率
+      # 9. 能力・今回能力発揮率
       - name: Analyze runners
         run: |
           python runner_analysis.py
 
-      # 9. 前走処理・課題・克服材料
+      # 10. 前走処理・課題・克服材料
       - name: Analyze previous race
         run: |
           python previous_race_analysis.py
 
-      # 10. 展開
+      # 11. 展開
       - name: Analyze pace
         run: |
           python pace_analysis.py
 
-      # 11. 条件別血統統計
+      # 12. 今回条件の血統統計
       - name: Build bloodline statistics
         run: |
           python bloodline_stats.py
 
-      # 12. 今回出走馬の血統評価
+      # 13. 今回出走馬の血統評価
       - name: Score race bloodlines
         run: |
           python race_bloodline_score.py
 
-      # 13. 最終統合
+      # 14. 最終統合
       - name: Run final analysis
         run: |
           python final_analysis.py
 
-      # 14. 完成チェック
+      # 15. 完成チェック
       - name: Validate final analysis
         run: |
           python - <<'PY'
@@ -200,7 +205,7 @@ jobs:
           )
           PY
 
-      # 15. JSONをまとめて保存
+      # 16. JSONをまとめて保存
       - name: Save analysis data
         run: |
           git config user.name "github-actions[bot]"
@@ -210,6 +215,7 @@ jobs:
             race.json \
             history_races.json \
             history_db.json \
+            history_pedigree.json \
             condition_history.json \
             pedigree.json \
             runner_history.json \
