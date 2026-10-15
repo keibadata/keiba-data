@@ -147,9 +147,32 @@ ability_data = load_json("runner_analysis.json")
 previous_data = load_json("previous_race_analysis.json")
 pace_data = load_json("pace_analysis.json")
 blood_data = load_json("race_bloodline_score.json")
+track_data_raw = load_json("track_condition.json")
 
-# ★ 当日馬場
-track_data = load_json("track_condition.json")
+
+# =====================================
+# Race ID安全確認
+# =====================================
+
+race_id = str(
+    race.get("race_id", "")
+).strip()
+
+track_race_id = str(
+    track_data_raw.get("race_id", "")
+).strip()
+
+track_race_id_matched = (
+    bool(race_id)
+    and bool(track_race_id)
+    and race_id == track_race_id
+)
+
+# 前レースの馬場データ誤反映防止
+if track_race_id_matched:
+    track_data = track_data_raw
+else:
+    track_data = {}
 
 
 runners = (
@@ -208,20 +231,7 @@ front_candidate_count = int(
 # 当日馬場
 # =====================================
 
-def evaluate_track_condition(
-    track,
-    running_style
-):
-    """
-    馬場は能力そのものには加点しない。
-    今回能力発揮率への補正として扱う。
-
-    クッション値・含水率単独では
-    馬ごとの加減点を行わない。
-
-    実際のバイアス情報と脚質の接続を
-    主な評価対象とする。
-    """
+def evaluate_track_condition(track, running_style):
 
     if not track:
         return (
@@ -233,44 +243,24 @@ def evaluate_track_condition(
     reasons = []
 
     track_condition = str(
-        track.get(
-            "track_condition",
-            ""
-        )
+        track.get("track_condition", "")
     ).strip()
 
     time_bias = str(
-        track.get(
-            "time_bias",
-            ""
-        )
+        track.get("time_bias", "")
     ).strip()
 
     inside_outside = str(
-        track.get(
-            "inside_outside_bias",
-            ""
-        )
+        track.get("inside_outside_bias", "")
     ).strip()
 
     style_bias = str(
-        track.get(
-            "running_style_bias",
-            ""
-        )
+        track.get("running_style_bias", "")
     ).strip()
 
-    cushion = track.get(
-        "cushion_value"
-    )
-
-    moisture_4 = track.get(
-        "moisture_4corner"
-    )
-
-    moisture_finish = track.get(
-        "moisture_finish"
-    )
+    cushion = track.get("cushion_value")
+    moisture_4 = track.get("moisture_4corner")
+    moisture_finish = track.get("moisture_finish")
 
     reference_count = int(
         get_number(
@@ -285,22 +275,17 @@ def evaluate_track_condition(
     )
 
 
-    # -------------------------
-    # 情報表示
-    # -------------------------
+    # 数値は状態確認材料。
+    # クッション値・含水率単独では加減点しない。
 
     if track_condition:
         reasons.append(
             "馬場:" + track_condition
         )
 
-    if cushion not in (
-        None,
-        ""
-    ):
+    if cushion not in (None, ""):
         reasons.append(
-            "クッション値:"
-            + str(cushion)
+            "クッション値:" + str(cushion)
         )
 
     if (
@@ -330,53 +315,37 @@ def evaluate_track_condition(
         )
 
 
-    # -------------------------
+    # =================================
     # 脚質バイアス
-    # -------------------------
+    # =================================
 
     if style_bias == "逃げ有利":
 
         if style == "逃げ":
             score += 1.2
 
-        elif style in (
-            "先行",
-            "好位"
-        ):
+        elif style in ("先行", "好位"):
             score += 0.5
 
-        elif style in (
-            "中団後",
-            "後方"
-        ):
+        elif style in ("中団後", "後方"):
             score -= 0.5
 
 
     elif style_bias == "先行有利":
 
-        if style in (
-            "逃げ",
-            "先行"
-        ):
+        if style in ("逃げ", "先行"):
             score += 0.9
 
         elif style == "好位":
             score += 0.5
 
-        elif style in (
-            "中団後",
-            "後方"
-        ):
+        elif style in ("中団後", "後方"):
             score -= 0.5
 
 
     elif style_bias == "差し有利":
 
-        if style in (
-            "差し",
-            "中団",
-            "中団後"
-        ):
+        if style in ("差し", "中団", "中団後"):
             score += 0.8
 
         elif style == "逃げ":
@@ -388,36 +357,22 @@ def evaluate_track_condition(
 
     elif style_bias == "追込有利":
 
-        if style in (
-            "差し",
-            "中団後",
-            "後方"
-        ):
+        if style in ("差し", "中団後", "後方"):
             score += 0.9
 
-        elif style in (
-            "逃げ",
-            "先行"
-        ):
+        elif style in ("逃げ", "先行"):
             score -= 0.6
 
 
-    # フラットなら補正しない
-
-
-    # -------------------------
+    # =================================
     # 内外バイアス
-    # -------------------------
-    # 枠順だけでは評価しない。
-    # 脚質との組み合わせで限定的に処理。
+    # =================================
+    # 枠だけでは評価しない。
+    # 位置取りとの接続のみ。
 
     if inside_outside == "内有利":
 
-        if style in (
-            "逃げ",
-            "先行",
-            "好位"
-        ):
+        if style in ("逃げ", "先行", "好位"):
             score += 0.3
 
             reasons.append(
@@ -440,9 +395,9 @@ def evaluate_track_condition(
             )
 
 
-    # -------------------------
-    # サンプル数による信頼度
-    # -------------------------
+    # =================================
+    # 参考レース数による信頼度
+    # =================================
 
     if reference_count <= 0:
         confidence = 0.0
@@ -460,9 +415,8 @@ def evaluate_track_condition(
         confidence = 1.00
 
 
-    # バイアス入力があるのに
-    # 参考レース数未入力の場合は
-    # 完全無効にはせず暫定50%
+    # バイアスを入力済みで参考レース数だけ
+    # 未入力なら暫定50%
     if (
         reference_count <= 0
         and (
@@ -479,6 +433,12 @@ def evaluate_track_condition(
 
     score *= confidence
 
+    score = clamp(
+        score,
+        -1.5,
+        1.5
+    )
+
 
     if reference_count > 0:
         reasons.append(
@@ -488,24 +448,13 @@ def evaluate_track_condition(
         )
 
 
-    # 過大補正防止
-    score = clamp(
-        score,
-        -1.5,
-        1.5
-    )
-
-
     if score == 0:
         reasons.append(
             "馬場による発揮率補正なし"
         )
 
 
-    return (
-        score,
-        reasons
-    )
+    return score, reasons
 
 
 # =====================================
@@ -686,10 +635,7 @@ def evaluate_bloodline(data):
         + str(positive)
     ]
 
-    return (
-        adjustment,
-        reasons
-    )
+    return adjustment, reasons
 
 
 # =====================================
@@ -739,43 +685,25 @@ def evaluate_pace(data):
 
     if base_pace == "ミドル":
 
-        if style in (
-            "先行",
-            "好位",
-            "中団"
-        ):
+        if style in ("先行", "好位", "中団"):
             score += 0.5
 
-        elif style in (
-            "中団後",
-            "後方"
-        ):
+        elif style in ("中団後", "後方"):
             score -= 0.3
 
 
     elif base_pace == "スロー":
 
-        if style in (
-            "逃げ",
-            "先行",
-            "好位"
-        ):
+        if style in ("逃げ", "先行", "好位"):
             score += 0.7
 
-        elif style in (
-            "中団後",
-            "後方"
-        ):
+        elif style in ("中団後", "後方"):
             score -= 0.7
 
 
     elif base_pace == "ハイ":
 
-        if style in (
-            "差し",
-            "中団",
-            "中団後"
-        ):
+        if style in ("差し", "中団", "中団後"):
             score += 0.7
 
         if style == "逃げ":
@@ -813,11 +741,7 @@ def evaluate_pace(data):
 
 
     return (
-        clamp(
-            score,
-            -1.5,
-            1.5
-        ),
+        clamp(score, -1.5, 1.5),
         reasons
     )
 
@@ -880,7 +804,7 @@ for runner in runners:
 
 
     # -------------------------
-    # 当日馬場
+    # 当日馬場 → 発揮率
     # -------------------------
 
     (
@@ -892,8 +816,6 @@ for runner in runners:
     )
 
 
-    # 馬場は能力ではなく
-    # 今回能力発揮率へ接続
     adjusted_performance_rate = clamp(
         original_performance_rate
         + track_rate_adjustment,
@@ -903,7 +825,7 @@ for runner in runners:
 
 
     # -------------------------
-    # 能力 × 補正後発揮率
+    # 能力 × 今回能力発揮率
     # -------------------------
 
     base_performance = (
@@ -965,7 +887,7 @@ for runner in runners:
 
 
     # -------------------------
-    # 最終スコア
+    # 最終
     # -------------------------
 
     final_score = (
@@ -994,10 +916,7 @@ for runner in runners:
 
     reasons = [
         "能力"
-        + format(
-            ability_score,
-            ".1f"
-        ),
+        + format(ability_score, ".1f"),
 
         "元発揮率"
         + format(
@@ -1028,21 +947,10 @@ for runner in runners:
     ]
 
 
-    reasons.extend(
-        track_reasons
-    )
-
-    reasons.extend(
-        previous_reasons
-    )
-
-    reasons.extend(
-        pace_reasons
-    )
-
-    reasons.extend(
-        blood_reasons
-    )
+    reasons.extend(track_reasons)
+    reasons.extend(previous_reasons)
+    reasons.extend(pace_reasons)
+    reasons.extend(blood_reasons)
 
 
     if unknown:
@@ -1063,23 +971,18 @@ for runner in runners:
             get_name(runner),
 
         "ability_score":
-            round1(
-                ability_score
-            ),
+            round1(ability_score),
 
-        # 元発揮率
         "original_performance_rate":
             round1(
                 original_performance_rate
             ),
 
-        # 馬場による発揮率補正
         "track_performance_rate_adjustment":
             round1(
                 track_rate_adjustment
             ),
 
-        # 最終的な今回能力発揮率
         "performance_rate":
             round1(
                 adjusted_performance_rate
@@ -1255,11 +1158,6 @@ track_effective_count = sum(
 )
 
 
-track_data_available = bool(
-    track_data
-)
-
-
 # =====================================
 # JSON出力
 # =====================================
@@ -1270,17 +1168,21 @@ output = {
         now_jst(),
 
     "race_id":
-        str(
-            race.get(
-                "race_id",
-                ""
-            )
-        ),
+        race_id,
 
     "track_condition": {
 
-        "available":
-            track_data_available,
+        "source_available":
+            bool(track_data_raw),
+
+        "race_id_matched":
+            track_race_id_matched,
+
+        "source_race_id":
+            track_race_id,
+
+        "applied":
+            bool(track_data),
 
         "track_condition":
             track_data.get(
@@ -1351,6 +1253,9 @@ output = {
         "track_affects_performance_rate_not_ability":
             True,
 
+        "track_race_id_must_match":
+            True,
+
         "cushion_value_not_used_alone":
             True,
 
@@ -1414,8 +1319,14 @@ output = {
         "previous_effective_count":
             previous_effective_count,
 
-        "track_data_available":
-            track_data_available,
+        "track_source_available":
+            bool(track_data_raw),
+
+        "track_race_id_matched":
+            track_race_id_matched,
+
+        "track_applied":
+            bool(track_data),
 
         "track_effective_count":
             track_effective_count
@@ -1444,8 +1355,21 @@ with open(
 # ログ
 # =====================================
 
+print("===== FINAL ANALYSIS =====")
+
 print(
-    "===== FINAL ANALYSIS ====="
+    "race id:",
+    race_id
+)
+
+print(
+    "track race id:",
+    track_race_id
+)
+
+print(
+    "track race id matched:",
+    track_race_id_matched
 )
 
 print(
@@ -1474,11 +1398,6 @@ print(
     blood_connected,
     "/",
     len(results)
-)
-
-print(
-    "track data:",
-    track_data_available
 )
 
 print(
