@@ -5,28 +5,42 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
 
+
 DEFAULT_RACE_ID = "202605040502"
-RACE_ID = os.environ.get("RACE_ID", DEFAULT_RACE_ID).strip()
+RACE_ID = os.environ.get(
+    "RACE_ID",
+    DEFAULT_RACE_ID
+).strip()
 
 if not re.fullmatch(r"\d{12}", RACE_ID):
-    raise ValueError("RACE_IDは12桁の数字で指定してください。")
+    raise ValueError(
+        "RACE_IDは12桁の数字で指定してください。"
+    )
 
-URL = f"https://race.netkeiba.com/race/shutuba.html?race_id={RACE_ID}"
+
+URL = (
+    "https://race.netkeiba.com/"
+    f"race/shutuba.html?race_id={RACE_ID}"
+)
 
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) "
-        "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+        "Mozilla/5.0 "
+        "(iPhone; CPU iPhone OS 18_0 like Mac OS X) "
+        "AppleWebKit/605.1.15 "
+        "(KHTML, like Gecko) "
         "Version/18.0 Mobile/15E148 Safari/604.1"
     ),
     "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
 }
+
 
 response = requests.get(
     URL,
     headers=HEADERS,
     timeout=30
 )
+
 response.raise_for_status()
 response.encoding = response.apparent_encoding
 
@@ -39,15 +53,23 @@ soup = BeautifulSoup(
 def clean_text(element):
     if element is None:
         return ""
-    return element.get_text(" ", strip=True)
+
+    return element.get_text(
+        " ",
+        strip=True
+    )
 
 
 def first_text(row, selectors):
     for selector in selectors:
-        element = row.select_one(selector)
+        element = row.select_one(
+            selector
+        )
 
         if element:
-            text = clean_text(element)
+            text = clean_text(
+                element
+            )
 
             if text:
                 return text
@@ -59,20 +81,135 @@ def first_text(row, selectors):
 # レース条件
 # =========================================================
 
-def extract_race_condition(soup, race_id):
+def extract_race_condition(
+    soup,
+    race_id
+):
     """
-    出馬表ページから
-    競馬場・芝/ダート・距離・馬場状態を取得。
+    出馬表ページから以下を取得する。
 
-    HTMLだけで取れない場合でも、
-    JRAのrace_id構造から競馬場を補完する。
+    ・開催日
+    ・競馬場
+    ・芝 / ダート / 障害
+    ・距離
+    ・馬場状態
+
+    競馬場だけはHTML取得失敗に備え、
+    JRA race_id の場コードからも補完する。
+
+    開催日は未来データ混入防止に必須なので、
+    推測値では補完しない。
     """
 
-    page_text = clean_text(soup)
+    page_text = clean_text(
+        soup
+    )
 
-    # -------------------------
+    # -----------------------------------------------------
+    # 開催日
+    # -----------------------------------------------------
+
+    race_date = ""
+
+    date_texts = []
+
+    date_selectors = [
+        ".RaceData02",
+        ".RaceData01",
+        ".RaceData",
+        ".RaceList_Date",
+        ".RaceList_Data",
+        ".RaceList_Item01",
+        ".RaceList_Item02",
+    ]
+
+    for selector in date_selectors:
+        for element in soup.select(
+            selector
+        ):
+            text = clean_text(
+                element
+            )
+
+            if text:
+                date_texts.append(
+                    text
+                )
+
+    date_texts.append(
+        page_text
+    )
+
+    date_patterns = [
+        # 2026年10月11日
+        r"(20\d{2})年\s*"
+        r"(\d{1,2})月\s*"
+        r"(\d{1,2})日",
+
+        # 2026/10/11
+        r"(20\d{2})/"
+        r"(\d{1,2})/"
+        r"(\d{1,2})",
+
+        # 2026-10-11
+        r"(20\d{2})-"
+        r"(\d{1,2})-"
+        r"(\d{1,2})",
+
+        # 2026.10.11
+        r"(20\d{2})\."
+        r"(\d{1,2})\."
+        r"(\d{1,2})",
+    ]
+
+    for text in date_texts:
+
+        for pattern in date_patterns:
+
+            match = re.search(
+                pattern,
+                text
+            )
+
+            if not match:
+                continue
+
+            try:
+                year = int(
+                    match.group(1)
+                )
+
+                month = int(
+                    match.group(2)
+                )
+
+                day = int(
+                    match.group(3)
+                )
+
+                race_date = datetime(
+                    year,
+                    month,
+                    day
+                ).strftime(
+                    "%Y-%m-%d"
+                )
+
+            except (
+                TypeError,
+                ValueError
+            ):
+                race_date = ""
+
+            if race_date:
+                break
+
+        if race_date:
+            break
+
+    # -----------------------------------------------------
     # 競馬場
-    # -------------------------
+    # -----------------------------------------------------
 
     track = ""
 
@@ -89,25 +226,28 @@ def extract_race_condition(soup, race_id):
         "10": "小倉",
     }
 
-    # JRA race_id:
+    # JRA race_id
     # YYYY + 場コード2桁 + 開催回 + 開催日 + R
     if len(race_id) == 12:
-        track_code = race_id[4:6]
+        track_code = race_id[
+            4:6
+        ]
+
         track = jra_tracks.get(
             track_code,
             ""
         )
 
-    # HTML側に明確な競馬場名があれば確認
+    # HTML側に明確な競馬場名がある場合は確認
     for name in jra_tracks.values():
+
         if name in page_text:
             track = name
             break
 
-    # -------------------------
-    # 芝 / ダート / 障害
-    # 距離
-    # -------------------------
+    # -----------------------------------------------------
+    # 芝 / ダート / 障害・距離
+    # -----------------------------------------------------
 
     surface = ""
     distance = 0
@@ -123,62 +263,95 @@ def extract_race_condition(soup, race_id):
     ]
 
     for selector in selectors:
-        for element in soup.select(selector):
-            text = clean_text(element)
+
+        for element in soup.select(
+            selector
+        ):
+
+            text = clean_text(
+                element
+            )
 
             if text:
-                race_data_texts.append(text)
+                race_data_texts.append(
+                    text
+                )
 
-    race_data_texts.append(page_text)
+    race_data_texts.append(
+        page_text
+    )
 
     for text in race_data_texts:
 
-        # 芝1400m
+        # 芝1600m
         match = re.search(
-            r"芝\s*([0-9]{3,4})\s*m?",
+            r"芝\s*"
+            r"([0-9]{3,4})\s*"
+            r"[mｍ]?",
             text,
             re.IGNORECASE
         )
 
         if match:
             surface = "芝"
-            distance = int(match.group(1))
+
+            distance = int(
+                match.group(1)
+            )
+
             break
 
-        # ダ1400m / ダート1400m
+        # ダ1600m / ダート1600m
         match = re.search(
-            r"(?:ダート|ダ)\s*([0-9]{3,4})\s*m?",
+            r"(?:ダート|ダ)\s*"
+            r"([0-9]{3,4})\s*"
+            r"[mｍ]?",
             text,
             re.IGNORECASE
         )
 
         if match:
             surface = "ダート"
-            distance = int(match.group(1))
+
+            distance = int(
+                match.group(1)
+            )
+
             break
 
         # 障害
         match = re.search(
-            r"障(?:害)?\s*([0-9]{3,4})\s*m?",
+            r"障(?:害)?\s*"
+            r"([0-9]{3,4})\s*"
+            r"[mｍ]?",
             text,
             re.IGNORECASE
         )
 
         if match:
             surface = "障害"
-            distance = int(match.group(1))
+
+            distance = int(
+                match.group(1)
+            )
+
             break
 
-    # -------------------------
+    # -----------------------------------------------------
     # 馬場状態
-    # -------------------------
+    # -----------------------------------------------------
 
     track_condition = ""
 
     condition_patterns = [
-        r"馬場\s*[:：]\s*(良|稍重|重|不良)",
-        r"芝\s*[:：]\s*(良|稍重|重|不良)",
-        r"ダート?\s*[:：]\s*(良|稍重|重|不良)",
+        r"馬場\s*[:：]\s*"
+        r"(良|稍重|重|不良)",
+
+        r"芝\s*[:：]\s*"
+        r"(良|稍重|重|不良)",
+
+        r"ダート?\s*[:：]\s*"
+        r"(良|稍重|重|不良)",
     ]
 
     for pattern in condition_patterns:
@@ -189,14 +362,27 @@ def extract_race_condition(soup, race_id):
         )
 
         if match:
-            track_condition = match.group(1)
+            track_condition = (
+                match.group(1)
+            )
+
             break
 
     return {
-        "track": track,
-        "surface": surface,
-        "distance": distance,
-        "track_condition": track_condition,
+        "race_date":
+            race_date,
+
+        "track":
+            track,
+
+        "surface":
+            surface,
+
+        "distance":
+            distance,
+
+        "track_condition":
+            track_condition,
     }
 
 
@@ -211,6 +397,7 @@ race_condition = extract_race_condition(
 # =========================================================
 
 def extract_horse_id(row):
+
     link = row.select_one(
         'a[href*="/horse/"]'
     )
@@ -223,10 +410,13 @@ def extract_horse_id(row):
         ""
     )
 
-    for pattern in [
+    patterns = [
         r"/horse/(\d+)",
         r"horse_id=(\d+)",
-    ]:
+    ]
+
+    for pattern in patterns:
+
         match = re.search(
             pattern,
             href
@@ -239,6 +429,7 @@ def extract_horse_id(row):
 
 
 def extract_horse_name(row):
+
     name = first_text(
         row,
         [
@@ -256,6 +447,7 @@ def extract_horse_name(row):
 
 
 def extract_number(row):
+
     text = first_text(
         row,
         [
@@ -274,26 +466,37 @@ def extract_number(row):
         return match.group()
 
     cells = row.find_all(
-        ["td", "div"]
+        [
+            "td",
+            "div",
+        ]
     )
 
     for cell in cells[:6]:
 
-        value = clean_text(cell)
+        value = clean_text(
+            cell
+        )
 
         if re.fullmatch(
             r"\d{1,2}",
             value
         ):
-            number = int(value)
+
+            number = int(
+                value
+            )
 
             if 1 <= number <= 18:
-                return str(number)
+                return str(
+                    number
+                )
 
     return ""
 
 
 def extract_sex_age(row):
+
     text = first_text(
         row,
         [
@@ -309,12 +512,14 @@ def extract_sex_age(row):
     )
 
     if not match:
+
         match = re.search(
             r"[牡牝セ騸]\s*\d+",
             clean_text(row)
         )
 
     if match:
+
         return re.sub(
             r"\s+",
             "",
@@ -325,6 +530,7 @@ def extract_sex_age(row):
 
 
 def extract_jockey(row):
+
     text = first_text(
         row,
         [
@@ -344,6 +550,7 @@ def extract_jockey(row):
 
 
 def extract_carried_weight(row):
+
     selectors = [
         ".Weight",
         ".BurdenWeight",
@@ -363,19 +570,31 @@ def extract_carried_weight(row):
             )
 
             numbers = re.findall(
-                r"(?<!\d)(\d{2}(?:\.\d)?)(?!\d)",
+                r"(?<!\d)"
+                r"(\d{2}(?:\.\d)?)"
+                r"(?!\d)",
                 text
             )
 
             for value in numbers:
 
-                weight = float(value)
+                weight = float(
+                    value
+                )
 
-                if 40.0 <= weight <= 65.0:
-                    return f"{weight:.1f}"
+                if (
+                    40.0
+                    <= weight
+                    <= 65.0
+                ):
+                    return (
+                        f"{weight:.1f}"
+                    )
 
     jockey_element = (
-        row.select_one(".Jockey")
+        row.select_one(
+            ".Jockey"
+        )
         or row.select_one(
             'a[href*="/jockey/"]'
         )
@@ -383,7 +602,9 @@ def extract_carried_weight(row):
 
     if jockey_element:
 
-        parent = jockey_element.parent
+        parent = (
+            jockey_element.parent
+        )
 
         for _ in range(3):
 
@@ -395,41 +616,69 @@ def extract_carried_weight(row):
             )
 
             numbers = re.findall(
-                r"(?<!\d)(\d{2}(?:\.\d)?)(?!\d)",
+                r"(?<!\d)"
+                r"(\d{2}(?:\.\d)?)"
+                r"(?!\d)",
                 text
             )
 
             for value in numbers:
 
-                weight = float(value)
+                weight = float(
+                    value
+                )
 
-                if 40.0 <= weight <= 65.0:
-                    return f"{weight:.1f}"
+                if (
+                    40.0
+                    <= weight
+                    <= 65.0
+                ):
+                    return (
+                        f"{weight:.1f}"
+                    )
 
-            parent = parent.parent
+            parent = (
+                parent.parent
+            )
 
-    row_text = clean_text(row)
+    row_text = clean_text(
+        row
+    )
 
     numbers = re.findall(
-        r"(?<!\d)(\d{2}(?:\.\d)?)(?!\d)",
+        r"(?<!\d)"
+        r"(\d{2}(?:\.\d)?)"
+        r"(?!\d)",
         row_text
     )
 
     for value in numbers:
 
-        weight = float(value)
+        weight = float(
+            value
+        )
 
-        if 40.0 <= weight <= 65.0:
-            return f"{weight:.1f}"
+        if (
+            40.0
+            <= weight
+            <= 65.0
+        ):
+            return (
+                f"{weight:.1f}"
+            )
 
     return ""
 
 
 def extract_body_weight(row):
-    row_text = clean_text(row)
+
+    row_text = clean_text(
+        row
+    )
 
     match = re.search(
-        r"(\d{3})\s*\(([+\-−]?\d+)\)",
+        r"(\d{3})\s*"
+        r"\(([+\-−]?\d+)\)",
         row_text
     )
 
@@ -440,16 +689,29 @@ def extract_body_weight(row):
 
     change = (
         match.group(2)
-        .replace("−", "-")
+        .replace(
+            "−",
+            "-"
+        )
     )
 
     if not change.startswith(
-        ("+", "-")
+        (
+            "+",
+            "-",
+        )
     ):
-        if change != "0":
-            change = "+" + change
 
-    return weight, change
+        if change != "0":
+            change = (
+                "+"
+                + change
+            )
+
+    return (
+        weight,
+        change
+    )
 
 
 horses = []
@@ -458,23 +720,31 @@ for row in soup.select(
     ".HorseList"
 ):
 
-    horse_name = extract_horse_name(
-        row
+    horse_name = (
+        extract_horse_name(
+            row
+        )
     )
 
     if not horse_name:
         continue
 
-    horse_number = extract_number(
-        row
+    horse_number = (
+        extract_number(
+            row
+        )
     )
 
-    horse_id = extract_horse_id(
-        row
+    horse_id = (
+        extract_horse_id(
+            row
+        )
     )
 
-    sex_age = extract_sex_age(
-        row
+    sex_age = (
+        extract_sex_age(
+            row
+        )
     )
 
     carried_weight = (
@@ -483,8 +753,10 @@ for row in soup.select(
         )
     )
 
-    jockey = extract_jockey(
-        row
+    jockey = (
+        extract_jockey(
+            row
+        )
     )
 
     (
@@ -531,12 +803,15 @@ if not horses:
 
 
 def horse_sort_key(horse):
+
     number = horse[
         "horse_number"
     ]
 
     if number.isdigit():
-        return int(number)
+        return int(
+            number
+        )
 
     return 999
 
@@ -566,7 +841,9 @@ for horse in horses:
     ]:
 
         if not horse[key]:
-            missing.append(key)
+            missing.append(
+                key
+            )
 
     if missing:
 
@@ -588,31 +865,61 @@ for horse in horses:
         )
 
 
-# レース条件は後続解析に必須
-if not race_condition["track"]:
+# =========================================================
+# 必須レース情報の安全確認
+# =========================================================
+
+if not race_condition[
+    "race_date"
+]:
+    raise RuntimeError(
+        "開催日を取得できませんでした。"
+    )
+
+if not race_condition[
+    "track"
+]:
     raise RuntimeError(
         "競馬場を取得できませんでした。"
     )
 
-if not race_condition["surface"]:
+if not race_condition[
+    "surface"
+]:
     raise RuntimeError(
         "芝・ダートを取得できませんでした。"
     )
 
-if race_condition["distance"] <= 0:
+if (
+    race_condition[
+        "distance"
+    ]
+    <= 0
+):
     raise RuntimeError(
         "距離を取得できませんでした。"
     )
 
 
 JST = timezone(
-    timedelta(hours=9)
+    timedelta(
+        hours=9
+    )
 )
 
+
+# =========================================================
+# race.json
+# =========================================================
 
 data = {
     "race_id":
         RACE_ID,
+
+    "race_date":
+        race_condition[
+            "race_date"
+        ],
 
     "updated_at":
         datetime.now(
@@ -625,8 +932,13 @@ data = {
     "source_url":
         URL,
 
-    # 後続処理で使用するレース条件
     "track":
+        race_condition[
+            "track"
+        ],
+
+    # 旧処理との互換性用
+    "racecourse":
         race_condition[
             "track"
         ],
@@ -671,6 +983,10 @@ with open(
     )
 
 
+# =========================================================
+# ログ
+# =========================================================
+
 print(
     json.dumps(
         data,
@@ -689,18 +1005,31 @@ print(
 )
 
 print(
+    "race_date:",
+    data[
+        "race_date"
+    ]
+)
+
+print(
     "track:",
-    data["track"]
+    data[
+        "track"
+    ]
 )
 
 print(
     "surface:",
-    data["surface"]
+    data[
+        "surface"
+    ]
 )
 
 print(
     "distance:",
-    data["distance"]
+    data[
+        "distance"
+    ]
 )
 
 print(
@@ -753,4 +1082,6 @@ if warnings:
     )
 
     for warning in warnings:
-        print(warning)
+        print(
+            warning
+        )
