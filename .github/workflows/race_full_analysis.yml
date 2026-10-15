@@ -42,62 +42,72 @@ jobs:
           echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
           echo "Target Race ID: $RACE_ID"
 
-      # 1. 出馬表
+      # 1. 今回レース取得
       - name: Collect race
         run: |
           python main_v3.py
 
-      # 2. 今回条件と過去DBの一致確認
+      # 2. 今回条件の過去レースを探索
+      - name: Find condition history races
+        run: |
+          python history_batch.py
+
+      # 3. 過去レースDBを条件横断で蓄積
+      - name: Update history database
+        run: |
+          python history_db.py
+
+      # 4. 今回条件だけをDBから抽出
       - name: Select condition history
         run: |
           python condition_history.py
 
-      # 3. 対象馬の5代血統
+      # 5. 対象馬の5代血統
       - name: Collect pedigree
         run: |
           python pedigree.py
 
-      # 4. 血統名の正規化
+      # 6. 血統名の正規化
       - name: Normalize pedigree
         run: |
           python normalize_pedigree.py
 
-      # 5. 過去成績
+      # 7. 過去成績
       - name: Collect runner history
         run: |
           python runner_history.py
 
-      # 6. 能力・今回能力発揮率
+      # 8. 能力・今回能力発揮率
       - name: Analyze runners
         run: |
           python runner_analysis.py
 
-      # 7. 前走処理・課題・克服材料
+      # 9. 前走処理・課題・克服材料
       - name: Analyze previous race
         run: |
           python previous_race_analysis.py
 
-      # 8. 展開
+      # 10. 展開
       - name: Analyze pace
         run: |
           python pace_analysis.py
 
-      # 9. 条件別血統統計
+      # 11. 条件別血統統計
       - name: Build bloodline statistics
         run: |
           python bloodline_stats.py
 
-      # 10. 今回出走馬の血統評価
+      # 12. 今回出走馬の血統評価
       - name: Score race bloodlines
         run: |
           python race_bloodline_score.py
 
-      # 11. 最終統合
+      # 13. 最終統合
       - name: Run final analysis
         run: |
           python final_analysis.py
 
-      # 12. 完成チェック
+      # 14. 完成チェック
       - name: Validate final analysis
         run: |
           python - <<'PY'
@@ -190,7 +200,7 @@ jobs:
           )
           PY
 
-      # 13. JSONをまとめて保存
+      # 15. JSONをまとめて保存
       - name: Save analysis data
         run: |
           git config user.name "github-actions[bot]"
@@ -198,6 +208,8 @@ jobs:
 
           git add \
             race.json \
+            history_races.json \
+            history_db.json \
             condition_history.json \
             pedigree.json \
             runner_history.json \
