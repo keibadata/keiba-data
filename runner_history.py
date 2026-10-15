@@ -6,30 +6,29 @@ from datetime import datetime, timezone, timedelta
 import requests
 from bs4 import BeautifulSoup
 
-
 RACE_FILE = "race.json"
 OUTPUT_FILE = "runner_history.json"
 
-BASE_URL = "https://db.netkeiba.com/horse/{horse_id}/"
+BASE_URL = "https://db.netkeiba.com/horse/result/{horse_id}/"
 
-REQUEST_INTERVAL = 1.2
-TIMEOUT = 20
+REQUEST_INTERVAL = 1.5
+TIMEOUT = 25
 MAX_RETRIES = 3
 
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/141.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) "
+        "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+        "Version/18.0 Mobile/15E148 Safari/604.1"
     ),
-    "Accept": (
-        "text/html,application/xhtml+xml,"
-        "application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
-    ),
-    "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "ja-JP,ja;q=0.9,en;q=0.7",
 }
 
-JST = timezone(timedelta(hours=9))
+
+def now_jst():
+    jst = timezone(timedelta(hours=9))
+    return datetime.now(jst).isoformat()
 
 
 def clean_text(value):
@@ -38,99 +37,61 @@ def clean_text(value):
     return re.sub(r"\s+", " ", str(value)).strip()
 
 
-def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_json(path, data):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(
-            data,
-            f,
-            ensure_ascii=False,
-            indent=2
-        )
-
-
-def fetch(session, url):
+def get_html(url):
     last_error = None
 
-    for attempt in range(1, MAX_RETRIES + 1):
+    for attempt in range(MAX_RETRIES):
         try:
-            response = session.get(
+            response = requests.get(
                 url,
                 headers=HEADERS,
                 timeout=TIMEOUT
             )
 
-            print(
-                "  HTTP:",
-                response.status_code,
-                "bytes:",
-                len(response.content)
-            )
-
             if response.status_code == 200:
-                response.encoding = (
-                    response.apparent_encoding
-                    or response.encoding
-                    or "EUC-JP"
-                )
+                response.encoding = response.apparent_encoding
                 return response.text
 
-            last_error = (
-                f"HTTP {response.status_code}"
-            )
+            last_error = f"HTTP {response.status_code}"
 
         except Exception as e:
             last_error = str(e)
 
-        if attempt < MAX_RETRIES:
-            time.sleep(
-                REQUEST_INTERVAL * attempt
-            )
+        if attempt < MAX_RETRIES - 1:
+            time.sleep(2 + attempt)
 
-    raise RuntimeError(
-        last_error or "取得失敗"
-    )
+    raise RuntimeError(last_error or "取得失敗")
 
 
-def extract_horses(data):
+def load_runners():
+    with open(RACE_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
     candidates = []
 
     if isinstance(data, dict):
-        for key in (
+        for key in [
             "runners",
             "horses",
             "entries",
+            "race_entries",
             "results"
-        ):
+        ]:
             if isinstance(data.get(key), list):
                 candidates = data[key]
                 break
 
         if not candidates:
-            race = data.get("race")
-
-            if isinstance(race, dict):
-                for key in (
-                    "runners",
-                    "horses",
-                    "entries",
-                    "results"
-                ):
-                    if isinstance(
-                        race.get(key),
-                        list
-                    ):
-                        candidates = race[key]
+            for value in data.values():
+                if isinstance(value, list) and value:
+                    if isinstance(value[0], dict):
+                        candidates = value
                         break
 
     elif isinstance(data, list):
         candidates = data
 
-    horses = {}
+    runners = []
 
     for item in candidates:
         if not isinstance(item, dict):
@@ -138,734 +99,376 @@ def extract_horses(data):
 
         horse_id = clean_text(
             item.get("horse_id")
+            or item.get("horseId")
             or item.get("id")
         )
 
-        if not horse_id:
-            continue
-
-        horses[horse_id] = {
-            "horse_id": horse_id,
-            "horse_name": clean_text(
-                item.get("horse_name")
-                or item.get("name")
-            ),
-            "horse_number": clean_text(
-                item.get("horse_number")
-                or item.get("number")
-                or item.get("umaban")
-            )
-        }
-
-    return list(horses.values())
-
-
-def find_result_table(soup):
-    # netkeibaで過去走表に使われる代表的なclass
-    selectors = [
-        "table.db_h_race_results",
-        "table.race_table_01",
-        "table.nk_tb_common",
-    ]
-
-    for selector in selectors:
-        tables = soup.select(selector)
-
-        for table in tables:
-            text = clean_text(
-                table.get_text(
-                    " ",
-                    strip=True
-                )
-            )
-
-            if (
-                "日付" in text
-                and "着順" in text
-                and (
-                    "レース名" in text
-                    or "レース" in text
-                )
-            ):
-                return table
-
-    # classに依存しない予備判定
-    for table in soup.find_all("table"):
-        text = clean_text(
-            table.get_text(
-                " ",
-                strip=True
-            )
+        horse_name = clean_text(
+            item.get("horse_name")
+            or item.get("horseName")
+            or item.get("name")
         )
 
-        required = 0
+        horse_number = clean_text(
+            item.get("horse_number")
+            or item.get("horseNumber")
+            or item.get("number")
+            or item.get("umaban")
+        )
 
-        for word in (
-            "日付",
-            "着順",
-            "騎手",
-            "距離"
-        ):
-            if word in text:
-                required += 1
+        if horse_id:
+            runners.append({
+                "horse_id": horse_id,
+                "horse_name": horse_name,
+                "horse_number": horse_number
+            })
 
-        if required >= 3:
-            return table
-
-    return None
+    return runners
 
 
-def build_header_map(table):
+def table_headers(table):
     rows = table.find_all("tr")
 
     if not rows:
-        return {}, []
+        return []
 
-    header_row = None
+    for row in rows[:3]:
+        headers = [
+            clean_text(x.get_text(" ", strip=True))
+            for x in row.find_all(["th", "td"])
+        ]
+
+        joined = " ".join(headers)
+
+        if (
+            "日付" in joined
+            and ("着順" in joined or "着" in joined)
+            and ("レース名" in joined or "レース" in joined)
+        ):
+            return headers
+
+    return []
+
+
+def find_result_table(soup):
+    best_table = None
+    best_score = -1
+
+    for table in soup.find_all("table"):
+        text = clean_text(table.get_text(" ", strip=True))
+
+        score = 0
+
+        keywords = [
+            "日付",
+            "開催",
+            "レース名",
+            "着順",
+            "距離",
+            "タイム",
+            "通過",
+            "上り",
+            "馬体重",
+        ]
+
+        for keyword in keywords:
+            if keyword in text:
+                score += 1
+
+        row_count = len(table.find_all("tr"))
+
+        if row_count >= 2:
+            score += 2
+
+        if score > best_score:
+            best_score = score
+            best_table = table
+
+    if best_score < 5:
+        return None
+
+    return best_table
+
+
+def normalize_header(header):
+    h = clean_text(header)
+
+    replacements = {
+        "着 順": "着順",
+        "レース": "レース名",
+        "上り": "上がり",
+        "上り3F": "上がり",
+        "上がり3F": "上がり",
+        "馬場": "馬場状態",
+    }
+
+    return replacements.get(h, h)
+
+
+def get_value(record, names):
+    for name in names:
+        if name in record and clean_text(record[name]):
+            return clean_text(record[name])
+    return ""
+
+
+def parse_distance_surface(value):
+    text = clean_text(value)
+
+    surface = ""
+    distance = ""
+
+    if "芝" in text:
+        surface = "芝"
+    elif "ダ" in text:
+        surface = "ダート"
+    elif "障" in text:
+        surface = "障害"
+
+    match = re.search(r"(\d{3,4})", text)
+    if match:
+        distance = match.group(1)
+
+    return surface, distance
+
+
+def parse_result_table(table):
+    rows = table.find_all("tr")
+
+    header_index = None
     headers = []
 
-    for row_index, row in enumerate(rows):
-        cells = row.find_all(
-            ["th", "td"]
-        )
-
+    for i, row in enumerate(rows[:5]):
+        cells = row.find_all(["th", "td"])
         values = [
-            clean_text(
-                cell.get_text(
-                    " ",
-                    strip=True
-                )
-            )
-            for cell in cells
+            normalize_header(x.get_text(" ", strip=True))
+            for x in cells
         ]
 
         joined = " ".join(values)
 
-        if (
-            "日付" in joined
-            and (
-                "着順" in joined
-                or "レース名" in joined
-            )
-        ):
-            header_row = row_index
+        if "日付" in joined and ("着順" in joined or "着" in joined):
             headers = values
+            header_index = i
             break
 
-    if header_row is None:
-        return {}, rows
+    if header_index is None:
+        raise RuntimeError("競走成績ヘッダーを判定できません")
 
-    header_map = {}
+    results = []
 
-    for i, header in enumerate(headers):
-        if header:
-            header_map[header] = i
-
-    return {
-        "map": header_map,
-        "headers": headers,
-        "row_index": header_row
-    }, rows
-
-
-def find_col(headers, *names):
-    for name in names:
-        for i, header in enumerate(headers):
-            if header == name:
-                return i
-
-    for name in names:
-        for i, header in enumerate(headers):
-            if name in header:
-                return i
-
-    return -1
-
-
-def get_cell(cells, index):
-    if index < 0:
-        return ""
-
-    if index >= len(cells):
-        return ""
-
-    return clean_text(
-        cells[index].get_text(
-            " ",
-            strip=True
-        )
-    )
-
-
-def parse_int(value):
-    match = re.search(
-        r"-?\d+",
-        clean_text(value)
-    )
-
-    if not match:
-        return None
-
-    try:
-        return int(match.group())
-    except Exception:
-        return None
-
-
-def parse_float(value):
-    value = clean_text(value).replace(
-        ",",
-        ""
-    )
-
-    match = re.search(
-        r"-?\d+(?:\.\d+)?",
-        value
-    )
-
-    if not match:
-        return None
-
-    try:
-        return float(match.group())
-    except Exception:
-        return None
-
-
-def parse_rank(value):
-    return parse_int(value)
-
-
-def parse_distance(value):
-    value = clean_text(value)
-
-    match = re.search(
-        r"(芝|ダ|ダート|障)\s*([0-9]+)",
-        value
-    )
-
-    if not match:
-        return "", None
-
-    surface = match.group(1)
-
-    if surface == "ダ":
-        surface = "ダート"
-
-    if surface == "障":
-        surface = "障害"
-
-    return surface, int(match.group(2))
-
-
-def parse_course(value):
-    value = clean_text(value)
-
-    match = re.search(
-        r"(東京|中山|京都|阪神|中京|"
-        r"札幌|函館|福島|新潟|小倉|"
-        r"大井|川崎|船橋|浦和|門別|"
-        r"園田|姫路|名古屋|笠松|"
-        r"高知|佐賀|盛岡|水沢)",
-        value
-    )
-
-    if match:
-        return match.group(1)
-
-    return value
-
-
-def parse_weight(value):
-    value = clean_text(value)
-
-    match = re.search(
-        r"(\d+)"
-        r"(?:\(([+-]?\d+)\))?",
-        value
-    )
-
-    if not match:
-        return None, None
-
-    weight = int(match.group(1))
-
-    change = (
-        int(match.group(2))
-        if match.group(2)
-        else None
-    )
-
-    return weight, change
-
-
-def extract_race_id(cells):
-    for cell in cells:
-        for link in cell.find_all(
-            "a",
-            href=True
-        ):
-            href = link.get(
-                "href",
-                ""
-            )
-
-            patterns = [
-                r"/race/(\d{10,14})",
-                r"race_id=(\d{10,14})"
-            ]
-
-            for pattern in patterns:
-                match = re.search(
-                    pattern,
-                    href
-                )
-
-                if match:
-                    return match.group(1)
-
-    return ""
-
-
-def parse_history(html):
-    soup = BeautifulSoup(
-        html,
-        "html.parser"
-    )
-
-    table = find_result_table(soup)
-
-    if table is None:
-        title = clean_text(
-            soup.title.get_text(
-                " ",
-                strip=True
-            )
-            if soup.title
-            else ""
-        )
-
-        raise RuntimeError(
-            "過去成績テーブルなし"
-            f" / title={title}"
-            f" / tables={len(soup.find_all('table'))}"
-        )
-
-    header_info, rows = build_header_map(
-        table
-    )
-
-    if not header_info:
-        raise RuntimeError(
-            "過去成績のヘッダーを認識できません"
-        )
-
-    headers = header_info["headers"]
-    start_index = (
-        header_info["row_index"] + 1
-    )
-
-    idx_date = find_col(
-        headers,
-        "日付"
-    )
-
-    idx_course = find_col(
-        headers,
-        "開催"
-    )
-
-    idx_r = find_col(
-        headers,
-        "R"
-    )
-
-    idx_race = find_col(
-        headers,
-        "レース名",
-        "レース"
-    )
-
-    idx_field = find_col(
-        headers,
-        "頭数"
-    )
-
-    idx_frame = find_col(
-        headers,
-        "枠番",
-        "枠"
-    )
-
-    idx_number = find_col(
-        headers,
-        "馬番"
-    )
-
-    idx_odds = find_col(
-        headers,
-        "オッズ"
-    )
-
-    idx_popularity = find_col(
-        headers,
-        "人気"
-    )
-
-    idx_rank = find_col(
-        headers,
-        "着順"
-    )
-
-    idx_jockey = find_col(
-        headers,
-        "騎手"
-    )
-
-    idx_weight_carried = find_col(
-        headers,
-        "斤量"
-    )
-
-    idx_distance = find_col(
-        headers,
-        "距離"
-    )
-
-    idx_track = find_col(
-        headers,
-        "馬場"
-    )
-
-    idx_time = find_col(
-        headers,
-        "タイム"
-    )
-
-    idx_margin = find_col(
-        headers,
-        "着差"
-    )
-
-    idx_passing = find_col(
-        headers,
-        "通過"
-    )
-
-    idx_pace = find_col(
-        headers,
-        "ペース"
-    )
-
-    idx_last3f = find_col(
-        headers,
-        "上り",
-        "上がり"
-    )
-
-    idx_weight = find_col(
-        headers,
-        "馬体重"
-    )
-
-    history = []
-
-    for row in rows[start_index:]:
-        cells = row.find_all(
-            ["td", "th"]
-        )
+    for row in rows[header_index + 1:]:
+        cells = row.find_all("td")
 
         if not cells:
             continue
 
-        date = get_cell(
-            cells,
-            idx_date
-        )
+        values = [
+            clean_text(cell.get_text(" ", strip=True))
+            for cell in cells
+        ]
 
-        rank_raw = get_cell(
-            cells,
-            idx_rank
-        )
-
-        if not date:
+        if len(values) < 3:
             continue
 
-        # 日付らしくない行を除外
-        if not re.search(
-            r"\d{4}[./-]\d{1,2}[./-]\d{1,2}",
-            date
-        ):
+        record = {}
+
+        for i, value in enumerate(values):
+            if i < len(headers):
+                key = headers[i]
+            else:
+                key = f"column_{i + 1}"
+
+            record[key] = value
+
+        race_date = get_value(
+            record,
+            ["日付"]
+        )
+
+        rank = get_value(
+            record,
+            ["着順", "着"]
+        )
+
+        if not race_date:
             continue
 
-        distance_raw = get_cell(
-            cells,
-            idx_distance
+        distance_raw = get_value(
+            record,
+            ["距離"]
         )
 
-        surface, distance = parse_distance(
-            distance_raw
+        surface, distance = parse_distance_surface(distance_raw)
+
+        race_name = get_value(
+            record,
+            ["レース名", "レース"]
         )
 
-        horse_weight, weight_change = (
-            parse_weight(
-                get_cell(
-                    cells,
-                    idx_weight
-                )
-            )
-        )
-
-        history.append({
-            "race_id": extract_race_id(
-                cells
+        result = {
+            "date": race_date,
+            "meeting": get_value(
+                record,
+                ["開催"]
             ),
-            "date": date,
-            "racecourse": parse_course(
-                get_cell(
-                    cells,
-                    idx_course
-                )
+            "race_name": race_name,
+            "rank": rank,
+            "jockey": get_value(
+                record,
+                ["騎手"]
             ),
-            "race_number": get_cell(
-                cells,
-                idx_r
-            ),
-            "race_name": get_cell(
-                cells,
-                idx_race
-            ),
-            "field_size": parse_int(
-                get_cell(
-                    cells,
-                    idx_field
-                )
-            ),
-            "frame_number": parse_int(
-                get_cell(
-                    cells,
-                    idx_frame
-                )
-            ),
-            "horse_number": parse_int(
-                get_cell(
-                    cells,
-                    idx_number
-                )
-            ),
-            "odds": parse_float(
-                get_cell(
-                    cells,
-                    idx_odds
-                )
-            ),
-            "popularity": parse_int(
-                get_cell(
-                    cells,
-                    idx_popularity
-                )
-            ),
-            "rank": parse_rank(
-                rank_raw
-            ),
-            "rank_raw": rank_raw,
-            "jockey": get_cell(
-                cells,
-                idx_jockey
-            ),
-            "carried_weight": parse_float(
-                get_cell(
-                    cells,
-                    idx_weight_carried
-                )
+            "carried_weight": get_value(
+                record,
+                ["斤量"]
             ),
             "surface": surface,
             "distance": distance,
             "distance_raw": distance_raw,
-            "track_condition": get_cell(
-                cells,
-                idx_track
+            "track_condition": get_value(
+                record,
+                ["馬場状態", "馬場"]
             ),
-            "time": get_cell(
-                cells,
-                idx_time
+            "time": get_value(
+                record,
+                ["タイム"]
             ),
-            "margin": get_cell(
-                cells,
-                idx_margin
+            "margin": get_value(
+                record,
+                ["着差"]
             ),
-            "passing": get_cell(
-                cells,
-                idx_passing
+            "passing": get_value(
+                record,
+                ["通過"]
             ),
-            "pace": get_cell(
-                cells,
-                idx_pace
+            "last3f": get_value(
+                record,
+                ["上がり", "上り", "上り3F", "上がり3F"]
             ),
-            "last3f": parse_float(
-                get_cell(
-                    cells,
-                    idx_last3f
-                )
+            "horse_weight": get_value(
+                record,
+                ["馬体重"]
             ),
-            "horse_weight": horse_weight,
-            "weight_change": weight_change
-        })
+            "odds": get_value(
+                record,
+                ["オッズ"]
+            ),
+            "popularity": get_value(
+                record,
+                ["人気"]
+            ),
+        }
 
-    if not history:
+        results.append(result)
+
+    return results
+
+
+def collect_horse_history(horse):
+    horse_id = horse["horse_id"]
+
+    url = BASE_URL.format(horse_id=horse_id)
+
+    html = get_html(url)
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    table = find_result_table(soup)
+
+    if table is None:
+        title = ""
+        if soup.title:
+            title = clean_text(soup.title.get_text(" ", strip=True))
+
         raise RuntimeError(
-            "過去成績テーブルは存在するが"
-            "レース行を取得できません"
+            "競走成績テーブルなし / title=" + title
         )
 
-    return history
+    results = parse_result_table(table)
+
+    if not results:
+        raise RuntimeError("競走成績0件")
+
+    return {
+        "horse_id": horse_id,
+        "horse_name": horse["horse_name"],
+        "horse_number": horse["horse_number"],
+        "source_url": url,
+        "past_race_count": len(results),
+        "past_races": results,
+    }
 
 
 def main():
-    race_data = load_json(
-        RACE_FILE
-    )
+    runners = load_runners()
 
-    horses = extract_horses(
-        race_data
-    )
+    output = {
+        "updated_at": now_jst(),
+        "source": "netkeiba",
+        "source_race_file": RACE_FILE,
+        "target_horse_count": len(runners),
+        "collected_horse_count": 0,
+        "total_past_race_count": 0,
+        "error_count": 0,
+        "errors": [],
+        "horses": [],
+    }
 
-    print(
-        "Target horses:",
-        len(horses)
-    )
-
-    if not horses:
-        raise RuntimeError(
-            "race.jsonから出走馬を取得できません"
-        )
-
-    session = requests.Session()
-
-    collected = []
-    errors = []
-
-    for index, horse in enumerate(
-        horses,
-        start=1
-    ):
-        horse_id = horse["horse_id"]
-        horse_name = horse["horse_name"]
-
+    for index, horse in enumerate(runners, start=1):
         print(
-            f"[{index}/{len(horses)}] "
-            f"{horse_name} "
-            f"{horse_id}"
+            f"[{index}/{len(runners)}] "
+            f"{horse['horse_name']} "
+            f"({horse['horse_id']})"
         )
 
         try:
-            html = fetch(
-                session,
-                BASE_URL.format(
-                    horse_id=horse_id
-                )
-            )
+            data = collect_horse_history(horse)
 
-            history = parse_history(
-                html
-            )
-
-            collected.append({
-                "horse_id": horse_id,
-                "horse_number": horse[
-                    "horse_number"
-                ],
-                "horse_name": horse_name,
-                "race_count": len(history),
-                "races": history
-            })
+            output["horses"].append(data)
+            output["collected_horse_count"] += 1
+            output["total_past_race_count"] += data["past_race_count"]
 
             print(
-                "  OK races:",
-                len(history)
+                "  OK:",
+                data["past_race_count"],
+                "races"
             )
 
         except Exception as e:
             message = str(e)
 
-            print(
-                "  ERROR:",
-                message
-            )
-
-            errors.append({
-                "horse_id": horse_id,
-                "horse_name": horse_name,
-                "error": message
+            output["errors"].append({
+                "horse_id": horse["horse_id"],
+                "horse_name": horse["horse_name"],
+                "error": message,
             })
 
-            collected.append({
-                "horse_id": horse_id,
-                "horse_number": horse[
-                    "horse_number"
-                ],
-                "horse_name": horse_name,
-                "race_count": 0,
-                "races": []
-            })
+            output["error_count"] += 1
 
-        if index < len(horses):
-            time.sleep(
-                REQUEST_INTERVAL
-            )
+            print("  ERROR:", message)
 
-    total_races = sum(
-        x["race_count"]
-        for x in collected
-    )
+        time.sleep(REQUEST_INTERVAL)
 
-    collected_count = sum(
-        1
-        for x in collected
-        if x["race_count"] > 0
-    )
+    output["updated_at"] = now_jst()
 
-    output = {
-        "updated_at": datetime.now(
-            JST
-        ).isoformat(),
-        "source": "netkeiba",
-        "source_race_file": RACE_FILE,
-        "target_horse_count": len(horses),
-        "collected_horse_count": (
-            collected_count
-        ),
-        "total_past_race_count": (
-            total_races
-        ),
-        "error_count": len(errors),
-        "errors": errors,
-        "horses": collected
-    }
-
-    save_json(
+    with open(
         OUTPUT_FILE,
-        output
-    )
+        "w",
+        encoding="utf-8"
+    ) as f:
+        json.dump(
+            output,
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
 
     print("")
-    print("===== RESULT =====")
-    print(
-        "target_horse_count:",
-        len(horses)
-    )
-    print(
-        "collected_horse_count:",
-        collected_count
-    )
-    print(
-        "total_past_race_count:",
-        total_races
-    )
-    print(
-        "error_count:",
-        len(errors)
-    )
+    print("===== Runner History =====")
+    print("target:", output["target_horse_count"])
+    print("collected:", output["collected_horse_count"])
+    print("past races:", output["total_past_race_count"])
+    print("errors:", output["error_count"])
 
 
 if __name__ == "__main__":
