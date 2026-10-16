@@ -45,7 +45,11 @@ def get_number(data, *keys, default=0.0):
             continue
 
         try:
-            return float(value)
+            return float(
+                str(value)
+                .replace("kg", "")
+                .strip()
+            )
         except (TypeError, ValueError):
             continue
 
@@ -63,7 +67,11 @@ def get_optional_number(data, *keys):
             continue
 
         try:
-            return float(value)
+            return float(
+                str(value)
+                .replace("kg", "")
+                .strip()
+            )
         except (TypeError, ValueError):
             continue
 
@@ -167,6 +175,26 @@ def find_horse(index, runner):
     return {}
 
 
+def first_number(primary, secondary, *keys):
+    value = get_optional_number(
+        primary,
+        *keys
+    )
+
+    if value is not None:
+        return value, "race.json"
+
+    value = get_optional_number(
+        secondary,
+        *keys
+    )
+
+    if value is not None:
+        return value, "body_weight.json"
+
+    return None, ""
+
+
 # =====================================
 # データ読み込み
 # =====================================
@@ -210,7 +238,8 @@ else:
 
 
 # =====================================
-# 馬体重 Race ID確認
+# body_weight.json Race ID確認
+# 補助ソースとしてのみ使用
 # =====================================
 
 body_weight_race_id = str(
@@ -298,6 +327,29 @@ front_candidate_count = int(
 
 
 # =====================================
+# 年齢
+# =====================================
+
+def get_age(runner):
+    sex_age = str(
+        runner.get("sex_age", "")
+    ).strip()
+
+    digits = "".join(
+        ch for ch in sex_age
+        if ch.isdigit()
+    )
+
+    if not digits:
+        return None
+
+    try:
+        return int(digits)
+    except ValueError:
+        return None
+
+
+# =====================================
 # 当日馬場
 # =====================================
 
@@ -343,11 +395,6 @@ def evaluate_track_condition(track, running_style):
     style = str(
         running_style or "不明"
     )
-
-    # ---------------------------------
-    # 数値は記録
-    # 単独では加減点しない
-    # ---------------------------------
 
     if track_condition:
         reasons.append(
@@ -432,7 +479,7 @@ def evaluate_track_condition(track, running_style):
 
     # ---------------------------------
     # 内外
-    # 枠単独では評価しない
+    # 枠単独評価は禁止
     # ---------------------------------
 
     if inside_outside == "内有利":
@@ -516,54 +563,76 @@ def evaluate_track_condition(track, running_style):
 
 
 # =====================================
-# 馬体重・斤量体重比
+# 馬体重
+#
+# 優先:
+# 1 race.json
+# 2 body_weight.json
 # =====================================
 
-def evaluate_body_weight(data):
+def evaluate_body_weight(
+    runner,
+    body_fallback
+):
 
-    if not data:
-        return {
-            "adjustment": 0.0,
-            "body_weight": None,
-            "change": None,
-            "carried_weight": None,
-            "weight_ratio": None,
-            "reasons": [
-                "馬体重データ不明・補正なし"
-            ]
-        }
-
-    body_weight = get_optional_number(
-        data,
+    body_weight, body_source = first_number(
+        runner,
+        body_fallback,
         "body_weight",
         "weight"
     )
 
-    change = get_optional_number(
-        data,
+    change, change_source = first_number(
+        runner,
+        body_fallback,
         "body_weight_change",
         "weight_change",
         "change"
     )
 
-    carried_weight = get_optional_number(
-        data,
+    carried_weight, carried_source = first_number(
+        runner,
+        body_fallback,
         "carried_weight",
         "burden_weight",
+        "weight_carried",
         "jockey_weight"
     )
+
+    age = get_age(runner)
 
     reasons = []
     adjustment = 0.0
     weight_ratio = None
 
+    sources = {
+        value
+        for value in (
+            body_source,
+            change_source,
+            carried_source
+        )
+        if value
+    }
+
+    if sources:
+        reasons.append(
+            "馬体データ:"
+            + "+".join(
+                sorted(sources)
+            )
+        )
+
     if body_weight is None or body_weight <= 0:
+
         return {
             "adjustment": 0.0,
             "body_weight": None,
             "change": change,
             "carried_weight": carried_weight,
             "weight_ratio": None,
+            "age": age,
+            "source": "",
             "reasons": [
                 "当日馬体重不明・補正なし"
             ]
@@ -587,6 +656,15 @@ def evaluate_body_weight(data):
         )
 
     # ---------------------------------
+    # 2歳馬
+    # ---------------------------------
+
+    if age == 2:
+        reasons.append(
+            "2歳馬・馬体増は成長分を考慮"
+        )
+
+    # ---------------------------------
     # 斤量体重比
     # ---------------------------------
 
@@ -594,6 +672,7 @@ def evaluate_body_weight(data):
         carried_weight is not None
         and carried_weight > 0
     ):
+
         weight_ratio = (
             carried_weight
             / body_weight
@@ -602,25 +681,33 @@ def evaluate_body_weight(data):
 
         reasons.append(
             "斤量:"
-            + format(carried_weight, ".1f")
+            + format(
+                carried_weight,
+                ".1f"
+            )
             + "kg"
         )
 
         reasons.append(
             "斤量体重比:"
-            + format(weight_ratio, ".2f")
+            + format(
+                weight_ratio,
+                ".2f"
+            )
             + "%"
         )
 
-        # 単独評価を避けるため補正は小さく限定
+        # 小幅補正のみ
         if weight_ratio >= 13.5:
             adjustment -= 0.4
+
             reasons.append(
-                "斤量体重比高め・発揮率小幅注意"
+                "斤量体重比高め・小幅注意"
             )
 
         elif weight_ratio >= 13.0:
             adjustment -= 0.2
+
             reasons.append(
                 "斤量体重比やや高め"
             )
@@ -636,32 +723,64 @@ def evaluate_body_weight(data):
         )
 
     # ---------------------------------
-    # 馬体増減そのものでは評価しない
+    # 馬体増減
+    # 単独では加減点しない
     # ---------------------------------
 
     if change is not None:
 
         abs_change = abs(change)
 
-        if abs_change >= 20:
-            reasons.append(
-                "大幅馬体変動・状態確認必要"
-            )
+        if age == 2:
 
-        elif abs_change >= 10:
-            reasons.append(
-                "馬体変動あり・単独評価しない"
-            )
+            if abs_change >= 20:
+                reasons.append(
+                    "2歳・大幅馬体変動"
+                    "・状態確認必要"
+                )
+
+            elif abs_change >= 10:
+                reasons.append(
+                    "2歳・馬体変動あり"
+                    "・成長分含め単独評価しない"
+                )
+
+            else:
+                reasons.append(
+                    "2歳・馬体変動は単独評価しない"
+                )
 
         else:
-            reasons.append(
-                "馬体変動は通常範囲"
-            )
+
+            if abs_change >= 20:
+                reasons.append(
+                    "大幅馬体変動・状態確認必要"
+                )
+
+            elif abs_change >= 10:
+                reasons.append(
+                    "馬体変動あり・単独評価しない"
+                )
+
+            else:
+                reasons.append(
+                    "馬体変動は通常範囲"
+                )
 
     adjustment = clamp(
         adjustment,
         -0.5,
         0.0
+    )
+
+    source_label = (
+        "race.json"
+        if "race.json" in sources
+        else (
+            "body_weight.json"
+            if "body_weight.json" in sources
+            else ""
+        )
     )
 
     return {
@@ -670,6 +789,8 @@ def evaluate_body_weight(data):
         "change": change,
         "carried_weight": carried_weight,
         "weight_ratio": weight_ratio,
+        "age": age,
+        "source": source_label,
         "reasons": reasons
     }
 
@@ -679,11 +800,23 @@ def evaluate_body_weight(data):
 # =====================================
 
 def evaluate_body_issue_connection(
-    body_data,
+    body_result,
     previous_horse
 ):
 
-    if not body_data:
+    body_weight = body_result.get(
+        "body_weight"
+    )
+
+    change = body_result.get(
+        "change"
+    )
+
+    age = body_result.get(
+        "age"
+    )
+
+    if body_weight is None:
         return (
             0.0,
             ["馬体重×課題:馬体重不明"]
@@ -703,13 +836,6 @@ def evaluate_body_issue_connection(
             0.0,
             ["馬体重×課題:前走データなし"]
         )
-
-    change = get_optional_number(
-        body_data,
-        "body_weight_change",
-        "weight_change",
-        "change"
-    )
 
     if change is None:
         return (
@@ -738,8 +864,13 @@ def evaluate_body_issue_connection(
             ["馬体重に接続する前走課題なし"]
         )
 
-    issue_text = " ".join(issues)
-    overcoming_text = " ".join(overcoming)
+    issue_text = " ".join(
+        issues
+    )
+
+    overcoming_text = " ".join(
+        overcoming
+    )
 
     score = 0.0
     reasons = []
@@ -810,7 +941,8 @@ def evaluate_body_issue_connection(
 
         elif change > 0:
             reasons.append(
-                "太め系課題に対して馬体増・克服不明"
+                "太め系課題に対して馬体増"
+                "・克服確認できず"
             )
 
         else:
@@ -829,11 +961,23 @@ def evaluate_body_issue_connection(
         )
 
         if change >= 4:
-            score += 0.4
 
-            reasons.append(
-                "馬体増で回復方向"
-            )
+            # 2歳の増加は成長分もあるため
+            # 馬体増だけでは強く加点しない
+            if age == 2:
+                score += 0.2
+
+                reasons.append(
+                    "2歳馬体増・回復方向候補"
+                    "だが成長分も考慮"
+                )
+
+            else:
+                score += 0.4
+
+                reasons.append(
+                    "馬体増で回復方向"
+                )
 
             if any(
                 keyword in overcoming_text
@@ -931,10 +1075,6 @@ def evaluate_previous(data):
     score = 0.0
     reasons = []
 
-    # ---------------------------------
-    # 前走プラス
-    # ---------------------------------
-
     if positives:
         positive_add = min(
             len(positives) * 0.30,
@@ -949,10 +1089,6 @@ def evaluate_previous(data):
             + "件"
         )
 
-    # ---------------------------------
-    # 課題
-    # ---------------------------------
-
     if issues:
         issue_minus = min(
             len(issues) * 0.25,
@@ -966,22 +1102,21 @@ def evaluate_previous(data):
             + str(len(issues))
             + "件"
         )
+
     else:
         reasons.append(
             "明確な前走課題なし"
         )
-
-    # ---------------------------------
-    # 課題克服
-    # 最重要だが件数だけで暴走させない
-    # ---------------------------------
 
     if overcoming:
 
         if issues:
             resolution_ratio = min(
                 len(overcoming)
-                / max(len(issues), 1),
+                / max(
+                    len(issues),
+                    1
+                ),
                 1.0
             )
 
@@ -1012,24 +1147,16 @@ def evaluate_previous(data):
             )
 
         else:
-            # 課題がないのに克服材料だけ存在する場合
-            # 強く加点しない
             score += 0.2
 
             reasons.append(
                 "克服材料あり・対応課題不明"
             )
 
-    else:
-
-        if issues:
-            reasons.append(
-                "明確な課題克服材料なし"
-            )
-
-    # ---------------------------------
-    # 未知数
-    # ---------------------------------
+    elif issues:
+        reasons.append(
+            "明確な課題克服材料なし"
+        )
 
     if unknowns:
         reasons.append(
@@ -1055,7 +1182,7 @@ def evaluate_previous(data):
 
 # =====================================
 # 血統
-# 条件適性補助のみ
+# 今回条件への補助のみ
 # =====================================
 
 def evaluate_bloodline(data):
@@ -1088,24 +1215,52 @@ def evaluate_bloodline(data):
         )
     )
 
-    # 血統単独の影響を抑制
-    adjustment = clamp(
-        score * 2.0,
-        -0.8,
-        0.8
-    )
+    # 該当祖先なし
+    # ニュートラル
+    if matched <= 0:
+        adjustment = 0.0
+
+    # 明確なプラス祖先なし
+    # 強いマイナスにはしない
+    elif positive <= 0:
+        adjustment = clamp(
+            score,
+            -0.4,
+            0.0
+        )
+
+    else:
+        adjustment = clamp(
+            score,
+            -0.8,
+            0.8
+        )
 
     reasons = [
         "血統スコア"
-        + format(score, ".3f"),
+        + format(
+            score,
+            ".3f"
+        ),
 
         "該当祖先"
         + str(matched)
         + "・プラス"
         + str(positive),
 
-        "血統は条件適性補助のみ"
+        "血統は今回条件への補助のみ"
     ]
+
+    if matched <= 0:
+        reasons.append(
+            "血統該当なし・ニュートラル"
+        )
+
+    elif positive <= 0:
+        reasons.append(
+            "プラス祖先なし"
+            "・血統単独の強い減点禁止"
+        )
 
     return adjustment, reasons
 
@@ -1196,10 +1351,6 @@ def evaluate_pace(data):
         if style == "逃げ":
             score -= 0.5
 
-    # ---------------------------------
-    # ハナ争い・前目候補
-    # ---------------------------------
-
     if (
         leader_candidate_count == 0
         and front_candidate_count <= 4
@@ -1220,10 +1371,6 @@ def evaluate_pace(data):
         reasons.append(
             "逃げ候補複数・ハナ争い注意"
         )
-
-    # ---------------------------------
-    # 後方依存
-    # ---------------------------------
 
     if back_rate >= 0.60:
         score -= 0.6
@@ -1280,7 +1427,7 @@ for runner in runners:
         runner
     )
 
-    body_weight = find_horse(
+    body_fallback = find_horse(
         body_weight_index,
         runner
     )
@@ -1328,14 +1475,18 @@ for runner in runners:
 
     # ---------------------------------
     # 馬体重
+    # race.json最優先
     # ---------------------------------
 
     body_result = evaluate_body_weight(
-        body_weight
+        runner,
+        body_fallback
     )
 
     body_weight_rate_adjustment = (
-        body_result["adjustment"]
+        body_result[
+            "adjustment"
+        ]
     )
 
     # ---------------------------------
@@ -1346,13 +1497,12 @@ for runner in runners:
         body_issue_adjustment,
         body_issue_reasons
     ) = evaluate_body_issue_connection(
-        body_weight,
+        body_result,
         previous_horse
     )
 
     # ---------------------------------
     # 今回能力発揮率
-    # 能力とは分離
     # ---------------------------------
 
     adjusted_performance_rate = clamp(
@@ -1379,7 +1529,10 @@ for runner in runners:
     # ---------------------------------
 
     condition_adjustment = clamp(
-        (condition_fit - 50.0)
+        (
+            condition_fit
+            - 50.0
+        )
         / 25.0,
         -2.0,
         2.0
@@ -1422,7 +1575,7 @@ for runner in runners:
     )
 
     # ---------------------------------
-    # 最終スコア
+    # 最終
     # ---------------------------------
 
     final_score = (
@@ -1535,13 +1688,11 @@ for runner in runners:
         "horse_name":
             get_name(runner),
 
-        # 能力
         "ability_score":
             round1(
                 ability_score
             ),
 
-        # 発揮率
         "original_performance_rate":
             round1(
                 original_performance_rate
@@ -1572,7 +1723,6 @@ for runner in runners:
                 base_performance
             ),
 
-        # 馬体
         "body_weight":
             (
                 round1(
@@ -1626,7 +1776,11 @@ for runner in runners:
                 else None
             ),
 
-        # 条件
+        "body_weight_source":
+            body_result[
+                "source"
+            ],
+
         "condition_fit_score":
             round1(
                 condition_fit
@@ -1637,7 +1791,6 @@ for runner in runners:
                 condition_adjustment
             ),
 
-        # 前走
         "previous_positive_count":
             previous_positive_count,
 
@@ -1652,7 +1805,6 @@ for runner in runners:
                 previous_adj
             ),
 
-        # 展開
         "pace_adjustment":
             round1(
                 pace_adj
@@ -1661,7 +1813,6 @@ for runner in runners:
         "running_style":
             running_style,
 
-        # 血統
         "bloodline_score":
             round(
                 get_number(
@@ -1677,7 +1828,6 @@ for runner in runners:
                 blood_adj
             ),
 
-        # 最終
         "final_score":
             round1(
                 final_score
@@ -1780,10 +1930,22 @@ blood_connected = sum(
 
 body_weight_connected = sum(
     1
-    for runner in runners
-    if find_horse(
-        body_weight_index,
-        runner
+    for horse in results
+    if horse[
+        "body_weight"
+    ] is not None
+)
+
+race_json_body_weight_connected = sum(
+    1
+    for horse in results
+    if (
+        horse[
+            "body_weight"
+        ] is not None
+        and horse[
+            "body_weight_source"
+        ] == "race.json"
     )
 )
 
@@ -1829,14 +1991,12 @@ output = {
     "race_id":
         race_id,
 
-    # ---------------------------------
-    # 馬場
-    # ---------------------------------
-
     "track_condition": {
 
         "source_available":
-            bool(track_data_raw),
+            bool(
+                track_data_raw
+            ),
 
         "race_id_matched":
             track_race_id_matched,
@@ -1845,7 +2005,9 @@ output = {
             track_race_id,
 
         "applied":
-            bool(track_data),
+            bool(
+                track_data
+            ),
 
         "track_condition":
             track_data.get(
@@ -1896,32 +2058,25 @@ output = {
             )
     },
 
-    # ---------------------------------
-    # 馬体重
-    # ---------------------------------
-
     "body_weight_source": {
 
-        "source_available":
+        "primary_source":
+            "race.json",
+
+        "fallback_source":
+            "body_weight.json",
+
+        "fallback_source_available":
             bool(
                 body_weight_data_raw
             ),
 
-        "race_id_matched":
+        "fallback_race_id_matched":
             body_weight_race_id_matched,
 
-        "source_race_id":
-            body_weight_race_id,
-
-        "applied":
-            bool(
-                body_weight_data
-            )
+        "fallback_source_race_id":
+            body_weight_race_id
     },
-
-    # ---------------------------------
-    # 展開
-    # ---------------------------------
 
     "race_scenario": {
 
@@ -1935,10 +2090,6 @@ output = {
             front_candidate_count
     },
 
-    # ---------------------------------
-    # 方法
-    # ---------------------------------
-
     "method": {
 
         "ability_and_performance_rate_separated":
@@ -1947,10 +2098,19 @@ output = {
         "track_affects_performance_rate_not_ability":
             True,
 
+        "body_weight_primary_source_is_race_json":
+            True,
+
+        "body_weight_json_is_fallback_only":
+            True,
+
         "body_weight_affects_performance_rate_not_ability":
             True,
 
         "body_weight_change_not_used_alone":
+            True,
+
+        "two_year_old_growth_considered":
             True,
 
         "weight_body_ratio_not_used_as_strong_standalone_factor":
@@ -1962,9 +2122,6 @@ output = {
         "track_race_id_must_match":
             True,
 
-        "body_weight_race_id_must_match":
-            True,
-
         "cushion_value_not_used_alone":
             True,
 
@@ -1972,9 +2129,6 @@ output = {
             True,
 
         "draw_not_used_alone":
-            True,
-
-        "track_unknown_not_penalized":
             True,
 
         "previous_finish_not_used_alone":
@@ -1986,7 +2140,7 @@ output = {
         "bloodline_is_condition_support_only":
             True,
 
-        "pace_is_performance_support":
+        "bloodline_strong_negative_without_positive_match_prohibited":
             True,
 
         "unknown_not_penalized":
@@ -1998,10 +2152,6 @@ output = {
         "internet_prediction_not_used":
             True
     },
-
-    # ---------------------------------
-    # 接続状況
-    # ---------------------------------
 
     "summary": {
 
@@ -2026,33 +2176,27 @@ output = {
         "body_weight_connected_count":
             body_weight_connected,
 
+        "race_json_body_weight_connected_count":
+            race_json_body_weight_connected,
+
         "previous_effective_count":
             previous_effective_count,
 
         "track_source_available":
-            bool(track_data_raw),
+            bool(
+                track_data_raw
+            ),
 
         "track_race_id_matched":
             track_race_id_matched,
 
         "track_applied":
-            bool(track_data),
+            bool(
+                track_data
+            ),
 
         "track_effective_count":
             track_effective_count,
-
-        "body_weight_source_available":
-            bool(
-                body_weight_data_raw
-            ),
-
-        "body_weight_race_id_matched":
-            body_weight_race_id_matched,
-
-        "body_weight_applied":
-            bool(
-                body_weight_data
-            ),
 
         "body_weight_effective_count":
             body_weight_effective_count
@@ -2105,12 +2249,16 @@ print(
 )
 
 print(
-    "body weight race id:",
+    "body weight primary source: race.json"
+)
+
+print(
+    "body weight fallback race id:",
     body_weight_race_id
 )
 
 print(
-    "body weight race id matched:",
+    "body weight fallback matched:",
     body_weight_race_id_matched
 )
 
@@ -2145,6 +2293,13 @@ print(
 print(
     "body weight:",
     body_weight_connected,
+    "/",
+    len(results)
+)
+
+print(
+    "body weight from race.json:",
+    race_json_body_weight_connected,
     "/",
     len(results)
 )
@@ -2189,8 +2344,12 @@ for horse in results:
         horse["body_weight"],
         "増減",
         horse["body_weight_change"],
+        "斤量",
+        horse["carried_weight"],
         "斤量比",
         horse["weight_body_ratio"],
+        "馬体元",
+        horse["body_weight_source"],
         "馬場",
         horse[
             "track_performance_rate_adjustment"
