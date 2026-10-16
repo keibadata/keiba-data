@@ -42,17 +42,10 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # 0. Race IDを決定
-      #
-      # 新方式:
-      # 開催日 + 競馬場 + R番号
-      #   ↓
-      # resolve_race_id.py
-      #   ↓
-      # race_id.txt
-      #
-      # 旧方式:
-      # 入力が無い場合は従来通りrace_id.txtを使用
+      # =====================================
+      # 0. Race ID
+      # =====================================
+
       - name: Resolve or load race ID
         env:
           RACE_DATE: ${{ inputs.race_date }}
@@ -90,77 +83,131 @@ jobs:
           echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
           echo "Target Race ID: $RACE_ID"
 
+      # =====================================
       # 1. 今回レース取得
+      # =====================================
+
       - name: Collect race
         run: |
           python main_v3.py
 
-      # 2. 今回条件の過去レースを探索
+      # =====================================
+      # 2. 馬場データ構築
+      # race.json取得後に必ず実行
+      # =====================================
+
+      - name: Build track condition
+        run: |
+          python track_condition.py
+
+      # =====================================
+      # 3. 今回条件の過去レース探索
+      # =====================================
+
       - name: Find condition history races
         run: |
           python history_batch.py
 
-      # 3. 過去レースDBを条件横断で蓄積
+      # =====================================
+      # 4. 過去レースDB更新
+      # =====================================
+
       - name: Update history database
         run: |
           python history_db.py
 
-      # 4. 履歴DBに追加された馬の5代血統を増分取得
+      # =====================================
+      # 5. 履歴馬5代血統
+      # =====================================
+
       - name: Update history pedigrees
         run: |
           python history_pedigree.py
 
-      # 5. 今回条件だけを履歴DBから抽出
+      # =====================================
+      # 6. 今回条件履歴抽出
+      # =====================================
+
       - name: Select condition history
         run: |
           python condition_history.py
 
-      # 6. 今回出走馬の5代血統
+      # =====================================
+      # 7. 今回出走馬5代血統
+      # =====================================
+
       - name: Collect pedigree
         run: |
           python pedigree.py
 
-      # 7. 今回出走馬の血統名を正規化
+      # =====================================
+      # 8. 血統名正規化
+      # =====================================
+
       - name: Normalize pedigree
         run: |
           python normalize_pedigree.py
 
-      # 8. 今回出走馬の過去成績
+      # =====================================
+      # 9. 出走馬過去成績
+      # =====================================
+
       - name: Collect runner history
         run: |
           python runner_history.py
 
-      # 9. 能力・今回能力発揮率
+      # =====================================
+      # 10. 能力・今回能力発揮率
+      # =====================================
+
       - name: Analyze runners
         run: |
           python runner_analysis.py
 
-      # 10. 前走処理・課題・克服材料
+      # =====================================
+      # 11. 前走処理
+      # =====================================
+
       - name: Analyze previous race
         run: |
           python previous_race_analysis.py
 
-      # 11. 展開
+      # =====================================
+      # 12. 展開
+      # =====================================
+
       - name: Analyze pace
         run: |
           python pace_analysis.py
 
-      # 12. 今回条件の血統統計
+      # =====================================
+      # 13. 血統統計
+      # =====================================
+
       - name: Build bloodline statistics
         run: |
           python bloodline_stats.py
 
-      # 13. 今回出走馬の血統評価
+      # =====================================
+      # 14. 今回出走馬血統評価
+      # =====================================
+
       - name: Score race bloodlines
         run: |
           python race_bloodline_score.py
 
-      # 14. 最終統合
+      # =====================================
+      # 15. 最終統合
+      # =====================================
+
       - name: Run final analysis
         run: |
           python final_analysis.py
 
-      # 15. 完成チェック
+      # =====================================
+      # 16. 完成チェック
+      # =====================================
+
       - name: Validate final analysis
         run: |
           python - <<'PY'
@@ -174,7 +221,10 @@ jobs:
           ) as f:
               data = json.load(f)
 
-          summary = data.get("summary", {})
+          summary = data.get(
+              "summary",
+              {}
+          )
 
           runner_count = summary.get(
               "runner_count",
@@ -209,6 +259,12 @@ jobs:
                   summary.get(
                       "bloodline_connected_count",
                       0
+                  ),
+
+              "body_weight":
+                  summary.get(
+                      "body_weight_connected_count",
+                      0
                   )
           }
 
@@ -223,6 +279,7 @@ jobs:
           )
 
           for name, value in checks.items():
+
               print(
                   name + ":",
                   value,
@@ -231,29 +288,82 @@ jobs:
               )
 
           if runner_count <= 0:
+
               sys.exit(
                   "ERROR: runner_count = 0"
               )
 
           if ranked_count != runner_count:
+
               sys.exit(
                   "ERROR: ranking incomplete"
               )
 
           for name, value in checks.items():
+
               if value != runner_count:
+
                   sys.exit(
                       "ERROR: "
                       + name
                       + " connection incomplete"
                   )
 
+          # =================================
+          # 馬場接続状態
+          # =================================
+
+          track = data.get(
+              "track_condition",
+              {}
+          )
+
+          print(
+              "track source available:",
+              track.get(
+                  "source_available"
+              )
+          )
+
+          print(
+              "track race id matched:",
+              track.get(
+                  "race_id_matched"
+              )
+          )
+
+          print(
+              "track applied:",
+              track.get(
+                  "applied"
+              )
+          )
+
+          # track_condition.py が
+          # 今回race_idで作られているため
+          # Race ID不一致なら異常
+          if (
+              track.get(
+                  "source_available"
+              )
+              and not track.get(
+                  "race_id_matched"
+              )
+          ):
+
+              sys.exit(
+                  "ERROR: track condition race ID mismatch"
+              )
+
           print(
               "FULL ANALYSIS VALIDATION OK"
           )
           PY
 
-      # 16. JSON + Race IDを保存
+      # =====================================
+      # 17. JSON + Race ID 保存
+      # =====================================
+
       - name: Save analysis data
         run: |
           git config user.name "github-actions[bot]"
@@ -262,6 +372,7 @@ jobs:
           git add \
             race_id.txt \
             race.json \
+            track_condition.json \
             history_races.json \
             history_db.json \
             history_pedigree.json \
