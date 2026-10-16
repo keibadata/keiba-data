@@ -12,8 +12,14 @@ RACE_FILE = "race.json"
 HISTORY_DB_FILE = "history_db.json"
 OUTPUT_FILE = "history_races.json"
 
+# 血統統計に使う最大レース数
 MAX_RACES = 20
+
+# この件数以上DBにあれば、ネット探索しない
+MIN_CACHE_RACES = 10
+
 LOOKBACK_DAYS = 180
+
 REQUEST_WAIT = 0.5
 DATE_WAIT = 0.8
 
@@ -280,6 +286,7 @@ def get_existing_races(
         ):
             continue
 
+        # 今回レースは除外
         if race_id == target["race_id"]:
             continue
 
@@ -296,7 +303,8 @@ def get_existing_races(
             )
         )
 
-        # 今回レース以降は血統統計に使わない
+        # 日付が分かる場合、
+        # 今回レース当日以降は使用しない
         if race_date is not None:
             if race_date >= target[
                 "target_date"
@@ -495,7 +503,8 @@ def build_output(
     errors,
     cache_used,
     existing_count,
-    searched
+    searched,
+    cache_reason
 ):
     return {
         "updated_at":
@@ -537,6 +546,9 @@ def build_output(
             "max_races":
                 MAX_RACES,
 
+            "min_cache_races":
+                MIN_CACHE_RACES,
+
             "future_races_excluded":
                 True,
 
@@ -545,6 +557,9 @@ def build_output(
 
             "cache_used":
                 cache_used,
+
+            "cache_reason":
+                cache_reason,
 
             "existing_matching_races":
                 existing_count,
@@ -625,14 +640,23 @@ def main():
     )
 
     # =====================================================
-    # 既存DBだけで必要数が揃っている
-    # → ネット検索を完全スキップ
+    # 10件以上あれば既存DBを採用
+    # ネット探索は完全スキップ
     # =====================================================
 
-    if existing_count >= MAX_RACES:
+    if existing_count >= MIN_CACHE_RACES:
         selected = existing[
             :MAX_RACES
         ]
+
+        if existing_count >= MAX_RACES:
+            cache_reason = (
+                "MAX_RACES以上の既存データあり"
+            )
+        else:
+            cache_reason = (
+                "MIN_CACHE_RACES以上の既存データあり"
+            )
 
         output = build_output(
             target=target,
@@ -641,6 +665,7 @@ def main():
             cache_used=True,
             existing_count=existing_count,
             searched=False,
+            cache_reason=cache_reason,
         )
 
         save_json(
@@ -649,11 +674,16 @@ def main():
         )
 
         print(
-            "既存DBに必要数あり"
+            "既存DBを使用します"
         )
 
         print(
             "ネット検索をスキップします"
+        )
+
+        print(
+            "理由:",
+            cache_reason
         )
 
         print(
@@ -668,7 +698,7 @@ def main():
         return
 
     # =====================================================
-    # 不足分だけ検索
+    # 10件未満の場合だけ不足分を検索
     # =====================================================
 
     matched = list(
@@ -682,14 +712,22 @@ def main():
 
     errors = []
 
-    needed = (
-        MAX_RACES
-        - len(matched)
+    print(
+        "既存DBが",
+        MIN_CACHE_RACES,
+        "件未満のためネット検索します"
     )
 
     print(
-        "不足レース:",
-        needed
+        "現在:",
+        existing_count,
+        "件"
+    )
+
+    print(
+        "目標最大:",
+        MAX_RACES,
+        "件"
     )
 
     for days_back in range(
@@ -829,7 +867,10 @@ def main():
             DATE_WAIT
         )
 
-    # 重複を最終除去
+    # =====================================================
+    # 重複除去
+    # =====================================================
+
     unique = []
     seen = set()
 
@@ -881,6 +922,9 @@ def main():
             existing_count
         ),
         searched=True,
+        cache_reason=(
+            "既存DBがMIN_CACHE_RACES未満"
+        ),
     )
 
     save_json(
