@@ -12,6 +12,7 @@ OUTPUT_FILE = "body_weight.json"
 # =====================================
 
 def load_json(filename):
+
     if not os.path.exists(filename):
         return {}
 
@@ -31,6 +32,7 @@ def load_json(filename):
 
 
 def now_jst():
+
     return datetime.now(
         timezone(
             timedelta(hours=9)
@@ -39,6 +41,7 @@ def now_jst():
 
 
 def get_name(data):
+
     if not isinstance(data, dict):
         return ""
 
@@ -50,6 +53,7 @@ def get_name(data):
 
 
 def get_id(data):
+
     if not isinstance(data, dict):
         return ""
 
@@ -60,6 +64,7 @@ def get_id(data):
 
 
 def get_number_string(data):
+
     if not isinstance(data, dict):
         return ""
 
@@ -75,6 +80,7 @@ def get_optional_number(
     data,
     *keys
 ):
+
     if not isinstance(data, dict):
         return None
 
@@ -85,8 +91,16 @@ def get_optional_number(
         if value is None:
             continue
 
-        if value == "":
+        value = str(value).strip()
+
+        if not value:
             continue
+
+        # +8 等にも対応
+        value = value.replace(
+            "kg",
+            ""
+        ).strip()
 
         try:
             return float(value)
@@ -101,14 +115,16 @@ def get_optional_number(
 
 
 # =====================================
-# race.json
+# race.json 読み込み
 # =====================================
 
 race = load_json(
     RACE_FILE
 )
 
+
 if not race:
+
     raise RuntimeError(
         "race.jsonを読み込めません"
     )
@@ -123,6 +139,7 @@ race_id = str(
 
 
 if not race_id:
+
     raise RuntimeError(
         "race.jsonにrace_idがありません"
     )
@@ -137,149 +154,71 @@ runners = (
 
 
 if not runners:
+
     raise RuntimeError(
         "race.jsonに出走馬がありません"
     )
 
 
 # =====================================
-# 既存body_weight.json
-# =====================================
-# 再実行時に入力済み馬体重を保持する
-# Race IDが一致する場合だけ使用
+# Race情報
 # =====================================
 
-old_data = load_json(
-    OUTPUT_FILE
-)
-
-old_race_id = str(
-    old_data.get(
-        "race_id",
+race_date = str(
+    race.get(
+        "race_date",
         ""
     )
 ).strip()
 
 
-if old_race_id == race_id:
+track = str(
+    race.get("track")
+    or race.get("racecourse")
+    or ""
+).strip()
 
-    old_horses = (
-        old_data.get(
-            "horses",
-            []
-        )
+
+surface = str(
+    race.get(
+        "surface",
+        ""
     )
+).strip()
 
-else:
 
-    old_horses = []
+distance = get_optional_number(
+    race,
+    "distance"
+)
+
+
+source = str(
+    race.get(
+        "source",
+        ""
+    )
+).strip()
+
+
+source_url = str(
+    race.get(
+        "source_url",
+        ""
+    )
+).strip()
 
 
 # =====================================
-# Index
-# =====================================
-
-old_by_id = {}
-old_by_name = {}
-old_by_number = {}
-
-
-for horse in old_horses:
-
-    if not isinstance(
-        horse,
-        dict
-    ):
-        continue
-
-    horse_id = get_id(
-        horse
-    )
-
-    horse_name = get_name(
-        horse
-    )
-
-    horse_number = (
-        get_number_string(
-            horse
-        )
-    )
-
-    if horse_id:
-        old_by_id[
-            horse_id
-        ] = horse
-
-    if horse_name:
-        old_by_name[
-            horse_name
-        ] = horse
-
-    if horse_number:
-        old_by_number[
-            horse_number
-        ] = horse
-
-
-def find_old(runner):
-
-    horse_id = get_id(
-        runner
-    )
-
-    horse_name = get_name(
-        runner
-    )
-
-    horse_number = (
-        get_number_string(
-            runner
-        )
-    )
-
-    if (
-        horse_id
-        and horse_id
-        in old_by_id
-    ):
-        return old_by_id[
-            horse_id
-        ]
-
-    if (
-        horse_name
-        and horse_name
-        in old_by_name
-    ):
-        return old_by_name[
-            horse_name
-        ]
-
-    if (
-        horse_number
-        and horse_number
-        in old_by_number
-    ):
-        return old_by_number[
-            horse_number
-        ]
-
-    return {}
-
-
-# =====================================
-# 馬体重データ作成
+# 馬体重データ生成
 # =====================================
 
 horses = []
 
+warnings = []
+
 
 for runner in runners:
-
-    old = find_old(
-        runner
-    )
 
     horse_id = get_id(
         runner
@@ -296,8 +235,33 @@ for runner in runners:
     )
 
     # ---------------------------------
+    # 当日馬体重
+    # race.jsonを直接使用
+    # ---------------------------------
+
+    body_weight = (
+        get_optional_number(
+            runner,
+            "body_weight",
+            "weight"
+        )
+    )
+
+    # ---------------------------------
+    # 馬体重増減
+    # ---------------------------------
+
+    body_weight_change = (
+        get_optional_number(
+            runner,
+            "body_weight_change",
+            "weight_change",
+            "change"
+        )
+    )
+
+    # ---------------------------------
     # 斤量
-    # race.jsonを優先
     # ---------------------------------
 
     carried_weight = (
@@ -310,86 +274,42 @@ for runner in runners:
         )
     )
 
-    if carried_weight is None:
-
-        carried_weight = (
-            get_optional_number(
-                old,
-                "carried_weight"
-            )
-        )
-
-    # ---------------------------------
-    # 当日馬体重
-    # 既存値を保持
-    # ---------------------------------
-
-    body_weight = (
-        get_optional_number(
-            old,
-            "body_weight"
-        )
-    )
-
-    # ---------------------------------
-    # 増減
-    # ---------------------------------
-
-    body_weight_change = (
-        get_optional_number(
-            old,
-            "body_weight_change"
-        )
-    )
-
     # ---------------------------------
     # 前走馬体重
-    # ---------------------------------
-
-    previous_body_weight = (
-        get_optional_number(
-            old,
-            "previous_body_weight"
-        )
-    )
-
-    # ---------------------------------
-    # 増減が不明で
-    # 当日＋前走馬体重がある場合
-    # 自動計算
+    #
+    # 当日馬体重と増減があれば
+    # 逆算可能
     # ---------------------------------
 
     if (
-        body_weight_change
-        is None
-        and body_weight
-        is not None
-        and previous_body_weight
-        is not None
+        body_weight is not None
+        and body_weight_change is not None
     ):
 
-        body_weight_change = (
+        previous_body_weight = (
             body_weight
-            - previous_body_weight
+            - body_weight_change
         )
+
+    else:
+
+        previous_body_weight = None
 
     # ---------------------------------
     # 斤量体重比
     # ---------------------------------
 
     if (
-        body_weight
-        is not None
+        body_weight is not None
         and body_weight > 0
-        and carried_weight
-        is not None
+        and carried_weight is not None
         and carried_weight > 0
     ):
 
         weight_body_ratio = (
             carried_weight
             / body_weight
-            * 100
+            * 100.0
         )
 
         weight_body_ratio = round(
@@ -405,17 +325,45 @@ for runner in runners:
     # 状態
     # ---------------------------------
 
+    missing = []
+
     if body_weight is None:
+        missing.append(
+            "馬体重"
+        )
+
+    if body_weight_change is None:
+        missing.append(
+            "増減"
+        )
+
+    if carried_weight is None:
+        missing.append(
+            "斤量"
+        )
+
+    if missing:
 
         status = (
-            "馬体重未取得"
+            "一部不明:"
+            + ",".join(missing)
+        )
+
+        warnings.append(
+            horse_number
+            + " "
+            + horse_name
+            + " "
+            + status
         )
 
     else:
 
-        status = (
-            "馬体重取得済み"
-        )
+        status = "取得済み"
+
+    # ---------------------------------
+    # 出力
+    # ---------------------------------
 
     horses.append({
 
@@ -427,6 +375,22 @@ for runner in runners:
 
         "horse_name":
             horse_name,
+
+        "sex_age":
+            str(
+                runner.get(
+                    "sex_age",
+                    ""
+                )
+            ).strip(),
+
+        "jockey":
+            str(
+                runner.get(
+                    "jockey",
+                    ""
+                )
+            ).strip(),
 
         "body_weight":
             (
@@ -484,11 +448,25 @@ for runner in runners:
 # 集計
 # =====================================
 
+runner_count = len(
+    horses
+)
+
+
 body_weight_count = sum(
     1
     for horse in horses
     if horse[
         "body_weight"
+    ] is not None
+)
+
+
+change_count = sum(
+    1
+    for horse in horses
+    if horse[
+        "body_weight_change"
     ] is not None
 )
 
@@ -511,6 +489,22 @@ ratio_count = sum(
 )
 
 
+complete_count = sum(
+    1
+    for horse in horses
+    if (
+        horse["body_weight"]
+        is not None
+        and horse[
+            "body_weight_change"
+        ] is not None
+        and horse[
+            "carried_weight"
+        ] is not None
+    )
+)
+
+
 # =====================================
 # 出力
 # =====================================
@@ -523,21 +517,48 @@ output = {
     "race_id":
         race_id,
 
+    "race_date":
+        race_date,
+
+    "track":
+        track,
+
+    "surface":
+        surface,
+
+    "distance":
+        distance,
+
     "source":
-        "race.json + existing body_weight.json",
+        source,
+
+    "source_url":
+        source_url,
 
     "method": {
 
-        "body_weight_not_scored_here":
+        "source_is_race_json":
             True,
 
-        "body_weight_change_not_scored_here":
+        "body_weight_from_race_json":
+            True,
+
+        "body_weight_change_from_race_json":
+            True,
+
+        "carried_weight_from_race_json":
+            True,
+
+        "previous_body_weight_reconstructed":
             True,
 
         "weight_body_ratio_calculated":
             True,
 
-        "race_id_checked":
+        "body_weight_not_scored_here":
+            True,
+
+        "body_weight_change_not_scored_here":
             True,
 
         "unknown_not_penalized":
@@ -547,10 +568,13 @@ output = {
     "summary": {
 
         "runner_count":
-            len(horses),
+            runner_count,
 
         "body_weight_count":
             body_weight_count,
+
+        "body_weight_change_count":
+            change_count,
 
         "carried_weight_count":
             carried_weight_count,
@@ -558,17 +582,27 @@ output = {
         "weight_body_ratio_count":
             ratio_count,
 
-        "body_weight_complete":
+        "complete_count":
+            complete_count,
+
+        "complete":
             (
-                body_weight_count
-                == len(horses)
+                complete_count
+                == runner_count
             )
     },
+
+    "warnings":
+        warnings,
 
     "horses":
         horses
 }
 
+
+# =====================================
+# JSON保存
+# =====================================
 
 with open(
     OUTPUT_FILE,
@@ -598,35 +632,83 @@ print(
 )
 
 print(
+    "race:",
+    track,
+    surface,
+    distance
+)
+
+print(
     "runner:",
-    len(horses)
+    runner_count
 )
 
 print(
     "body weight:",
     body_weight_count,
     "/",
-    len(horses)
+    runner_count
+)
+
+print(
+    "change:",
+    change_count,
+    "/",
+    runner_count
 )
 
 print(
     "carried weight:",
     carried_weight_count,
     "/",
-    len(horses)
+    runner_count
 )
 
 print(
     "weight/body ratio:",
     ratio_count,
     "/",
-    len(horses)
+    runner_count
+)
+
+print(
+    "complete:",
+    complete_count,
+    "/",
+    runner_count
 )
 
 print()
 
 
 for horse in horses:
+
+    ratio = (
+        format(
+            horse[
+                "weight_body_ratio"
+            ],
+            ".2f"
+        )
+        + "%"
+        if horse[
+            "weight_body_ratio"
+        ] is not None
+        else "不明"
+    )
+
+    change = (
+        format(
+            horse[
+                "body_weight_change"
+            ],
+            "+.0f"
+        )
+        if horse[
+            "body_weight_change"
+        ] is not None
+        else "不明"
+    )
 
     print(
         horse[
@@ -640,18 +722,27 @@ for horse in horses:
             "body_weight"
         ],
         "増減",
-        horse[
-            "body_weight_change"
-        ],
+        change,
         "斤量",
         horse[
             "carried_weight"
         ],
-        "斤量体重比",
-        horse[
-            "weight_body_ratio"
-        ],
+        "斤量比",
+        ratio,
         horse[
             "status"
         ]
     )
+
+
+if warnings:
+
+    print()
+    print(
+        "===== WARNINGS ====="
+    )
+
+    for warning in warnings:
+        print(
+            warning
+        )
