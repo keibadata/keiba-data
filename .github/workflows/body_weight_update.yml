@@ -1,0 +1,124 @@
+name: Body Weight Update
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: body-weight-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: |
+          pip install -r requirements.txt
+
+      - name: Load race ID
+        run: |
+          RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
+
+          if ! echo "$RACE_ID" | grep -Eq '^[0-9]{12}$'; then
+            echo "ERROR: race_id.txt must contain exactly 12 digits"
+            exit 1
+          fi
+
+          echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
+          echo "Target Race ID: $RACE_ID"
+
+      - name: Collect latest body weights
+        run: |
+          python main_v3.py
+
+      - name: Validate body weights
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open(
+              "race.json",
+              "r",
+              encoding="utf-8"
+          ) as f:
+              data = json.load(f)
+
+          horses = data.get("horses", [])
+
+          if not horses:
+              sys.exit(
+                  "ERROR: no horses in race.json"
+              )
+
+          missing = []
+
+          for horse in horses:
+              weight = str(
+                  horse.get(
+                      "body_weight",
+                      ""
+                  )
+              ).strip()
+
+              if not weight:
+                  missing.append(
+                      horse.get(
+                          "horse_name",
+                          "unknown"
+                      )
+                  )
+
+          print(
+              "runner_count:",
+              len(horses)
+          )
+
+          print(
+              "body_weight_count:",
+              len(horses) - len(missing)
+          )
+
+          if missing:
+              print(
+                  "Body weights not announced:",
+                  ", ".join(missing)
+              )
+
+              sys.exit(
+                  "ERROR: body weights are not complete yet"
+              )
+
+          print(
+              "BODY WEIGHT VALIDATION OK"
+          )
+          PY
+
+      - name: Save race data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add race.json
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+
+          git commit -m "Update body weights"
+          git push
