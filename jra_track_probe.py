@@ -1,27 +1,18 @@
 import re
+from urllib.parse import urljoin
+
 import requests
 from bs4 import BeautifulSoup
 
 
 # =========================================================
-# JRA クッション値 HTML構造診断
+# JRA クッション値 通信先/API診断
 # =========================================================
 
-PAGES = {
-    "page1": (
-        "https://www.jra.go.jp/"
-        "keiba/baba/index.html"
-    ),
-    "page2": (
-        "https://www.jra.go.jp/"
-        "keiba/baba/index2.html"
-    ),
-    "page3": (
-        "https://www.jra.go.jp/"
-        "keiba/baba/index3.html"
-    ),
-}
-
+PAGE_URL = (
+    "https://www.jra.go.jp/"
+    "keiba/baba/index.html"
+)
 
 HEADERS = {
     "User-Agent": (
@@ -47,7 +38,7 @@ def clean_text(value):
     ).strip()
 
 
-def fetch_page(url):
+def fetch(url):
     response = requests.get(
         url,
         headers=HEADERS,
@@ -64,152 +55,199 @@ def fetch_page(url):
     return response.text
 
 
-def detect_track(soup):
-    title = ""
+def contains_target(text):
+    text_lower = text.lower()
 
-    if soup.title:
-        title = clean_text(
-            soup.title.get_text(
-                " ",
-                strip=True
-            )
-        )
-
-    tracks = [
-        "東京",
-        "京都",
-        "新潟",
-        "中山",
-        "阪神",
-        "中京",
-        "札幌",
-        "函館",
-        "福島",
-        "小倉",
+    keywords = [
+        "cushion_list",
+        "btn_cushion",
+        "cushion_data",
+        "cushion",
+        "クッション",
     ]
 
-    for track in tracks:
-        if track in title:
-            return track
-
-    return ""
-
-
-def print_tag_info(
-    label,
-    element
-):
-    print()
-    print(
-        "-----",
-        label,
-        "-----"
+    return any(
+        keyword.lower() in text_lower
+        for keyword in keywords
     )
 
-    if element is None:
+
+def print_context(
+    text,
+    keyword,
+    width=500
+):
+    lower_text = text.lower()
+    lower_keyword = keyword.lower()
+
+    start = 0
+    count = 0
+
+    while True:
+
+        index = lower_text.find(
+            lower_keyword,
+            start
+        )
+
+        if index < 0:
+            break
+
+        count += 1
+
+        left = max(
+            0,
+            index - width
+        )
+
+        right = min(
+            len(text),
+            index + len(keyword) + width
+        )
+
+        print()
         print(
-            "NONE"
+            f"[{keyword} #{count}]"
         )
-        return
 
-    print(
-        "TAG:",
-        element.name
-    )
-
-    print(
-        "CLASS:",
-        element.get(
-            "class",
-            []
+        print(
+            text[left:right]
         )
-    )
 
-    print(
-        "ID:",
-        element.get(
-            "id",
-            ""
+        start = (
+            index
+            + len(keyword)
         )
-    )
 
-    print(
-        "TEXT:"
-    )
+        if count >= 10:
+            break
 
-    print(
-        clean_text(
-            element.get_text(
-                " ",
-                strip=True
-            )
-        )[:3000]
-    )
-
-    print(
-        "HTML:"
-    )
-
-    print(
-        str(element)[:5000]
-    )
+    return count
 
 
-def relevant_cushion_elements(
-    soup
+# =========================================================
+# 1. 馬場情報ページ取得
+# =========================================================
+
+print(
+    "===== FETCH JRA TRACK PAGE ====="
+)
+
+html = fetch(
+    PAGE_URL
+)
+
+print(
+    "PAGE:",
+    PAGE_URL
+)
+
+print(
+    "HTML BYTES:",
+    len(html.encode("utf-8"))
+)
+
+soup = BeautifulSoup(
+    html,
+    "html.parser"
+)
+
+
+# =========================================================
+# 2. scriptタグ一覧
+# =========================================================
+
+scripts = []
+
+for script in soup.find_all(
+    "script"
 ):
-    results = []
 
-    for element in soup.find_all(
-        string=re.compile(
-            "クッション値"
+    src = script.get(
+        "src"
+    )
+
+    if src:
+
+        url = urljoin(
+            PAGE_URL,
+            src
         )
-    ):
 
-        parent = element.parent
-
-        if parent is None:
-            continue
-
-        text = clean_text(
-            parent.get_text(
-                " ",
-                strip=True
+        if url not in scripts:
+            scripts.append(
+                url
             )
-        )
 
-        # -------------------------------------------------
-        # 基礎知識・説明リンクをなるべく除外
-        # -------------------------------------------------
 
-        if (
-            "基礎知識"
-            in text
-            and len(text) < 100
-        ):
-            continue
+print()
+print(
+    "===== JAVASCRIPT FILES ====="
+)
 
-        results.append(
-            parent
-        )
+print(
+    "COUNT:",
+    len(scripts)
+)
 
-    return results
+for index, url in enumerate(
+    scripts,
+    start=1
+):
+
+    print(
+        f"{index}:",
+        url
+    )
 
 
 # =========================================================
-# 実行
+# 3. HTML内の関連文字を確認
 # =========================================================
 
-for page_name, url in PAGES.items():
+print()
+print(
+    "===== HTML TARGET CONTEXT ====="
+)
+
+for keyword in [
+    "cushion_list",
+    "btn_cushion",
+    "cushion_data",
+]:
+
+    count = print_context(
+        html,
+        keyword,
+        width=350
+    )
+
+    if count == 0:
+        print(
+            keyword,
+            ": NONE"
+        )
+
+
+# =========================================================
+# 4. JSファイルを順番に取得
+# =========================================================
+
+matched_scripts = []
+
+for index, url in enumerate(
+    scripts,
+    start=1
+):
 
     print()
     print(
-        "=" * 80
+        "=" * 70
     )
 
     print(
-        "PAGE:",
-        page_name
+        "CHECK SCRIPT:",
+        index
     )
 
     print(
@@ -219,160 +257,228 @@ for page_name, url in PAGES.items():
 
     try:
 
-        html = fetch_page(
+        js = fetch(
             url
         )
 
-    except Exception as e:
+    except Exception as error:
 
         print(
             "FETCH ERROR:",
-            repr(e)
+            repr(error)
         )
 
         continue
 
-    soup = BeautifulSoup(
-        html,
-        "html.parser"
-    )
-
-    track = detect_track(
-        soup
-    )
-
     print(
-        "TRACK:",
-        track
+        "SIZE:",
+        len(js)
     )
 
-    matches = (
-        relevant_cushion_elements(
-            soup
-        )
-    )
-
-    print(
-        "CUSHION TEXT MATCHES:",
-        len(matches)
-    )
-
-    if not matches:
-
-        print(
-            "NO CUSHION ELEMENT"
-        )
-
-        continue
-
-    for index, element in enumerate(
-        matches[:10],
-        start=1
+    if not contains_target(
+        js
     ):
 
-        print()
         print(
-            "#" * 80
+            "TARGET: NONE"
         )
 
-        print(
-            "MATCH:",
-            index
+        continue
+
+    print(
+        "TARGET: FOUND"
+    )
+
+    matched_scripts.append(
+        {
+            "url": url,
+            "text": js,
+        }
+    )
+
+    for keyword in [
+        "cushion_list",
+        "btn_cushion",
+        "cushion_data",
+        "cushion",
+    ]:
+
+        print_context(
+            js,
+            keyword,
+            width=700
         )
 
-        print_tag_info(
-            "MATCH ELEMENT",
-            element
-        )
 
-        # ================================================
-        # 親を最大5階層確認
-        # ================================================
-
-        parent = element
-
-        for level in range(
-            1,
-            6
-        ):
-
-            parent = (
-                parent.parent
-                if parent
-                else None
-            )
-
-            if parent is None:
-                break
-
-            print_tag_info(
-                f"PARENT LEVEL {level}",
-                parent
-            )
-
-        # ================================================
-        # 直近の前後兄弟
-        # ================================================
-
-        previous_element = (
-            element.find_previous_sibling()
-        )
-
-        next_element = (
-            element.find_next_sibling()
-        )
-
-        print_tag_info(
-            "PREVIOUS SIBLING",
-            previous_element
-        )
-
-        print_tag_info(
-            "NEXT SIBLING",
-            next_element
-        )
-
-        # ================================================
-        # 近くのtable
-        # ================================================
-
-        table = element.find_parent(
-            "table"
-        )
-
-        print_tag_info(
-            "PARENT TABLE",
-            table
-        )
-
-        # ================================================
-        # 近くのsection/div
-        # ================================================
-
-        container = (
-            element.find_parent(
-                "section"
-            )
-            or element.find_parent(
-                "div"
-            )
-        )
-
-        print_tag_info(
-            "NEAREST CONTAINER",
-            container
-        )
-
+# =========================================================
+# 5. 通信URL候補を抽出
+# =========================================================
 
 print()
 print(
-    "=" * 80
+    "=" * 70
 )
 
 print(
-    "JRA CUSHION HTML PROBE FINISHED"
+    "===== NETWORK URL CANDIDATES ====="
+)
+
+network_candidates = []
+
+
+def add_candidate(value):
+
+    value = clean_text(
+        value
+    )
+
+    if not value:
+        return
+
+    if value not in network_candidates:
+        network_candidates.append(
+            value
+        )
+
+
+for item in matched_scripts:
+
+    js = item[
+        "text"
+    ]
+
+    # -----------------------------------------------------
+    # 絶対URL
+    # -----------------------------------------------------
+
+    for match in re.finditer(
+        r"""https?://[^\s"'<>]+""",
+        js
+    ):
+
+        add_candidate(
+            match.group(0)
+        )
+
+    # -----------------------------------------------------
+    # 相対URL・JSON・APIらしい文字列
+    # -----------------------------------------------------
+
+    patterns = [
+        r"""["']([^"']+\.json(?:\?[^"']*)?)["']""",
+        r"""["']([^"']+\.php(?:\?[^"']*)?)["']""",
+        r"""["']([^"']+\.cgi(?:\?[^"']*)?)["']""",
+        r"""["']([^"']+/api/[^"']*)["']""",
+        r"""["']([^"']*cushion[^"']*)["']""",
+        r"""["']([^"']*baba[^"']*\.json[^"']*)["']""",
+    ]
+
+    for pattern in patterns:
+
+        for match in re.finditer(
+            pattern,
+            js,
+            flags=re.I
+        ):
+
+            add_candidate(
+                match.group(1)
+            )
+
+
+if not network_candidates:
+
+    print(
+        "NONE"
+    )
+
+else:
+
+    for index, value in enumerate(
+        network_candidates,
+        start=1
+    ):
+
+        print(
+            f"{index}:",
+            value
+        )
+
+
+# =========================================================
+# 6. $.ajax / fetch / XMLHttpRequest 周辺
+# =========================================================
+
+print()
+print(
+    "=" * 70
 )
 
 print(
-    "=" * 80
+    "===== REQUEST CODE CONTEXT ====="
+)
+
+request_keywords = [
+    "$.ajax",
+    "$.get",
+    "$.getJSON",
+    "fetch(",
+    "XMLHttpRequest",
+    "ajax(",
+    "url:",
+]
+
+found_request_code = False
+
+for item in matched_scripts:
+
+    js = item[
+        "text"
+    ]
+
+    print()
+    print(
+        "SCRIPT:",
+        item["url"]
+    )
+
+    for keyword in request_keywords:
+
+        count = print_context(
+            js,
+            keyword,
+            width=900
+        )
+
+        if count > 0:
+            found_request_code = True
+
+
+if not found_request_code:
+
+    print(
+        "NO REQUEST CODE FOUND"
+    )
+
+
+# =========================================================
+# 完了
+# =========================================================
+
+print()
+print(
+    "=" * 70
+)
+
+print(
+    "MATCHED SCRIPT COUNT:",
+    len(matched_scripts)
+)
+
+print(
+    "JRA CUSHION NETWORK PROBE FINISHED"
+)
+
+print(
+    "=" * 70
 )
