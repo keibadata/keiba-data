@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 
 # =========================================================
-# JRA 馬場情報ページ診断
+# JRA クッション値 HTML構造診断
 # =========================================================
 
 PAGES = {
@@ -37,10 +37,13 @@ HEADERS = {
 
 
 def clean_text(value):
+    if value is None:
+        return ""
+
     return re.sub(
         r"\s+",
         " ",
-        value
+        str(value)
     ).strip()
 
 
@@ -61,7 +64,7 @@ def fetch_page(url):
     return response.text
 
 
-def find_track_name(soup):
+def detect_track(soup):
     title = ""
 
     if soup.title:
@@ -72,7 +75,7 @@ def find_track_name(soup):
             )
         )
 
-    for track in [
+    tracks = [
         "東京",
         "京都",
         "新潟",
@@ -83,277 +86,114 @@ def find_track_name(soup):
         "函館",
         "福島",
         "小倉",
-    ]:
+    ]
+
+    for track in tracks:
         if track in title:
             return track
 
     return ""
 
 
-def find_dates(text):
-    results = []
-
-    patterns = [
-        (
-            r"(20\d{2})年"
-            r"\s*(\d{1,2})月"
-            r"\s*(\d{1,2})日"
-        ),
-        (
-            r"(20\d{2})/"
-            r"(\d{1,2})/"
-            r"(\d{1,2})"
-        ),
-    ]
-
-    for pattern in patterns:
-
-        for match in re.finditer(
-            pattern,
-            text
-        ):
-
-            value = (
-                f"{int(match.group(1)):04d}-"
-                f"{int(match.group(2)):02d}-"
-                f"{int(match.group(3)):02d}"
-            )
-
-            if value not in results:
-                results.append(
-                    value
-                )
-
-    return results
-
-
-def contexts(
-    text,
-    keyword,
-    width=220,
-    limit=10
-):
-    results = []
-
-    start = 0
-
-    while True:
-
-        index = text.find(
-            keyword,
-            start
-        )
-
-        if index < 0:
-            break
-
-        left = max(
-            0,
-            index - width
-        )
-
-        right = min(
-            len(text),
-            index + len(keyword) + width
-        )
-
-        value = clean_text(
-            text[left:right]
-        )
-
-        if value not in results:
-            results.append(
-                value
-            )
-
-        if len(results) >= limit:
-            break
-
-        start = (
-            index
-            + len(keyword)
-        )
-
-    return results
-
-
-def find_cushion_candidates(text):
-    results = []
-
-    for context in contexts(
-        text,
-        "クッション値",
-        width=250,
-        limit=15
-    ):
-
-        # -------------------------------------------------
-        # 小数値だけを候補化
-        #
-        # 12 / 10 / 8 / 7 などの
-        # 基準説明整数を除外する
-        # -------------------------------------------------
-
-        numbers = re.findall(
-            r"(?<!\d)"
-            r"(\d{1,2}\.\d)"
-            r"(?!\d)",
-            context
-        )
-
-        candidates = []
-
-        for value in numbers:
-
-            try:
-                number = float(
-                    value
-                )
-            except ValueError:
-                continue
-
-            # JRAクッション値として
-            # 明らかに不自然な値を除外
-            if not (
-                5.0
-                <= number
-                <= 15.0
-            ):
-                continue
-
-            if number not in candidates:
-                candidates.append(
-                    number
-                )
-
-        if candidates:
-
-            results.append(
-                {
-                    "values":
-                        candidates,
-
-                    "context":
-                        context,
-                }
-            )
-
-    return results
-
-
-def find_moisture_candidates(text):
-    results = []
-
-    # -----------------------------------------------------
-    # HTMLテキストで確認できた実際の並び
-    #
-    # ゴール前 4コーナー
-    # 芝 14.0 12.7
-    # ダート 2.1 2.2
-    # -----------------------------------------------------
-
-    patterns = [
-        (
-            r"ゴール前"
-            r"\s*4コーナー"
-            r".{0,100}?"
-            r"芝\s*"
-            r"(\d{1,2}(?:\.\d+)?)"
-            r"\s*"
-            r"(\d{1,2}(?:\.\d+)?)"
-            r"\s*"
-            r"ダート\s*"
-            r"(\d{1,2}(?:\.\d+)?)"
-            r"\s*"
-            r"(\d{1,2}(?:\.\d+)?)"
-        ),
-
-        (
-            r"ゴール前と4コーナーの含水率"
-            r".{0,150}?"
-            r"ゴール前"
-            r"\s*4コーナー"
-            r".{0,100}?"
-            r"芝\s*"
-            r"(\d{1,2}(?:\.\d+)?)"
-            r"\s*"
-            r"(\d{1,2}(?:\.\d+)?)"
-            r"\s*"
-            r"ダート\s*"
-            r"(\d{1,2}(?:\.\d+)?)"
-            r"\s*"
-            r"(\d{1,2}(?:\.\d+)?)"
-        ),
-    ]
-
-    for pattern in patterns:
-
-        for match in re.finditer(
-            pattern,
-            text,
-            flags=re.I
-        ):
-
-            candidate = {
-                "turf_finish":
-                    float(
-                        match.group(1)
-                    ),
-
-                "turf_4corner":
-                    float(
-                        match.group(2)
-                    ),
-
-                "dirt_finish":
-                    float(
-                        match.group(3)
-                    ),
-
-                "dirt_4corner":
-                    float(
-                        match.group(4)
-                    ),
-            }
-
-            if candidate not in results:
-                results.append(
-                    candidate
-                )
-
-    return results
-
-
-def print_contexts(
-    title,
-    items
+def print_tag_info(
+    label,
+    element
 ):
     print()
     print(
-        "---",
-        title,
-        "---"
+        "-----",
+        label,
+        "-----"
     )
 
-    if not items:
+    if element is None:
         print(
             "NONE"
         )
         return
 
-    for index, value in enumerate(
-        items,
-        start=1
+    print(
+        "TAG:",
+        element.name
+    )
+
+    print(
+        "CLASS:",
+        element.get(
+            "class",
+            []
+        )
+    )
+
+    print(
+        "ID:",
+        element.get(
+            "id",
+            ""
+        )
+    )
+
+    print(
+        "TEXT:"
+    )
+
+    print(
+        clean_text(
+            element.get_text(
+                " ",
+                strip=True
+            )
+        )[:3000]
+    )
+
+    print(
+        "HTML:"
+    )
+
+    print(
+        str(element)[:5000]
+    )
+
+
+def relevant_cushion_elements(
+    soup
+):
+    results = []
+
+    for element in soup.find_all(
+        string=re.compile(
+            "クッション値"
+        )
     ):
 
-        print()
-        print(
-            f"[{index}]"
+        parent = element.parent
+
+        if parent is None:
+            continue
+
+        text = clean_text(
+            parent.get_text(
+                " ",
+                strip=True
+            )
         )
 
-        print(
-            value
+        # -------------------------------------------------
+        # 基礎知識・説明リンクをなるべく除外
+        # -------------------------------------------------
+
+        if (
+            "基礎知識"
+            in text
+            and len(text) < 100
+        ):
+            continue
+
+        results.append(
+            parent
         )
+
+    return results
 
 
 # =========================================================
@@ -364,7 +204,7 @@ for page_name, url in PAGES.items():
 
     print()
     print(
-        "=" * 70
+        "=" * 80
     )
 
     print(
@@ -397,125 +237,142 @@ for page_name, url in PAGES.items():
         "html.parser"
     )
 
-    text = clean_text(
-        soup.get_text(
-            " ",
-            strip=True
-        )
-    )
-
-    track_name = find_track_name(
+    track = detect_track(
         soup
-    )
-
-    dates = find_dates(
-        text
-    )
-
-    cushion_candidates = (
-        find_cushion_candidates(
-            text
-        )
-    )
-
-    moisture_candidates = (
-        find_moisture_candidates(
-            text
-        )
     )
 
     print(
         "TRACK:",
-        track_name
+        track
+    )
+
+    matches = (
+        relevant_cushion_elements(
+            soup
+        )
     )
 
     print(
-        "DATES:",
-        dates[:10]
+        "CUSHION TEXT MATCHES:",
+        len(matches)
     )
 
-    print()
-    print(
-        "--- CUSHION CANDIDATES ---"
-    )
-
-    if not cushion_candidates:
+    if not matches:
 
         print(
-            "NONE"
+            "NO CUSHION ELEMENT"
         )
 
-    else:
+        continue
 
-        for index, item in enumerate(
-            cushion_candidates,
-            start=1
-        ):
+    for index, element in enumerate(
+        matches[:10],
+        start=1
+    ):
 
-            print()
-            print(
-                f"CANDIDATE {index}"
-            )
-
-            print(
-                "VALUES:",
-                item["values"]
-            )
-
-            print(
-                "CONTEXT:",
-                item["context"]
-            )
-
-    print()
-    print(
-        "--- MOISTURE CANDIDATES ---"
-    )
-
-    if not moisture_candidates:
+        print()
+        print(
+            "#" * 80
+        )
 
         print(
-            "NONE"
+            "MATCH:",
+            index
         )
 
-    else:
+        print_tag_info(
+            "MATCH ELEMENT",
+            element
+        )
 
-        for index, item in enumerate(
-            moisture_candidates,
-            start=1
+        # ================================================
+        # 親を最大5階層確認
+        # ================================================
+
+        parent = element
+
+        for level in range(
+            1,
+            6
         ):
 
-            print(
-                f"CANDIDATE {index}:",
-                item
+            parent = (
+                parent.parent
+                if parent
+                else None
             )
 
-    # -----------------------------------------------------
-    # 測定時刻周辺
-    # -----------------------------------------------------
+            if parent is None:
+                break
 
-    measurement_contexts = contexts(
-        text,
-        "測定時刻",
-        width=180,
-        limit=5
-    )
+            print_tag_info(
+                f"PARENT LEVEL {level}",
+                parent
+            )
 
-    print_contexts(
-        "MEASUREMENT CONTEXT",
-        measurement_contexts
-    )
+        # ================================================
+        # 直近の前後兄弟
+        # ================================================
+
+        previous_element = (
+            element.find_previous_sibling()
+        )
+
+        next_element = (
+            element.find_next_sibling()
+        )
+
+        print_tag_info(
+            "PREVIOUS SIBLING",
+            previous_element
+        )
+
+        print_tag_info(
+            "NEXT SIBLING",
+            next_element
+        )
+
+        # ================================================
+        # 近くのtable
+        # ================================================
+
+        table = element.find_parent(
+            "table"
+        )
+
+        print_tag_info(
+            "PARENT TABLE",
+            table
+        )
+
+        # ================================================
+        # 近くのsection/div
+        # ================================================
+
+        container = (
+            element.find_parent(
+                "section"
+            )
+            or element.find_parent(
+                "div"
+            )
+        )
+
+        print_tag_info(
+            "NEAREST CONTAINER",
+            container
+        )
 
 
 print()
 print(
-    "=" * 70
+    "=" * 80
 )
 
 print(
-    "JRA TRACK PROBE FINISHED"
+    "JRA CUSHION HTML PROBE FINISHED"
 )
 
 print(
-    "=" * 70
+    "=" * 80
 )
