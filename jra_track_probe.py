@@ -5,10 +5,6 @@ import requests
 from bs4 import BeautifulSoup
 
 
-# =========================================================
-# JRA クッション値 通信先/API診断
-# =========================================================
-
 PAGE_URL = (
     "https://www.jra.go.jp/"
     "keiba/baba/index.html"
@@ -25,17 +21,6 @@ HEADERS = {
     "Accept-Language":
         "ja,en-US;q=0.9,en;q=0.8",
 }
-
-
-def clean_text(value):
-    if value is None:
-        return ""
-
-    return re.sub(
-        r"\s+",
-        " ",
-        str(value)
-    ).strip()
 
 
 def fetch(url):
@@ -55,96 +40,70 @@ def fetch(url):
     return response.text
 
 
-def contains_target(text):
-    text_lower = text.lower()
-
-    keywords = [
-        "cushion_list",
-        "btn_cushion",
-        "cushion_data",
-        "cushion",
-        "クッション",
-    ]
-
-    return any(
-        keyword.lower() in text_lower
-        for keyword in keywords
+def compact(value):
+    return re.sub(
+        r"[ \t]+",
+        " ",
+        value
     )
 
 
-def print_context(
+def contexts(
     text,
     keyword,
-    width=500
+    width=1200,
+    limit=5
 ):
+    results = []
+
     lower_text = text.lower()
     lower_keyword = keyword.lower()
 
     start = 0
-    count = 0
 
-    while True:
+    while len(results) < limit:
 
-        index = lower_text.find(
+        pos = lower_text.find(
             lower_keyword,
             start
         )
 
-        if index < 0:
+        if pos < 0:
             break
-
-        count += 1
 
         left = max(
             0,
-            index - width
+            pos - width
         )
 
         right = min(
             len(text),
-            index + len(keyword) + width
+            pos + len(keyword) + width
         )
 
-        print()
-        print(
-            f"[{keyword} #{count}]"
-        )
+        value = text[
+            left:right
+        ]
 
-        print(
-            text[left:right]
-        )
+        if value not in results:
+            results.append(
+                value
+            )
 
         start = (
-            index
+            pos
             + len(keyword)
         )
 
-        if count >= 10:
-            break
-
-    return count
+    return results
 
 
 # =========================================================
-# 1. 馬場情報ページ取得
+# JRA馬場ページ
 # =========================================================
-
-print(
-    "===== FETCH JRA TRACK PAGE ====="
-)
 
 html = fetch(
     PAGE_URL
-)
-
-print(
-    "PAGE:",
-    PAGE_URL
-)
-
-print(
-    "HTML BYTES:",
-    len(html.encode("utf-8"))
 )
 
 soup = BeautifulSoup(
@@ -154,100 +113,84 @@ soup = BeautifulSoup(
 
 
 # =========================================================
-# 2. scriptタグ一覧
+# JS一覧取得
 # =========================================================
 
-scripts = []
+script_urls = []
 
 for script in soup.find_all(
     "script"
 ):
-
     src = script.get(
         "src"
     )
 
-    if src:
+    if not src:
+        continue
 
-        url = urljoin(
-            PAGE_URL,
-            src
+    url = urljoin(
+        PAGE_URL,
+        src
+    )
+
+    if url not in script_urls:
+        script_urls.append(
+            url
         )
 
-        if url not in scripts:
-            scripts.append(
-                url
+
+# =========================================================
+# cushion関連JSだけ抽出
+# =========================================================
+
+matched = []
+
+for url in script_urls:
+
+    try:
+        js = fetch(
+            url
+        )
+
+    except Exception:
+        continue
+
+    lower = js.lower()
+
+    if (
+        "cushion_list" in lower
+        or "btn_cushion" in lower
+        or "cushion_data" in lower
+    ):
+        matched.append(
+            (
+                url,
+                js
             )
+        )
 
 
-print()
 print(
-    "===== JAVASCRIPT FILES ====="
+    "===== MATCHED JAVASCRIPT ====="
 )
 
 print(
     "COUNT:",
-    len(scripts)
+    len(matched)
 )
 
-for index, url in enumerate(
-    scripts,
-    start=1
-):
 
-    print(
-        f"{index}:",
-        url
-    )
-
-
-# =========================================================
-# 3. HTML内の関連文字を確認
-# =========================================================
-
-print()
-print(
-    "===== HTML TARGET CONTEXT ====="
-)
-
-for keyword in [
-    "cushion_list",
-    "btn_cushion",
-    "cushion_data",
-]:
-
-    count = print_context(
-        html,
-        keyword,
-        width=350
-    )
-
-    if count == 0:
-        print(
-            keyword,
-            ": NONE"
-        )
-
-
-# =========================================================
-# 4. JSファイルを順番に取得
-# =========================================================
-
-matched_scripts = []
-
-for index, url in enumerate(
-    scripts,
+for index, (
+    url,
+    js
+) in enumerate(
+    matched,
     start=1
 ):
 
     print()
     print(
-        "=" * 70
-    )
-
-    print(
-        "CHECK SCRIPT:",
-        index
+        f"JS #{index}"
     )
 
     print(
@@ -255,122 +198,161 @@ for index, url in enumerate(
         url
     )
 
-    try:
-
-        js = fetch(
-            url
-        )
-
-    except Exception as error:
-
-        print(
-            "FETCH ERROR:",
-            repr(error)
-        )
-
-        continue
-
     print(
         "SIZE:",
         len(js)
     )
 
-    if not contains_target(
-        js
-    ):
-
-        print(
-            "TARGET: NONE"
-        )
-
-        continue
-
-    print(
-        "TARGET: FOUND"
-    )
-
-    matched_scripts.append(
-        {
-            "url": url,
-            "text": js,
-        }
-    )
-
-    for keyword in [
-        "cushion_list",
-        "btn_cushion",
-        "cushion_data",
-        "cushion",
-    ]:
-
-        print_context(
-            js,
-            keyword,
-            width=700
-        )
-
 
 # =========================================================
-# 5. 通信URL候補を抽出
+# cushion_list周辺
 # =========================================================
 
 print()
 print(
-    "=" * 70
+    "===== CUSHION_LIST CODE ====="
 )
 
-print(
-    "===== NETWORK URL CANDIDATES ====="
-)
+for url, js in matched:
 
-network_candidates = []
-
-
-def add_candidate(value):
-
-    value = clean_text(
-        value
+    items = contexts(
+        js,
+        "cushion_list",
+        width=1600,
+        limit=3
     )
 
-    if not value:
-        return
-
-    if value not in network_candidates:
-        network_candidates.append(
-            value
-        )
-
-
-for item in matched_scripts:
-
-    js = item[
-        "text"
-    ]
-
-    # -----------------------------------------------------
-    # 絶対URL
-    # -----------------------------------------------------
-
-    for match in re.finditer(
-        r"""https?://[^\s"'<>]+""",
-        js
+    for index, item in enumerate(
+        items,
+        start=1
     ):
 
-        add_candidate(
-            match.group(0)
+        print()
+        print(
+            "SCRIPT:",
+            url
         )
 
-    # -----------------------------------------------------
-    # 相対URL・JSON・APIらしい文字列
-    # -----------------------------------------------------
+        print(
+            f"CUSHION_LIST #{index}"
+        )
+
+        print(
+            compact(
+                item
+            )
+        )
+
+
+# =========================================================
+# btn_cushion周辺
+# =========================================================
+
+print()
+print(
+    "===== BTN_CUSHION CODE ====="
+)
+
+for url, js in matched:
+
+    items = contexts(
+        js,
+        "btn_cushion",
+        width=1600,
+        limit=3
+    )
+
+    for index, item in enumerate(
+        items,
+        start=1
+    ):
+
+        print()
+        print(
+            f"BTN_CUSHION #{index}"
+        )
+
+        print(
+            compact(
+                item
+            )
+        )
+
+
+# =========================================================
+# AJAX / GET / POST / JSON 周辺
+# =========================================================
+
+print()
+print(
+    "===== REQUEST CODE ====="
+)
+
+request_words = [
+    "$.ajax",
+    "$.get(",
+    "$.post(",
+    "$.getjson",
+    "fetch(",
+    "xmlhttprequest",
+    ".json",
+]
+
+request_found = False
+
+for url, js in matched:
+
+    for keyword in request_words:
+
+        items = contexts(
+            js,
+            keyword,
+            width=1300,
+            limit=3
+        )
+
+        for item in items:
+
+            request_found = True
+
+            print()
+            print(
+                "KEYWORD:",
+                keyword
+            )
+
+            print(
+                compact(
+                    item
+                )
+            )
+
+
+if not request_found:
+    print(
+        "NONE"
+    )
+
+
+# =========================================================
+# URL文字列候補
+# =========================================================
+
+print()
+print(
+    "===== URL STRINGS ====="
+)
+
+url_strings = []
+
+for url, js in matched:
 
     patterns = [
-        r"""["']([^"']+\.json(?:\?[^"']*)?)["']""",
-        r"""["']([^"']+\.php(?:\?[^"']*)?)["']""",
-        r"""["']([^"']+\.cgi(?:\?[^"']*)?)["']""",
-        r"""["']([^"']+/api/[^"']*)["']""",
         r"""["']([^"']*cushion[^"']*)["']""",
-        r"""["']([^"']*baba[^"']*\.json[^"']*)["']""",
+        r"""["']([^"']*baba[^"']*)["']""",
+        r"""["']([^"']+\.json[^"']*)["']""",
+        r"""["']([^"']+\.php[^"']*)["']""",
+        r"""["']([^"']+\.cgi[^"']*)["']""",
     ]
 
     for pattern in patterns:
@@ -381,21 +363,25 @@ for item in matched_scripts:
             flags=re.I
         ):
 
-            add_candidate(
+            value = (
                 match.group(1)
+                .strip()
             )
 
+            if (
+                value
+                and value
+                not in url_strings
+            ):
+                url_strings.append(
+                    value
+                )
 
-if not network_candidates:
 
-    print(
-        "NONE"
-    )
-
-else:
+if url_strings:
 
     for index, value in enumerate(
-        network_candidates,
+        url_strings,
         start=1
     ):
 
@@ -404,81 +390,14 @@ else:
             value
         )
 
-
-# =========================================================
-# 6. $.ajax / fetch / XMLHttpRequest 周辺
-# =========================================================
-
-print()
-print(
-    "=" * 70
-)
-
-print(
-    "===== REQUEST CODE CONTEXT ====="
-)
-
-request_keywords = [
-    "$.ajax",
-    "$.get",
-    "$.getJSON",
-    "fetch(",
-    "XMLHttpRequest",
-    "ajax(",
-    "url:",
-]
-
-found_request_code = False
-
-for item in matched_scripts:
-
-    js = item[
-        "text"
-    ]
-
-    print()
-    print(
-        "SCRIPT:",
-        item["url"]
-    )
-
-    for keyword in request_keywords:
-
-        count = print_context(
-            js,
-            keyword,
-            width=900
-        )
-
-        if count > 0:
-            found_request_code = True
-
-
-if not found_request_code:
+else:
 
     print(
-        "NO REQUEST CODE FOUND"
+        "NONE"
     )
 
 
-# =========================================================
-# 完了
-# =========================================================
-
 print()
 print(
-    "=" * 70
-)
-
-print(
-    "MATCHED SCRIPT COUNT:",
-    len(matched_scripts)
-)
-
-print(
-    "JRA CUSHION NETWORK PROBE FINISHED"
-)
-
-print(
-    "=" * 70
+    "===== FINISHED ====="
 )
