@@ -1,13 +1,24 @@
 import re
 import requests
-from urllib.parse import urljoin
+from bs4 import BeautifulSoup
 
 
 # ============================================================
 # 設定
 # ============================================================
 
-BABA_URL = "https://www.jra.go.jp/keiba/baba/index.html"
+MOIST_URL = (
+    "https://www.jra.go.jp/"
+    "keiba/baba/_data_moist.html"
+)
+
+BABA_URL = (
+    "https://www.jra.go.jp/"
+    "keiba/baba/index.html"
+)
+
+TARGET_TRACK = "東京"
+TARGET_DATE = "2026-10-12"
 
 HEADERS = {
     "User-Agent": (
@@ -32,10 +43,10 @@ TIMEOUT = 30
 # HTTP
 # ============================================================
 
-def get_text(url):
+def get_html():
 
     response = requests.get(
-        url,
+        MOIST_URL,
         headers=HEADERS,
         timeout=TIMEOUT
     )
@@ -56,399 +67,474 @@ def get_text(url):
 
 
 # ============================================================
-# JavaScript一覧取得
+# 日付候補
 # ============================================================
 
-def get_script_urls(html):
-
-    sources = re.findall(
-        r'<script[^>]+src=["\']([^"\']+)["\']',
-        html,
-        flags=re.IGNORECASE
-    )
-
-    urls = []
-
-    for source in sources:
-
-        url = urljoin(
-            BABA_URL,
-            source
-        )
-
-        if url not in urls:
-            urls.append(url)
-
-    return urls
-
-
-# ============================================================
-# JavaScript関数を丸ごと抽出
-# ============================================================
-
-def extract_function(
-    javascript,
-    function_name
-):
-
-    pattern = re.compile(
-        rf"function\s+"
-        rf"{re.escape(function_name)}"
-        rf"\s*\([^)]*\)\s*\{{"
-    )
-
-    match = pattern.search(
-        javascript
-    )
-
-    if not match:
-        return ""
-
-
-    brace_start = javascript.find(
-        "{",
-        match.start()
-    )
-
-    if brace_start == -1:
-        return ""
-
-
-    depth = 0
-
-    in_single = False
-    in_double = False
-    in_template = False
-
-    escaped = False
-
-
-    for index in range(
-        brace_start,
-        len(javascript)
-    ):
-
-        char = javascript[index]
-
-
-        if escaped:
-
-            escaped = False
-
-            continue
-
-
-        if char == "\\":
-
-            escaped = True
-
-            continue
-
-
-        if (
-            char == "'"
-            and not in_double
-            and not in_template
-        ):
-
-            in_single = not in_single
-
-            continue
-
-
-        if (
-            char == '"'
-            and not in_single
-            and not in_template
-        ):
-
-            in_double = not in_double
-
-            continue
-
-
-        if (
-            char == "`"
-            and not in_single
-            and not in_double
-        ):
-
-            in_template = not in_template
-
-            continue
-
-
-        if (
-            in_single
-            or in_double
-            or in_template
-        ):
-
-            continue
-
-
-        if char == "{":
-
-            depth += 1
-
-
-        elif char == "}":
-
-            depth -= 1
-
-
-            if depth == 0:
-
-                return javascript[
-                    match.start():
-                    index + 1
-                ]
-
-
-    return ""
-
-
-# ============================================================
-# URL・通信部分抽出
-# ============================================================
-
-def extract_network_info(
-    function_text
-):
-
-    results = []
-
-
-    patterns = [
-
-        r"url\s*:\s*[^,\n]+",
-
-        r"\$\.ajax\s*\([^;]{0,5000}",
-
-        r"\$\.getJSON\s*\([^;]{0,5000}",
-
-        r"\$\.get\s*\([^;]{0,5000}",
-
-        r"fetch\s*\([^;]{0,5000}",
-
-        r"""["'][^"']+\.(?:html|json|xml|php|csv)(?:\?[^"']*)?["']""",
-
+def date_variants():
+
+    year, month, day = TARGET_DATE.split("-")
+
+    month_i = int(month)
+    day_i = int(day)
+
+    return [
+        TARGET_DATE,
+        TARGET_DATE.replace("-", "/"),
+        f"{year}年{month_i}月{day_i}日",
+        f"{month_i}月{day_i}日",
+        f"{month_i}/{day_i}",
+        f"{month_i:02d}/{day_i:02d}",
     ]
 
 
-    for pattern in patterns:
-
-        for match in re.finditer(
-            pattern,
-            function_text,
-            flags=re.IGNORECASE
-        ):
-
-            value = match.group(0).strip()
-
-            if value not in results:
-                results.append(value)
-
-
-    return results
-
-
 # ============================================================
-# 実行
+# HTML取得
 # ============================================================
 
 print()
-print(
-    "========================================"
-)
+print("========================================")
+print("JRA MOIST HTML PROBE")
+print("========================================")
 
-print(
-    "JRA GET_MOIST_DATA PROBE"
-)
+print("URL:", MOIST_URL)
+print("TARGET TRACK:", TARGET_TRACK)
+print("TARGET DATE:", TARGET_DATE)
 
-print(
-    "========================================"
-)
-
-print(
-    "PAGE:",
-    BABA_URL
-)
-
-
-# ============================================================
-# index.html
-# ============================================================
 
 try:
 
-    html = get_text(
-        BABA_URL
-    )
+    html = get_html()
 
 except Exception as exc:
 
     raise SystemExit(
-        "ERROR: JRA page fetch failed: "
+        "ERROR: "
         + str(exc)
     )
 
 
-script_urls = get_script_urls(
-    html
+print("HTML SIZE:", len(html))
+
+
+# ============================================================
+# HTML全体に何があるか
+# ============================================================
+
+soup = BeautifulSoup(
+    html,
+    "html.parser"
 )
+
+
+text = soup.get_text(
+    " ",
+    strip=True
+)
+
+
+print()
+print("===== BASIC CHECK =====")
+
+print(
+    "東京 exists:",
+    TARGET_TRACK in text
+)
+
+
+for value in date_variants():
+
+    if value in text:
+
+        print(
+            "DATE MATCH:",
+            value
+        )
+
+
+# ============================================================
+# 東京を含む要素
+# ============================================================
+
+print()
+print("===== TOKYO ELEMENTS =====")
+
+
+tokyo_elements = []
+
+
+for tag in soup.find_all(True):
+
+    tag_text = tag.get_text(
+        " ",
+        strip=True
+    )
+
+    if TARGET_TRACK not in tag_text:
+        continue
+
+    # 巨大な親要素は除外
+    if len(tag_text) > 5000:
+        continue
+
+    tokyo_elements.append(
+        tag
+    )
 
 
 print(
-    "JS FILE COUNT:",
-    len(script_urls)
+    "TOKYO ELEMENT COUNT:",
+    len(tokyo_elements)
 )
 
 
+for number, tag in enumerate(
+    tokyo_elements[:10],
+    start=1
+):
+
+    print()
+    print(
+        "----------------------------------------"
+    )
+
+    print(
+        "TOKYO ELEMENT",
+        number
+    )
+
+    print(
+        "TAG:",
+        tag.name
+    )
+
+    print(
+        "ID:",
+        tag.get("id")
+    )
+
+    print(
+        "CLASS:",
+        tag.get("class")
+    )
+
+    print(
+        "TEXT:",
+        tag.get_text(
+            " ",
+            strip=True
+        )
+    )
+
+    print(
+        "HTML:"
+    )
+
+    print(
+        str(tag)[:5000]
+    )
+
+
 # ============================================================
-# get_moist_data()探索
+# 10/12を含む要素
 # ============================================================
 
-found = False
+print()
+print("===== TARGET DATE ELEMENTS =====")
 
 
-for script_url in script_urls:
+date_elements = []
 
-    try:
 
-        javascript = get_text(
-            script_url
+for tag in soup.find_all(True):
+
+    tag_text = tag.get_text(
+        " ",
+        strip=True
+    )
+
+    matched = False
+
+    for value in date_variants():
+
+        if value in tag_text:
+            matched = True
+            break
+
+    if not matched:
+        continue
+
+    if len(tag_text) > 5000:
+        continue
+
+    date_elements.append(
+        tag
+    )
+
+
+print(
+    "DATE ELEMENT COUNT:",
+    len(date_elements)
+)
+
+
+for number, tag in enumerate(
+    date_elements[:10],
+    start=1
+):
+
+    print()
+    print(
+        "----------------------------------------"
+    )
+
+    print(
+        "DATE ELEMENT",
+        number
+    )
+
+    print(
+        "TAG:",
+        tag.name
+    )
+
+    print(
+        "ID:",
+        tag.get("id")
+    )
+
+    print(
+        "CLASS:",
+        tag.get("class")
+    )
+
+    print(
+        "TEXT:",
+        tag.get_text(
+            " ",
+            strip=True
+        )
+    )
+
+    print(
+        "HTML:"
+    )
+
+    print(
+        str(tag)[:5000]
+    )
+
+
+# ============================================================
+# JSが利用している可能性の高いクラス・属性
+# ============================================================
+
+print()
+print("===== STRUCTURE CANDIDATES =====")
+
+
+keywords = [
+    "moist",
+    "turf",
+    "dirt",
+    "time",
+    "gm",
+    "c4",
+]
+
+
+found = 0
+
+
+for tag in soup.find_all(True):
+
+    attrs = str(
+        tag.attrs
+    ).lower()
+
+    tag_html = str(
+        tag
+    ).lower()
+
+
+    if not any(
+        keyword in attrs
+        or keyword in tag_html
+        for keyword in keywords
+    ):
+        continue
+
+
+    tag_text = tag.get_text(
+        " ",
+        strip=True
+    )
+
+
+    # 巨大ブロックを除外
+    if len(tag_text) > 2500:
+        continue
+
+
+    found += 1
+
+
+    print()
+    print(
+        "----------------------------------------"
+    )
+
+    print(
+        "STRUCTURE",
+        found
+    )
+
+    print(
+        "TAG:",
+        tag.name
+    )
+
+    print(
+        "ID:",
+        tag.get("id")
+    )
+
+    print(
+        "CLASS:",
+        tag.get("class")
+    )
+
+    print(
+        "TEXT:",
+        tag_text
+    )
+
+    print(
+        "HTML:"
+    )
+
+    print(
+        str(tag)[:3500]
+    )
+
+
+    if found >= 20:
+        break
+
+
+# ============================================================
+# 生HTMLから東京周辺を直接抽出
+# ============================================================
+
+print()
+print("===== RAW TOKYO CONTEXT =====")
+
+
+positions = [
+    match.start()
+    for match in re.finditer(
+        TARGET_TRACK,
+        html
+    )
+]
+
+
+print(
+    "RAW TOKYO MATCH COUNT:",
+    len(positions)
+)
+
+
+for number, position in enumerate(
+    positions[:5],
+    start=1
+):
+
+    start = max(
+        0,
+        position - 1500
+    )
+
+    end = min(
+        len(html),
+        position + 5000
+    )
+
+
+    print()
+    print(
+        "----------------------------------------"
+    )
+
+    print(
+        "RAW TOKYO",
+        number
+    )
+
+    print(
+        html[start:end]
+    )
+
+
+# ============================================================
+# 生HTMLから10/12周辺を直接抽出
+# ============================================================
+
+print()
+print("===== RAW DATE CONTEXT =====")
+
+
+raw_date_found = 0
+
+
+for value in date_variants():
+
+    positions = [
+        match.start()
+        for match in re.finditer(
+            re.escape(value),
+            html
+        )
+    ]
+
+
+    for position in positions[:3]:
+
+        raw_date_found += 1
+
+        start = max(
+            0,
+            position - 1500
         )
 
-    except Exception:
-
-        continue
-
-
-    if "get_moist_data" not in javascript:
-
-        continue
+        end = min(
+            len(html),
+            position + 5000
+        )
 
 
-    function_text = extract_function(
-        javascript,
-        "get_moist_data"
-    )
-
-
-    if not function_text:
-
-        continue
-
-
-    found = True
-
-
-    print()
-    print(
-        "========================================"
-    )
-
-    print(
-        "FOUND get_moist_data()"
-    )
-
-    print(
-        "JS:",
-        script_url
-    )
-
-    print(
-        "========================================"
-    )
-
-
-    # --------------------------------------------------------
-    # 関数全文
-    # --------------------------------------------------------
-
-    print()
-
-    print(
-        "===== FUNCTION START ====="
-    )
-
-    print(
-        function_text
-    )
-
-    print(
-        "===== FUNCTION END ====="
-    )
-
-
-    # --------------------------------------------------------
-    # 通信情報
-    # --------------------------------------------------------
-
-    network_info = extract_network_info(
-        function_text
-    )
-
-
-    print()
-
-    print(
-        "===== NETWORK INFO ====="
-    )
-
-
-    if network_info:
-
-        for number, value in enumerate(
-            network_info,
-            start=1
-        ):
-
-            print()
-
-            print(
-                "NETWORK",
-                number
-            )
-
-            print(
-                value
-            )
-
-    else:
+        print()
+        print(
+            "----------------------------------------"
+        )
 
         print(
-            "NETWORK INFO NOT FOUND"
+            "DATE FORMAT:",
+            value
+        )
+
+        print(
+            html[start:end]
         )
 
 
-    break
-
-
-# ============================================================
-# 見つからなかった場合
-# ============================================================
-
-if not found:
-
-    print()
+if raw_date_found == 0:
 
     print(
-        "ERROR: get_moist_data() NOT FOUND"
+        "RAW TARGET DATE NOT FOUND"
     )
 
 
 print()
-
-print(
-    "========================================"
-)
-
-print(
-    "PROBE FINISHED"
-)
-
-print(
-    "========================================"
-)
+print("========================================")
+print("PROBE FINISHED")
+print("========================================")
