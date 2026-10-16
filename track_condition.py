@@ -2,9 +2,14 @@ import json
 import os
 from datetime import datetime, timezone, timedelta
 
+
 RACE_FILE = "race.json"
-OLD_TRACK_FILE = "track_condition.json"
+TRACK_FILE = "track_condition.json"
 OUTPUT_FILE = "track_condition.json"
+
+JST = timezone(
+    timedelta(hours=9)
+)
 
 
 def load_json(filename):
@@ -12,212 +17,426 @@ def load_json(filename):
         return {}
 
     try:
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(
+            filename,
+            "r",
+            encoding="utf-8"
+        ) as f:
             return json.load(f)
-    except (json.JSONDecodeError, OSError):
+
+    except (
+        json.JSONDecodeError,
+        OSError
+    ):
         return {}
 
 
 def now_jst():
     return datetime.now(
-        timezone(timedelta(hours=9))
+        JST
     ).isoformat()
 
 
-race = load_json(RACE_FILE)
-old_track = load_json(OLD_TRACK_FILE)
+def clean(value):
+    if value is None:
+        return ""
 
-race_id = str(
-    race.get("race_id", "")
-).strip()
-
-race_date = str(
-    race.get("race_date", "")
-).strip()
-
-track = str(
-    race.get("track")
-    or race.get("racecourse")
-    or ""
-).strip()
-
-surface = str(
-    race.get("surface", "")
-).strip()
-
-distance = race.get("distance")
-
-race_track_condition = str(
-    race.get("track_condition", "")
-).strip()
+    return str(
+        value
+    ).strip()
 
 
-# =====================================
-# 旧データを引き継げるか
-# =====================================
+# =========================================================
+# race.json
+# =========================================================
 
-old_race_id = str(
-    old_track.get("race_id", "")
-).strip()
-
-old_race_date = str(
-    old_track.get("race_date", "")
-).strip()
-
-old_track_name = str(
-    old_track.get("track", "")
-).strip()
-
-old_surface = str(
-    old_track.get("surface", "")
-).strip()
-
-
-same_race = (
-    bool(race_id)
-    and race_id == old_race_id
+race = load_json(
+    RACE_FILE
 )
 
-same_condition_group = (
-    bool(track)
-    and bool(surface)
-    and track == old_track_name
-    and surface == old_surface
+if not race:
+    raise RuntimeError(
+        "race.jsonを読み込めませんでした。"
+    )
+
+
+race_id = clean(
+    race.get("race_id")
+)
+
+race_date = clean(
+    race.get("race_date")
+)
+
+track = clean(
+    race.get("track")
+    or race.get("racecourse")
+)
+
+surface = clean(
+    race.get("surface")
+)
+
+distance = race.get(
+    "distance"
+)
+
+race_track_condition = clean(
+    race.get("track_condition")
+)
+
+
+# =========================================================
+# 必須項目チェック
+# =========================================================
+
+if not race_id:
+    raise RuntimeError(
+        "race_idがありません。"
+    )
+
+if not race_date:
+    raise RuntimeError(
+        "race_dateがありません。"
+    )
+
+if not track:
+    raise RuntimeError(
+        "trackがありません。"
+    )
+
+if surface not in (
+    "芝",
+    "ダート"
+):
+    raise RuntimeError(
+        "surfaceが芝/ダートではありません。"
+    )
+
+
+# =========================================================
+# 既存track_condition.json
+# =========================================================
+
+old = load_json(
+    TRACK_FILE
+)
+
+old_race_id = clean(
+    old.get("race_id")
+)
+
+old_race_date = clean(
+    old.get("race_date")
+)
+
+old_track = clean(
+    old.get("track")
+)
+
+old_surface = clean(
+    old.get("surface")
+)
+
+
+# =========================================================
+# 引継ぎ判定
+# =========================================================
+#
+# 1. 完全に同じrace_id
+#
+# または
+#
+# 2. 開催日
+#    競馬場
+#    surface
+#
+# の3条件が完全一致した場合だけ許可
+#
+# 日付不明の旧データは絶対に共有しない
+# =========================================================
+
+same_race = (
+    bool(old_race_id)
+    and old_race_id == race_id
     and (
-        not race_date
-        or not old_race_date
-        or race_date == old_race_date
+        not old_track
+        or old_track == track
+    )
+    and (
+        not old_surface
+        or old_surface == surface
     )
 )
 
 
-# =====================================
-# 初期値
-# =====================================
+same_date_track_surface = (
+    bool(race_date)
+    and bool(old_race_date)
+    and bool(track)
+    and bool(old_track)
+    and bool(surface)
+    and bool(old_surface)
 
-track_condition = race_track_condition
+    and race_date == old_race_date
+    and track == old_track
+    and surface == old_surface
+)
+
+
+can_reuse = (
+    same_race
+    or same_date_track_surface
+)
+
+
+# =========================================================
+# 初期値
+# =========================================================
+
+track_condition = (
+    race_track_condition
+)
 
 cushion_value = None
+
 moisture_4corner = None
 moisture_finish = None
 
 time_bias = ""
+
 inside_outside_bias = ""
+
 running_style_bias = ""
 
 reference_race_count = 0
+
 memo = ""
 
+source_race_id = ""
 
-# =====================================
-# 同一レース
-# または同日・同場・同馬場のみ引継ぎ
-# =====================================
 
-if same_race or same_condition_group:
+# =========================================================
+# 安全な旧データのみ引継ぎ
+# =========================================================
 
-    if not track_condition:
-        track_condition = str(
-            old_track.get(
-                "track_condition",
-                ""
+if can_reuse:
+
+    source_race_id = (
+        clean(
+            old.get(
+                "source_race_id"
             )
-        ).strip()
-
-    time_bias = str(
-        old_track.get(
-            "time_bias",
-            ""
         )
-    ).strip()
-
-    inside_outside_bias = str(
-        old_track.get(
-            "inside_outside_bias",
-            ""
-        )
-    ).strip()
-
-    running_style_bias = str(
-        old_track.get(
-            "running_style_bias",
-            ""
-        )
-    ).strip()
-
-    reference_race_count = int(
-        old_track.get(
-            "reference_race_count",
-            0
-        ) or 0
+        or old_race_id
     )
 
-    memo = str(
-        old_track.get(
-            "memo",
-            ""
-        )
-    ).strip()
+    if not track_condition:
 
-    # 芝のみクッション値
+        track_condition = clean(
+            old.get(
+                "track_condition"
+            )
+        )
+
+    # -----------------------------------------------------
+    # 芝クッション値
+    # -----------------------------------------------------
+
     if surface == "芝":
-        cushion_value = old_track.get(
+
+        cushion_value = old.get(
             "cushion_value"
         )
 
-    # 含水率は芝・ダートそれぞれ
-    # 同じsurfaceの時だけ引継ぐ
-    moisture_4corner = old_track.get(
+    # -----------------------------------------------------
+    # 含水率
+    # -----------------------------------------------------
+
+    moisture_4corner = old.get(
         "moisture_4corner"
     )
 
-    moisture_finish = old_track.get(
+    moisture_finish = old.get(
         "moisture_finish"
     )
 
+    # -----------------------------------------------------
+    # 実測バイアス
+    # -----------------------------------------------------
 
-# =====================================
-# surface別安全処理
-# =====================================
+    time_bias = clean(
+        old.get(
+            "time_bias"
+        )
+    )
+
+    inside_outside_bias = clean(
+        old.get(
+            "inside_outside_bias"
+        )
+    )
+
+    running_style_bias = clean(
+        old.get(
+            "running_style_bias"
+        )
+    )
+
+    try:
+        reference_race_count = int(
+            old.get(
+                "reference_race_count",
+                0
+            )
+            or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+        reference_race_count = 0
+
+    memo = clean(
+        old.get(
+            "memo"
+        )
+    )
+
+
+# =========================================================
+# surface安全処理
+# =========================================================
 
 if surface == "ダート":
-    # ダートにクッション値を混ぜない
+
+    # ダートにクッション値は使用しない
     cushion_value = None
 
-elif surface == "芝":
-    pass
 
-else:
-    # surface不明なら数値情報を流用しない
-    cushion_value = None
-    moisture_4corner = None
-    moisture_finish = None
-    time_bias = ""
-    inside_outside_bias = ""
-    running_style_bias = ""
-    reference_race_count = 0
+# =========================================================
+# データ有無
+# =========================================================
+
+data_available = any(
+    [
+        bool(track_condition),
+
+        (
+            cushion_value
+            is not None
+        ),
+
+        (
+            moisture_4corner
+            is not None
+        ),
+
+        (
+            moisture_finish
+            is not None
+        ),
+
+        bool(
+            time_bias
+        ),
+
+        bool(
+            inside_outside_bias
+        ),
+
+        bool(
+            running_style_bias
+        ),
+
+        reference_race_count > 0,
+    ]
+)
 
 
-# =====================================
+# =========================================================
+# 旧データ不採用理由
+# =========================================================
+
+reject_reason = ""
+
+if old and not can_reuse:
+
+    if (
+        old_race_date
+        and old_race_date != race_date
+    ):
+
+        reject_reason = (
+            "race_date mismatch"
+        )
+
+    elif (
+        old_track
+        and old_track != track
+    ):
+
+        reject_reason = (
+            "track mismatch"
+        )
+
+    elif (
+        old_surface
+        and old_surface != surface
+    ):
+
+        reject_reason = (
+            "surface mismatch"
+        )
+
+    elif not old_race_date:
+
+        reject_reason = (
+            "old race_date missing"
+        )
+
+    else:
+
+        reject_reason = (
+            "condition group mismatch"
+        )
+
+
+# =========================================================
 # 出力
-# =====================================
+# =========================================================
 
 output = {
-    "race_id": race_id,
-    "race_date": race_date,
+    "race_id":
+        race_id,
 
-    "track": track,
-    "surface": surface,
-    "distance": distance,
+    "race_date":
+        race_date,
 
-    "track_condition": track_condition,
+    "track":
+        track,
 
-    "cushion_value": cushion_value,
+    "surface":
+        surface,
 
-    "moisture_4corner": moisture_4corner,
-    "moisture_finish": moisture_finish,
+    "distance":
+        distance,
 
-    "time_bias": time_bias,
+    "track_condition":
+        track_condition,
+
+    "cushion_value":
+        cushion_value,
+
+    "moisture_4corner":
+        moisture_4corner,
+
+    "moisture_finish":
+        moisture_finish,
+
+    "time_bias":
+        time_bias,
 
     "inside_outside_bias":
         inside_outside_bias,
@@ -228,23 +447,43 @@ output = {
     "reference_race_count":
         reference_race_count,
 
-    "memo": memo,
+    "data_available":
+        data_available,
+
+    "source_race_id":
+        source_race_id,
 
     "source": (
         "previous_track_condition"
-        if same_race or same_condition_group
+        if can_reuse
         else "race.json"
     ),
 
     "match_status": {
-        "same_race": same_race,
+        "same_race":
+            same_race,
+
         "same_date_track_surface":
-            same_condition_group
+            same_date_track_surface,
+
+        "reused":
+            can_reuse,
+
+        "reject_reason":
+            reject_reason,
     },
 
-    "updated_at": now_jst()
+    "memo":
+        memo,
+
+    "updated_at":
+        now_jst(),
 }
 
+
+# =========================================================
+# 保存
+# =========================================================
 
 with open(
     OUTPUT_FILE,
@@ -260,23 +499,90 @@ with open(
     )
 
 
-print("===== TRACK CONDITION =====")
-print("race id:", race_id)
-print("date:", race_date)
-print("track:", track)
-print("surface:", surface)
-print("distance:", distance)
-print("condition:", track_condition)
-print("same race:", same_race)
+# =========================================================
+# ログ
+# =========================================================
+
+print(
+    "===== TRACK CONDITION ====="
+)
+
+print(
+    "race id:",
+    race_id
+)
+
+print(
+    "date:",
+    race_date
+)
+
+print(
+    "track:",
+    track
+)
+
+print(
+    "surface:",
+    surface
+)
+
+print(
+    "distance:",
+    distance
+)
+
+print(
+    "condition:",
+    track_condition
+)
+
+print(
+    "same race:",
+    same_race
+)
+
 print(
     "same date/track/surface:",
-    same_condition_group
+    same_date_track_surface
 )
+
+print(
+    "reused:",
+    can_reuse
+)
+
+print(
+    "reject reason:",
+    reject_reason
+)
+
+print(
+    "cushion:",
+    cushion_value
+)
+
+print(
+    "moisture 4corner:",
+    moisture_4corner
+)
+
+print(
+    "moisture finish:",
+    moisture_finish
+)
+
 print(
     "running style bias:",
     running_style_bias
 )
+
 print(
     "reference races:",
     reference_race_count
+)
+
+print(
+    "data available:",
+    data_available
 )
