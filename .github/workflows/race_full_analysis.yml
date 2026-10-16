@@ -2,6 +2,19 @@ name: Race Full Analysis
 
 on:
   workflow_dispatch:
+    inputs:
+      race_date:
+        description: "開催日 YYYY/MM/DD"
+        required: false
+        type: string
+      race_track:
+        description: "競馬場 例: 東京"
+        required: false
+        type: string
+      race_no:
+        description: "R番号 1-12"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -29,9 +42,44 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # 0. race_id.txt → RACE_ID
-      - name: Load race ID
+      # 0. Race IDを決定
+      #
+      # 新方式:
+      # 開催日 + 競馬場 + R番号
+      #   ↓
+      # resolve_race_id.py
+      #   ↓
+      # race_id.txt
+      #
+      # 旧方式:
+      # 入力が無い場合は従来通りrace_id.txtを使用
+      - name: Resolve or load race ID
+        env:
+          RACE_DATE: ${{ inputs.race_date }}
+          RACE_TRACK: ${{ inputs.race_track }}
+          RACE_NO: ${{ inputs.race_no }}
         run: |
+          if [ -n "$RACE_DATE" ] || [ -n "$RACE_TRACK" ] || [ -n "$RACE_NO" ]; then
+
+            if [ -z "$RACE_DATE" ] || [ -z "$RACE_TRACK" ] || [ -z "$RACE_NO" ]; then
+              echo "ERROR: race_date / race_track / race_no must all be supplied"
+              exit 1
+            fi
+
+            echo "Automatic Race ID resolution"
+            echo "Date : $RACE_DATE"
+            echo "Track: $RACE_TRACK"
+            echo "Race : ${RACE_NO}R"
+
+            python resolve_race_id.py
+
+          else
+
+            echo "No race selection inputs."
+            echo "Using existing race_id.txt."
+
+          fi
+
           RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
 
           if ! echo "$RACE_ID" | grep -Eq '^[0-9]{12}$'; then
@@ -205,13 +253,14 @@ jobs:
           )
           PY
 
-      # 16. JSONをまとめて保存
+      # 16. JSON + Race IDを保存
       - name: Save analysis data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add \
+            race_id.txt \
             race.json \
             history_races.json \
             history_db.json \
