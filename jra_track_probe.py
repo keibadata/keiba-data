@@ -18,8 +18,15 @@ HEADERS = {
         "(KHTML, like Gecko) "
         "Version/18.0 Mobile/15E148 Safari/604.1"
     ),
+    "Accept": (
+        "text/html,application/xhtml+xml,"
+        "application/xml;q=0.9,*/*;q=0.8"
+    ),
     "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+    "Referer": BABA_URL,
 }
+
+TIMEOUT = 30
 
 
 # =========================================================
@@ -31,15 +38,20 @@ def get_text(url):
     response = requests.get(
         url,
         headers=HEADERS,
-        timeout=30
+        timeout=TIMEOUT
     )
 
     response.raise_for_status()
 
-    response.encoding = (
-        response.apparent_encoding
-        or "utf-8"
-    )
+    if (
+        not response.encoding
+        or response.encoding.lower()
+        in ["iso-8859-1", "ascii"]
+    ):
+        response.encoding = (
+            response.apparent_encoding
+            or "utf-8"
+        )
 
     return response.text
 
@@ -66,168 +78,151 @@ def extract_script_urls(html):
         )
 
         if full_url not in urls:
-            urls.append(
-                full_url
-            )
+            urls.append(full_url)
 
     return urls
 
 
 # =========================================================
-# 関数本体抽出
+# キーワード周辺抽出
 # =========================================================
 
-def extract_function(
-    javascript,
-    function_name
+def extract_all_contexts(
+    text,
+    keyword,
+    before=1200,
+    after=2500
 ):
 
+    results = []
+
+    pattern = re.compile(
+        re.escape(keyword),
+        flags=re.IGNORECASE
+    )
+
+    for match in pattern.finditer(text):
+
+        start = max(
+            0,
+            match.start() - before
+        )
+
+        end = min(
+            len(text),
+            match.end() + after
+        )
+
+        value = text[start:end]
+
+        if value not in results:
+            results.append(value)
+
+    return results
+
+
+# =========================================================
+# URL候補
+# =========================================================
+
+def extract_url_candidates(text):
+
     patterns = [
-        rf"function\s+{re.escape(function_name)}\s*\([^)]*\)\s*\{{",
-        rf"{re.escape(function_name)}\s*=\s*function\s*\([^)]*\)\s*\{{",
+        r'https?://[^\s\'"<>]+',
+
+        r'["\'][^"\']*moisture[^"\']*["\']',
+
+        r'["\'][^"\']*water[^"\']*["\']',
+
+        r'["\'][^"\']*baba[^"\']*["\']',
+
+        r'["\'][^"\']+\.(?:json|php|html|xml|csv)'
+        r'(?:\?[^"\']*)?["\']',
+
+        r'url\s*:\s*[^,\n]+',
+
+        r'fetch\s*\([^;]{0,2000}',
+
+        r'\$\.ajax\s*\([^;]{0,3000}',
+
+        r'\$\.getJSON\s*\([^;]{0,2000}',
+
+        r'\$\.get\s*\([^;]{0,2000}',
     ]
 
-    match = None
+    results = []
 
     for pattern in patterns:
 
-        match = re.search(
+        for match in re.finditer(
             pattern,
-            javascript
-        )
-
-        if match:
-            break
-
-    if not match:
-        return ""
-
-    start = match.start()
-
-    brace_start = javascript.find(
-        "{",
-        match.start()
-    )
-
-    if brace_start == -1:
-        return ""
-
-    depth = 0
-
-    in_single = False
-    in_double = False
-    in_template = False
-    escaped = False
-
-    for index in range(
-        brace_start,
-        len(javascript)
-    ):
-
-        char = javascript[index]
-
-        if escaped:
-            escaped = False
-            continue
-
-        if char == "\\":
-            escaped = True
-            continue
-
-        if (
-            char == "'"
-            and not in_double
-            and not in_template
+            text,
+            flags=re.IGNORECASE
         ):
-            in_single = not in_single
-            continue
 
-        if (
-            char == '"'
-            and not in_single
-            and not in_template
-        ):
-            in_double = not in_double
-            continue
+            value = match.group(0).strip()
 
-        if (
-            char == "`"
-            and not in_single
-            and not in_double
-        ):
-            in_template = not in_template
-            continue
+            if value not in results:
+                results.append(value)
 
-        if (
-            in_single
-            or in_double
-            or in_template
-        ):
-            continue
-
-        if char == "{":
-            depth += 1
-
-        elif char == "}":
-
-            depth -= 1
-
-            if depth == 0:
-
-                return javascript[
-                    start:index + 1
-                ]
-
-    return ""
+    return results
 
 
 # =========================================================
-# 関数周辺抽出
+# 関数名候補抽出
 # =========================================================
 
-def extract_context(
-    javascript,
-    keyword,
-    before=1200,
-    after=3000
-):
+def extract_function_names(text):
 
-    position = javascript.find(
-        keyword
-    )
-
-    if position == -1:
-        return ""
-
-    start = max(
-        0,
-        position - before
-    )
-
-    end = min(
-        len(javascript),
-        position + after
-    )
-
-    return javascript[
-        start:end
-    ]
-
-
-# =========================================================
-# 通信処理候補抽出
-# =========================================================
-
-def extract_network_candidates(text):
+    names = []
 
     patterns = [
-        r"\$\.ajax\s*\([^;]{0,3000}",
-        r"\$\.getJSON\s*\([^;]{0,2000}",
-        r"\$\.get\s*\([^;]{0,2000}",
-        r"\$\.post\s*\([^;]{0,2000}",
-        r"fetch\s*\([^;]{0,2000}",
-        r"url\s*:\s*[^,\n]+",
-        r"""["'][^"']+\.(?:json|php|html|xml|csv)(?:\?[^"']*)?["']""",
+        r'function\s+([A-Za-z0-9_$]+)\s*\(',
+        r'([A-Za-z0-9_$]+)\s*=\s*function\s*\(',
+    ]
+
+    for pattern in patterns:
+
+        for match in re.finditer(
+            pattern,
+            text
+        ):
+
+            name = match.group(1)
+
+            lower = name.lower()
+
+            if any(
+                word in lower
+                for word in [
+                    "moist",
+                    "water",
+                    "baba",
+                    "condition",
+                    "track",
+                    "data"
+                ]
+            ):
+
+                if name not in names:
+                    names.append(name)
+
+    return names
+
+
+# =========================================================
+# 通信処理だけ抽出
+# =========================================================
+
+def extract_network_blocks(text):
+
+    patterns = [
+        r'\$\.ajax\s*\([^;]{0,5000}',
+        r'\$\.getJSON\s*\([^;]{0,4000}',
+        r'\$\.get\s*\([^;]{0,4000}',
+        r'\$\.post\s*\([^;]{0,4000}',
+        r'fetch\s*\([^;]{0,4000}',
+        r'XMLHttpRequest[^;]{0,4000}',
     ]
 
     results = []
@@ -243,59 +238,151 @@ def extract_network_candidates(text):
             value = match.group(0)
 
             if value not in results:
-                results.append(
-                    value
-                )
+                results.append(value)
 
     return results
+
+
+# =========================================================
+# HTML側の含水率関連記述
+# =========================================================
+
+def probe_html(html):
+
+    print()
+    print("===== HTML MOISTURE RELATED CODE =====")
+
+    keywords = [
+        "moisture",
+        "含水",
+        "含水率",
+        "ゴール前",
+        "4コーナー",
+        "ダート",
+        "芝"
+    ]
+
+    found = False
+
+    for keyword in keywords:
+
+        contexts = extract_all_contexts(
+            html,
+            keyword,
+            before=800,
+            after=1600
+        )
+
+        if not contexts:
+            continue
+
+        found = True
+
+        print()
+        print("----------------------------------------")
+        print("HTML KEYWORD:", keyword)
+        print("COUNT:", len(contexts))
+        print("----------------------------------------")
+
+        for number, context in enumerate(
+            contexts[:5],
+            start=1
+        ):
+
+            print()
+            print(
+                f"[HTML {keyword} #{number}]"
+            )
+
+            print(context)
+
+    if not found:
+        print("HTML MOISTURE DATA NOT FOUND")
 
 
 # =========================================================
 # 実行
 # =========================================================
 
-print(
-    "========================================"
-)
+print("========================================")
+print("JRA MOISTURE NETWORK PROBE")
+print("========================================")
+print("PAGE:", BABA_URL)
+
+
+try:
+
+    html = get_text(
+        BABA_URL
+    )
+
+except Exception as exc:
+
+    raise SystemExit(
+        "ERROR: JRA馬場ページ取得失敗: "
+        + str(exc)
+    )
+
 
 print(
-    "JRA TRACK NETWORK PROBE"
-)
-
-print(
-    "========================================"
-)
-
-print(
-    "PAGE:",
-    BABA_URL
+    "INDEX SIZE:",
+    len(html)
 )
 
 
-html = get_text(
-    BABA_URL
-)
+# =========================================================
+# HTML本体確認
+# =========================================================
 
+probe_html(html)
+
+
+# =========================================================
+# JS一覧
+# =========================================================
 
 script_urls = extract_script_urls(
     html
 )
 
 
-print(
-    "\n===== JAVASCRIPT FILES ====="
-)
-
+print()
+print("===== JAVASCRIPT FILES =====")
 print(
     "COUNT:",
     len(script_urls)
 )
 
 
-matched_count = 0
+for index, url in enumerate(
+    script_urls,
+    start=1
+):
+
+    print(
+        f"{index}: {url}"
+    )
 
 
-for number, script_url in enumerate(
+# =========================================================
+# JS探索
+# =========================================================
+
+search_keywords = [
+    "moisture",
+    "含水",
+    "含水率",
+    "water",
+    "ゴール前",
+    "4コーナー",
+    "baba",
+]
+
+
+matched_scripts = 0
+
+
+for script_number, script_url in enumerate(
     script_urls,
     start=1
 ):
@@ -308,8 +395,9 @@ for number, script_url in enumerate(
 
     except Exception as exc:
 
+        print()
         print(
-            "\nJS ERROR:",
+            "JS ERROR:",
             script_url,
             exc
         )
@@ -317,220 +405,267 @@ for number, script_url in enumerate(
         continue
 
 
-    keywords = [
-        "get_cushion_data",
-        "set_cushion_data",
-        "cushion_list",
-        "cushion_data",
-    ]
+    matched_keywords = []
+
+    for keyword in search_keywords:
+
+        if re.search(
+            re.escape(keyword),
+            javascript,
+            flags=re.IGNORECASE
+        ):
+
+            matched_keywords.append(
+                keyword
+            )
 
 
-    if not any(
-        keyword in javascript
-        for keyword in keywords
+    # 含水関連が無ければ、
+    # URL/通信候補だけ確認
+    url_candidates = extract_url_candidates(
+        javascript
+    )
+
+    moisture_url_candidates = []
+
+    for value in url_candidates:
+
+        lower = value.lower()
+
+        if any(
+            word in lower
+            for word in [
+                "moist",
+                "water",
+                "baba",
+                "condition"
+            ]
+        ):
+            moisture_url_candidates.append(
+                value
+            )
+
+
+    if (
+        not matched_keywords
+        and not moisture_url_candidates
     ):
         continue
 
 
-    matched_count += 1
+    matched_scripts += 1
 
 
-    print(
-        "\n========================================"
-    )
-
+    print()
+    print("========================================")
     print(
         "MATCHED JS #",
-        matched_count
+        matched_scripts
     )
-
+    print(
+        "SCRIPT NUMBER:",
+        script_number
+    )
     print(
         "URL:",
         script_url
     )
-
     print(
         "SIZE:",
         len(javascript)
     )
-
     print(
-        "========================================"
+        "KEYWORDS:",
+        matched_keywords
     )
+    print("========================================")
 
 
-    # -----------------------------------------------------
-    # get_cushion_data()
-    # -----------------------------------------------------
+    # =====================================================
+    # 含水率関連コード
+    # =====================================================
 
-    function_text = extract_function(
-        javascript,
-        "get_cushion_data"
-    )
+    print()
+    print("===== MOISTURE RELATED CODE =====")
 
 
-    print(
-        "\n===== FUNCTION: get_cushion_data ====="
-    )
+    related_found = False
 
 
-    if function_text:
+    for keyword in search_keywords:
 
+        contexts = extract_all_contexts(
+            javascript,
+            keyword,
+            before=1800,
+            after=4000
+        )
+
+        if not contexts:
+            continue
+
+
+        related_found = True
+
+
+        print()
+        print("----------------------------------------")
         print(
-            function_text
+            "KEYWORD:",
+            keyword
         )
-
-    else:
-
         print(
-            "FUNCTION NOT FOUND"
+            "MATCH COUNT:",
+            len(contexts)
         )
+        print("----------------------------------------")
 
 
-    # -----------------------------------------------------
-    # set_cushion_data()
-    # -----------------------------------------------------
-
-    set_function_text = extract_function(
-        javascript,
-        "set_cushion_data"
-    )
-
-
-    print(
-        "\n===== FUNCTION: set_cushion_data ====="
-    )
-
-
-    if set_function_text:
-
-        print(
-            set_function_text
-        )
-
-    else:
-
-        print(
-            "FUNCTION NOT FOUND"
-        )
-
-
-    # -----------------------------------------------------
-    # get_cushion_data 周辺
-    # -----------------------------------------------------
-
-    context = extract_context(
-        javascript,
-        "get_cushion_data",
-        before=2000,
-        after=5000
-    )
-
-
-    print(
-        "\n===== GET CUSHION CONTEXT ====="
-    )
-
-
-    if context:
-
-        print(
-            context
-        )
-
-    else:
-
-        print(
-            "CONTEXT NOT FOUND"
-        )
-
-
-    # -----------------------------------------------------
-    # 通信候補
-    # -----------------------------------------------------
-
-    network_candidates = (
-        extract_network_candidates(
-            context
-            if context
-            else javascript
-        )
-    )
-
-
-    print(
-        "\n===== NETWORK CANDIDATES ====="
-    )
-
-
-    if network_candidates:
-
-        for index, candidate in enumerate(
-            network_candidates,
+        for number, context in enumerate(
+            contexts[:8],
             start=1
         ):
 
+            print()
             print(
-                "\nNETWORK #",
-                index
+                f"[{keyword} CONTEXT #{number}]"
             )
 
-            print(
-                candidate
-            )
+            print(context)
+
+
+    if not related_found:
+
+        print(
+            "MOISTURE RELATED CODE NOT FOUND"
+        )
+
+
+    # =====================================================
+    # 関数候補
+    # =====================================================
+
+    print()
+    print("===== RELATED FUNCTION NAMES =====")
+
+
+    function_names = extract_function_names(
+        javascript
+    )
+
+
+    if function_names:
+
+        for name in function_names:
+
+            print(name)
 
     else:
 
         print(
-            "NETWORK CANDIDATE NOT FOUND"
+            "RELATED FUNCTION NOT FOUND"
         )
 
 
-    # -----------------------------------------------------
-    # cushion_list 周辺
-    # -----------------------------------------------------
+    # =====================================================
+    # URL候補
+    # =====================================================
 
-    cushion_list_context = (
-        extract_context(
-            javascript,
-            "cushion_list",
-            before=1500,
-            after=3500
-        )
-    )
+    print()
+    print("===== MOISTURE URL CANDIDATES =====")
 
 
-    print(
-        "\n===== CUSHION_LIST CONTEXT ====="
-    )
+    if moisture_url_candidates:
 
+        for number, candidate in enumerate(
+            moisture_url_candidates,
+            start=1
+        ):
 
-    if cushion_list_context:
+            print()
+            print(
+                f"URL CANDIDATE #{number}"
+            )
 
-        print(
-            cushion_list_context
-        )
+            print(candidate)
 
     else:
 
         print(
-            "CUSHION_LIST NOT FOUND"
+            "MOISTURE URL CANDIDATE NOT FOUND"
         )
 
 
-print(
-    "\n========================================"
-)
+    # =====================================================
+    # 通信処理
+    # =====================================================
 
+    print()
+    print("===== NETWORK BLOCKS =====")
+
+
+    network_blocks = extract_network_blocks(
+        javascript
+    )
+
+
+    relevant_network_blocks = []
+
+
+    for block in network_blocks:
+
+        lower = block.lower()
+
+        if any(
+            word in lower
+            for word in [
+                "moist",
+                "water",
+                "baba",
+                "condition",
+                "json",
+                "xml",
+                "csv"
+            ]
+        ):
+
+            relevant_network_blocks.append(
+                block
+            )
+
+
+    if relevant_network_blocks:
+
+        for number, block in enumerate(
+            relevant_network_blocks,
+            start=1
+        ):
+
+            print()
+            print(
+                f"NETWORK #{number}"
+            )
+
+            print(block)
+
+    else:
+
+        print(
+            "RELEVANT NETWORK BLOCK NOT FOUND"
+        )
+
+
+# =========================================================
+# 終了
+# =========================================================
+
+print()
+print("========================================")
 print(
     "MATCHED SCRIPT COUNT:",
-    matched_count
+    matched_scripts
 )
-
 print(
-    "JRA TRACK NETWORK PROBE FINISHED"
+    "JRA MOISTURE NETWORK PROBE FINISHED"
 )
-
-print(
-    "========================================"
-)
+print("========================================")
