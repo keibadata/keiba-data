@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import time
 from datetime import datetime, timedelta, timezone
@@ -8,6 +9,7 @@ from bs4 import BeautifulSoup
 
 
 RACE_FILE = "race.json"
+HISTORY_DB_FILE = "history_db.json"
 OUTPUT_FILE = "history_races.json"
 
 MAX_RACES = 20
@@ -25,7 +27,10 @@ HEADERS = {
 }
 
 
-def load_json(path):
+def load_json(path, default=None):
+    if not os.path.exists(path):
+        return {} if default is None else default
+
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -59,16 +64,37 @@ def normalize_distance(value):
         return 0
 
 
+def normalize_track(value):
+    return str(value or "").strip()
+
+
+def parse_date(value):
+    value = str(value or "").strip()
+
+    if not value:
+        return None
+
+    try:
+        return datetime.strptime(
+            value,
+            "%Y-%m-%d"
+        ).date()
+    except ValueError:
+        return None
+
+
 def get_html(url, params=None):
-    r = requests.get(
+    response = requests.get(
         url,
         params=params,
         headers=HEADERS,
         timeout=30,
     )
-    r.raise_for_status()
-    r.encoding = r.apparent_encoding
-    return r.text
+
+    response.raise_for_status()
+    response.encoding = response.apparent_encoding
+
+    return response.text
 
 
 def extract_race_ids(html):
@@ -96,9 +122,15 @@ def extract_race_ids(html):
 
 
 def get_target_condition(race):
-    race_info = race.get("race_info", {})
+    race_info = race.get(
+        "race_info",
+        {}
+    )
 
-    if not isinstance(race_info, dict):
+    if not isinstance(
+        race_info,
+        dict
+    ):
         race_info = {}
 
     race_id = str(
@@ -111,13 +143,13 @@ def get_target_condition(race):
         or ""
     ).strip()
 
-    track = str(
+    track = normalize_track(
         race.get("track")
         or race.get("racecourse")
         or race_info.get("track")
         or race_info.get("racecourse")
         or ""
-    ).strip()
+    )
 
     surface = normalize_surface(
         race.get("surface")
@@ -131,17 +163,19 @@ def get_target_condition(race):
         or 0
     )
 
-    if not re.fullmatch(r"\d{12}", race_id):
+    if not re.fullmatch(
+        r"\d{12}",
+        race_id
+    ):
         raise RuntimeError(
             "race.json の race_id が不正です"
         )
 
-    try:
-        target_date = datetime.strptime(
-            race_date,
-            "%Y-%m-%d"
-        ).date()
-    except ValueError:
+    target_date = parse_date(
+        race_date
+    )
+
+    if target_date is None:
         raise RuntimeError(
             "race.json の race_date を取得できません"
         )
@@ -171,6 +205,163 @@ def get_target_condition(race):
     }
 
 
+def race_condition(row):
+    if not isinstance(row, dict):
+        return {
+            "racecourse": "",
+            "surface": "",
+            "distance": 0,
+        }
+
+    return {
+        "racecourse": normalize_track(
+            row.get("racecourse")
+            or row.get("track")
+            or ""
+        ),
+        "surface": normalize_surface(
+            row.get("surface")
+            or ""
+        ),
+        "distance": normalize_distance(
+            row.get("distance")
+            or 0
+        ),
+    }
+
+
+def matches_target(row, target):
+    condition = race_condition(
+        row
+    )
+
+    return (
+        condition["racecourse"]
+        == target["racecourse"]
+        and condition["surface"]
+        == target["surface"]
+        and condition["distance"]
+        == target["distance"]
+    )
+
+
+def get_existing_races(
+    history_db,
+    target
+):
+    races = history_db.get(
+        "races",
+        []
+    )
+
+    if not isinstance(races, list):
+        return []
+
+    result = []
+    seen = set()
+
+    for race in races:
+        if not isinstance(
+            race,
+            dict
+        ):
+            continue
+
+        race_id = str(
+            race.get(
+                "race_id",
+                ""
+            )
+        ).strip()
+
+        if not re.fullmatch(
+            r"\d{12}",
+            race_id
+        ):
+            continue
+
+        if race_id == target["race_id"]:
+            continue
+
+        if not matches_target(
+            race,
+            target
+        ):
+            continue
+
+        race_date = parse_date(
+            race.get(
+                "race_date",
+                ""
+            )
+        )
+
+        # 今回レース以降は血統統計に使わない
+        if race_date is not None:
+            if race_date >= target[
+                "target_date"
+            ]:
+                continue
+
+        if race_id in seen:
+            continue
+
+        seen.add(race_id)
+
+        result.append({
+            "race_id":
+                race_id,
+
+            "race_date":
+                str(
+                    race.get(
+                        "race_date",
+                        ""
+                    )
+                ),
+
+            "racecourse":
+                target[
+                    "racecourse"
+                ],
+
+            "race_number":
+                str(
+                    race.get(
+                        "race_number",
+                        ""
+                    )
+                ),
+
+            "surface":
+                target[
+                    "surface"
+                ],
+
+            "distance":
+                target[
+                    "distance"
+                ],
+        })
+
+    # 新しいレースを優先
+    result.sort(
+        key=lambda x: (
+            x.get(
+                "race_date",
+                ""
+            ),
+            x.get(
+                "race_id",
+                ""
+            ),
+        ),
+        reverse=True,
+    )
+
+    return result
+
+
 def parse_race_info(race_id):
     html = get_html(
         "https://race.sp.netkeiba.com/",
@@ -192,18 +383,32 @@ def parse_race_info(race_id):
 
     race_number = ""
 
-    if re.fullmatch(r"\d{12}", race_id):
-        number = int(race_id[-2:])
+    if re.fullmatch(
+        r"\d{12}",
+        race_id
+    ):
+        number = int(
+            race_id[-2:]
+        )
 
         if 1 <= number <= 12:
-            race_number = f"{number}R"
+            race_number = (
+                f"{number}R"
+            )
 
     racecourse = ""
 
     for name in (
-        "札幌", "函館", "福島", "新潟",
-        "東京", "中山", "中京", "京都",
-        "阪神", "小倉",
+        "札幌",
+        "函館",
+        "福島",
+        "新潟",
+        "東京",
+        "中山",
+        "中京",
+        "京都",
+        "阪神",
+        "小倉",
     ):
         if name in text:
             racecourse = name
@@ -219,84 +424,310 @@ def parse_race_info(race_id):
     )
 
     for pattern in patterns:
-        m = re.search(pattern, text)
+        match = re.search(
+            pattern,
+            text
+        )
 
-        if not m:
+        if not match:
             continue
 
-        a = m.group(1)
-        b = m.group(2)
+        a = match.group(1)
+        b = match.group(2)
 
-        if a in ("芝", "ダート", "ダ"):
-            surface = normalize_surface(a)
+        if a in (
+            "芝",
+            "ダート",
+            "ダ",
+        ):
+            surface = (
+                normalize_surface(a)
+            )
+
             distance = int(b)
+
         else:
             distance = int(a)
-            surface = normalize_surface(b)
+
+            surface = (
+                normalize_surface(b)
+            )
 
         break
 
     return {
-        "race_id": race_id,
-        "racecourse": racecourse,
-        "race_number": race_number,
-        "surface": surface,
-        "distance": distance,
+        "race_id":
+            race_id,
+
+        "racecourse":
+            racecourse,
+
+        "race_number":
+            race_number,
+
+        "surface":
+            surface,
+
+        "distance":
+            distance,
     }
 
 
-def find_races_from_date(date_string):
+def find_races_from_date(
+    date_string
+):
     html = get_html(
         "https://race.netkeiba.com/top/race_list.html",
         {
-            "kaisai_date": date_string
+            "kaisai_date":
+                date_string
         },
     )
 
-    return extract_race_ids(html)
+    return extract_race_ids(
+        html
+    )
+
+
+def build_output(
+    target,
+    races,
+    errors,
+    cache_used,
+    existing_count,
+    searched
+):
+    return {
+        "updated_at":
+            datetime.now(
+                timezone.utc
+            ).isoformat(),
+
+        "target_race_id":
+            target[
+                "race_id"
+            ],
+
+        "condition": {
+            "racecourse":
+                target[
+                    "racecourse"
+                ],
+
+            "surface":
+                target[
+                    "surface"
+                ],
+
+            "distance":
+                target[
+                    "distance"
+                ],
+        },
+
+        "search": {
+            "before_date":
+                target[
+                    "race_date"
+                ],
+
+            "lookback_days":
+                LOOKBACK_DAYS,
+
+            "max_races":
+                MAX_RACES,
+
+            "future_races_excluded":
+                True,
+
+            "target_race_excluded":
+                True,
+
+            "cache_used":
+                cache_used,
+
+            "existing_matching_races":
+                existing_count,
+
+            "network_search_performed":
+                searched,
+        },
+
+        "race_count":
+            len(races),
+
+        "races":
+            races,
+
+        "error_count":
+            len(errors),
+
+        "errors":
+            errors,
+    }
 
 
 def main():
-    race = load_json(RACE_FILE)
-    target = get_target_condition(race)
+    race = load_json(
+        RACE_FILE
+    )
 
-    print("==============================")
-    print("条件別 過去レース探索")
-    print("対象Race ID:", target["race_id"])
-    print("対象日:", target["race_date"])
+    target = get_target_condition(
+        race
+    )
+
+    history_db = load_json(
+        HISTORY_DB_FILE,
+        {}
+    )
+
+    print(
+        "=============================="
+    )
+
+    print(
+        "条件別 過去レース探索"
+    )
+
+    print(
+        "対象Race ID:",
+        target["race_id"]
+    )
+
+    print(
+        "対象日:",
+        target["race_date"]
+    )
+
     print(
         "条件:",
         target["racecourse"],
         target["surface"],
         target["distance"],
     )
-    print("==============================")
 
-    matched = []
-    checked_ids = set()
-    errors = []
+    print(
+        "=============================="
+    )
 
-    # 対象レース当日は含めない。
-    # 前日から過去方向へ探索する。
-    for days_back in range(1, LOOKBACK_DAYS + 1):
-        search_date = (
-            target["target_date"]
-            - timedelta(days=days_back)
+    existing = get_existing_races(
+        history_db,
+        target
+    )
+
+    existing_count = len(
+        existing
+    )
+
+    print(
+        "既存DB一致レース:",
+        existing_count
+    )
+
+    # =====================================================
+    # 既存DBだけで必要数が揃っている
+    # → ネット検索を完全スキップ
+    # =====================================================
+
+    if existing_count >= MAX_RACES:
+        selected = existing[
+            :MAX_RACES
+        ]
+
+        output = build_output(
+            target=target,
+            races=selected,
+            errors=[],
+            cache_used=True,
+            existing_count=existing_count,
+            searched=False,
         )
 
-        date_string = search_date.strftime(
-            "%Y%m%d"
+        save_json(
+            OUTPUT_FILE,
+            output
+        )
+
+        print(
+            "既存DBに必要数あり"
+        )
+
+        print(
+            "ネット検索をスキップします"
+        )
+
+        print(
+            "history_races.json 作成完了"
+        )
+
+        print(
+            "対象条件レース:",
+            len(selected)
+        )
+
+        return
+
+    # =====================================================
+    # 不足分だけ検索
+    # =====================================================
+
+    matched = list(
+        existing
+    )
+
+    checked_ids = {
+        row["race_id"]
+        for row in matched
+    }
+
+    errors = []
+
+    needed = (
+        MAX_RACES
+        - len(matched)
+    )
+
+    print(
+        "不足レース:",
+        needed
+    )
+
+    for days_back in range(
+        1,
+        LOOKBACK_DAYS + 1
+    ):
+        if len(matched) >= MAX_RACES:
+            break
+
+        search_date = (
+            target["target_date"]
+            - timedelta(
+                days=days_back
+            )
+        )
+
+        date_string = (
+            search_date.strftime(
+                "%Y%m%d"
+            )
         )
 
         try:
-            race_ids = find_races_from_date(
-                date_string
+            race_ids = (
+                find_races_from_date(
+                    date_string
+                )
             )
+
         except Exception as e:
             errors.append({
-                "date": date_string,
-                "error": str(e),
+                "date":
+                    date_string,
+
+                "error":
+                    str(e),
             })
+
             continue
 
         if not race_ids:
@@ -310,13 +741,23 @@ def main():
         )
 
         for race_id in race_ids:
-            if race_id == target["race_id"]:
+            if len(matched) >= MAX_RACES:
+                break
+
+            if (
+                race_id
+                == target[
+                    "race_id"
+                ]
+            ):
                 continue
 
             if race_id in checked_ids:
                 continue
 
-            checked_ids.add(race_id)
+            checked_ids.add(
+                race_id
+            )
 
             try:
                 info = parse_race_info(
@@ -324,82 +765,157 @@ def main():
                 )
 
                 if (
-                    info["racecourse"]
-                    == target["racecourse"]
-                    and info["surface"]
-                    == target["surface"]
-                    and info["distance"]
-                    == target["distance"]
+                    info[
+                        "racecourse"
+                    ]
+                    == target[
+                        "racecourse"
+                    ]
+                    and info[
+                        "surface"
+                    ]
+                    == target[
+                        "surface"
+                    ]
+                    and info[
+                        "distance"
+                    ]
+                    == target[
+                        "distance"
+                    ]
                 ):
-                    info["race_date"] = (
-                        search_date.isoformat()
+                    info[
+                        "race_date"
+                    ] = (
+                        search_date
+                        .isoformat()
                     )
 
-                    matched.append(info)
+                    matched.append(
+                        info
+                    )
 
                     print(
                         "  MATCH:",
                         race_id,
-                        info["racecourse"],
-                        info["surface"],
-                        info["distance"],
+                        info[
+                            "racecourse"
+                        ],
+                        info[
+                            "surface"
+                        ],
+                        info[
+                            "distance"
+                        ],
                     )
 
-                    if len(matched) >= MAX_RACES:
-                        break
-
-                time.sleep(REQUEST_WAIT)
+                time.sleep(
+                    REQUEST_WAIT
+                )
 
             except Exception as e:
                 errors.append({
-                    "race_id": race_id,
-                    "error": str(e),
+                    "race_id":
+                        race_id,
+
+                    "error":
+                        str(e),
                 })
 
         if len(matched) >= MAX_RACES:
             break
 
-        time.sleep(DATE_WAIT)
+        time.sleep(
+            DATE_WAIT
+        )
 
-    output = {
-        "updated_at": datetime.now(
-            timezone.utc
-        ).isoformat(),
+    # 重複を最終除去
+    unique = []
+    seen = set()
 
-        "target_race_id": target["race_id"],
+    for row in matched:
+        race_id = str(
+            row.get(
+                "race_id",
+                ""
+            )
+        )
 
-        "condition": {
-            "racecourse": target["racecourse"],
-            "surface": target["surface"],
-            "distance": target["distance"],
-        },
+        if race_id in seen:
+            continue
 
-        "search": {
-            "before_date": target["race_date"],
-            "lookback_days": LOOKBACK_DAYS,
-            "max_races": MAX_RACES,
-            "future_races_excluded": True,
-            "target_race_excluded": True,
-        },
+        seen.add(
+            race_id
+        )
 
-        "race_count": len(matched),
-        "races": matched,
-        "error_count": len(errors),
-        "errors": errors,
-    }
+        unique.append(
+            row
+        )
+
+    unique.sort(
+        key=lambda x: (
+            x.get(
+                "race_date",
+                ""
+            ),
+            x.get(
+                "race_id",
+                ""
+            ),
+        ),
+        reverse=True,
+    )
+
+    unique = unique[
+        :MAX_RACES
+    ]
+
+    output = build_output(
+        target=target,
+        races=unique,
+        errors=errors,
+        cache_used=(
+            existing_count > 0
+        ),
+        existing_count=(
+            existing_count
+        ),
+        searched=True,
+    )
 
     save_json(
         OUTPUT_FILE,
         output
     )
 
-    print("==============================")
-    print("history_races.json 作成完了")
-    print("対象条件レース:", len(matched))
-    print("取得エラー:", len(errors))
-    print("==============================")
+    print(
+        "=============================="
+    )
 
-    if not matched:
+    print(
+        "history_races.json 作成完了"
+    )
+
+    print(
+        "既存利用:",
+        existing_count
+    )
+
+    print(
+        "最終対象レース:",
+        len(unique)
+    )
+
+    print(
+        "取得エラー:",
+        len(errors)
+    )
+
+    print(
+        "=============================="
+    )
+
+    if not unique:
         raise RuntimeError(
             "対象レース以前に同条件の過去レースを取得できませんでした"
         )
