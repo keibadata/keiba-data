@@ -1,14 +1,14 @@
 import re
+import requests
 from urllib.parse import urljoin
 
-import requests
-from bs4 import BeautifulSoup
 
+# =========================================================
+# 設定
+# =========================================================
 
-PAGE_URL = (
-    "https://www.jra.go.jp/"
-    "keiba/baba/index.html"
-)
+BASE_URL = "https://www.jra.go.jp"
+BABA_URL = "https://www.jra.go.jp/keiba/baba/index.html"
 
 HEADERS = {
     "User-Agent": (
@@ -18,12 +18,16 @@ HEADERS = {
         "(KHTML, like Gecko) "
         "Version/18.0 Mobile/15E148 Safari/604.1"
     ),
-    "Accept-Language":
-        "ja,en-US;q=0.9,en;q=0.8",
+    "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
 }
 
 
-def fetch(url):
+# =========================================================
+# HTTP取得
+# =========================================================
+
+def get_text(url):
+
     response = requests.get(
         url,
         headers=HEADERS,
@@ -40,364 +44,493 @@ def fetch(url):
     return response.text
 
 
-def compact(value):
-    return re.sub(
-        r"[ \t]+",
-        " ",
-        value
+# =========================================================
+# JavaScript URL取得
+# =========================================================
+
+def extract_script_urls(html):
+
+    scripts = re.findall(
+        r'<script[^>]+src=["\']([^"\']+)["\']',
+        html,
+        flags=re.IGNORECASE
     )
 
+    urls = []
 
-def contexts(
-    text,
-    keyword,
-    width=1200,
-    limit=5
+    for src in scripts:
+
+        full_url = urljoin(
+            BABA_URL,
+            src
+        )
+
+        if full_url not in urls:
+            urls.append(
+                full_url
+            )
+
+    return urls
+
+
+# =========================================================
+# 関数本体抽出
+# =========================================================
+
+def extract_function(
+    javascript,
+    function_name
 ):
-    results = []
-
-    lower_text = text.lower()
-    lower_keyword = keyword.lower()
-
-    start = 0
-
-    while len(results) < limit:
-
-        pos = lower_text.find(
-            lower_keyword,
-            start
-        )
-
-        if pos < 0:
-            break
-
-        left = max(
-            0,
-            pos - width
-        )
-
-        right = min(
-            len(text),
-            pos + len(keyword) + width
-        )
-
-        value = text[
-            left:right
-        ]
-
-        if value not in results:
-            results.append(
-                value
-            )
-
-        start = (
-            pos
-            + len(keyword)
-        )
-
-    return results
-
-
-# =========================================================
-# JRA馬場ページ
-# =========================================================
-
-html = fetch(
-    PAGE_URL
-)
-
-soup = BeautifulSoup(
-    html,
-    "html.parser"
-)
-
-
-# =========================================================
-# JS一覧取得
-# =========================================================
-
-script_urls = []
-
-for script in soup.find_all(
-    "script"
-):
-    src = script.get(
-        "src"
-    )
-
-    if not src:
-        continue
-
-    url = urljoin(
-        PAGE_URL,
-        src
-    )
-
-    if url not in script_urls:
-        script_urls.append(
-            url
-        )
-
-
-# =========================================================
-# cushion関連JSだけ抽出
-# =========================================================
-
-matched = []
-
-for url in script_urls:
-
-    try:
-        js = fetch(
-            url
-        )
-
-    except Exception:
-        continue
-
-    lower = js.lower()
-
-    if (
-        "cushion_list" in lower
-        or "btn_cushion" in lower
-        or "cushion_data" in lower
-    ):
-        matched.append(
-            (
-                url,
-                js
-            )
-        )
-
-
-print(
-    "===== MATCHED JAVASCRIPT ====="
-)
-
-print(
-    "COUNT:",
-    len(matched)
-)
-
-
-for index, (
-    url,
-    js
-) in enumerate(
-    matched,
-    start=1
-):
-
-    print()
-    print(
-        f"JS #{index}"
-    )
-
-    print(
-        "URL:",
-        url
-    )
-
-    print(
-        "SIZE:",
-        len(js)
-    )
-
-
-# =========================================================
-# cushion_list周辺
-# =========================================================
-
-print()
-print(
-    "===== CUSHION_LIST CODE ====="
-)
-
-for url, js in matched:
-
-    items = contexts(
-        js,
-        "cushion_list",
-        width=1600,
-        limit=3
-    )
-
-    for index, item in enumerate(
-        items,
-        start=1
-    ):
-
-        print()
-        print(
-            "SCRIPT:",
-            url
-        )
-
-        print(
-            f"CUSHION_LIST #{index}"
-        )
-
-        print(
-            compact(
-                item
-            )
-        )
-
-
-# =========================================================
-# btn_cushion周辺
-# =========================================================
-
-print()
-print(
-    "===== BTN_CUSHION CODE ====="
-)
-
-for url, js in matched:
-
-    items = contexts(
-        js,
-        "btn_cushion",
-        width=1600,
-        limit=3
-    )
-
-    for index, item in enumerate(
-        items,
-        start=1
-    ):
-
-        print()
-        print(
-            f"BTN_CUSHION #{index}"
-        )
-
-        print(
-            compact(
-                item
-            )
-        )
-
-
-# =========================================================
-# AJAX / GET / POST / JSON 周辺
-# =========================================================
-
-print()
-print(
-    "===== REQUEST CODE ====="
-)
-
-request_words = [
-    "$.ajax",
-    "$.get(",
-    "$.post(",
-    "$.getjson",
-    "fetch(",
-    "xmlhttprequest",
-    ".json",
-]
-
-request_found = False
-
-for url, js in matched:
-
-    for keyword in request_words:
-
-        items = contexts(
-            js,
-            keyword,
-            width=1300,
-            limit=3
-        )
-
-        for item in items:
-
-            request_found = True
-
-            print()
-            print(
-                "KEYWORD:",
-                keyword
-            )
-
-            print(
-                compact(
-                    item
-                )
-            )
-
-
-if not request_found:
-    print(
-        "NONE"
-    )
-
-
-# =========================================================
-# URL文字列候補
-# =========================================================
-
-print()
-print(
-    "===== URL STRINGS ====="
-)
-
-url_strings = []
-
-for url, js in matched:
 
     patterns = [
-        r"""["']([^"']*cushion[^"']*)["']""",
-        r"""["']([^"']*baba[^"']*)["']""",
-        r"""["']([^"']+\.json[^"']*)["']""",
-        r"""["']([^"']+\.php[^"']*)["']""",
-        r"""["']([^"']+\.cgi[^"']*)["']""",
+        rf"function\s+{re.escape(function_name)}\s*\([^)]*\)\s*\{{",
+        rf"{re.escape(function_name)}\s*=\s*function\s*\([^)]*\)\s*\{{",
     ]
+
+    match = None
+
+    for pattern in patterns:
+
+        match = re.search(
+            pattern,
+            javascript
+        )
+
+        if match:
+            break
+
+    if not match:
+        return ""
+
+    start = match.start()
+
+    brace_start = javascript.find(
+        "{",
+        match.start()
+    )
+
+    if brace_start == -1:
+        return ""
+
+    depth = 0
+
+    in_single = False
+    in_double = False
+    in_template = False
+    escaped = False
+
+    for index in range(
+        brace_start,
+        len(javascript)
+    ):
+
+        char = javascript[index]
+
+        if escaped:
+            escaped = False
+            continue
+
+        if char == "\\":
+            escaped = True
+            continue
+
+        if (
+            char == "'"
+            and not in_double
+            and not in_template
+        ):
+            in_single = not in_single
+            continue
+
+        if (
+            char == '"'
+            and not in_single
+            and not in_template
+        ):
+            in_double = not in_double
+            continue
+
+        if (
+            char == "`"
+            and not in_single
+            and not in_double
+        ):
+            in_template = not in_template
+            continue
+
+        if (
+            in_single
+            or in_double
+            or in_template
+        ):
+            continue
+
+        if char == "{":
+            depth += 1
+
+        elif char == "}":
+
+            depth -= 1
+
+            if depth == 0:
+
+                return javascript[
+                    start:index + 1
+                ]
+
+    return ""
+
+
+# =========================================================
+# 関数周辺抽出
+# =========================================================
+
+def extract_context(
+    javascript,
+    keyword,
+    before=1200,
+    after=3000
+):
+
+    position = javascript.find(
+        keyword
+    )
+
+    if position == -1:
+        return ""
+
+    start = max(
+        0,
+        position - before
+    )
+
+    end = min(
+        len(javascript),
+        position + after
+    )
+
+    return javascript[
+        start:end
+    ]
+
+
+# =========================================================
+# 通信処理候補抽出
+# =========================================================
+
+def extract_network_candidates(text):
+
+    patterns = [
+        r"\$\.ajax\s*\([^;]{0,3000}",
+        r"\$\.getJSON\s*\([^;]{0,2000}",
+        r"\$\.get\s*\([^;]{0,2000}",
+        r"\$\.post\s*\([^;]{0,2000}",
+        r"fetch\s*\([^;]{0,2000}",
+        r"url\s*:\s*[^,\n]+",
+        r"""["'][^"']+\.(?:json|php|html|xml|csv)(?:\?[^"']*)?["']""",
+    ]
+
+    results = []
 
     for pattern in patterns:
 
         for match in re.finditer(
             pattern,
-            js,
-            flags=re.I
+            text,
+            flags=re.IGNORECASE
         ):
 
-            value = (
-                match.group(1)
-                .strip()
-            )
+            value = match.group(0)
 
-            if (
-                value
-                and value
-                not in url_strings
-            ):
-                url_strings.append(
+            if value not in results:
+                results.append(
                     value
                 )
 
+    return results
 
-if url_strings:
 
-    for index, value in enumerate(
-        url_strings,
-        start=1
-    ):
+# =========================================================
+# 実行
+# =========================================================
 
-        print(
-            f"{index}:",
-            value
+print(
+    "========================================"
+)
+
+print(
+    "JRA TRACK NETWORK PROBE"
+)
+
+print(
+    "========================================"
+)
+
+print(
+    "PAGE:",
+    BABA_URL
+)
+
+
+html = get_text(
+    BABA_URL
+)
+
+
+script_urls = extract_script_urls(
+    html
+)
+
+
+print(
+    "\n===== JAVASCRIPT FILES ====="
+)
+
+print(
+    "COUNT:",
+    len(script_urls)
+)
+
+
+matched_count = 0
+
+
+for number, script_url in enumerate(
+    script_urls,
+    start=1
+):
+
+    try:
+
+        javascript = get_text(
+            script_url
         )
 
-else:
+    except Exception as exc:
+
+        print(
+            "\nJS ERROR:",
+            script_url,
+            exc
+        )
+
+        continue
+
+
+    keywords = [
+        "get_cushion_data",
+        "set_cushion_data",
+        "cushion_list",
+        "cushion_data",
+    ]
+
+
+    if not any(
+        keyword in javascript
+        for keyword in keywords
+    ):
+        continue
+
+
+    matched_count += 1
+
 
     print(
-        "NONE"
+        "\n========================================"
+    )
+
+    print(
+        "MATCHED JS #",
+        matched_count
+    )
+
+    print(
+        "URL:",
+        script_url
+    )
+
+    print(
+        "SIZE:",
+        len(javascript)
+    )
+
+    print(
+        "========================================"
     )
 
 
-print()
+    # -----------------------------------------------------
+    # get_cushion_data()
+    # -----------------------------------------------------
+
+    function_text = extract_function(
+        javascript,
+        "get_cushion_data"
+    )
+
+
+    print(
+        "\n===== FUNCTION: get_cushion_data ====="
+    )
+
+
+    if function_text:
+
+        print(
+            function_text
+        )
+
+    else:
+
+        print(
+            "FUNCTION NOT FOUND"
+        )
+
+
+    # -----------------------------------------------------
+    # set_cushion_data()
+    # -----------------------------------------------------
+
+    set_function_text = extract_function(
+        javascript,
+        "set_cushion_data"
+    )
+
+
+    print(
+        "\n===== FUNCTION: set_cushion_data ====="
+    )
+
+
+    if set_function_text:
+
+        print(
+            set_function_text
+        )
+
+    else:
+
+        print(
+            "FUNCTION NOT FOUND"
+        )
+
+
+    # -----------------------------------------------------
+    # get_cushion_data 周辺
+    # -----------------------------------------------------
+
+    context = extract_context(
+        javascript,
+        "get_cushion_data",
+        before=2000,
+        after=5000
+    )
+
+
+    print(
+        "\n===== GET CUSHION CONTEXT ====="
+    )
+
+
+    if context:
+
+        print(
+            context
+        )
+
+    else:
+
+        print(
+            "CONTEXT NOT FOUND"
+        )
+
+
+    # -----------------------------------------------------
+    # 通信候補
+    # -----------------------------------------------------
+
+    network_candidates = (
+        extract_network_candidates(
+            context
+            if context
+            else javascript
+        )
+    )
+
+
+    print(
+        "\n===== NETWORK CANDIDATES ====="
+    )
+
+
+    if network_candidates:
+
+        for index, candidate in enumerate(
+            network_candidates,
+            start=1
+        ):
+
+            print(
+                "\nNETWORK #",
+                index
+            )
+
+            print(
+                candidate
+            )
+
+    else:
+
+        print(
+            "NETWORK CANDIDATE NOT FOUND"
+        )
+
+
+    # -----------------------------------------------------
+    # cushion_list 周辺
+    # -----------------------------------------------------
+
+    cushion_list_context = (
+        extract_context(
+            javascript,
+            "cushion_list",
+            before=1500,
+            after=3500
+        )
+    )
+
+
+    print(
+        "\n===== CUSHION_LIST CONTEXT ====="
+    )
+
+
+    if cushion_list_context:
+
+        print(
+            cushion_list_context
+        )
+
+    else:
+
+        print(
+            "CUSHION_LIST NOT FOUND"
+        )
+
+
 print(
-    "===== FINISHED ====="
+    "\n========================================"
+)
+
+print(
+    "MATCHED SCRIPT COUNT:",
+    matched_count
+)
+
+print(
+    "JRA TRACK NETWORK PROBE FINISHED"
+)
+
+print(
+    "========================================"
 )
