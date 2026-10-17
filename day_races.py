@@ -42,6 +42,7 @@ def load_json(path):
         "r",
         encoding="utf-8"
     ) as f:
+
         return json.load(f)
 
 
@@ -104,6 +105,7 @@ def normalize_surface(value):
 if not os.path.exists(
     RACE_FILE
 ):
+
     raise RuntimeError(
         "race.json がありません。"
     )
@@ -154,25 +156,28 @@ target_distance = int(
 
 
 # =========================================================
-# race_id 検査
+# race_id検査
 # =========================================================
 
 if not re.fullmatch(
     r"\d{12}",
     race_id
 ):
+
     raise RuntimeError(
         "race.json の race_id が不正です。"
     )
 
 
 if not race_date:
+
     raise RuntimeError(
         "race.json に race_date がありません。"
     )
 
 
 if not racecourse:
+
     raise RuntimeError(
         "race.json に競馬場がありません。"
     )
@@ -184,12 +189,19 @@ target_race_number = int(
 
 
 if not (
-    1 <= target_race_number <= 12
+    1
+    <= target_race_number
+    <= 12
 ):
+
     raise RuntimeError(
         f"対象R番号が不正です: {target_race_number}"
     )
 
+
+# =========================================================
+# 対象レースより前だけ
+# =========================================================
 
 eligible_race_numbers = list(
     range(
@@ -240,28 +252,55 @@ print(
 
 
 # =========================================================
-# 1Rなら前レースなし
+# 1R
 # =========================================================
 
 if not eligible_race_numbers:
 
     output = {
-        "race_id": race_id,
-        "race_date": race_date,
-        "racecourse": racecourse,
-        "surface": target_surface,
-        "distance": target_distance,
-        "target_race_number": target_race_number,
-        "future_race_usage": False,
-        "status": "no_previous_races",
-        "eligible_race_numbers": [],
-        "same_surface_race_numbers": [],
-        "collected_race_count": 0,
-        "same_surface_race_count": 0,
-        "collected_races": [],
-        "updated_at": datetime.now(
-            JST
-        ).isoformat(),
+        "race_id":
+            race_id,
+
+        "race_date":
+            race_date,
+
+        "racecourse":
+            racecourse,
+
+        "surface":
+            target_surface,
+
+        "distance":
+            target_distance,
+
+        "target_race_number":
+            target_race_number,
+
+        "future_race_usage":
+            False,
+
+        "status":
+            "no_previous_races",
+
+        "eligible_race_numbers":
+            [],
+
+        "same_surface_race_numbers":
+            [],
+
+        "collected_race_count":
+            0,
+
+        "same_surface_race_count":
+            0,
+
+        "collected_races":
+            [],
+
+        "updated_at":
+            datetime.now(
+                JST
+            ).isoformat(),
     }
 
     save_json(
@@ -327,9 +366,11 @@ def parse_race_condition(
             )
 
             if text:
+
                 candidates.append(
                     text
                 )
+
 
     candidates.append(
         clean_text(
@@ -390,31 +431,25 @@ def parse_race_condition(
 
     for text in candidates:
 
-        patterns = []
-
         if surface == "芝":
 
-            patterns.extend(
-                [
-                    r"芝\s*[:：]\s*(良|稍重|重|不良)",
-                    r"馬場\s*[:：]\s*(良|稍重|重|不良)",
-                ]
-            )
+            patterns = [
+                r"芝\s*[:：]\s*(良|稍重|重|不良)",
+                r"馬場\s*[:：]\s*(良|稍重|重|不良)",
+            ]
 
         elif surface == "ダート":
 
-            patterns.extend(
-                [
-                    r"(?:ダート|ダ)\s*[:：]\s*(良|稍重|重|不良)",
-                    r"馬場\s*[:：]\s*(良|稍重|重|不良)",
-                ]
-            )
+            patterns = [
+                r"(?:ダート|ダ)\s*[:：]\s*(良|稍重|重|不良)",
+                r"馬場\s*[:：]\s*(良|稍重|重|不良)",
+            ]
 
         else:
 
-            patterns.append(
+            patterns = [
                 r"馬場\s*[:：]\s*(良|稍重|重|不良)"
-            )
+            ]
 
 
         for pattern in patterns:
@@ -432,6 +467,7 @@ def parse_race_condition(
 
                 break
 
+
         if track_condition:
             break
 
@@ -444,7 +480,7 @@ def parse_race_condition(
 
 
 # =========================================================
-# 着順表
+# 着順
 # =========================================================
 
 def parse_results(
@@ -452,6 +488,7 @@ def parse_results(
 ):
 
     results = []
+
     seen_rows = set()
 
 
@@ -498,7 +535,7 @@ def parse_results(
 
 
         # -------------------------------------------------
-        # 馬名 / horse_id
+        # 馬名・horse_id
         # -------------------------------------------------
 
         horse_link = (
@@ -510,6 +547,7 @@ def parse_results(
             )
         )
 
+
         if horse_link is None:
             continue
 
@@ -517,6 +555,7 @@ def parse_results(
         horse_name = clean_text(
             horse_link
         )
+
 
         horse_id = ""
 
@@ -527,10 +566,12 @@ def parse_results(
             )
         )
 
+
         horse_id_match = re.search(
             r"/horse/(\d+)",
             href
         )
+
 
         if horse_id_match:
 
@@ -545,6 +586,7 @@ def parse_results(
 
         horse_number = None
 
+
         number_element = (
             row.select_one(
                 ".Umaban"
@@ -553,6 +595,7 @@ def parse_results(
                 ".Horse_Num"
             )
         )
+
 
         if number_element:
 
@@ -579,12 +622,13 @@ def parse_results(
 
             rank_cell_index = None
 
+
             for index, cell in enumerate(
                 cells
             ):
 
                 if (
-                    cell is rank_element
+                    rank_element is cell
                     or rank_element in cell.find_all(
                         True
                     )
@@ -596,16 +640,22 @@ def parse_results(
 
             if rank_cell_index is not None:
 
-                for candidate_index in [
+                candidate_indexes = [
                     rank_cell_index + 2,
                     rank_cell_index + 1,
-                ]:
+                ]
+
+
+                for candidate_index in (
+                    candidate_indexes
+                ):
 
                     if not (
                         0
                         <= candidate_index
                         < len(cells)
                     ):
+
                         continue
 
 
@@ -620,6 +670,7 @@ def parse_results(
                         r"\d{1,2}",
                         candidate_text
                     ):
+
                         continue
 
 
@@ -627,7 +678,12 @@ def parse_results(
                         candidate_text
                     )
 
-                    if 1 <= value <= 18:
+
+                    if (
+                        1
+                        <= value
+                        <= 18
+                    ):
 
                         horse_number = value
                         break
@@ -661,6 +717,7 @@ def parse_results(
                 )
             )
 
+
             if match:
 
                 last3f = float(
@@ -680,6 +737,7 @@ def parse_results(
                 r"\((\d{2}\.\d)\)",
                 row_text
             )
+
 
             if matches:
 
@@ -715,6 +773,7 @@ def parse_results(
                 )
             )
 
+
             if match:
 
                 race_time = (
@@ -733,6 +792,7 @@ def parse_results(
                 )
             )
 
+
             if match:
 
                 race_time = (
@@ -742,12 +802,23 @@ def parse_results(
 
         results.append(
             {
-                "finish": finish,
-                "horse_number": horse_number,
-                "horse_id": horse_id,
-                "horse_name": horse_name,
-                "last3f": last3f,
-                "race_time": race_time,
+                "finish":
+                    finish,
+
+                "horse_number":
+                    horse_number,
+
+                "horse_id":
+                    horse_id,
+
+                "horse_name":
+                    horse_name,
+
+                "last3f":
+                    last3f,
+
+                "race_time":
+                    race_time,
             }
         )
 
@@ -760,21 +831,19 @@ def parse_results(
             )
     )
 
+
     return results
 
 
 # =========================================================
 # コーナー通過順位
-#
-# Probe確認済み：
-# table.Corner_Num
 # =========================================================
 
 def parse_corner_positions(
     soup
 ):
 
-    positions = {
+    output = {
         "1": "",
         "2": "",
         "3": "",
@@ -800,6 +869,7 @@ def parse_corner_positions(
                 )
             )
 
+
             if "コーナー通過順位" in summary:
 
                 table = candidate
@@ -807,36 +877,40 @@ def parse_corner_positions(
 
 
     if table is None:
-        return positions
+
+        return output
 
 
     for row in table.find_all(
         "tr"
     ):
 
-        header = row.find(
+        heading = row.find(
             "th"
         )
 
-        cell = row.find(
+        value_cell = row.find(
             "td"
         )
 
+
         if (
-            header is None
-            or cell is None
+            heading is None
+            or value_cell is None
         ):
+
             continue
 
 
-        header_text = clean_text(
-            header
+        heading_text = clean_text(
+            heading
         )
 
         match = re.search(
             r"([1-4])\s*コーナー",
-            header_text
+            heading_text
         )
+
 
         if not match:
             continue
@@ -847,29 +921,35 @@ def parse_corner_positions(
         )
 
 
-        positions[
+        output[
             corner_number
         ] = clean_text(
-            cell
+            value_cell
         )
 
 
-    return positions
+    return output
 
 
 # =========================================================
-# レースラップ
+# ラップ取得
 #
-# Probeで構造確認済み：
+# ProbeでHTML構造を確認済み。
 #
-# table.RaceCommon_Table.Race_HaronTime
+# table.Race_HaronTime
+#   tr.Header
+#   tr.HaronTime
+#   tr.Header
+#   tr.HaronTime
 #
-# その中の data-laptime が
-# 各200m区間のラップ。
+# HaronTimeの各td:
 #
-# 累計時計
-# 24.1 / 36.3 / 48.6 / 1:00.2...
-# は使用しない。
+#   <td>12.7<br/>12.7</td>
+#
+# 上段 = 累計時計
+# 下段 = 区間ラップ
+#
+# よって各tdの最後の値だけを採用する。
 # =========================================================
 
 def parse_race_laps(
@@ -878,6 +958,7 @@ def parse_race_laps(
 ):
 
     if not distance:
+
         return []
 
 
@@ -886,10 +967,6 @@ def parse_race_laps(
     )
 
 
-    # -----------------------------------------------------
-    # 正規ラップテーブル
-    # -----------------------------------------------------
-
     table = soup.select_one(
         "table.Race_HaronTime"
     )
@@ -897,100 +974,127 @@ def parse_race_laps(
 
     if table is None:
 
-        table = soup.select_one(
-            ".Race_HaronTime"
-        )
-
-
-    if table is None:
-
         print(
-            "lap table not found"
+            "Race_HaronTime table not found"
         )
 
         return []
 
 
-    # -----------------------------------------------------
-    # data-laptimeを取得
-    # -----------------------------------------------------
-
-    lap_elements = table.select(
-        "[data-laptime]"
-    )
+    laps = []
 
 
-    values = []
+    for row in table.select(
+        "tr.HaronTime"
+    ):
+
+        cells = row.find_all(
+            "td",
+            recursive=False
+        )
 
 
-    for element in lap_elements:
+        for cell in cells:
 
-        raw = str(
-            element.get(
-                "data-laptime",
-                ""
+            # ---------------------------------------------
+            # get_text(separator) を使って
+            # <br> の上下を分離
+            # ---------------------------------------------
+
+            raw_parts = cell.get_text(
+                "\n",
+                strip=True
+            ).splitlines()
+
+
+            parts = [
+                part.strip()
+                for part in raw_parts
+                if part.strip()
+            ]
+
+
+            # ---------------------------------------------
+            # Probe確認:
+            #
+            # <td>12.7<br/>12.7</td>
+            #
+            # 最後の値が区間ラップ
+            # ---------------------------------------------
+
+            if not parts:
+                continue
+
+
+            lap_text = parts[-1]
+
+
+            if not re.fullmatch(
+                r"\d{1,2}\.\d",
+                lap_text
+            ):
+
+                print(
+                    "invalid lap cell:",
+                    parts
+                )
+
+                continue
+
+
+            lap = float(
+                lap_text
             )
-        ).strip()
 
 
-        if not re.fullmatch(
-            r"\d{1,2}\.\d",
-            raw
-        ):
-            continue
+            # 200m区間ラップとして
+            # 明らかな異常値だけ除外
+            if not (
+                8.0
+                <= lap
+                <= 20.0
+            ):
+
+                print(
+                    "invalid lap value:",
+                    lap
+                )
+
+                continue
 
 
-        value = float(
-            raw
-        )
+            laps.append(
+                lap
+            )
 
 
-        # 通常の200mラップとして
-        # 明らかな異常値だけ除外
-        if not (
-            8.0
-            <= value
-            <= 20.0
-        ):
-            continue
+    # =====================================================
+    # 区間数の厳密チェック
+    # =====================================================
 
-
-        values.append(
-            value
-        )
-
-
-    # -----------------------------------------------------
-    # 必ず距離と区間数を照合
-    #
-    # 1400mなら7個
-    # 1600mなら8個
-    # 1800mなら9個
-    # 2000mなら10個
-    # -----------------------------------------------------
-
-    if len(
-        values
-    ) != expected_count:
+    if (
+        len(laps)
+        != expected_count
+    ):
 
         print(
             "lap count mismatch:",
-            "distance=",
-            distance,
-            "expected=",
-            expected_count,
-            "actual=",
-            len(
-                values
-            ),
-            "values=",
-            values
+            f"distance={distance}",
+            f"expected={expected_count}",
+            f"actual={len(laps)}",
+            f"values={laps}"
         )
 
         return []
 
 
-    return values
+    print(
+        "race laps parsed:",
+        laps
+    )
+
+
+    return laps
 
 
 # =========================================================
@@ -1026,11 +1130,20 @@ def fetch_race_result(
     except Exception as exc:
 
         return {
-            "race_id": previous_race_id,
-            "race_number": race_number,
-            "status": "fetch_error",
-            "error": str(exc),
-            "source_url": url,
+            "race_id":
+                previous_race_id,
+
+            "race_number":
+                race_number,
+
+            "status":
+                "fetch_error",
+
+            "error":
+                str(exc),
+
+            "source_url":
+                url,
         }
 
 
@@ -1067,9 +1180,9 @@ def fetch_race_result(
     )
 
 
-    # -----------------------------------------------------
-    # パース状態
-    # -----------------------------------------------------
+    # =====================================================
+    # 状態判定
+    # =====================================================
 
     problems = []
 
@@ -1105,44 +1218,55 @@ def fetch_race_result(
         )
 
 
-    # 3角/4角が存在するコースなのに
-    # 両方空なら問題として記録
-    if (
-        not corner_positions.get(
-            "3"
-        )
-        and not corner_positions.get(
-            "4"
-        )
-    ):
+    if not problems:
 
-        problems.append(
-            "corner_positions"
+        status = "ok"
+
+    else:
+
+        status = (
+            "parse_incomplete"
         )
-
-
-    status = (
-        "ok"
-        if not problems
-        else "parse_incomplete"
-    )
 
 
     return {
-        "race_id": previous_race_id,
-        "race_number": race_number,
-        "source_url": url,
-        "surface": surface,
-        "distance": distance,
-        "track_condition": track_condition,
-        "race_laps": race_laps,
-        "corner_positions": corner_positions,
-        "result_count": len(
-            results
-        ),
-        "results": results,
-        "parse_problems": problems,
-        "status": status,
+        "race_id":
+            previous_race_id,
+
+        "race_number":
+            race_number,
+
+        "source_url":
+            url,
+
+        "surface":
+            surface,
+
+        "distance":
+            distance,
+
+        "track_condition":
+            track_condition,
+
+        "race_laps":
+            race_laps,
+
+        "corner_positions":
+            corner_positions,
+
+        "result_count":
+            len(
+                results
+            ),
+
+        "results":
+            results,
+
+        "parse_problems":
+            problems,
+
+        "status":
+            status,
     }
 
 
@@ -1163,6 +1287,10 @@ for race_number in (
         )
     )
 
+
+    # =====================================================
+    # 未来レース防止
+    # =====================================================
 
     if (
         int(
@@ -1309,19 +1437,33 @@ for item in collected_races:
 # =========================================================
 
 output = {
-    "race_id": race_id,
-    "race_date": race_date,
-    "racecourse": racecourse,
-    "surface": target_surface,
-    "distance": target_distance,
-    "target_race_number": target_race_number,
-    "future_race_usage": False,
+    "race_id":
+        race_id,
 
-    "status": (
-        "collected"
-        if collected_races
-        else "no_previous_races"
-    ),
+    "race_date":
+        race_date,
+
+    "racecourse":
+        racecourse,
+
+    "surface":
+        target_surface,
+
+    "distance":
+        target_distance,
+
+    "target_race_number":
+        target_race_number,
+
+    "future_race_usage":
+        False,
+
+    "status":
+        (
+            "collected"
+            if collected_races
+            else "no_previous_races"
+        ),
 
     "eligible_race_numbers":
         eligible_race_numbers,
