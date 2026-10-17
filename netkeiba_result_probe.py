@@ -1,7 +1,11 @@
 import re
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
+
+# =========================================================
+# 設定
+# =========================================================
 
 RACE_ID = "202605040502"
 
@@ -23,20 +27,64 @@ HEADERS = {
 }
 
 
-def clean_text(element):
+# =========================================================
+# 共通
+# =========================================================
 
+def clean_text(element):
     if element is None:
         return ""
 
     return re.sub(
         r"\s+",
         " ",
-        element.get_text(
-            " ",
-            strip=True
-        )
+        element.get_text(" ", strip=True)
     ).strip()
 
+
+def show_element(title, element, html_limit=12000):
+    print()
+    print("=" * 60)
+    print(title)
+    print("=" * 60)
+
+    if element is None:
+        print("NONE")
+        return
+
+    print("TAG:", getattr(element, "name", None))
+    print("ID:", element.get("id") if isinstance(element, Tag) else None)
+    print(
+        "CLASS:",
+        element.get("class") if isinstance(element, Tag) else None
+    )
+
+    print()
+    print("TEXT:")
+    print(clean_text(element)[:5000])
+
+    print()
+    print("HTML:")
+    print(str(element)[:html_limit])
+
+
+def next_tag_siblings(element, limit=10):
+    result = []
+
+    sibling = element.next_sibling
+
+    while sibling is not None and len(result) < limit:
+        if isinstance(sibling, Tag):
+            result.append(sibling)
+
+        sibling = sibling.next_sibling
+
+    return result
+
+
+# =========================================================
+# HTML取得
+# =========================================================
 
 response = requests.get(
     URL,
@@ -55,9 +103,9 @@ soup = BeautifulSoup(
 )
 
 
-print("=" * 50)
-print("NETKEIBA CORNER PROBE")
-print("=" * 50)
+print("=" * 60)
+print("NETKEIBA CORNER STRUCTURE PROBE")
+print("=" * 60)
 
 print("RACE_ID:", RACE_ID)
 print("URL:", URL)
@@ -65,297 +113,251 @@ print("HTML SIZE:", len(html))
 
 
 # =========================================================
-# 1. キーワード確認
+# 「コーナー通過順位」完全一致要素
 # =========================================================
 
 print()
-print("===== KEYWORD CHECK =====")
+print("===== EXACT CORNER HEADINGS =====")
 
-keywords = [
-    "コーナー通過順位",
-    "1コーナー",
-    "2コーナー",
-    "3コーナー",
-    "4コーナー",
-    "通過順位",
-]
-
-for keyword in keywords:
-
-    print(
-        keyword,
-        "=>",
-        html.count(keyword)
-    )
-
-
-# =========================================================
-# 2. キーワードを直接含む要素
-# =========================================================
-
-print()
-print("===== DIRECT TEXT ELEMENTS =====")
-
-for keyword in keywords:
-
-    print()
-    print("########", keyword, "########")
-
-    found = []
-
-    for node in soup.find_all(
-        string=re.compile(
-            re.escape(keyword)
-        )
-    ):
-
-        parent = node.parent
-
-        if parent is None:
-            continue
-
-        key = id(parent)
-
-        if key in found:
-            continue
-
-        found.append(key)
-
-        print()
-        print("TAG:", parent.name)
-        print("ID:", parent.get("id"))
-        print("CLASS:", parent.get("class"))
-        print("TEXT:", clean_text(parent))
-
-        print("PARENT HTML:")
-
-        parent2 = parent.parent
-
-        if parent2 is not None:
-            print(str(parent2)[:6000])
-        else:
-            print(str(parent)[:6000])
-
-
-# =========================================================
-# 3. 「コーナー」を含む要素
-# =========================================================
-
-print()
-print("===== CORNER ELEMENTS =====")
-
-corner_elements = []
-
-seen = set()
+exact_elements = []
 
 for element in soup.find_all(True):
-
     text = clean_text(element)
 
-    if not text:
-        continue
-
-    if (
-        "コーナー通過順位" not in text
-        and "1コーナー" not in text
-        and "2コーナー" not in text
-        and "3コーナー" not in text
-        and "4コーナー" not in text
-    ):
-        continue
-
-    key = id(element)
-
-    if key in seen:
-        continue
-
-    seen.add(key)
-
-    # ページ全体の巨大要素は除外
-    if len(text) > 3000:
-        continue
-
-    corner_elements.append(element)
+    if text == "コーナー通過順位":
+        exact_elements.append(element)
 
 
 print(
-    "CORNER ELEMENT COUNT:",
-    len(corner_elements)
+    "EXACT MATCH COUNT:",
+    len(exact_elements)
+)
+
+
+# =========================================================
+# 各候補を個別調査
+# =========================================================
+
+for index, element in enumerate(
+    exact_elements,
+    start=1
+):
+    print()
+    print("#" * 70)
+    print(
+        f"CORNER HEADING CANDIDATE {index}"
+    )
+    print("#" * 70)
+
+    show_element(
+        "HEADING",
+        element,
+        4000
+    )
+
+    # -----------------------------------------------------
+    # 親
+    # -----------------------------------------------------
+
+    parent = element.parent
+
+    show_element(
+        "PARENT",
+        parent,
+        8000
+    )
+
+    # -----------------------------------------------------
+    # 親の次兄弟
+    # -----------------------------------------------------
+
+    if parent is not None:
+        siblings = next_tag_siblings(
+            parent,
+            10
+        )
+
+        print()
+        print(
+            "PARENT NEXT TAG SIBLING COUNT:",
+            len(siblings)
+        )
+
+        for sibling_index, sibling in enumerate(
+            siblings,
+            start=1
+        ):
+            show_element(
+                (
+                    "PARENT NEXT SIBLING "
+                    f"{sibling_index}"
+                ),
+                sibling,
+                15000
+            )
+
+    # -----------------------------------------------------
+    # 祖父
+    # -----------------------------------------------------
+
+    grandparent = (
+        parent.parent
+        if parent is not None
+        else None
+    )
+
+    show_element(
+        "GRANDPARENT",
+        grandparent,
+        15000
+    )
+
+    # -----------------------------------------------------
+    # 祖父の子要素
+    # -----------------------------------------------------
+
+    if grandparent is not None:
+        children = [
+            child
+            for child in grandparent.children
+            if isinstance(child, Tag)
+        ]
+
+        print()
+        print(
+            "GRANDPARENT DIRECT CHILD COUNT:",
+            len(children)
+        )
+
+        for child_index, child in enumerate(
+            children[:20],
+            start=1
+        ):
+            show_element(
+                (
+                    "GRANDPARENT CHILD "
+                    f"{child_index}"
+                ),
+                child,
+                12000
+            )
+
+    # -----------------------------------------------------
+    # 祖父の次兄弟
+    # -----------------------------------------------------
+
+    if grandparent is not None:
+        siblings = next_tag_siblings(
+            grandparent,
+            10
+        )
+
+        print()
+        print(
+            "GRANDPARENT NEXT TAG SIBLING COUNT:",
+            len(siblings)
+        )
+
+        for sibling_index, sibling in enumerate(
+            siblings,
+            start=1
+        ):
+            show_element(
+                (
+                    "GRANDPARENT NEXT SIBLING "
+                    f"{sibling_index}"
+                ),
+                sibling,
+                15000
+            )
+
+
+# =========================================================
+# corner関連classを直接調査
+# =========================================================
+
+print()
+print("=" * 60)
+print("CORNER CLASS SEARCH")
+print("=" * 60)
+
+corner_class_elements = []
+
+for element in soup.find_all(True):
+    classes = element.get("class", [])
+
+    class_text = " ".join(
+        str(value)
+        for value in classes
+    ).lower()
+
+    if "corner" in class_text:
+        corner_class_elements.append(
+            element
+        )
+
+
+print(
+    "CORNER CLASS COUNT:",
+    len(corner_class_elements)
 )
 
 
 for index, element in enumerate(
-    corner_elements[:30],
+    corner_class_elements,
     start=1
 ):
-
-    print()
-    print("-" * 50)
-    print("CORNER ELEMENT", index)
-
-    print(
-        "TAG:",
-        element.name
-    )
-
-    print(
-        "ID:",
-        element.get("id")
-    )
-
-    print(
-        "CLASS:",
-        element.get("class")
-    )
-
-    print(
-        "TEXT:"
-    )
-
-    print(
-        clean_text(element)
-    )
-
-    print(
-        "HTML:"
-    )
-
-    print(
-        str(element)[:8000]
+    show_element(
+        f"CORNER CLASS ELEMENT {index}",
+        element,
+        10000
     )
 
 
 # =========================================================
-# 4. class / id に corner/pass を含むもの
+# idにもcornerがないか確認
 # =========================================================
 
 print()
-print("===== CLASS ID SEARCH =====")
+print("=" * 60)
+print("CORNER ID SEARCH")
+print("=" * 60)
 
-patterns = [
-    "corner",
-    "pass",
-    "passage",
-    "position",
-]
-
-matched = set()
+corner_id_elements = []
 
 for element in soup.find_all(True):
-
     element_id = str(
-        element.get(
-            "id",
-            ""
+        element.get("id", "")
+    )
+
+    if "corner" in element_id.lower():
+        corner_id_elements.append(
+            element
         )
-    )
 
-    classes = " ".join(
-        element.get(
-            "class",
-            []
-        )
-    )
 
-    target = (
-        element_id
-        + " "
-        + classes
-    ).lower()
+print(
+    "CORNER ID COUNT:",
+    len(corner_id_elements)
+)
 
-    if not any(
-        pattern in target
-        for pattern in patterns
-    ):
-        continue
 
-    key = (
-        element.name,
-        element_id,
-        classes,
-    )
-
-    if key in matched:
-        continue
-
-    matched.add(key)
-
-    print()
-    print("TAG:", element.name)
-    print("ID:", element_id)
-    print("CLASS:", classes)
-
-    print(
-        "TEXT:",
-        clean_text(element)[:1500]
-    )
-
-    print(
-        "HTML:",
-        str(element)[:5000]
+for index, element in enumerate(
+    corner_id_elements,
+    start=1
+):
+    show_element(
+        f"CORNER ID ELEMENT {index}",
+        element,
+        10000
     )
 
 
 # =========================================================
-# 5. 生HTMLでキーワード前後を表示
+# 完了
 # =========================================================
 
 print()
-print("===== RAW HTML AROUND CORNERS =====")
-
-for keyword in [
-    "コーナー通過順位",
-    "1コーナー",
-    "2コーナー",
-    "3コーナー",
-    "4コーナー",
-]:
-
-    print()
-    print("#" * 50)
-    print(keyword)
-    print("#" * 50)
-
-    matches = list(
-        re.finditer(
-            re.escape(keyword),
-            html
-        )
-    )
-
-    print(
-        "MATCH COUNT:",
-        len(matches)
-    )
-
-    for index, match in enumerate(
-        matches[:10],
-        start=1
-    ):
-
-        start = max(
-            0,
-            match.start() - 2500
-        )
-
-        end = min(
-            len(html),
-            match.end() + 6000
-        )
-
-        print()
-        print(
-            "----- MATCH",
-            index,
-            "-----"
-        )
-
-        print(
-            html[start:end]
-        )
-
-
-print()
-print("=" * 50)
-print("CORNER PROBE COMPLETE")
-print("=" * 50)
+print("=" * 60)
+print("PROBE COMPLETE")
+print("=" * 60)
