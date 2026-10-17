@@ -6,16 +6,107 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
 
 
-DEFAULT_RACE_ID = "202605040502"
-RACE_ID = os.environ.get(
-    "RACE_ID",
-    DEFAULT_RACE_ID
-).strip()
+# =========================================================
+# Race ID
+# =========================================================
 
-if not re.fullmatch(r"\d{12}", RACE_ID):
-    raise ValueError(
-        "RACE_IDは12桁の数字で指定してください。"
+DEFAULT_RACE_ID = "202605040502"
+
+
+def load_race_id():
+    """
+    Race ID の優先順位
+
+    1. 環境変数 RACE_ID
+    2. race_id.txt
+    3. DEFAULT_RACE_ID
+
+    day_bias 等で race_id.txt を一時変更した場合も
+    正しく対象レースを取得できるようにする。
+    """
+
+    # -----------------------------------------------------
+    # 1. 環境変数
+    # -----------------------------------------------------
+
+    env_race_id = os.environ.get(
+        "RACE_ID",
+        ""
+    ).strip()
+
+    if env_race_id:
+
+        if not re.fullmatch(
+            r"\d{12}",
+            env_race_id
+        ):
+            raise ValueError(
+                "環境変数 RACE_ID は"
+                "12桁の数字で指定してください。"
+            )
+
+        print(
+            "race id source: environment"
+        )
+
+        return env_race_id
+
+    # -----------------------------------------------------
+    # 2. race_id.txt
+    # -----------------------------------------------------
+
+    if os.path.exists(
+        "race_id.txt"
+    ):
+
+        with open(
+            "race_id.txt",
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            file_race_id = (
+                f.read()
+                .strip()
+            )
+
+        if file_race_id:
+
+            if not re.fullmatch(
+                r"\d{12}",
+                file_race_id
+            ):
+                raise ValueError(
+                    "race_id.txt は"
+                    "12桁の数字で指定してください。"
+                )
+
+            print(
+                "race id source: race_id.txt"
+            )
+
+            return file_race_id
+
+    # -----------------------------------------------------
+    # 3. デフォルト
+    # -----------------------------------------------------
+
+    if not re.fullmatch(
+        r"\d{12}",
+        DEFAULT_RACE_ID
+    ):
+        raise ValueError(
+            "DEFAULT_RACE_ID が不正です。"
+        )
+
+    print(
+        "race id source: default"
     )
+
+    return DEFAULT_RACE_ID
+
+
+RACE_ID = load_race_id()
 
 
 URL = (
@@ -33,6 +124,29 @@ HEADERS = {
     ),
     "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
 }
+
+
+print(
+    "========================================"
+)
+
+print(
+    "RACE COLLECTOR"
+)
+
+print(
+    "========================================"
+)
+
+print(
+    "Target Race ID:",
+    RACE_ID
+)
+
+print(
+    "URL:",
+    URL
+)
 
 
 response = requests.get(
@@ -141,22 +255,18 @@ def extract_race_condition(
     )
 
     date_patterns = [
-        # 2026年10月11日
         r"(20\d{2})年\s*"
         r"(\d{1,2})月\s*"
         r"(\d{1,2})日",
 
-        # 2026/10/11
         r"(20\d{2})/"
         r"(\d{1,2})/"
         r"(\d{1,2})",
 
-        # 2026-10-11
         r"(20\d{2})-"
         r"(\d{1,2})-"
         r"(\d{1,2})",
 
-        # 2026.10.11
         r"(20\d{2})\."
         r"(\d{1,2})\."
         r"(\d{1,2})",
@@ -226,9 +336,8 @@ def extract_race_condition(
         "10": "小倉",
     }
 
-    # JRA race_id
-    # YYYY + 場コード2桁 + 開催回 + 開催日 + R
     if len(race_id) == 12:
+
         track_code = race_id[
             4:6
         ]
@@ -238,7 +347,6 @@ def extract_race_condition(
             ""
         )
 
-    # HTML側に明確な競馬場名がある場合は確認
     for name in jra_tracks.values():
 
         if name in page_text:
@@ -283,7 +391,6 @@ def extract_race_condition(
 
     for text in race_data_texts:
 
-        # 芝1600m
         match = re.search(
             r"芝\s*"
             r"([0-9]{3,4})\s*"
@@ -301,7 +408,6 @@ def extract_race_condition(
 
             break
 
-        # ダ1600m / ダート1600m
         match = re.search(
             r"(?:ダート|ダ)\s*"
             r"([0-9]{3,4})\s*"
@@ -319,7 +425,6 @@ def extract_race_condition(
 
             break
 
-        # 障害
         match = re.search(
             r"障(?:害)?\s*"
             r"([0-9]{3,4})\s*"
@@ -937,7 +1042,6 @@ data = {
             "track"
         ],
 
-    # 旧処理との互換性用
     "racecourse":
         race_condition[
             "track"
@@ -967,6 +1071,18 @@ data = {
     "horses":
         horses,
 }
+
+
+# =========================================================
+# 最終 Race ID 整合性確認
+# =========================================================
+
+if data["race_id"] != RACE_ID:
+    raise RuntimeError(
+        "内部Race ID不整合: "
+        f"requested={RACE_ID} "
+        f"collected={data['race_id']}"
+    )
 
 
 with open(
@@ -1085,3 +1201,16 @@ if warnings:
         print(
             warning
         )
+
+
+print(
+    "\n========================================"
+)
+
+print(
+    "RACE COLLECTION FINISHED"
+)
+
+print(
+    "========================================"
+)
