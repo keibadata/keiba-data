@@ -58,7 +58,7 @@ def save_json(path, data):
         )
 
 
-def text_of(element):
+def clean_text(element):
     if element is None:
         return ""
 
@@ -91,14 +91,20 @@ def normalize_surface(value):
 def safe_int(value):
     try:
         return int(value)
-    except (TypeError, ValueError):
+    except (
+        TypeError,
+        ValueError
+    ):
         return None
 
 
 def safe_float(value):
     try:
         return float(value)
-    except (TypeError, ValueError):
+    except (
+        TypeError,
+        ValueError
+    ):
         return None
 
 
@@ -149,11 +155,13 @@ target_surface = normalize_surface(
     )
 )
 
-target_distance = safe_int(
+target_distance = int(
     race.get(
-        "distance"
+        "distance",
+        0
     )
-) or 0
+    or 0
+)
 
 
 # =========================================================
@@ -168,22 +176,14 @@ if not re.fullmatch(
         "race.json の race_id が不正です。"
     )
 
-
 if not race_date:
     raise RuntimeError(
         "race.json に race_date がありません。"
     )
 
-
 if not racecourse:
     raise RuntimeError(
         "race.json に競馬場がありません。"
-    )
-
-
-if not target_surface:
-    raise RuntimeError(
-        "race.json にsurfaceがありません。"
     )
 
 
@@ -195,12 +195,13 @@ if not (
     1 <= target_race_number <= 12
 ):
     raise RuntimeError(
-        f"対象R番号が不正です: {target_race_number}"
+        f"対象R番号が不正です: "
+        f"{target_race_number}"
     )
 
 
 # =========================================================
-# 対象より前のRだけ
+# 対象レースより前だけ
 # =========================================================
 
 eligible_race_numbers = list(
@@ -210,662 +211,45 @@ eligible_race_numbers = list(
     )
 )
 
-race_id_prefix = race_id[:-2]
 
-
-def build_race_id(race_number):
-    return (
-        race_id_prefix
-        + f"{race_number:02d}"
-    )
-
-
-# =========================================================
-# レース条件取得
-# =========================================================
-
-def extract_race_condition(soup):
-
-    page_text = text_of(
-        soup
-    )
-
-    surface = ""
-    distance = 0
-    track_condition = ""
-
-    texts = []
-
-    for selector in [
-        ".RaceData01",
-        ".RaceData02",
-        ".RaceData",
-        ".RaceName",
-    ]:
-
-        for element in soup.select(
-            selector
-        ):
-            value = text_of(
-                element
-            )
-
-            if value:
-                texts.append(
-                    value
-                )
-
-    texts.append(
-        page_text
-    )
-
-    for value in texts:
-
-        match = re.search(
-            r"芝\s*(\d{3,4})\s*[mｍ]?",
-            value
-        )
-
-        if match:
-            surface = "芝"
-            distance = int(
-                match.group(1)
-            )
-            break
-
-        match = re.search(
-            r"(?:ダート|ダ)\s*"
-            r"(\d{3,4})\s*[mｍ]?",
-            value
-        )
-
-        if match:
-            surface = "ダート"
-            distance = int(
-                match.group(1)
-            )
-            break
-
-        match = re.search(
-            r"障(?:害)?\s*"
-            r"(\d{3,4})\s*[mｍ]?",
-            value
-        )
-
-        if match:
-            surface = "障害"
-            distance = int(
-                match.group(1)
-            )
-            break
-
-    for pattern in [
-        r"馬場\s*[:：]\s*(良|稍重|重|不良)",
-        r"芝\s*[:：]\s*(良|稍重|重|不良)",
-        r"ダート?\s*[:：]\s*(良|稍重|重|不良)",
-    ]:
-
-        match = re.search(
-            pattern,
-            page_text
-        )
-
-        if match:
-            track_condition = (
-                match.group(1)
-            )
-            break
-
-    return {
-        "surface":
-            normalize_surface(
-                surface
-            ),
-
-        "distance":
-            distance,
-
-        "track_condition":
-            track_condition,
-    }
-
-
-# =========================================================
-# 馬名取得
-# =========================================================
-
-def extract_horse_name(row):
-
-    selectors = [
-        ".Horse_Info.Horse_Link a",
-        ".Horse_Info a",
-        ".HorseName a",
-        ".Horse_Name a",
-        'a[href*="/horse/"]',
-    ]
-
-    for selector in selectors:
-
-        element = row.select_one(
-            selector
-        )
-
-        if element:
-
-            name = text_of(
-                element
-            )
-
-            if name:
-                return name
-
-    return ""
-
-
-# =========================================================
-# 着順取得
-# =========================================================
-
-def extract_finish(row):
-
-    element = row.select_one(
-        ".Result_Num"
-    )
-
-    if element is None:
-        return None
-
-    match = re.search(
-        r"\d+",
-        text_of(
-            element
-        )
-    )
-
-    if not match:
-        return None
-
-    return safe_int(
-        match.group()
-    )
-
-
-# =========================================================
-# 馬番取得
-#
-# Probeで確認した実HTML:
-# <td class="Num Waku2 Sticky">2</td>
-#
-# このセルは今回のProbe上では馬を識別する番号として
-# 使用可能だが、枠/馬番の構造差に備えて生値も保持する。
-# =========================================================
-
-def extract_number(row):
-
-    element = row.select_one(
-        "td.Num"
-    )
-
-    if element is None:
-        return None
-
-    match = re.search(
-        r"\d+",
-        text_of(
-            element
-        )
-    )
-
-    if not match:
-        return None
-
-    return safe_int(
-        match.group()
-    )
-
-
-# =========================================================
-# PositionCell取得
-#
-# Probeで実HTML確認済み:
-#
-# <td class="PositionCell"
-#     data-position="2">2</td>
-# =========================================================
-
-def extract_positions(row):
-
-    positions = []
-
-    for cell in row.select(
-        ".PositionCell[data-position]"
-    ):
-
-        raw = cell.get(
-            "data-position",
-            ""
-        )
-
-        position = safe_int(
-            raw
-        )
-
-        if position is None:
-            continue
-
-        positions.append(
-            position
-        )
-
-    return positions
-
-
-# =========================================================
-# 区間ラップ取得
-#
-# Probeで実HTML確認済み:
-#
-# <td class="CellDataWrap"
-#     data-laptime="13.2">13.2</td>
-# =========================================================
-
-def extract_lap_times(row):
-
-    laps = []
-
-    for cell in row.select(
-        ".CellDataWrap[data-laptime]"
-    ):
-
-        raw = cell.get(
-            "data-laptime",
-            ""
-        )
-
-        value = safe_float(
-            raw
-        )
-
-        if value is None:
-            continue
-
-        laps.append(
-            value
-        )
-
-    return laps
-
-
-# =========================================================
-# HorseListを用途別に分類
-#
-# 同じ馬が複数HorseListに存在するため、
-# 全HorseListを結果馬として扱わない。
-# =========================================================
-
-def classify_horse_row(row):
-
-    has_result = (
-        row.select_one(
-            ".Result_Num"
-        )
-        is not None
-    )
-
-    has_horse = bool(
-        extract_horse_name(
-            row
-        )
-    )
-
-    has_lap = (
-        row.select_one(
-            ".CellDataWrap[data-laptime]"
-        )
-        is not None
-    )
-
-    has_position = (
-        row.select_one(
-            ".PositionCell[data-position]"
-        )
-        is not None
-    )
-
-    has_running_time = (
-        row.select_one(
-            ".RunningTimeCell"
-        )
-        is not None
-    )
-
-    has_mileage = (
-        row.select_one(
-            ".MilagesCell"
-        )
-        is not None
-    )
-
-    if not (
-        has_result
-        and has_horse
-    ):
-        return "other"
-
-    if has_lap and has_position:
-        return "lap_position"
-
-    if (
-        has_running_time
-        or has_mileage
-    ):
-        return "running_time"
-
-    return "other_result"
-
-
-# =========================================================
-# 位置取りから簡易脚質
-#
-# これは「能力評価」ではない。
-# 当日バイアス判定用の観測分類。
-# =========================================================
-
-def classify_running_style(
-    positions
-):
-
-    if not positions:
-        return ""
-
-    first_position = positions[0]
-
-    if first_position == 1:
-        return "逃げ"
-
-    if first_position <= 4:
-        return "先行"
-
-    if first_position <= 9:
-        return "中団"
-
-    return "後方"
-
-
-# =========================================================
-# 1レース取得
-# =========================================================
-
-def fetch_race_result(
-    previous_race_id,
-    race_number
-):
-
-    url = (
-        "https://race.netkeiba.com/"
-        "race/result.html"
-        f"?race_id={previous_race_id}"
-    )
-
-    try:
-
-        response = requests.get(
-            url,
-            headers=HEADERS,
-            timeout=30
-        )
-
-        response.raise_for_status()
-
-        response.encoding = (
-            response.apparent_encoding
-        )
-
-    except Exception as exc:
-
-        return {
-            "race_id":
-                previous_race_id,
-
-            "race_number":
-                race_number,
-
-            "source_url":
-                url,
-
-            "status":
-                "fetch_error",
-
-            "error":
-                str(exc),
-
-            "surface":
-                "",
-
-            "distance":
-                0,
-
-            "track_condition":
-                "",
-
-            "result_count":
-                0,
-
-            "results":
-                [],
-        }
-
-    soup = BeautifulSoup(
-        response.text,
-        "html.parser"
-    )
-
-    condition = extract_race_condition(
-        soup
-    )
-
-    # -----------------------------------------------------
-    # 同一馬を統合
-    # -----------------------------------------------------
-
-    horses = {}
-
-    for row in soup.select(
-        "tr.HorseList"
-    ):
-
-        row_type = classify_horse_row(
-            row
-        )
-
-        if row_type == "other":
-            continue
-
-        finish = extract_finish(
-            row
-        )
-
-        horse_name = extract_horse_name(
-            row
-        )
-
-        if (
-            finish is None
-            or not horse_name
-        ):
-            continue
-
-        number = extract_number(
-            row
-        )
-
-        # 同一馬統合キー
-        key = (
-            finish,
-            horse_name
-        )
-
-        if key not in horses:
-
-            horses[key] = {
-                "finish":
-                    finish,
-
-                "horse_number":
-                    number,
-
-                "horse_name":
-                    horse_name,
-
-                "positions":
-                    [],
-
-                "section_laps":
-                    [],
-
-                "running_style":
-                    "",
-
-                "source_row_types":
-                    [],
-            }
-
-        item = horses[key]
-
-        if (
-            item["horse_number"]
-            is None
-            and number is not None
-        ):
-            item[
-                "horse_number"
-            ] = number
-
-        if (
-            row_type
-            not in item[
-                "source_row_types"
-            ]
-        ):
-            item[
-                "source_row_types"
-            ].append(
-                row_type
-            )
-
-        positions = extract_positions(
-            row
-        )
-
-        laps = extract_lap_times(
-            row
-        )
-
-        # PositionCellが最も多い行を採用
-        if (
-            len(positions)
-            > len(
-                item["positions"]
-            )
-        ):
-            item[
-                "positions"
-            ] = positions
-
-        # data-laptime付きだけ採用
-        if (
-            len(laps)
-            > len(
-                item["section_laps"]
-            )
-        ):
-            item[
-                "section_laps"
-            ] = laps
-
-    # -----------------------------------------------------
-    # 最終整形
-    # -----------------------------------------------------
-
-    results = []
-
-    for item in horses.values():
-
-        item[
-            "running_style"
-        ] = classify_running_style(
-            item[
-                "positions"
-            ]
-        )
-
-        results.append(
-            item
-        )
-
-    results.sort(
-        key=lambda x: (
-            x.get(
-                "finish"
-            )
-            if x.get(
-                "finish"
-            )
-            is not None
-            else 999
-        )
-    )
-
-    status = "ok"
-
-    if not condition[
-        "surface"
-    ]:
-        status = (
-            "condition_parse_incomplete"
-        )
-
-    if not results:
-        status = (
-            "result_parse_incomplete"
-        )
-
-    return {
-        "race_id":
-            previous_race_id,
-
-        "race_number":
-            race_number,
-
-        "source_url":
-            url,
-
-        "surface":
-            condition[
-                "surface"
-            ],
-
-        "distance":
-            condition[
-                "distance"
-            ],
-
-        "track_condition":
-            condition[
-                "track_condition"
-            ],
-
-        "result_count":
-            len(
-                results
-            ),
-
-        "results":
-            results,
-
-        "status":
-            status,
-    }
+print(
+    "===== DAY RACES ====="
+)
+
+print(
+    "target race id:",
+    race_id
+)
+
+print(
+    "date:",
+    race_date
+)
+
+print(
+    "racecourse:",
+    racecourse
+)
+
+print(
+    "surface:",
+    target_surface
+)
+
+print(
+    "distance:",
+    target_distance
+)
+
+print(
+    "target race number:",
+    target_race_number
+)
+
+print(
+    "eligible previous races:",
+    eligible_race_numbers
+)
 
 
 # =========================================================
@@ -929,11 +313,627 @@ if not eligible_race_numbers:
         "対象が1Rのため前レースなし"
     )
 
-    print(
-        "future race usage: False"
+    raise SystemExit(0)
+
+
+# =========================================================
+# race_id生成
+# =========================================================
+
+race_id_prefix = race_id[:-2]
+
+
+def build_race_id(race_number):
+
+    return (
+        race_id_prefix
+        + f"{race_number:02d}"
     )
 
-    raise SystemExit(0)
+
+# =========================================================
+# レース条件取得
+# =========================================================
+
+def extract_race_condition(soup):
+
+    page_text = clean_text(
+        soup
+    )
+
+    surface = ""
+    distance = 0
+
+    texts = []
+
+    for selector in [
+        ".RaceData01",
+        ".RaceData02",
+        ".RaceData",
+        ".RaceName",
+    ]:
+
+        for element in soup.select(
+            selector
+        ):
+
+            text = clean_text(
+                element
+            )
+
+            if text:
+                texts.append(
+                    text
+                )
+
+    texts.append(
+        page_text
+    )
+
+    for text in texts:
+
+        match = re.search(
+            r"芝\s*(\d{3,4})\s*[mｍ]?",
+            text
+        )
+
+        if match:
+            surface = "芝"
+            distance = int(
+                match.group(1)
+            )
+            break
+
+        match = re.search(
+            r"(?:ダート|ダ)\s*"
+            r"(\d{3,4})\s*[mｍ]?",
+            text
+        )
+
+        if match:
+            surface = "ダート"
+            distance = int(
+                match.group(1)
+            )
+            break
+
+        match = re.search(
+            r"障(?:害)?\s*"
+            r"(\d{3,4})\s*[mｍ]?",
+            text
+        )
+
+        if match:
+            surface = "障害"
+            distance = int(
+                match.group(1)
+            )
+            break
+
+    track_condition = ""
+
+    for pattern in [
+        r"馬場\s*[:：]\s*"
+        r"(良|稍重|重|不良)",
+
+        r"芝\s*[:：]\s*"
+        r"(良|稍重|重|不良)",
+
+        r"ダート?\s*[:：]\s*"
+        r"(良|稍重|重|不良)",
+    ]:
+
+        match = re.search(
+            pattern,
+            page_text
+        )
+
+        if match:
+            track_condition = (
+                match.group(1)
+            )
+            break
+
+    return (
+        surface,
+        distance,
+        track_condition
+    )
+
+
+# =========================================================
+# 着順結果テーブルを特定
+# =========================================================
+
+def is_real_result_row(row):
+    """
+    通常の着順結果行だけを通す。
+
+    netkeibaには同じHorseListクラスを使った
+    ラップ解析・走行位置解析等の別テーブルがあるため、
+    Result_Num + Horse_Info + horseリンクの存在を必須にする。
+    """
+
+    result_cell = row.select_one(
+        "td.Result_Num"
+    )
+
+    horse_cell = row.select_one(
+        "td.Horse_Info"
+    )
+
+    horse_link = row.select_one(
+        'td.Horse_Info a[href*="/horse/"]'
+    )
+
+    if result_cell is None:
+        return False
+
+    if horse_cell is None:
+        return False
+
+    if horse_link is None:
+        return False
+
+    result_text = clean_text(
+        result_cell
+    )
+
+    if not re.fullmatch(
+        r"\d+",
+        result_text
+    ):
+        return False
+
+    return True
+
+
+# =========================================================
+# コーナー通過順位
+# =========================================================
+
+def extract_corner_positions(row):
+    """
+    馬ごとの「通過」欄を取得する。
+
+    例:
+      2-2
+      5-4
+      10-9
+      1-1-1-1
+
+    数字だけの配列に変換する。
+    """
+
+    selectors = [
+        ".PassageRate",
+        ".Passage",
+        ".Corner",
+    ]
+
+    for selector in selectors:
+
+        element = row.select_one(
+            selector
+        )
+
+        if element is None:
+            continue
+
+        text = clean_text(
+            element
+        )
+
+        numbers = re.findall(
+            r"\d+",
+            text
+        )
+
+        if numbers:
+            return [
+                int(value)
+                for value in numbers
+            ]
+
+    return []
+
+
+# =========================================================
+# 上がり3F
+# =========================================================
+
+def extract_last3f(row):
+
+    selectors = [
+        ".Last3F",
+        "td.Last3F",
+    ]
+
+    for selector in selectors:
+
+        element = row.select_one(
+            selector
+        )
+
+        if element is None:
+            continue
+
+        text = clean_text(
+            element
+        )
+
+        match = re.search(
+            r"\d{2}\.\d",
+            text
+        )
+
+        if match:
+            return safe_float(
+                match.group()
+            )
+
+    return None
+
+
+# =========================================================
+# レース全体ラップ
+# =========================================================
+
+def extract_race_laps(soup):
+
+    candidates = []
+
+    for selector in [
+        ".Race_HaronTime",
+        ".HaronTime",
+        ".RaceData_Haron",
+        "table.Race_HaronTime",
+    ]:
+
+        for element in soup.select(
+            selector
+        ):
+
+            text = clean_text(
+                element
+            )
+
+            if text:
+                candidates.append(
+                    text
+                )
+
+    for text in candidates:
+
+        values = re.findall(
+            r"(?<!\d)"
+            r"(\d{1,2}\.\d)"
+            r"(?!\d)",
+            text
+        )
+
+        if len(values) >= 3:
+
+            return [
+                float(value)
+                for value in values
+            ]
+
+    return []
+
+
+# =========================================================
+# 結果取得
+# =========================================================
+
+def fetch_race_result(
+    previous_race_id,
+    race_number
+):
+
+    url = (
+        "https://race.netkeiba.com/"
+        "race/result.html"
+        f"?race_id={previous_race_id}"
+    )
+
+    try:
+
+        response = requests.get(
+            url,
+            headers=HEADERS,
+            timeout=30
+        )
+
+        response.raise_for_status()
+
+        response.encoding = (
+            response.apparent_encoding
+        )
+
+    except Exception as exc:
+
+        return {
+            "race_id":
+                previous_race_id,
+
+            "race_number":
+                race_number,
+
+            "status":
+                "fetch_error",
+
+            "error":
+                str(exc),
+
+            "source_url":
+                url,
+
+            "results":
+                [],
+        }
+
+    soup = BeautifulSoup(
+        response.text,
+        "html.parser"
+    )
+
+    (
+        surface,
+        distance,
+        track_condition
+    ) = extract_race_condition(
+        soup
+    )
+
+    race_laps = extract_race_laps(
+        soup
+    )
+
+    results = []
+
+    # HorseListは複数テーブルに存在するので
+    # 後段で厳密に通常結果行だけを選別
+    rows = soup.select(
+        "tr.HorseList"
+    )
+
+    for row in rows:
+
+        if not is_real_result_row(
+            row
+        ):
+            continue
+
+        # -------------------------------------------------
+        # 着順
+        # -------------------------------------------------
+
+        result_cell = row.select_one(
+            "td.Result_Num"
+        )
+
+        finish_text = clean_text(
+            result_cell
+        )
+
+        finish = safe_int(
+            finish_text
+        )
+
+        if finish is None:
+            continue
+
+        # -------------------------------------------------
+        # 馬番
+        # -------------------------------------------------
+
+        horse_number = None
+
+        number_cell = (
+            row.select_one(
+                "td.Num"
+            )
+            or row.select_one(
+                "td.Umaban"
+            )
+            or row.select_one(
+                ".Umaban"
+            )
+        )
+
+        if number_cell:
+
+            match = re.search(
+                r"\d+",
+                clean_text(
+                    number_cell
+                )
+            )
+
+            if match:
+                horse_number = (
+                    int(
+                        match.group()
+                    )
+                )
+
+        # -------------------------------------------------
+        # 馬名・horse_id
+        # -------------------------------------------------
+
+        horse_link = row.select_one(
+            'td.Horse_Info '
+            'a[href*="/horse/"]'
+        )
+
+        horse_name = clean_text(
+            horse_link
+        )
+
+        horse_id = ""
+
+        if horse_link:
+
+            href = horse_link.get(
+                "href",
+                ""
+            )
+
+            match = re.search(
+                r"/horse/(\d+)",
+                href
+            )
+
+            if match:
+                horse_id = (
+                    match.group(1)
+                )
+
+        if not horse_name:
+            continue
+
+        # -------------------------------------------------
+        # 通過順位
+        # -------------------------------------------------
+
+        corner_positions = (
+            extract_corner_positions(
+                row
+            )
+        )
+
+        # -------------------------------------------------
+        # 上がり
+        # -------------------------------------------------
+
+        last3f = extract_last3f(
+            row
+        )
+
+        # -------------------------------------------------
+        # 保存
+        # -------------------------------------------------
+
+        results.append(
+            {
+                "finish":
+                    finish,
+
+                "horse_number":
+                    horse_number,
+
+                "horse_id":
+                    horse_id,
+
+                "horse_name":
+                    horse_name,
+
+                "corner_positions":
+                    corner_positions,
+
+                "last3f":
+                    last3f,
+            }
+        )
+
+    # -----------------------------------------------------
+    # 重複除去
+    # -----------------------------------------------------
+
+    unique_results = []
+    seen = set()
+
+    for item in results:
+
+        key = (
+            item.get(
+                "finish"
+            ),
+            item.get(
+                "horse_id"
+            ),
+            item.get(
+                "horse_name"
+            ),
+        )
+
+        if key in seen:
+            continue
+
+        seen.add(
+            key
+        )
+
+        unique_results.append(
+            item
+        )
+
+    results = unique_results
+
+    # -----------------------------------------------------
+    # 着順順
+    # -----------------------------------------------------
+
+    results.sort(
+        key=lambda item:
+            item.get(
+                "finish",
+                999
+            )
+    )
+
+    # -----------------------------------------------------
+    # 取得品質
+    # -----------------------------------------------------
+
+    if not surface:
+
+        status = (
+            "condition_parse_incomplete"
+        )
+
+    elif len(results) < 3:
+
+        status = (
+            "result_parse_incomplete"
+        )
+
+    else:
+
+        status = "ok"
+
+    return {
+        "race_id":
+            previous_race_id,
+
+        "race_number":
+            race_number,
+
+        "source_url":
+            url,
+
+        "surface":
+            surface,
+
+        "distance":
+            distance,
+
+        "track_condition":
+            track_condition,
+
+        "race_laps":
+            race_laps,
+
+        "result_count":
+            len(results),
+
+        "results":
+            results,
+
+        "status":
+            status,
+    }
 
 
 # =========================================================
@@ -952,15 +952,15 @@ for race_number in (
         )
     )
 
-    # 未来データ防止
     if (
         int(
             previous_race_id[-2:]
         )
         >= target_race_number
     ):
+
         raise RuntimeError(
-            "未来レース混入防止チェック失敗"
+            "未来レース混入防止チェックに失敗しました。"
         )
 
     print()
@@ -1002,37 +1002,18 @@ for race_number in (
     print(
         "result count:",
         result.get(
-            "result_count"
+            "result_count",
+            0
         )
     )
 
-    # 先頭3頭だけログ確認
-    for horse in result.get(
-        "results",
-        []
-    )[:3]:
-
-        print(
-            " ",
-            horse.get(
-                "finish"
-            ),
-            horse.get(
-                "horse_name"
-            ),
-            "positions=",
-            horse.get(
-                "positions"
-            ),
-            "style=",
-            horse.get(
-                "running_style"
-            ),
-            "laps=",
-            horse.get(
-                "section_laps"
-            ),
+    print(
+        "race laps:",
+        result.get(
+            "race_laps",
+            []
         )
+    )
 
     time.sleep(
         0.4
@@ -1040,7 +1021,7 @@ for race_number in (
 
 
 # =========================================================
-# 同馬場レース
+# 同一馬場
 # =========================================================
 
 same_surface_races = []
@@ -1048,27 +1029,27 @@ same_surface_races = []
 for item in collected_races:
 
     if (
-        item.get(
-            "status"
-        )
-        != "ok"
-    ):
-        continue
-
-    if (
         normalize_surface(
             item.get(
                 "surface"
             )
         )
-        == target_surface
+        != target_surface
     ):
+        continue
 
-        same_surface_races.append(
-            item.get(
-                "race_number"
-            )
+    # 結果取得が壊れているレースは
+    # バイアス判定対象にしない
+    if item.get(
+        "status"
+    ) != "ok":
+        continue
+
+    same_surface_races.append(
+        item.get(
+            "race_number"
         )
+    )
 
 
 # =========================================================
@@ -1077,22 +1058,22 @@ for item in collected_races:
 
 for item in collected_races:
 
-    race_number = safe_int(
+    item_race_number = int(
         item.get(
-            "race_number"
+            "race_number",
+            0
         )
+        or 0
     )
 
-    if race_number is None:
-        continue
-
     if (
-        race_number
+        item_race_number
         >= target_race_number
     ):
+
         raise RuntimeError(
             "対象レース以降のデータが"
-            "混入しています。"
+            "day_races.json に混入しています。"
         )
 
 
@@ -1123,7 +1104,11 @@ output = {
         False,
 
     "status":
-        "collected",
+        (
+            "collected"
+            if collected_races
+            else "no_previous_races"
+        ),
 
     "eligible_race_numbers":
         eligible_race_numbers,
@@ -1184,7 +1169,7 @@ print(
 )
 
 print(
-    "same surface:",
+    "same surface usable:",
     same_surface_races
 )
 
@@ -1193,6 +1178,39 @@ print(
     False
 )
 
+for item in collected_races:
+
+    print()
+    print(
+        "R:",
+        item.get(
+            "race_number"
+        )
+    )
+
+    print(
+        "surface:",
+        item.get(
+            "surface"
+        )
+    )
+
+    print(
+        "status:",
+        item.get(
+            "status"
+        )
+    )
+
+    print(
+        "result_count:",
+        item.get(
+            "result_count",
+            0
+        )
+    )
+
+print()
 print(
     "saved:",
     OUTPUT_FILE
