@@ -2,6 +2,11 @@ name: Day Bias Test
 
 on:
   workflow_dispatch:
+    inputs:
+      test_race_id:
+        description: "テスト対象Race ID（12桁）"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -26,39 +31,76 @@ jobs:
           pip install -r requirements.txt
 
       # =====================================
-      # 1. 対象レースより前の当日レース収集
+      # テスト対象race.jsonを取得
+      # race_id.txt本体は変更しない
+      # =====================================
+
+      - name: Prepare test race
+        env:
+          TEST_RACE_ID: ${{ inputs.test_race_id }}
+        run: |
+          if ! echo "$TEST_RACE_ID" | grep -Eq '^[0-9]{12}$'; then
+            echo "ERROR: test_race_id must contain exactly 12 digits"
+            exit 1
+          fi
+
+          echo "Test Race ID: $TEST_RACE_ID"
+
+          cp race_id.txt race_id_backup.txt
+          printf '%s\n' "$TEST_RACE_ID" > race_id.txt
+
+          python main_v3.py
+
+          mv race_id_backup.txt race_id.txt
+
+          python - <<'PY'
+          import json
+          import os
+
+          target = os.environ.get("TEST_RACE_ID", "").strip()
+
+          with open("race.json", "r", encoding="utf-8") as f:
+              race = json.load(f)
+
+          actual = str(race.get("race_id", "")).strip()
+
+          print("requested:", target)
+          print("race.json:", actual)
+
+          if actual != target:
+              raise SystemExit(
+                  "ERROR: collected race_id mismatch"
+              )
+
+          print("TEST RACE PREPARED")
+          PY
+
+      # =====================================
+      # 対象レース以前だけ収集
       # =====================================
 
       - name: Collect previous day races
         run: |
           python day_race_collector.py
 
-      # =====================================
-      # 2. 収集結果確認
-      # =====================================
-
       - name: Show collected day races
         run: |
           cat day_races.json
 
       # =====================================
-      # 3. 当日バイアス判定
+      # 当日バイアス
       # =====================================
 
       - name: Run day bias
         run: |
           python day_bias.py
 
-      # =====================================
-      # 4. バイアス結果確認
-      # =====================================
-
       - name: Show day bias
         run: |
           cat day_bias.json
 
       # =====================================
-      # 5. 安全性チェック
+      # 未来レース混入チェック
       # =====================================
 
       - name: Validate day bias
@@ -76,71 +118,81 @@ jobs:
           with open("day_bias.json", "r", encoding="utf-8") as f:
               day_bias = json.load(f)
 
-          race_id = str(race.get("race_id", "")).strip()
+          race_id = str(
+              race.get("race_id", "")
+          ).strip()
 
           if len(race_id) != 12 or not race_id.isdigit():
               sys.exit("ERROR: invalid race_id")
 
-          target_race_number = int(race_id[-2:])
+          target_number = int(
+              race_id[-2:]
+          )
 
-          collected_target = str(
-              day_races.get("target_race_id", "")
-          ).strip()
+          print("target race:", target_number)
 
-          if collected_target != race_id:
+          expected = list(
+              range(1, target_number)
+          )
+
+          actual_eligible = day_races.get(
+              "eligible_previous_race_numbers",
+              []
+          )
+
+          print(
+              "expected eligible:",
+              expected
+          )
+
+          print(
+              "actual eligible:",
+              actual_eligible
+          )
+
+          if actual_eligible != expected:
               sys.exit(
-                  "ERROR: day_races race ID mismatch"
+                  "ERROR: eligible race numbers mismatch"
               )
 
-          if day_races.get("future_race_usage"):
+          if day_races.get(
+              "future_race_usage"
+          ):
               sys.exit(
-                  "ERROR: future race usage detected in day_races"
+                  "ERROR: future race usage detected"
               )
 
-          for item in day_races.get("races", []):
-              race_number = item.get("race_number")
+          for item in day_races.get(
+              "races",
+              []
+          ):
+              number = item.get(
+                  "race_number"
+              )
 
-              if race_number is None:
+              if number is None:
                   continue
 
-              if int(race_number) >= target_race_number:
+              if int(number) >= target_number:
                   sys.exit(
-                      "ERROR: future race mixed into day_races"
+                      "ERROR: future race mixed into collection"
                   )
 
-          bias_race_id = str(
-              day_bias.get("race_id", "")
-          ).strip()
-
-          if bias_race_id != race_id:
+          if day_bias.get(
+              "future_race_usage"
+          ):
               sys.exit(
-                  "ERROR: day_bias race ID mismatch"
+                  "ERROR: future race usage detected in bias"
               )
 
-          if day_bias.get("future_race_usage"):
-              sys.exit(
-                  "ERROR: future race usage detected in day_bias"
-              )
-
-          print("race_id:", race_id)
           print(
-              "target race number:",
-              target_race_number
-          )
-          print(
-              "eligible previous races:",
-              day_races.get(
-                  "eligible_previous_race_numbers",
-                  []
-              )
-          )
-          print(
-              "collected race count:",
+              "collected:",
               day_races.get(
                   "collected_race_count",
                   0
               )
           )
+
           print(
               "same surface finished:",
               day_races.get(
@@ -148,22 +200,26 @@ jobs:
                   0
               )
           )
+
           print(
-              "day bias reference count:",
+              "reference count:",
               day_bias.get(
                   "reference_race_count",
                   0
               )
           )
 
-          print("DAY BIAS VALIDATION OK")
+          print(
+              "FUTURE LEAK CHECK OK"
+          )
           PY
 
       # =====================================
-      # 6. 保存
+      # テスト結果だけ保存
+      # race.json / race_id.txt は保存しない
       # =====================================
 
-      - name: Save day bias data
+      - name: Save day bias test data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -177,5 +233,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Update day race bias"
+          git commit -m "Test day race bias"
           git push
