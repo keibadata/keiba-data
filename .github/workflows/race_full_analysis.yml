@@ -42,10 +42,6 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # =====================================
-      # 0. Race ID
-      # =====================================
-
       - name: Resolve or load race ID
         env:
           RACE_DATE: ${{ inputs.race_date }}
@@ -53,7 +49,6 @@ jobs:
           RACE_NO: ${{ inputs.race_no }}
         run: |
           if [ -n "$RACE_DATE" ] || [ -n "$RACE_TRACK" ] || [ -n "$RACE_NO" ]; then
-
             if [ -z "$RACE_DATE" ] || [ -z "$RACE_TRACK" ] || [ -z "$RACE_NO" ]; then
               echo "ERROR: race_date / race_track / race_no must all be supplied"
               exit 1
@@ -65,12 +60,9 @@ jobs:
             echo "Race : ${RACE_NO}R"
 
             python resolve_race_id.py
-
           else
-
             echo "No race selection inputs."
             echo "Using existing race_id.txt."
-
           fi
 
           RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
@@ -83,130 +75,223 @@ jobs:
           echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
           echo "Target Race ID: $RACE_ID"
 
-      # =====================================
-      # 1. 今回レース取得
-      # =====================================
+      # ===================================================
+      # 対象レース
+      # ===================================================
 
       - name: Collect race
         run: |
           python main_v3.py
 
-      # =====================================
-      # 2. 馬場データ構築
-      # race.json取得後に必ず実行
-      # =====================================
+      # ===================================================
+      # JRA馬場情報
+      # ===================================================
 
       - name: Build track condition
         run: |
           python track_condition.py
 
-      # =====================================
-      # 3. 今回条件の過去レース探索
-      # =====================================
+      # ===================================================
+      # 当日バイアス
+      #
+      # 対象Rより前のレースだけ取得。
+      # 対象R以降は使用しない。
+      # ===================================================
+
+      - name: Collect previous day races
+        run: |
+          python day_races.py
+
+      - name: Run day bias
+        run: |
+          python day_bias.py
+
+      - name: Validate day bias
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open(
+              "race.json",
+              "r",
+              encoding="utf-8"
+          ) as f:
+              race = json.load(f)
+
+          with open(
+              "day_races.json",
+              "r",
+              encoding="utf-8"
+          ) as f:
+              day_races = json.load(f)
+
+          with open(
+              "day_bias.json",
+              "r",
+              encoding="utf-8"
+          ) as f:
+              day_bias = json.load(f)
+
+          race_id = str(
+              race.get("race_id", "")
+          ).strip()
+
+          if str(
+              day_races.get("race_id", "")
+          ).strip() != race_id:
+              sys.exit(
+                  "ERROR: day_races race ID mismatch"
+              )
+
+          if str(
+              day_bias.get("race_id", "")
+          ).strip() != race_id:
+              sys.exit(
+                  "ERROR: day_bias race ID mismatch"
+              )
+
+          target_race_number = int(
+              race_id[-2:]
+          )
+
+          for item in day_races.get(
+              "collected_races",
+              []
+          ):
+              race_number = int(
+                  item.get("race_number", 0)
+                  or 0
+              )
+
+              if race_number >= target_race_number:
+                  sys.exit(
+                      "ERROR: future race data detected"
+                  )
+
+          if day_races.get(
+              "future_race_usage"
+          ) is not False:
+              sys.exit(
+                  "ERROR: day_races future race flag"
+              )
+
+          if day_bias.get(
+              "future_race_usage"
+          ) is not False:
+              sys.exit(
+                  "ERROR: day_bias future race flag"
+              )
+
+          print(
+              "DAY BIAS VALIDATION OK"
+          )
+
+          print(
+              "bias:",
+              day_bias.get(
+                  "running_style_bias"
+              )
+          )
+
+          print(
+              "confidence:",
+              day_bias.get(
+                  "confidence"
+              )
+          )
+
+          print(
+              "analyzed races:",
+              day_bias.get(
+                  "analyzed_race_count"
+              )
+          )
+          PY
+
+      # ===================================================
+      # 条件別過去データ
+      # ===================================================
 
       - name: Find condition history races
         run: |
           python history_batch.py
 
-      # =====================================
-      # 4. 過去レースDB更新
-      # =====================================
-
       - name: Update history database
         run: |
           python history_db.py
-
-      # =====================================
-      # 5. 履歴馬5代血統
-      # =====================================
 
       - name: Update history pedigrees
         run: |
           python history_pedigree.py
 
-      # =====================================
-      # 6. 今回条件履歴抽出
-      # =====================================
-
       - name: Select condition history
         run: |
           python condition_history.py
 
-      # =====================================
-      # 7. 今回出走馬5代血統
-      # =====================================
+      # ===================================================
+      # 血統
+      # ===================================================
 
       - name: Collect pedigree
         run: |
           python pedigree.py
 
-      # =====================================
-      # 8. 血統名正規化
-      # =====================================
-
       - name: Normalize pedigree
         run: |
           python normalize_pedigree.py
 
-      # =====================================
-      # 9. 出走馬過去成績
-      # =====================================
+      # ===================================================
+      # 各馬履歴
+      # ===================================================
 
       - name: Collect runner history
         run: |
           python runner_history.py
 
-      # =====================================
-      # 10. 能力・今回能力発揮率
-      # =====================================
-
       - name: Analyze runners
         run: |
           python runner_analysis.py
 
-      # =====================================
-      # 11. 前走処理
-      # =====================================
+      # ===================================================
+      # 前走処理
+      # ===================================================
 
       - name: Analyze previous race
         run: |
           python previous_race_analysis.py
 
-      # =====================================
-      # 12. 展開
-      # =====================================
+      # ===================================================
+      # 展開
+      # ===================================================
 
       - name: Analyze pace
         run: |
           python pace_analysis.py
 
-      # =====================================
-      # 13. 血統統計
-      # =====================================
+      # ===================================================
+      # 血統統計
+      # ===================================================
 
       - name: Build bloodline statistics
         run: |
           python bloodline_stats.py
 
-      # =====================================
-      # 14. 今回出走馬血統評価
-      # =====================================
-
       - name: Score race bloodlines
         run: |
           python race_bloodline_score.py
 
-      # =====================================
-      # 15. 最終統合
-      # =====================================
+      # ===================================================
+      # 最終解析
+      # ===================================================
 
       - name: Run final analysis
         run: |
           python final_analysis.py
 
-      # =====================================
-      # 16. 完成チェック
-      # =====================================
+      # ===================================================
+      # 最終検証
+      # ===================================================
 
       - name: Validate final analysis
         run: |
@@ -265,7 +350,7 @@ jobs:
                   summary.get(
                       "body_weight_connected_count",
                       0
-                  )
+                  ),
           }
 
           print(
@@ -309,10 +394,6 @@ jobs:
                       + " connection incomplete"
                   )
 
-          # =================================
-          # 馬場接続状態
-          # =================================
-
           track = data.get(
               "track_condition",
               {}
@@ -339,9 +420,6 @@ jobs:
               )
           )
 
-          # track_condition.py が
-          # 今回race_idで作られているため
-          # Race ID不一致なら異常
           if (
               track.get(
                   "source_available"
@@ -360,9 +438,9 @@ jobs:
           )
           PY
 
-      # =====================================
-      # 17. JSON + Race ID 保存
-      # =====================================
+      # ===================================================
+      # 保存
+      # ===================================================
 
       - name: Save analysis data
         run: |
@@ -373,6 +451,8 @@ jobs:
             race_id.txt \
             race.json \
             track_condition.json \
+            day_races.json \
+            day_bias.json \
             history_races.json \
             history_db.json \
             history_pedigree.json \
