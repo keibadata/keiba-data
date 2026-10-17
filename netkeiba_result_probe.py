@@ -1,6 +1,6 @@
 import re
 import requests
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 
 
 # =========================================================
@@ -32,54 +32,85 @@ HEADERS = {
 # =========================================================
 
 def clean_text(element):
+
     if element is None:
         return ""
 
     return re.sub(
         r"\s+",
         " ",
-        element.get_text(" ", strip=True)
+        element.get_text(
+            " ",
+            strip=True
+        )
     ).strip()
 
 
-def show_element(title, element, html_limit=12000):
+def print_element(
+    title,
+    element,
+    html_length=8000
+):
+
     print()
-    print("=" * 60)
-    print(title)
-    print("=" * 60)
+    print(
+        "=" * 60
+    )
+    print(
+        title
+    )
+    print(
+        "=" * 60
+    )
 
     if element is None:
-        print("NONE")
+
+        print(
+            "NOT FOUND"
+        )
+
         return
 
-    print("TAG:", getattr(element, "name", None))
-    print("ID:", element.get("id") if isinstance(element, Tag) else None)
+    print(
+        "TAG:",
+        element.name
+    )
+
+    print(
+        "ID:",
+        element.get(
+            "id"
+        )
+    )
+
     print(
         "CLASS:",
-        element.get("class") if isinstance(element, Tag) else None
+        element.get(
+            "class"
+        )
     )
 
     print()
-    print("TEXT:")
-    print(clean_text(element)[:5000])
+    print(
+        "TEXT:"
+    )
+
+    print(
+        clean_text(
+            element
+        )[:4000]
+    )
 
     print()
-    print("HTML:")
-    print(str(element)[:html_limit])
+    print(
+        "HTML:"
+    )
 
-
-def next_tag_siblings(element, limit=10):
-    result = []
-
-    sibling = element.next_sibling
-
-    while sibling is not None and len(result) < limit:
-        if isinstance(sibling, Tag):
-            result.append(sibling)
-
-        sibling = sibling.next_sibling
-
-    return result
+    print(
+        str(
+            element
+        )[:html_length]
+    )
 
 
 # =========================================================
@@ -93,7 +124,10 @@ response = requests.get(
 )
 
 response.raise_for_status()
-response.encoding = response.apparent_encoding
+
+response.encoding = (
+    response.apparent_encoding
+)
 
 html = response.text
 
@@ -103,253 +137,675 @@ soup = BeautifulSoup(
 )
 
 
-print("=" * 60)
-print("NETKEIBA CORNER STRUCTURE PROBE")
-print("=" * 60)
-
-print("RACE_ID:", RACE_ID)
-print("URL:", URL)
-print("HTML SIZE:", len(html))
-
-
-# =========================================================
-# 「コーナー通過順位」完全一致要素
-# =========================================================
-
-print()
-print("===== EXACT CORNER HEADINGS =====")
-
-exact_elements = []
-
-for element in soup.find_all(True):
-    text = clean_text(element)
-
-    if text == "コーナー通過順位":
-        exact_elements.append(element)
-
+print(
+    "========================================"
+)
 
 print(
-    "EXACT MATCH COUNT:",
-    len(exact_elements)
+    "NETKEIBA LAP PROBE"
+)
+
+print(
+    "========================================"
+)
+
+print(
+    "RACE_ID:",
+    RACE_ID
+)
+
+print(
+    "URL:",
+    URL
+)
+
+print(
+    "HTML SIZE:",
+    len(html)
 )
 
 
 # =========================================================
-# 各候補を個別調査
+# 1.
+# ラップ関連キーワードの出現数
 # =========================================================
 
-for index, element in enumerate(
-    exact_elements,
-    start=1
-):
-    print()
-    print("#" * 70)
+print()
+print(
+    "===== KEYWORD COUNTS ====="
+)
+
+keywords = [
+    "ハロンタイム",
+    "ラップ",
+    "Haron",
+    "haron",
+    "Lap",
+    "lap",
+    "Laptime",
+    "laptime",
+    "data-laptime",
+    "Race_HaronTime",
+    "HaronTime",
+    "RaceData_Haron",
+]
+
+
+for keyword in keywords:
+
     print(
-        f"CORNER HEADING CANDIDATE {index}"
-    )
-    print("#" * 70)
-
-    show_element(
-        "HEADING",
-        element,
-        4000
+        keyword,
+        "=>",
+        html.count(
+            keyword
+        )
     )
 
-    # -----------------------------------------------------
-    # 親
-    # -----------------------------------------------------
+
+# =========================================================
+# 2.
+# 「ハロンタイム」という文字を持つ要素
+# =========================================================
+
+print()
+print(
+    "===== HARON TEXT ELEMENTS ====="
+)
+
+haron_elements = []
+
+
+for element in soup.find_all(
+    string=re.compile(
+        "ハロンタイム"
+    )
+):
 
     parent = element.parent
 
-    show_element(
-        "PARENT",
-        parent,
-        8000
+    if parent is None:
+        continue
+
+    haron_elements.append(
+        parent
     )
 
-    # -----------------------------------------------------
-    # 親の次兄弟
-    # -----------------------------------------------------
 
-    if parent is not None:
-        siblings = next_tag_siblings(
-            parent,
-            10
-        )
+print(
+    "count:",
+    len(
+        haron_elements
+    )
+)
 
-        print()
-        print(
-            "PARENT NEXT TAG SIBLING COUNT:",
-            len(siblings)
-        )
 
-        for sibling_index, sibling in enumerate(
-            siblings,
-            start=1
-        ):
-            show_element(
-                (
-                    "PARENT NEXT SIBLING "
-                    f"{sibling_index}"
-                ),
-                sibling,
-                15000
-            )
+for index, element in enumerate(
+    haron_elements,
+    start=1
+):
 
-    # -----------------------------------------------------
-    # 祖父
-    # -----------------------------------------------------
-
-    grandparent = (
-        parent.parent
-        if parent is not None
-        else None
+    print_element(
+        f"HARON TEXT ELEMENT {index}",
+        element
     )
 
-    show_element(
-        "GRANDPARENT",
-        grandparent,
-        15000
+    print_element(
+        f"HARON PARENT {index}",
+        element.parent,
+        12000
     )
 
-    # -----------------------------------------------------
-    # 祖父の子要素
-    # -----------------------------------------------------
+    if element.parent is not None:
 
-    if grandparent is not None:
-        children = [
-            child
-            for child in grandparent.children
-            if isinstance(child, Tag)
-        ]
-
-        print()
-        print(
-            "GRANDPARENT DIRECT CHILD COUNT:",
-            len(children)
+        print_element(
+            f"HARON GRANDPARENT {index}",
+            element.parent.parent,
+            16000
         )
-
-        for child_index, child in enumerate(
-            children[:20],
-            start=1
-        ):
-            show_element(
-                (
-                    "GRANDPARENT CHILD "
-                    f"{child_index}"
-                ),
-                child,
-                12000
-            )
-
-    # -----------------------------------------------------
-    # 祖父の次兄弟
-    # -----------------------------------------------------
-
-    if grandparent is not None:
-        siblings = next_tag_siblings(
-            grandparent,
-            10
-        )
-
-        print()
-        print(
-            "GRANDPARENT NEXT TAG SIBLING COUNT:",
-            len(siblings)
-        )
-
-        for sibling_index, sibling in enumerate(
-            siblings,
-            start=1
-        ):
-            show_element(
-                (
-                    "GRANDPARENT NEXT SIBLING "
-                    f"{sibling_index}"
-                ),
-                sibling,
-                15000
-            )
 
 
 # =========================================================
-# corner関連classを直接調査
+# 3.
+# class名に Haron / Lap を含む要素
 # =========================================================
 
 print()
-print("=" * 60)
-print("CORNER CLASS SEARCH")
-print("=" * 60)
+print(
+    "===== CLASS SEARCH ====="
+)
 
-corner_class_elements = []
+class_candidates = []
 
-for element in soup.find_all(True):
-    classes = element.get("class", [])
+seen = set()
+
+
+for element in soup.find_all(
+    True
+):
+
+    classes = element.get(
+        "class",
+        []
+    )
 
     class_text = " ".join(
-        str(value)
-        for value in classes
-    ).lower()
+        classes
+    )
 
-    if "corner" in class_text:
-        corner_class_elements.append(
-            element
-        )
+    lower = class_text.lower()
+
+    if (
+        "haron" not in lower
+        and "lap" not in lower
+    ):
+        continue
+
+    key = id(
+        element
+    )
+
+    if key in seen:
+        continue
+
+    seen.add(
+        key
+    )
+
+    class_candidates.append(
+        element
+    )
 
 
 print(
-    "CORNER CLASS COUNT:",
-    len(corner_class_elements)
+    "count:",
+    len(
+        class_candidates
+    )
 )
 
 
 for index, element in enumerate(
-    corner_class_elements,
+    class_candidates[:50],
     start=1
 ):
-    show_element(
-        f"CORNER CLASS ELEMENT {index}",
+
+    print_element(
+        f"CLASS CANDIDATE {index}",
         element,
         10000
     )
 
 
 # =========================================================
-# idにもcornerがないか確認
+# 4.
+# data-laptime 全件
 # =========================================================
 
 print()
-print("=" * 60)
-print("CORNER ID SEARCH")
-print("=" * 60)
+print(
+    "===== DATA-LAPTIME ====="
+)
 
-corner_id_elements = []
-
-for element in soup.find_all(True):
-    element_id = str(
-        element.get("id", "")
-    )
-
-    if "corner" in element_id.lower():
-        corner_id_elements.append(
-            element
-        )
-
+data_laptime_elements = soup.select(
+    "[data-laptime]"
+)
 
 print(
-    "CORNER ID COUNT:",
-    len(corner_id_elements)
+    "count:",
+    len(
+        data_laptime_elements
+    )
 )
 
 
 for index, element in enumerate(
-    corner_id_elements,
+    data_laptime_elements[:100],
     start=1
 ):
-    show_element(
-        f"CORNER ID ELEMENT {index}",
-        element,
+
+    print()
+    print(
+        "DATA-LAPTIME",
+        index
+    )
+
+    print(
+        "TAG:",
+        element.name
+    )
+
+    print(
+        "CLASS:",
+        element.get(
+            "class"
+        )
+    )
+
+    print(
+        "VALUE:",
+        element.get(
+            "data-laptime"
+        )
+    )
+
+    print(
+        "TEXT:",
+        clean_text(
+            element
+        )[:300]
+    )
+
+
+# =========================================================
+# 5.
+# data-laptimeを持つ親要素
+# =========================================================
+
+print()
+print(
+    "===== DATA-LAPTIME PARENTS ====="
+)
+
+parents = []
+
+parent_seen = set()
+
+
+for element in data_laptime_elements:
+
+    parent = element.parent
+
+    if parent is None:
+        continue
+
+    key = id(
+        parent
+    )
+
+    if key in parent_seen:
+        continue
+
+    parent_seen.add(
+        key
+    )
+
+    parents.append(
+        parent
+    )
+
+
+print(
+    "parent count:",
+    len(
+        parents
+    )
+)
+
+
+for index, parent in enumerate(
+    parents[:30],
+    start=1
+):
+
+    print_element(
+        f"LAPTIME PARENT {index}",
+        parent,
         10000
+    )
+
+
+# =========================================================
+# 6.
+# 「12.4 - 11.1」のような
+# ラップ列候補をHTML全体から探す
+# =========================================================
+
+print()
+print(
+    "===== LAP SEQUENCE SEARCH ====="
+)
+
+sequence_pattern = re.compile(
+    r"(?:"
+    r"\d{1,2}\.\d"
+    r"\s*(?:-|－|–|—)\s*"
+    r"){2,}"
+    r"\d{1,2}\.\d"
+)
+
+
+sequence_matches = list(
+    sequence_pattern.finditer(
+        html
+    )
+)
+
+
+print(
+    "sequence count:",
+    len(
+        sequence_matches
+    )
+)
+
+
+for index, match in enumerate(
+    sequence_matches[:30],
+    start=1
+):
+
+    print()
+    print(
+        "----------------------------------------"
+    )
+
+    print(
+        "SEQUENCE",
+        index
+    )
+
+    print(
+        "VALUE:"
+    )
+
+    print(
+        match.group()
+    )
+
+    start = max(
+        0,
+        match.start() - 1500
+    )
+
+    end = min(
+        len(html),
+        match.end() + 2500
+    )
+
+    print()
+    print(
+        "RAW HTML AROUND:"
+    )
+
+    print(
+        html[start:end]
+    )
+
+
+# =========================================================
+# 7.
+# 10秒台～19秒台の数値が多数入る
+# table / tr を探索
+# =========================================================
+
+print()
+print(
+    "===== NUMERIC TABLE SEARCH ====="
+)
+
+numeric_pattern = re.compile(
+    r"(?<!\d)"
+    r"(?:[89]|1\d)\.\d"
+    r"(?!\d)"
+)
+
+
+tables = soup.find_all(
+    "table"
+)
+
+
+for table_index, table in enumerate(
+    tables,
+    start=1
+):
+
+    text = clean_text(
+        table
+    )
+
+    values = numeric_pattern.findall(
+        text
+    )
+
+    if len(
+        values
+    ) < 4:
+        continue
+
+    print()
+    print(
+        "========================================"
+    )
+
+    print(
+        "TABLE",
+        table_index
+    )
+
+    print(
+        "ID:",
+        table.get(
+            "id"
+        )
+    )
+
+    print(
+        "CLASS:",
+        table.get(
+            "class"
+        )
+    )
+
+    print(
+        "VALUES:",
+        values[:50]
+    )
+
+    print(
+        "TEXT:"
+    )
+
+    print(
+        text[:4000]
+    )
+
+    print(
+        "HTML:"
+    )
+
+    print(
+        str(
+            table
+        )[:12000]
+    )
+
+
+# =========================================================
+# 8.
+# tbody単位でも同じ調査
+# =========================================================
+
+print()
+print(
+    "===== NUMERIC TBODY SEARCH ====="
+)
+
+
+tbodies = soup.find_all(
+    "tbody"
+)
+
+
+for tbody_index, tbody in enumerate(
+    tbodies,
+    start=1
+):
+
+    text = clean_text(
+        tbody
+    )
+
+    values = numeric_pattern.findall(
+        text
+    )
+
+    if len(
+        values
+    ) < 4:
+        continue
+
+    print()
+    print(
+        "========================================"
+    )
+
+    print(
+        "TBODY",
+        tbody_index
+    )
+
+    print(
+        "CLASS:",
+        tbody.get(
+            "class"
+        )
+    )
+
+    print(
+        "VALUES:",
+        values[:50]
+    )
+
+    print(
+        "TEXT:"
+    )
+
+    print(
+        text[:4000]
+    )
+
+
+# =========================================================
+# 9.
+# 「ハロンタイム」周辺の生HTML
+# =========================================================
+
+print()
+print(
+    "===== RAW HTML AROUND ハロンタイム ====="
+)
+
+
+raw_matches = list(
+    re.finditer(
+        "ハロンタイム",
+        html
+    )
+)
+
+
+print(
+    "match count:",
+    len(
+        raw_matches
+    )
+)
+
+
+for index, match in enumerate(
+    raw_matches[:10],
+    start=1
+):
+
+    start = max(
+        0,
+        match.start() - 3000
+    )
+
+    end = min(
+        len(html),
+        match.end() + 12000
+    )
+
+    print()
+    print(
+        "========================================"
+    )
+
+    print(
+        "RAW MATCH",
+        index
+    )
+
+    print(
+        "========================================"
+    )
+
+    print(
+        html[start:end]
+    )
+
+
+# =========================================================
+# 10.
+# script内にラップデータがあるか確認
+# =========================================================
+
+print()
+print(
+    "===== SCRIPT SEARCH ====="
+)
+
+
+scripts = soup.find_all(
+    "script"
+)
+
+
+for script_index, script in enumerate(
+    scripts,
+    start=1
+):
+
+    script_text = (
+        script.string
+        or script.get_text(
+            "\n",
+            strip=False
+        )
+        or ""
+    )
+
+    lower = (
+        script_text.lower()
+    )
+
+    if (
+        "laptime" not in lower
+        and "haron" not in lower
+        and "ハロン" not in script_text
+    ):
+
+        continue
+
+
+    print()
+    print(
+        "========================================"
+    )
+
+    print(
+        "SCRIPT",
+        script_index
+    )
+
+    print(
+        "========================================"
+    )
+
+    print(
+        script_text[:20000]
     )
 
 
@@ -358,6 +814,14 @@ for index, element in enumerate(
 # =========================================================
 
 print()
-print("=" * 60)
-print("PROBE COMPLETE")
-print("=" * 60)
+print(
+    "========================================"
+)
+
+print(
+    "LAP PROBE COMPLETE"
+)
+
+print(
+    "========================================"
+)
