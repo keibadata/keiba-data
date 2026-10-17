@@ -98,30 +98,6 @@ def normalize_surface(value):
     return value
 
 
-def to_float(value):
-
-    try:
-        return float(value)
-
-    except (
-        TypeError,
-        ValueError
-    ):
-        return None
-
-
-def to_int(value):
-
-    try:
-        return int(value)
-
-    except (
-        TypeError,
-        ValueError
-    ):
-        return None
-
-
 # =========================================================
 # race.json
 # =========================================================
@@ -287,35 +263,17 @@ if not eligible_race_numbers:
         "racecourse": racecourse,
         "surface": target_surface,
         "distance": target_distance,
-
-        "target_race_number":
-            target_race_number,
-
-        "future_race_usage":
-            False,
-
-        "status":
-            "no_previous_races",
-
-        "eligible_race_numbers":
-            [],
-
-        "same_surface_race_numbers":
-            [],
-
-        "collected_race_count":
-            0,
-
-        "same_surface_race_count":
-            0,
-
-        "collected_races":
-            [],
-
-        "updated_at":
-            datetime.now(
-                JST
-            ).isoformat(),
+        "target_race_number": target_race_number,
+        "future_race_usage": False,
+        "status": "no_previous_races",
+        "eligible_race_numbers": [],
+        "same_surface_race_numbers": [],
+        "collected_race_count": 0,
+        "same_surface_race_count": 0,
+        "collected_races": [],
+        "updated_at": datetime.now(
+            JST
+        ).isoformat(),
     }
 
     save_json(
@@ -381,9 +339,11 @@ def parse_race_condition(
             )
 
             if text:
+
                 candidates.append(
                     text
                 )
+
 
     page_text = clean_text(
         soup
@@ -397,8 +357,7 @@ def parse_race_condition(
     for text in candidates:
 
         match = re.search(
-            r"芝\s*"
-            r"(\d{3,4})\s*[mｍ]?",
+            r"芝\s*(\d{3,4})\s*[mｍ]?",
             text
         )
 
@@ -414,8 +373,7 @@ def parse_race_condition(
 
 
         match = re.search(
-            r"(?:ダート|ダ)\s*"
-            r"(\d{3,4})\s*[mｍ]?",
+            r"(?:ダート|ダ)\s*(\d{3,4})\s*[mｍ]?",
             text
         )
 
@@ -431,8 +389,7 @@ def parse_race_condition(
 
 
         match = re.search(
-            r"障(?:害)?\s*"
-            r"(\d{3,4})\s*[mｍ]?",
+            r"障(?:害)?\s*(\d{3,4})\s*[mｍ]?",
             text
         )
 
@@ -455,11 +412,8 @@ def parse_race_condition(
 
             patterns.extend(
                 [
-                    r"芝\s*[:：]\s*"
-                    r"(良|稍重|重|不良)",
-
-                    r"馬場\s*[:：]\s*"
-                    r"(良|稍重|重|不良)",
+                    r"芝\s*[:：]\s*(良|稍重|重|不良)",
+                    r"馬場\s*[:：]\s*(良|稍重|重|不良)",
                 ]
             )
 
@@ -467,20 +421,15 @@ def parse_race_condition(
 
             patterns.extend(
                 [
-                    r"(?:ダート|ダ)\s*"
-                    r"[:：]\s*"
-                    r"(良|稍重|重|不良)",
-
-                    r"馬場\s*[:：]\s*"
-                    r"(良|稍重|重|不良)",
+                    r"(?:ダート|ダ)\s*[:：]\s*(良|稍重|重|不良)",
+                    r"馬場\s*[:：]\s*(良|稍重|重|不良)",
                 ]
             )
 
         else:
 
             patterns.append(
-                r"馬場\s*[:：]\s*"
-                r"(良|稍重|重|不良)"
+                r"馬場\s*[:：]\s*(良|稍重|重|不良)"
             )
 
 
@@ -499,6 +448,7 @@ def parse_race_condition(
 
                 break
 
+
         if track_condition:
             break
 
@@ -511,16 +461,7 @@ def parse_race_condition(
 
 
 # =========================================================
-# 正規の着順表取得
-#
-# Probeで確認済み：
-#
-# .Result_Num
-# ↓
-# 親tr
-#
-# Header行もResult_Numを持つので
-# 「数字 + 着」のみ採用する。
+# 着順表
 # =========================================================
 
 def parse_results(
@@ -652,8 +593,6 @@ def parse_results(
                 )
 
 
-        # 馬番専用classが取れない場合
-        # Probeで確認した着順行の先頭構造から補完
         if horse_number is None:
 
             cells = row.find_all(
@@ -661,9 +600,8 @@ def parse_results(
                 recursive=False
             )
 
-            # Result_Numの次に枠番、
-            # その次に馬番が置かれる構造を探索
             rank_cell_index = None
+
 
             for index, cell in enumerate(
                 cells
@@ -687,6 +625,7 @@ def parse_results(
                     rank_cell_index + 1,
                 ]
 
+
                 for candidate_index in (
                     candidate_indexes
                 ):
@@ -697,10 +636,12 @@ def parse_results(
                         < len(cells)
                     ):
 
-                        candidate_text = clean_text(
-                            cells[
-                                candidate_index
-                            ]
+                        candidate_text = (
+                            clean_text(
+                                cells[
+                                    candidate_index
+                                ]
+                            )
                         )
 
                         if re.fullmatch(
@@ -712,7 +653,11 @@ def parse_results(
                                 candidate_text
                             )
 
-                            if 1 <= value <= 18:
+                            if (
+                                1
+                                <= value
+                                <= 18
+                            ):
 
                                 horse_number = value
                                 break
@@ -720,10 +665,6 @@ def parse_results(
 
         # -------------------------------------------------
         # 上がり3F
-        #
-        # Probe結果の行テキスト末尾にも
-        # (33.3) のように存在する。
-        # 専用class優先。
         # -------------------------------------------------
 
         last3f = None
@@ -865,15 +806,103 @@ def parse_results(
 
 
 # =========================================================
+# コーナー通過順位
+#
+# Probeで実構造確認済み：
+#
+# table.RaceCommon_Table.Corner_Num
+#
+# <tr>
+#   <th><strong>3</strong>コーナー</th>
+#   <td>(*8,12)(5,11,10)...</td>
+# </tr>
+#
+# Corner_Num01/02/03 は着順色分け用classなので
+# td全体のテキストをそのまま保存する。
+# =========================================================
+
+def parse_corner_positions(
+    soup
+):
+
+    corner_positions = {}
+
+
+    table = soup.select_one(
+        "table.RaceCommon_Table.Corner_Num"
+    )
+
+
+    if table is None:
+
+        return corner_positions
+
+
+    for row in table.select(
+        "tr"
+    ):
+
+        heading = row.find(
+            "th"
+        )
+
+        value_cell = row.find(
+            "td"
+        )
+
+
+        if (
+            heading is None
+            or value_cell is None
+        ):
+
+            continue
+
+
+        heading_text = clean_text(
+            heading
+        )
+
+
+        match = re.search(
+            r"([1-4])\s*コーナー",
+            heading_text
+        )
+
+
+        if not match:
+            continue
+
+
+        corner_number = (
+            match.group(1)
+        )
+
+
+        # separatorの空白だけ除去。
+        # *, (), カンマなどの意味のある記号は保持。
+        value = clean_text(
+            value_cell
+        )
+
+
+        value = re.sub(
+            r"\s+",
+            "",
+            value
+        )
+
+
+        corner_positions[
+            corner_number
+        ] = value
+
+
+    return corner_positions
+
+
+# =========================================================
 # ラップ取得
-#
-# 重要：
-# HorseListからは取得しない。
-#
-# data-laptimeを持つCellDataWrapを探し、
-# PositionCellを含む「馬別ラップ」は除外。
-#
-# レース全体のラップ系列だけを候補にする。
 # =========================================================
 
 def parse_race_laps(
@@ -892,10 +921,6 @@ def parse_race_laps(
 
     candidates = []
 
-
-    # -----------------------------------------------------
-    # ラップ系コンテナ候補
-    # -----------------------------------------------------
 
     selectors = [
         ".Race_HaronTime",
@@ -935,12 +960,11 @@ def parse_race_laps(
 
 
     # -----------------------------------------------------
-    # data-laptimeから取得
+    # data-laptime
     # -----------------------------------------------------
 
     for container in containers:
 
-        # 馬別ラップテーブルを除外
         if container.select_one(
             ".PositionCell"
         ):
@@ -976,7 +1000,6 @@ def parse_race_laps(
             )
 
 
-            # 200m区間として異常値を除外
             if not (
                 8.0
                 <= value
@@ -999,8 +1022,7 @@ def parse_race_laps(
 
 
     # -----------------------------------------------------
-    # data-laptime候補がない場合
-    # テキストから取得
+    # テキスト候補
     # -----------------------------------------------------
 
     if not candidates:
@@ -1048,11 +1070,6 @@ def parse_race_laps(
                 )
 
 
-    # -----------------------------------------------------
-    # 距離から期待される区間数に
-    # 最も近い候補を選ぶ
-    # -----------------------------------------------------
-
     if not candidates:
 
         return []
@@ -1084,8 +1101,6 @@ def parse_race_laps(
     best = candidates[0]
 
 
-    # 区間数より多い場合は
-    # 推測で切り詰めず不明扱い
     if (
         expected_count > 0
         and len(best) != expected_count
@@ -1173,6 +1188,13 @@ def fetch_race_result(
     )
 
 
+    corner_positions = (
+        parse_corner_positions(
+            soup
+        )
+    )
+
+
     # -----------------------------------------------------
     # 状態
     # -----------------------------------------------------
@@ -1201,10 +1223,23 @@ def fetch_race_result(
         )
 
 
-    if distance and not race_laps:
+    if (
+        distance
+        and not race_laps
+    ):
 
         problems.append(
             "race_laps"
+        )
+
+
+    # コーナー情報については、
+    # 直線競走など存在しないケースも考えられるため
+    # レース全体を失敗扱いにはしない。
+    if not corner_positions:
+
+        problems.append(
+            "corner_positions"
         )
 
 
@@ -1240,6 +1275,9 @@ def fetch_race_result(
 
         "race_laps":
             race_laps,
+
+        "corner_positions":
+            corner_positions,
 
         "result_count":
             len(
@@ -1289,6 +1327,7 @@ for race_number in (
 
 
     print()
+
     print(
         "collect:",
         previous_race_id
@@ -1332,6 +1371,14 @@ for race_number in (
         result.get(
             "race_laps",
             []
+        )
+    )
+
+    print(
+        "corner positions:",
+        result.get(
+            "corner_positions",
+            {}
         )
     )
 
@@ -1478,6 +1525,7 @@ save_json(
 # =========================================================
 
 print()
+
 print(
     "===== DAY RACES RESULT ====="
 )
