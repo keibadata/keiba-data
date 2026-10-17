@@ -2,7 +2,6 @@ import json
 import os
 import re
 from datetime import datetime, timezone, timedelta
-from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
@@ -15,19 +14,19 @@ from bs4 import BeautifulSoup
 RACE_FILE = "race.json"
 OUTPUT_FILE = "track_condition.json"
 
-JRA_BABA_PAGE = "https://www.jra.go.jp/keiba/baba/index.html"
-
-CUSHION_URL = urljoin(
-    JRA_BABA_PAGE,
-    "_data_cushion.html"
+JRA_BABA_PAGE = (
+    "https://www.jra.go.jp/keiba/baba/index.html"
 )
 
-MOIST_URL = urljoin(
-    JRA_BABA_PAGE,
-    "_data_moist.html"
+JRA_CUSHION_URL = (
+    "https://www.jra.go.jp/keiba/baba/_data_cushion.html"
 )
 
-TIMEOUT = 20
+JRA_MOIST_URL = (
+    "https://www.jra.go.jp/keiba/baba/_data_moist.html"
+)
+
+TIMEOUT = 30
 
 JST = timezone(
     timedelta(hours=9)
@@ -58,7 +57,6 @@ HEADERS = {
 # ============================================================
 
 def now_jst():
-
     return datetime.now(
         JST
     ).isoformat(
@@ -135,48 +133,12 @@ def to_float(value):
         return None
 
     try:
-
         return float(
             match.group()
         )
-
     except Exception:
-
         return None
 
-
-def normalize_date(value):
-
-    value = clean_text(
-        value
-    )
-
-    if not value:
-        return ""
-
-    value = value.replace(
-        "/",
-        "-"
-    )
-
-    match = re.search(
-        r"(\d{4})-(\d{1,2})-(\d{1,2})",
-        value
-    )
-
-    if not match:
-        return ""
-
-    return (
-        f"{int(match.group(1)):04d}-"
-        f"{int(match.group(2)):02d}-"
-        f"{int(match.group(3)):02d}"
-    )
-
-
-# ============================================================
-# HTTP
-# ============================================================
 
 def get_html(url):
 
@@ -223,20 +185,6 @@ TRACK_ALIASES = {
 }
 
 
-TRACK_CODES = {
-    "札幌": ["01", "sapporo"],
-    "函館": ["02", "hakodate"],
-    "福島": ["03", "fukushima"],
-    "新潟": ["04", "niigata"],
-    "東京": ["05", "tokyo"],
-    "中山": ["06", "nakayama"],
-    "中京": ["07", "chukyo"],
-    "京都": ["08", "kyoto"],
-    "阪神": ["09", "hanshin"],
-    "小倉": ["10", "kokura"],
-}
-
-
 def normalize_track(value):
 
     value = clean_text(
@@ -253,6 +201,52 @@ def normalize_track(value):
                 return track_name
 
     return value
+
+
+# ============================================================
+# 日付
+# ============================================================
+
+def parse_race_date(value):
+
+    text = clean_text(
+        value
+    )
+
+    if not text:
+        return None
+
+    formats = [
+        "%Y-%m-%d",
+        "%Y/%m/%d",
+    ]
+
+    for fmt in formats:
+
+        try:
+
+            return datetime.strptime(
+                text,
+                fmt
+            ).date()
+
+        except ValueError:
+            pass
+
+    return None
+
+
+def make_jra_date_prefix(
+    race_date_obj
+):
+
+    if race_date_obj is None:
+        return ""
+
+    return (
+        f"{race_date_obj.month}月"
+        f"{race_date_obj.day}日"
+    )
 
 
 # ============================================================
@@ -278,15 +272,28 @@ race_id = clean_text(
 )
 
 
-race_date = normalize_date(
-    race.get("race_date")
-    or race.get("date")
+race_date_text = clean_text(
+    race.get(
+        "race_date"
+    )
+    or race.get(
+        "date"
+    )
+)
+
+
+race_date_obj = parse_race_date(
+    race_date_text
 )
 
 
 track = normalize_track(
-    race.get("track")
-    or race.get("racecourse")
+    race.get(
+        "track"
+    )
+    or race.get(
+        "racecourse"
+    )
 )
 
 
@@ -316,11 +323,35 @@ if not race_id:
     )
 
 
+if not race_date_obj:
+
+    raise SystemExit(
+        "ERROR: race_date が不正です"
+    )
+
+
 if not track:
 
     raise SystemExit(
         "ERROR: 競馬場がありません"
     )
+
+
+if surface not in [
+    "芝",
+    "ダート"
+]:
+
+    raise SystemExit(
+        "ERROR: surface が芝/ダートではありません"
+    )
+
+
+target_date_prefix = (
+    make_jra_date_prefix(
+        race_date_obj
+    )
+)
 
 
 print()
@@ -335,7 +366,12 @@ print(
 
 print(
     "date:",
-    race_date
+    race_date_text
+)
+
+print(
+    "target date:",
+    target_date_prefix
 )
 
 print(
@@ -353,265 +389,47 @@ print(
     distance
 )
 
-print(
-    "cushion url:",
-    CUSHION_URL
-)
-
-print(
-    "moist url:",
-    MOIST_URL
-)
-
 print()
 
 
 # ============================================================
-# 対象競馬場ブロック
+# JRA含水率
+#
+# 実HTML:
+#
+# <div id="rcA" title="東京">
+#   <div class="unit">
+#     <div class="time">10月12日 ...</div>
+#     <div class="turf">
+#       <span class="mg">...</span>
+#       <span class="m4c">...</span>
+#     </div>
+#     <div class="dirt">
+#       <span class="mg">...</span>
+#       <span class="m4c">...</span>
+#     </div>
+#   </div>
+# </div>
+#
+# mg  = ゴール前
+# m4c = 4コーナー
 # ============================================================
 
-def score_track_container(
-    element,
-    track_name
-):
-
-    if element is None:
-        return -1
-
-    text = clean_text(
-        element.get_text(
-            " ",
-            strip=True
-        )
-    )
-
-    score = 0
-
-
-    if track_name in text:
-        score += 20
-
-
-    element_id = clean_text(
-        element.get(
-            "id"
-        )
-    ).lower()
-
-
-    classes = " ".join(
-        element.get(
-            "class",
-            []
-        )
-    ).lower()
-
-
-    for code in TRACK_CODES.get(
-        track_name,
-        []
-    ):
-
-        code = code.lower()
-
-        if element_id == code:
-            score += 50
-
-        elif code in element_id:
-            score += 20
-
-        if code in classes:
-            score += 10
-
-
-    length = len(
-        text
-    )
-
-
-    if length > 8000:
-        score -= 20
-
-    elif length < 3000:
-        score += 5
-
-
-    return score
-
-
-def find_track_block(
-    soup,
-    track_name
-):
-
-    candidates = []
-
-
-    for tag in soup.find_all(
-        [
-            "div",
-            "section",
-            "li",
-            "article",
-            "tbody"
-        ]
-    ):
-
-        text = clean_text(
-            tag.get_text(
-                " ",
-                strip=True
-            )
-        )
-
-
-        if track_name not in text:
-            continue
-
-
-        score = score_track_container(
-            tag,
-            track_name
-        )
-
-
-        candidates.append(
-            (
-                score,
-                len(text),
-                tag
-            )
-        )
-
-
-    if candidates:
-
-        candidates.sort(
-            key=lambda x: (
-                x[0],
-                -x[1]
-            ),
-            reverse=True
-        )
-
-        return candidates[0][2]
-
-
-    for code in TRACK_CODES.get(
-        track_name,
-        []
-    ):
-
-        tag = soup.find(
-            id=re.compile(
-                re.escape(code),
-                re.I
-            )
-        )
-
-        if tag:
-            return tag
-
-
-    return None
-
-
-# ============================================================
-# 日付情報抽出
-# ============================================================
-
-def extract_dates(text):
-
-    results = []
-
-
-    patterns = [
-
-        r"(\d{4})[年/\-]"
-        r"(\d{1,2})[月/\-]"
-        r"(\d{1,2})日?",
-
-        r"(\d{1,2})月"
-        r"(\d{1,2})日",
-
-    ]
-
-
-    for index, pattern in enumerate(
-        patterns
-    ):
-
-        for match in re.finditer(
-            pattern,
-            text
-        ):
-
-            try:
-
-                if index == 0:
-
-                    year = int(
-                        match.group(1)
-                    )
-
-                    month = int(
-                        match.group(2)
-                    )
-
-                    day = int(
-                        match.group(3)
-                    )
-
-                else:
-
-                    year = datetime.now(
-                        JST
-                    ).year
-
-                    month = int(
-                        match.group(1)
-                    )
-
-                    day = int(
-                        match.group(2)
-                    )
-
-
-                value = (
-                    f"{year:04d}-"
-                    f"{month:02d}-"
-                    f"{day:02d}"
-                )
-
-
-                if value not in results:
-                    results.append(
-                        value
-                    )
-
-            except Exception:
-
-                pass
-
-
-    return results
-
-
-# ============================================================
-# クッション値
-# ============================================================
-
-def extract_cushion(
+def extract_moisture(
     html,
-    track_name
+    track_name,
+    race_date_obj,
+    surface_name
 ):
 
     result = {
-        "value": None,
-        "time": "",
         "found": False,
-        "dates": [],
-        "count": 0
+        "track_found": False,
+        "date_found": False,
+        "measurement_time": "",
+        "finish": None,
+        "four_corner": None,
+        "track_block_id": "",
     }
 
 
@@ -625,41 +443,362 @@ def extract_cushion(
     )
 
 
-    block = find_track_block(
-        soup,
-        track_name
+    # --------------------------------------------------------
+    # title="東京" 等で競馬場を直接特定
+    # --------------------------------------------------------
+
+    track_block = soup.find(
+        attrs={
+            "title": track_name
+        }
     )
 
 
-    root = (
-        block
-        if block is not None
-        else soup
-    )
+    if track_block is None:
+
+        return result
 
 
-    block_text = clean_text(
-        root.get_text(
-            " ",
-            strip=True
+    result[
+        "track_found"
+    ] = True
+
+
+    result[
+        "track_block_id"
+    ] = clean_text(
+        track_block.get(
+            "id"
         )
     )
 
 
-    result["dates"] = extract_dates(
-        block_text
+    target_prefix = (
+        make_jra_date_prefix(
+            race_date_obj
+        )
     )
 
 
-    values = []
+    # --------------------------------------------------------
+    # 対象日付のunitだけを選択
+    # --------------------------------------------------------
+
+    target_unit = None
+    target_time = ""
 
 
-    for unit in root.select(
+    for unit in track_block.select(
         ".unit"
     ):
 
-        cushion_element = unit.select_one(
-            ".cushion"
+        time_element = unit.select_one(
+            ".time"
+        )
+
+
+        if time_element is None:
+            continue
+
+
+        time_text = clean_text(
+            time_element.get_text(
+                " ",
+                strip=True
+            )
+        )
+
+
+        if not time_text.startswith(
+            target_prefix
+        ):
+            continue
+
+
+        target_unit = unit
+        target_time = time_text
+
+        break
+
+
+    if target_unit is None:
+
+        return result
+
+
+    result[
+        "date_found"
+    ] = True
+
+
+    result[
+        "measurement_time"
+    ] = target_time
+
+
+    # --------------------------------------------------------
+    # 芝 / ダートを明示選択
+    # --------------------------------------------------------
+
+    if surface_name == "芝":
+
+        surface_block = (
+            target_unit.select_one(
+                ".turf"
+            )
+        )
+
+    else:
+
+        surface_block = (
+            target_unit.select_one(
+                ".dirt"
+            )
+        )
+
+
+    if surface_block is None:
+
+        return result
+
+
+    # --------------------------------------------------------
+    # ゴール前 / 4コーナー
+    # --------------------------------------------------------
+
+    finish_element = (
+        surface_block.select_one(
+            ".mg"
+        )
+    )
+
+
+    four_corner_element = (
+        surface_block.select_one(
+            ".m4c"
+        )
+    )
+
+
+    finish = None
+    four_corner = None
+
+
+    if finish_element is not None:
+
+        finish = to_float(
+            finish_element.get_text(
+                " ",
+                strip=True
+            )
+        )
+
+
+    if four_corner_element is not None:
+
+        four_corner = to_float(
+            four_corner_element.get_text(
+                " ",
+                strip=True
+            )
+        )
+
+
+    # --------------------------------------------------------
+    # 含水率として異常値なら破棄
+    # --------------------------------------------------------
+
+    if (
+        finish is not None
+        and not (
+            0.0 <= finish <= 30.0
+        )
+    ):
+
+        finish = None
+
+
+    if (
+        four_corner is not None
+        and not (
+            0.0 <= four_corner <= 30.0
+        )
+    ):
+
+        four_corner = None
+
+
+    result[
+        "finish"
+    ] = finish
+
+
+    result[
+        "four_corner"
+    ] = four_corner
+
+
+    result[
+        "found"
+    ] = (
+        finish is not None
+        or four_corner is not None
+    )
+
+
+    return result
+
+
+# ============================================================
+# JRAクッション値
+#
+# ダートでは取得値を評価に使用しない。
+#
+# 芝の場合のみ対象日付を確認して採用。
+# ============================================================
+
+def extract_cushion(
+    html,
+    track_name,
+    race_date_obj
+):
+
+    result = {
+        "found": False,
+        "track_found": False,
+        "date_found": False,
+        "measurement_time": "",
+        "value": None,
+        "track_block_id": "",
+    }
+
+
+    if not html:
+        return result
+
+
+    soup = BeautifulSoup(
+        html,
+        "html.parser"
+    )
+
+
+    # title属性優先
+    track_block = soup.find(
+        attrs={
+            "title": track_name
+        }
+    )
+
+
+    # cushion側はid等の構造が違う可能性があるため
+    # titleで見つからなければテキストも確認
+    if track_block is None:
+
+        for candidate in soup.find_all(
+            [
+                "div",
+                "section",
+                "li"
+            ]
+        ):
+
+            candidate_text = clean_text(
+                candidate.get_text(
+                    " ",
+                    strip=True
+                )
+            )
+
+
+            if track_name not in candidate_text:
+                continue
+
+
+            if len(
+                candidate_text
+            ) > 3000:
+                continue
+
+
+            track_block = candidate
+
+            break
+
+
+    if track_block is None:
+
+        return result
+
+
+    result[
+        "track_found"
+    ] = True
+
+
+    result[
+        "track_block_id"
+    ] = clean_text(
+        track_block.get(
+            "id"
+        )
+    )
+
+
+    target_prefix = (
+        make_jra_date_prefix(
+            race_date_obj
+        )
+    )
+
+
+    # --------------------------------------------------------
+    # 対象日付のunit
+    # --------------------------------------------------------
+
+    for unit in track_block.select(
+        ".unit"
+    ):
+
+        time_element = (
+            unit.select_one(
+                ".time"
+            )
+        )
+
+
+        if time_element is None:
+            continue
+
+
+        time_text = clean_text(
+            time_element.get_text(
+                " ",
+                strip=True
+            )
+        )
+
+
+        if not time_text.startswith(
+            target_prefix
+        ):
+            continue
+
+
+        result[
+            "date_found"
+        ] = True
+
+
+        result[
+            "measurement_time"
+        ] = time_text
+
+
+        cushion_element = (
+            unit.select_one(
+                ".cushion"
+            )
         )
 
 
@@ -675,413 +814,21 @@ def extract_cushion(
         )
 
 
-        if value is None:
-            continue
-
-
-        if not 5.0 <= value <= 15.0:
-            continue
-
-
-        time_element = unit.select_one(
-            ".time"
-        )
-
-
-        time_text = ""
-
-
-        if time_element is not None:
-
-            time_text = clean_text(
-                time_element.get_text(
-                    " ",
-                    strip=True
-                )
-            )
-
-
-        values.append(
-            {
-                "value": value,
-                "time": time_text
-            }
-        )
-
-
-    if values:
-
-        latest = values[-1]
-
-        result["value"] = latest[
-            "value"
-        ]
-
-        result["time"] = latest[
-            "time"
-        ]
-
-        result["found"] = True
-
-        result["count"] = len(
-            values
-        )
-
-        result["all"] = values
-
-
-    return result
-
-
-# ============================================================
-# 含水率
-#
-# JRA baba2025.js:
-# _data_moist.html
-#
-# _moist_data:
-# {
-#   time: ...,
-#   turf: ...,
-#   dirt: ...
-# }
-#
-# g  = ゴール前
-# 4c = 4コーナー
-# ============================================================
-
-def extract_surface_pair(
-    element
-):
-
-    if element is None:
-        return None
-
-
-    # --------------------------------------
-    # class="gm" / class="c4"
-    # --------------------------------------
-
-    gm = element.select_one(
-        ".gm"
-    )
-
-    c4 = element.select_one(
-        ".c4"
-    )
-
-
-    if (
-        gm is not None
-        and c4 is not None
-    ):
-
-        finish = to_float(
-            gm.get_text(
-                " ",
-                strip=True
-            )
-        )
-
-        four_corner = to_float(
-            c4.get_text(
-                " ",
-                strip=True
-            )
-        )
-
-
         if (
-            finish is not None
-            or four_corner is not None
+            value is not None
+            and 5.0 <= value <= 15.0
         ):
 
-            return {
-                "finish": finish,
-                "four_corner": four_corner
-            }
+            result[
+                "value"
+            ] = value
 
+            result[
+                "found"
+            ] = True
 
-    return None
 
-
-def extract_moisture(
-    html,
-    track_name,
-    surface_name
-):
-
-    result = {
-        "finish": None,
-        "four_corner": None,
-        "time": "",
-        "found": False,
-        "dates": [],
-        "records": []
-    }
-
-
-    if not html:
-        return result
-
-
-    soup = BeautifulSoup(
-        html,
-        "html.parser"
-    )
-
-
-    block = find_track_block(
-        soup,
-        track_name
-    )
-
-
-    root = (
-        block
-        if block is not None
-        else soup
-    )
-
-
-    root_text = clean_text(
-        root.get_text(
-            " ",
-            strip=True
-        )
-    )
-
-
-    result["dates"] = extract_dates(
-        root_text
-    )
-
-
-    # ========================================================
-    # 1. JRA表示用IDを直接探索
-    # ========================================================
-
-    target_id = (
-        "dirt_line"
-        if surface_name == "ダート"
-        else "turf_line"
-    )
-
-
-    line = root.find(
-        id=target_id
-    )
-
-
-    pair = extract_surface_pair(
-        line
-    )
-
-
-    if pair:
-
-        result["finish"] = pair[
-            "finish"
-        ]
-
-        result["four_corner"] = pair[
-            "four_corner"
-        ]
-
-        result["found"] = True
-
-        return result
-
-
-    # ========================================================
-    # 2. HTML内のデータ属性・クラス探索
-    # ========================================================
-
-    surface_word = (
-        "ダート"
-        if surface_name == "ダート"
-        else "芝"
-    )
-
-
-    candidates = []
-
-
-    for tag in root.find_all(
-        [
-            "tr",
-            "li",
-            "div"
-        ]
-    ):
-
-        text = clean_text(
-            tag.get_text(
-                " ",
-                strip=True
-            )
-        )
-
-
-        if surface_word not in text:
-            continue
-
-
-        gm = tag.select_one(
-            ".gm"
-        )
-
-        c4 = tag.select_one(
-            ".c4"
-        )
-
-
-        if (
-            gm is None
-            or c4 is None
-        ):
-            continue
-
-
-        finish = to_float(
-            gm.get_text(
-                " ",
-                strip=True
-            )
-        )
-
-        four_corner = to_float(
-            c4.get_text(
-                " ",
-                strip=True
-            )
-        )
-
-
-        if (
-            finish is None
-            and four_corner is None
-        ):
-            continue
-
-
-        candidates.append(
-            {
-                "finish": finish,
-                "four_corner": four_corner,
-                "text": text
-            }
-        )
-
-
-    if candidates:
-
-        latest = candidates[-1]
-
-        result["finish"] = latest[
-            "finish"
-        ]
-
-        result["four_corner"] = latest[
-            "four_corner"
-        ]
-
-        result["found"] = True
-
-        result["records"] = candidates
-
-        return result
-
-
-    # ========================================================
-    # 3. JRAデータHTMLをテキストとして解析
-    #
-    # JSが読む
-    # turf / dirt / g / 4c
-    # を直接確認する
-    # ========================================================
-
-    patterns = []
-
-
-    if surface_name == "ダート":
-
-        patterns = [
-
-            re.compile(
-                r"dirt"
-                r".{0,500}?"
-                r"""(?:class=["']?g["']?|["']g["'])"""
-                r".{0,100}?"
-                r"(\d+(?:\.\d+)?)"
-                r".{0,500}?"
-                r"""(?:class=["']?4c["']?|["']4c["'])"""
-                r".{0,100}?"
-                r"(\d+(?:\.\d+)?)",
-                re.I | re.S
-            ),
-
-        ]
-
-    else:
-
-        patterns = [
-
-            re.compile(
-                r"turf"
-                r".{0,500}?"
-                r"""(?:class=["']?g["']?|["']g["'])"""
-                r".{0,100}?"
-                r"(\d+(?:\.\d+)?)"
-                r".{0,500}?"
-                r"""(?:class=["']?4c["']?|["']4c["'])"""
-                r".{0,100}?"
-                r"(\d+(?:\.\d+)?)",
-                re.I | re.S
-            ),
-
-        ]
-
-
-    for pattern in patterns:
-
-        matches = list(
-            pattern.finditer(
-                html
-            )
-        )
-
-
-        if not matches:
-            continue
-
-
-        match = matches[-1]
-
-
-        finish = to_float(
-            match.group(1)
-        )
-
-        four_corner = to_float(
-            match.group(2)
-        )
-
-
-        if (
-            finish is not None
-            or four_corner is not None
-        ):
-
-            result["finish"] = finish
-
-            result["four_corner"] = (
-                four_corner
-            )
-
-            result["found"] = True
-
-            return result
+        break
 
 
     return result
@@ -1091,39 +838,21 @@ def extract_moisture(
 # JRA取得
 # ============================================================
 
-cushion_html = ""
 moist_html = ""
-
-
-try:
-
-    cushion_html = get_html(
-        CUSHION_URL
-    )
-
-    print(
-        "cushion page: OK",
-        len(cushion_html),
-        "bytes"
-    )
-
-except Exception as exc:
-
-    print(
-        "WARNING: cushion page:",
-        str(exc)
-    )
+cushion_html = ""
 
 
 try:
 
     moist_html = get_html(
-        MOIST_URL
+        JRA_MOIST_URL
     )
 
     print(
         "moist page: OK",
-        len(moist_html),
+        len(
+            moist_html
+        ),
         "bytes"
     )
 
@@ -1135,140 +864,112 @@ except Exception as exc:
     )
 
 
+# 芝の時だけクッション値が必要
+if surface == "芝":
+
+    try:
+
+        cushion_html = get_html(
+            JRA_CUSHION_URL
+        )
+
+        print(
+            "cushion page: OK",
+            len(
+                cushion_html
+            ),
+            "bytes"
+        )
+
+    except Exception as exc:
+
+        print(
+            "WARNING: cushion page:",
+            str(exc)
+        )
+
+else:
+
+    print(
+        "cushion page: skipped for dirt"
+    )
+
+
 print()
 
 
 # ============================================================
-# 抽出
+# 含水率抽出
 # ============================================================
-
-cushion = extract_cushion(
-    cushion_html,
-    track
-)
-
 
 moisture = extract_moisture(
     moist_html,
     track,
+    race_date_obj,
     surface
 )
 
 
 # ============================================================
-# 日付安全チェック
+# クッション値抽出
 # ============================================================
 
-source_dates = []
+if surface == "芝":
 
-
-for value in (
-    cushion.get(
-        "dates",
-        []
-    )
-    + moisture.get(
-        "dates",
-        []
-    )
-):
-
-    if value not in source_dates:
-        source_dates.append(
-            value
-        )
-
-
-today = datetime.now(
-    JST
-).strftime(
-    "%Y-%m-%d"
-)
-
-
-race_is_today = (
-    bool(race_date)
-    and race_date == today
-)
-
-
-date_verified = (
-    bool(race_date)
-    and race_date in source_dates
-)
-
-
-# JRA側HTMLに日付が存在しない場合でも、
-# 当日レースなら現在ページを使用可能。
-current_page_safe = (
-    date_verified
-    or (
-        race_is_today
-        and not source_dates
-    )
-)
-
-
-# ============================================================
-# 値
-# ============================================================
-
-raw_cushion_value = cushion.get(
-    "value"
-)
-
-
-raw_moisture_finish = moisture.get(
-    "finish"
-)
-
-
-raw_moisture_4corner = moisture.get(
-    "four_corner"
-)
-
-
-# ============================================================
-# 実際に解析へ使用する値
-# ============================================================
-
-if (
-    surface == "芝"
-    and current_page_safe
-):
-
-    cushion_value = (
-        raw_cushion_value
+    cushion = extract_cushion(
+        cushion_html,
+        track,
+        race_date_obj
     )
 
 else:
 
+    cushion = {
+        "found": False,
+        "track_found": False,
+        "date_found": False,
+        "measurement_time": "",
+        "value": None,
+        "track_block_id": "",
+    }
+
+
+# ============================================================
+# 適用値
+# ============================================================
+
+moisture_finish = (
+    moisture.get(
+        "finish"
+    )
+)
+
+
+moisture_4corner = (
+    moisture.get(
+        "four_corner"
+    )
+)
+
+
+if surface == "芝":
+
+    cushion_value = (
+        cushion.get(
+            "value"
+        )
+    )
+
+else:
+
+    # ダートでは絶対にクッション値を評価しない
     cushion_value = None
 
 
-if current_page_safe:
-
-    moisture_finish = (
-        raw_moisture_finish
-    )
-
-    moisture_4corner = (
-        raw_moisture_4corner
-    )
-
-else:
-
-    moisture_finish = None
-
-    moisture_4corner = None
-
-
 # ============================================================
-# 既存ファイル
+# 既存の人手入力バイアス保持
 #
-# race_idだけでなく
-# 競馬場・馬場種別も一致した場合だけ
-# 人手入力バイアスを保持
+# race_id一致時のみ。
 # ============================================================
 
 old = load_json(
@@ -1276,35 +977,17 @@ old = load_json(
 )
 
 
-same_context = (
-
+same_race = (
     clean_text(
         old.get(
             "race_id"
         )
     )
     == race_id
-
-    and
-
-    normalize_track(
-        old.get("track")
-        or old.get("racecourse")
-    )
-    == track
-
-    and
-
-    clean_text(
-        old.get(
-            "surface"
-        )
-    )
-    == surface
 )
 
 
-if same_context:
+if same_race:
 
     time_bias = clean_text(
         old.get(
@@ -1340,9 +1023,7 @@ if same_context:
 else:
 
     time_bias = ""
-
     inside_outside_bias = ""
-
     running_style_bias = ""
 
     reference_race_count = 0
@@ -1351,19 +1032,25 @@ else:
 
 
 # ============================================================
-# 利用可能判定
+# データ有効性
 # ============================================================
 
 if surface == "芝":
 
     physical_data_available = any(
         [
-            cushion_value is not None,
-            moisture_finish is not None,
-            moisture_4corner is not None,
+            cushion_value
+            is not None,
+
+            moisture_finish
+            is not None,
+
+            moisture_4corner
+            is not None,
+
             bool(
                 race_track_condition
-            )
+            ),
         ]
     )
 
@@ -1371,11 +1058,15 @@ else:
 
     physical_data_available = any(
         [
-            moisture_finish is not None,
-            moisture_4corner is not None,
+            moisture_finish
+            is not None,
+
+            moisture_4corner
+            is not None,
+
             bool(
                 race_track_condition
-            )
+            ),
         ]
     )
 
@@ -1385,13 +1076,16 @@ bias_data_available = any(
         bool(
             time_bias
         ),
+
         bool(
             inside_outside_bias
         ),
+
         bool(
             running_style_bias
         ),
-        reference_race_count > 0
+
+        reference_race_count > 0,
     ]
 )
 
@@ -1407,17 +1101,16 @@ data_available = (
 # ============================================================
 
 output = {
-
     "race_id": race_id,
 
-    "race_date": race_date,
+    "race_date": (
+        race_date_obj.isoformat()
+    ),
 
     "track": track,
-
     "racecourse": track,
 
     "surface": surface,
-
     "distance": distance,
 
     "track_condition": (
@@ -1425,7 +1118,7 @@ output = {
     ),
 
     # --------------------------------------------------------
-    # 解析に使用可能な値
+    # クッション
     # --------------------------------------------------------
 
     "cushion_value": (
@@ -1434,15 +1127,37 @@ output = {
 
     "cushion_measurement_time": (
         cushion.get(
-            "time",
+            "measurement_time",
             ""
         )
-        if (
-            surface == "芝"
-            and current_page_safe
-        )
+        if surface == "芝"
         else ""
     ),
+
+    "cushion_track_found": (
+        cushion.get(
+            "track_found",
+            False
+        )
+    ),
+
+    "cushion_date_found": (
+        cushion.get(
+            "date_found",
+            False
+        )
+    ),
+
+    "cushion_fetch_found": (
+        cushion.get(
+            "found",
+            False
+        )
+    ),
+
+    # --------------------------------------------------------
+    # 含水率
+    # --------------------------------------------------------
 
     "moisture_finish": (
         moisture_finish
@@ -1452,53 +1167,39 @@ output = {
         moisture_4corner
     ),
 
-    # --------------------------------------------------------
-    # JRAから取得した生値
-    #
-    # 日付不一致時は解析には使わない
-    # --------------------------------------------------------
-
-    "raw_jra": {
-
-        "cushion_value": (
-            raw_cushion_value
-        ),
-
-        "cushion_time": (
-            cushion.get(
-                "time",
-                ""
-            )
-        ),
-
-        "moisture_finish": (
-            raw_moisture_finish
-        ),
-
-        "moisture_4corner": (
-            raw_moisture_4corner
-        ),
-
-        "source_dates": (
-            source_dates
-        ),
-
-    },
-
-    # --------------------------------------------------------
-    # 日付検証
-    # --------------------------------------------------------
-
-    "source_date_verified": (
-        date_verified
+    "moisture_measurement_time": (
+        moisture.get(
+            "measurement_time",
+            ""
+        )
     ),
 
-    "race_is_today": (
-        race_is_today
+    "moisture_track_found": (
+        moisture.get(
+            "track_found",
+            False
+        )
     ),
 
-    "current_page_safe": (
-        current_page_safe
+    "moisture_date_found": (
+        moisture.get(
+            "date_found",
+            False
+        )
+    ),
+
+    "moisture_fetch_found": (
+        moisture.get(
+            "found",
+            False
+        )
+    ),
+
+    "moisture_track_block_id": (
+        moisture.get(
+            "track_block_id",
+            ""
+        )
     ),
 
     # --------------------------------------------------------
@@ -1522,12 +1223,8 @@ output = {
     ),
 
     # --------------------------------------------------------
-    # 状態
+    # 接続状態
     # --------------------------------------------------------
-
-    "data_available": (
-        data_available
-    ),
 
     "physical_data_available": (
         physical_data_available
@@ -1537,26 +1234,12 @@ output = {
         bias_data_available
     ),
 
-    # --------------------------------------------------------
-    # 取得状態
-    # --------------------------------------------------------
-
-    "cushion_fetch_found": (
-        cushion.get(
-            "found",
-            False
-        )
-    ),
-
-    "moisture_fetch_found": (
-        moisture.get(
-            "found",
-            False
-        )
+    "data_available": (
+        data_available
     ),
 
     # --------------------------------------------------------
-    # Source
+    # ソース
     # --------------------------------------------------------
 
     "source": "JRA",
@@ -1566,28 +1249,17 @@ output = {
     ),
 
     "cushion_source_url": (
-        CUSHION_URL
+        JRA_CUSHION_URL
     ),
 
     "moisture_source_url": (
-        MOIST_URL
+        JRA_MOIST_URL
     ),
-
-    # --------------------------------------------------------
-    # ルール
-    # --------------------------------------------------------
 
     "surface_rule": (
-        "芝はクッション値・含水率を条件情報として扱う。"
-        "ダートではクッション値を使用せず含水率を扱う。"
-        "クッション値・含水率は単独加点しない。"
-    ),
-
-    "date_safety_rule": (
-        "JRA現在ページのデータは対象日との一致を確認できる場合、"
-        "または対象レースが当日でページ側に日付情報が無い場合のみ"
-        "解析値として使用する。"
-        "過去レースに現在値を流用しない。"
+        "芝はクッション値・含水率を条件情報として使用。"
+        "ダートはクッション値を使用せず含水率のみ使用。"
+        "対象競馬場かつ対象日付のunitと一致した値だけ採用。"
     ),
 
     "memo": (
@@ -1596,7 +1268,7 @@ output = {
 
     "updated_at": (
         now_jst()
-    )
+    ),
 }
 
 
@@ -1622,7 +1294,7 @@ print(
 
 print(
     "race date:",
-    race_date
+    race_date_obj.isoformat()
 )
 
 print(
@@ -1640,63 +1312,102 @@ print(
     race_track_condition
 )
 
-print()
-
-print(
-    "JRA source dates:",
-    source_dates
-)
-
-print(
-    "race is today:",
-    race_is_today
-)
-
-print(
-    "source date verified:",
-    date_verified
-)
-
-print(
-    "current page safe:",
-    current_page_safe
-)
 
 print()
-
 print(
-    "raw cushion:",
-    raw_cushion_value
+    "----- MOISTURE MATCH -----"
 )
 
 print(
-    "raw moisture finish:",
-    raw_moisture_finish
+    "track found:",
+    moisture.get(
+        "track_found"
+    )
 )
 
 print(
-    "raw moisture 4corner:",
-    raw_moisture_4corner
-)
-
-print()
-
-print(
-    "applied cushion:",
-    cushion_value
+    "track block id:",
+    moisture.get(
+        "track_block_id"
+    )
 )
 
 print(
-    "applied moisture finish:",
+    "date found:",
+    moisture.get(
+        "date_found"
+    )
+)
+
+print(
+    "measurement time:",
+    moisture.get(
+        "measurement_time"
+    )
+)
+
+print(
+    "moisture finish:",
     moisture_finish
 )
 
 print(
-    "applied moisture 4corner:",
+    "moisture 4corner:",
     moisture_4corner
 )
 
+print(
+    "moisture fetch found:",
+    moisture.get(
+        "found"
+    )
+)
+
+
 print()
+print(
+    "----- CUSHION MATCH -----"
+)
+
+if surface == "芝":
+
+    print(
+        "track found:",
+        cushion.get(
+            "track_found"
+        )
+    )
+
+    print(
+        "date found:",
+        cushion.get(
+            "date_found"
+        )
+    )
+
+    print(
+        "measurement time:",
+        cushion.get(
+            "measurement_time"
+        )
+    )
+
+    print(
+        "cushion:",
+        cushion_value
+    )
+
+else:
+
+    print(
+        "not used for dirt"
+    )
+
+
+print()
+print(
+    "----- AVAILABILITY -----"
+)
 
 print(
     "physical data:",
