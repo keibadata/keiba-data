@@ -42,7 +42,6 @@ def load_json(path):
         "r",
         encoding="utf-8"
     ) as f:
-
         return json.load(f)
 
 
@@ -105,7 +104,6 @@ def normalize_surface(value):
 if not os.path.exists(
     RACE_FILE
 ):
-
     raise RuntimeError(
         "race.json がありません。"
     )
@@ -163,21 +161,18 @@ if not re.fullmatch(
     r"\d{12}",
     race_id
 ):
-
     raise RuntimeError(
         "race.json の race_id が不正です。"
     )
 
 
 if not race_date:
-
     raise RuntimeError(
         "race.json に race_date がありません。"
     )
 
 
 if not racecourse:
-
     raise RuntimeError(
         "race.json に競馬場がありません。"
     )
@@ -189,19 +184,12 @@ target_race_number = int(
 
 
 if not (
-    1
-    <= target_race_number
-    <= 12
+    1 <= target_race_number <= 12
 ):
-
     raise RuntimeError(
         f"対象R番号が不正です: {target_race_number}"
     )
 
-
-# =========================================================
-# 対象レースより前だけ
-# =========================================================
 
 eligible_race_numbers = list(
     range(
@@ -252,7 +240,7 @@ print(
 
 
 # =========================================================
-# 1R
+# 1Rなら前レースなし
 # =========================================================
 
 if not eligible_race_numbers:
@@ -339,18 +327,14 @@ def parse_race_condition(
             )
 
             if text:
-
                 candidates.append(
                     text
                 )
 
-
-    page_text = clean_text(
-        soup
-    )
-
     candidates.append(
-        page_text
+        clean_text(
+            soup
+        )
     )
 
 
@@ -448,7 +432,6 @@ def parse_race_condition(
 
                 break
 
-
         if track_condition:
             break
 
@@ -469,7 +452,6 @@ def parse_results(
 ):
 
     results = []
-
     seen_rows = set()
 
 
@@ -516,7 +498,7 @@ def parse_results(
 
 
         # -------------------------------------------------
-        # 馬名・horse_id
+        # 馬名 / horse_id
         # -------------------------------------------------
 
         horse_link = (
@@ -528,7 +510,6 @@ def parse_results(
             )
         )
 
-
         if horse_link is None:
             continue
 
@@ -536,7 +517,6 @@ def parse_results(
         horse_name = clean_text(
             horse_link
         )
-
 
         horse_id = ""
 
@@ -546,7 +526,6 @@ def parse_results(
                 ""
             )
         )
-
 
         horse_id_match = re.search(
             r"/horse/(\d+)",
@@ -566,7 +545,6 @@ def parse_results(
 
         horse_number = None
 
-
         number_element = (
             row.select_one(
                 ".Umaban"
@@ -575,7 +553,6 @@ def parse_results(
                 ".Horse_Num"
             )
         )
-
 
         if number_element:
 
@@ -602,14 +579,13 @@ def parse_results(
 
             rank_cell_index = None
 
-
             for index, cell in enumerate(
                 cells
             ):
 
-                if rank_element in (
-                    cell,
-                    *cell.find_all(
+                if (
+                    cell is rank_element
+                    or rank_element in cell.find_all(
                         True
                     )
                 ):
@@ -620,47 +596,41 @@ def parse_results(
 
             if rank_cell_index is not None:
 
-                candidate_indexes = [
+                for candidate_index in [
                     rank_cell_index + 2,
                     rank_cell_index + 1,
-                ]
+                ]:
 
-
-                for candidate_index in (
-                    candidate_indexes
-                ):
-
-                    if (
+                    if not (
                         0
                         <= candidate_index
                         < len(cells)
                     ):
+                        continue
 
-                        candidate_text = (
-                            clean_text(
-                                cells[
-                                    candidate_index
-                                ]
-                            )
-                        )
 
-                        if re.fullmatch(
-                            r"\d{1,2}",
-                            candidate_text
-                        ):
+                    candidate_text = clean_text(
+                        cells[
+                            candidate_index
+                        ]
+                    )
 
-                            value = int(
-                                candidate_text
-                            )
 
-                            if (
-                                1
-                                <= value
-                                <= 18
-                            ):
+                    if not re.fullmatch(
+                        r"\d{1,2}",
+                        candidate_text
+                    ):
+                        continue
 
-                                horse_number = value
-                                break
+
+                    value = int(
+                        candidate_text
+                    )
+
+                    if 1 <= value <= 18:
+
+                        horse_number = value
+                        break
 
 
         # -------------------------------------------------
@@ -680,22 +650,24 @@ def parse_results(
                 selector
             )
 
-            if element:
+            if element is None:
+                continue
 
-                match = re.search(
-                    r"(\d{2}\.\d)",
-                    clean_text(
-                        element
-                    )
+
+            match = re.search(
+                r"(\d{2}\.\d)",
+                clean_text(
+                    element
+                )
+            )
+
+            if match:
+
+                last3f = float(
+                    match.group(1)
                 )
 
-                if match:
-
-                    last3f = float(
-                        match.group(1)
-                    )
-
-                    break
+                break
 
 
         if last3f is None:
@@ -732,35 +704,33 @@ def parse_results(
                 selector
             )
 
-            if element:
+            if element is None:
+                continue
 
-                text = clean_text(
+
+            match = re.search(
+                r"\d+:\d{2}\.\d",
+                clean_text(
                     element
                 )
+            )
 
-                match = re.search(
-                    r"\d+:\d{2}\.\d",
-                    text
+            if match:
+
+                race_time = (
+                    match.group()
                 )
 
-                if match:
-
-                    race_time = (
-                        match.group()
-                    )
-
-                    break
+                break
 
 
         if not race_time:
 
-            row_text = clean_text(
-                row
-            )
-
             match = re.search(
                 r"\d+:\d{2}\.\d",
-                row_text
+                clean_text(
+                    row
+                )
             )
 
             if match:
@@ -772,23 +742,12 @@ def parse_results(
 
         results.append(
             {
-                "finish":
-                    finish,
-
-                "horse_number":
-                    horse_number,
-
-                "horse_id":
-                    horse_id,
-
-                "horse_name":
-                    horse_name,
-
-                "last3f":
-                    last3f,
-
-                "race_time":
-                    race_time,
+                "finish": finish,
+                "horse_number": horse_number,
+                "horse_id": horse_id,
+                "horse_name": horse_name,
+                "last3f": last3f,
+                "race_time": race_time,
             }
         )
 
@@ -801,74 +760,83 @@ def parse_results(
             )
     )
 
-
     return results
 
 
 # =========================================================
 # コーナー通過順位
 #
-# Probeで実構造確認済み：
-#
-# table.RaceCommon_Table.Corner_Num
-#
-# <tr>
-#   <th><strong>3</strong>コーナー</th>
-#   <td>(*8,12)(5,11,10)...</td>
-# </tr>
-#
-# Corner_Num01/02/03 は着順色分け用classなので
-# td全体のテキストをそのまま保存する。
+# Probe確認済み：
+# table.Corner_Num
 # =========================================================
 
 def parse_corner_positions(
     soup
 ):
 
-    corner_positions = {}
+    positions = {
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+    }
 
 
     table = soup.select_one(
-        "table.RaceCommon_Table.Corner_Num"
+        "table.Corner_Num"
     )
 
 
     if table is None:
 
-        return corner_positions
+        for candidate in soup.find_all(
+            "table"
+        ):
+
+            summary = str(
+                candidate.get(
+                    "summary",
+                    ""
+                )
+            )
+
+            if "コーナー通過順位" in summary:
+
+                table = candidate
+                break
 
 
-    for row in table.select(
+    if table is None:
+        return positions
+
+
+    for row in table.find_all(
         "tr"
     ):
 
-        heading = row.find(
+        header = row.find(
             "th"
         )
 
-        value_cell = row.find(
+        cell = row.find(
             "td"
         )
 
-
         if (
-            heading is None
-            or value_cell is None
+            header is None
+            or cell is None
         ):
-
             continue
 
 
-        heading_text = clean_text(
-            heading
+        header_text = clean_text(
+            header
         )
-
 
         match = re.search(
             r"([1-4])\s*コーナー",
-            heading_text
+            header_text
         )
-
 
         if not match:
             continue
@@ -879,30 +847,29 @@ def parse_corner_positions(
         )
 
 
-        # separatorの空白だけ除去。
-        # *, (), カンマなどの意味のある記号は保持。
-        value = clean_text(
-            value_cell
-        )
-
-
-        value = re.sub(
-            r"\s+",
-            "",
-            value
-        )
-
-
-        corner_positions[
+        positions[
             corner_number
-        ] = value
+        ] = clean_text(
+            cell
+        )
 
 
-    return corner_positions
+    return positions
 
 
 # =========================================================
-# ラップ取得
+# レースラップ
+#
+# Probeで構造確認済み：
+#
+# table.RaceCommon_Table.Race_HaronTime
+#
+# その中の data-laptime が
+# 各200m区間のラップ。
+#
+# 累計時計
+# 24.1 / 36.3 / 48.6 / 1:00.2...
+# は使用しない。
 # =========================================================
 
 def parse_race_laps(
@@ -910,206 +877,120 @@ def parse_race_laps(
     distance
 ):
 
-    expected_count = 0
+    if not distance:
+        return []
 
-    if distance > 0:
 
-        expected_count = (
-            distance // 200
+    expected_count = (
+        distance // 200
+    )
+
+
+    # -----------------------------------------------------
+    # 正規ラップテーブル
+    # -----------------------------------------------------
+
+    table = soup.select_one(
+        "table.Race_HaronTime"
+    )
+
+
+    if table is None:
+
+        table = soup.select_one(
+            ".Race_HaronTime"
         )
 
 
-    candidates = []
+    if table is None:
 
+        print(
+            "lap table not found"
+        )
 
-    selectors = [
-        ".Race_HaronTime",
-        ".HaronTime",
-        ".RaceData_Haron",
-        "table.Race_HaronTime",
-        "[class*='Haron']",
-        "[class*='Lap']",
-    ]
-
-
-    containers = []
-
-    seen_container = set()
-
-
-    for selector in selectors:
-
-        for container in soup.select(
-            selector
-        ):
-
-            key = id(
-                container
-            )
-
-            if key in seen_container:
-                continue
-
-            seen_container.add(
-                key
-            )
-
-            containers.append(
-                container
-            )
+        return []
 
 
     # -----------------------------------------------------
-    # data-laptime
+    # data-laptimeを取得
     # -----------------------------------------------------
 
-    for container in containers:
+    lap_elements = table.select(
+        "[data-laptime]"
+    )
 
-        if container.select_one(
-            ".PositionCell"
+
+    values = []
+
+
+    for element in lap_elements:
+
+        raw = str(
+            element.get(
+                "data-laptime",
+                ""
+            )
+        ).strip()
+
+
+        if not re.fullmatch(
+            r"\d{1,2}\.\d",
+            raw
         ):
-
             continue
 
 
-        values = []
-
-
-        for element in container.select(
-            "[data-laptime]"
-        ):
-
-            raw = str(
-                element.get(
-                    "data-laptime",
-                    ""
-                )
-            ).strip()
-
-
-            if not re.fullmatch(
-                r"\d{1,2}\.\d",
-                raw
-            ):
-
-                continue
-
-
-            value = float(
-                raw
-            )
-
-
-            if not (
-                8.0
-                <= value
-                <= 20.0
-            ):
-
-                continue
-
-
-            values.append(
-                value
-            )
-
-
-        if values:
-
-            candidates.append(
-                values
-            )
-
-
-    # -----------------------------------------------------
-    # テキスト候補
-    # -----------------------------------------------------
-
-    if not candidates:
-
-        for container in containers:
-
-            if container.select_one(
-                ".PositionCell"
-            ):
-
-                continue
-
-
-            text = clean_text(
-                container
-            )
-
-
-            values = [
-                float(value)
-                for value in re.findall(
-                    r"(?<!\d)"
-                    r"(\d{1,2}\.\d)"
-                    r"(?!\d)",
-                    text
-                )
-            ]
-
-
-            values = [
-                value
-                for value in values
-                if (
-                    8.0
-                    <= value
-                    <= 20.0
-                )
-            ]
-
-
-            if values:
-
-                candidates.append(
-                    values
-                )
-
-
-    if not candidates:
-
-        return []
-
-
-    if expected_count > 0:
-
-        exact = [
-            values
-            for values in candidates
-            if len(values) == expected_count
-        ]
-
-
-        if exact:
-
-            return exact[0]
-
-
-        candidates.sort(
-            key=lambda values:
-                abs(
-                    len(values)
-                    - expected_count
-                )
+        value = float(
+            raw
         )
 
 
-    best = candidates[0]
+        # 通常の200mラップとして
+        # 明らかな異常値だけ除外
+        if not (
+            8.0
+            <= value
+            <= 20.0
+        ):
+            continue
 
 
-    if (
-        expected_count > 0
-        and len(best) != expected_count
-    ):
+        values.append(
+            value
+        )
+
+
+    # -----------------------------------------------------
+    # 必ず距離と区間数を照合
+    #
+    # 1400mなら7個
+    # 1600mなら8個
+    # 1800mなら9個
+    # 2000mなら10個
+    # -----------------------------------------------------
+
+    if len(
+        values
+    ) != expected_count:
+
+        print(
+            "lap count mismatch:",
+            "distance=",
+            distance,
+            "expected=",
+            expected_count,
+            "actual=",
+            len(
+                values
+            ),
+            "values=",
+            values
+        )
 
         return []
 
 
-    return best
+    return values
 
 
 # =========================================================
@@ -1145,20 +1026,11 @@ def fetch_race_result(
     except Exception as exc:
 
         return {
-            "race_id":
-                previous_race_id,
-
-            "race_number":
-                race_number,
-
-            "status":
-                "fetch_error",
-
-            "error":
-                str(exc),
-
-            "source_url":
-                url,
+            "race_id": previous_race_id,
+            "race_number": race_number,
+            "status": "fetch_error",
+            "error": str(exc),
+            "source_url": url,
         }
 
 
@@ -1182,12 +1054,6 @@ def fetch_race_result(
     )
 
 
-    race_laps = parse_race_laps(
-        soup,
-        distance
-    )
-
-
     corner_positions = (
         parse_corner_positions(
             soup
@@ -1195,8 +1061,14 @@ def fetch_race_result(
     )
 
 
+    race_laps = parse_race_laps(
+        soup,
+        distance
+    )
+
+
     # -----------------------------------------------------
-    # 状態
+    # パース状態
     # -----------------------------------------------------
 
     problems = []
@@ -1233,65 +1105,44 @@ def fetch_race_result(
         )
 
 
-    # コーナー情報については、
-    # 直線競走など存在しないケースも考えられるため
-    # レース全体を失敗扱いにはしない。
-    if not corner_positions:
+    # 3角/4角が存在するコースなのに
+    # 両方空なら問題として記録
+    if (
+        not corner_positions.get(
+            "3"
+        )
+        and not corner_positions.get(
+            "4"
+        )
+    ):
 
         problems.append(
             "corner_positions"
         )
 
 
-    if not problems:
-
-        status = "ok"
-
-    else:
-
-        status = (
-            "parse_incomplete"
-        )
+    status = (
+        "ok"
+        if not problems
+        else "parse_incomplete"
+    )
 
 
     return {
-        "race_id":
-            previous_race_id,
-
-        "race_number":
-            race_number,
-
-        "source_url":
-            url,
-
-        "surface":
-            surface,
-
-        "distance":
-            distance,
-
-        "track_condition":
-            track_condition,
-
-        "race_laps":
-            race_laps,
-
-        "corner_positions":
-            corner_positions,
-
-        "result_count":
-            len(
-                results
-            ),
-
-        "results":
-            results,
-
-        "parse_problems":
-            problems,
-
-        "status":
-            status,
+        "race_id": previous_race_id,
+        "race_number": race_number,
+        "source_url": url,
+        "surface": surface,
+        "distance": distance,
+        "track_condition": track_condition,
+        "race_laps": race_laps,
+        "corner_positions": corner_positions,
+        "result_count": len(
+            results
+        ),
+        "results": results,
+        "parse_problems": problems,
+        "status": status,
     }
 
 
@@ -1313,7 +1164,6 @@ for race_number in (
     )
 
 
-    # 未来レース防止
     if (
         int(
             previous_race_id[-2:]
@@ -1327,7 +1177,6 @@ for race_number in (
 
 
     print()
-
     print(
         "collect:",
         previous_race_id
@@ -1460,33 +1309,19 @@ for item in collected_races:
 # =========================================================
 
 output = {
-    "race_id":
-        race_id,
+    "race_id": race_id,
+    "race_date": race_date,
+    "racecourse": racecourse,
+    "surface": target_surface,
+    "distance": target_distance,
+    "target_race_number": target_race_number,
+    "future_race_usage": False,
 
-    "race_date":
-        race_date,
-
-    "racecourse":
-        racecourse,
-
-    "surface":
-        target_surface,
-
-    "distance":
-        target_distance,
-
-    "target_race_number":
-        target_race_number,
-
-    "future_race_usage":
-        False,
-
-    "status":
-        (
-            "collected"
-            if collected_races
-            else "no_previous_races"
-        ),
+    "status": (
+        "collected"
+        if collected_races
+        else "no_previous_races"
+    ),
 
     "eligible_race_numbers":
         eligible_race_numbers,
@@ -1525,7 +1360,6 @@ save_json(
 # =========================================================
 
 print()
-
 print(
     "===== DAY RACES RESULT ====="
 )
