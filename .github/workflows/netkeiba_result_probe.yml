@@ -1,0 +1,36 @@
+name: Netkeiba Result Probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      race_id:
+        description: "確認する12桁のrace_id"
+        required: true
+        default: "202605040503"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: |
+          pip install requests beautifulsoup4
+
+      - name: Run result probe
+        env:
+          RACE_ID: ${{ inputs.race_id }}
+        run: |
+          python netkeiba_result_probe.py
