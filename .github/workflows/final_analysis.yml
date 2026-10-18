@@ -45,6 +45,18 @@ jobs:
       - name: Collect race
         run: python main_v3.py
 
+      # 対象レース以前の同日実レースを収集
+      - name: Collect day races
+        run: python day_races.py
+
+      # 当日の馬場状態・含水率・クッション値
+      - name: Collect track condition
+        run: python track_condition.py
+
+      # 当日バイアス解析
+      - name: Analyze day bias
+        run: python day_bias.py
+
       # 今回出走馬の5代血統
       - name: Collect pedigree
         run: python pedigree.py
@@ -129,6 +141,9 @@ jobs:
 
           git add \
             race.json \
+            day_races.json \
+            track_condition.json \
+            day_bias.json \
             pedigree.json \
             runner_history.json \
             runner_analysis.json \
