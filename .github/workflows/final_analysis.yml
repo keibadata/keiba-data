@@ -28,7 +28,10 @@ jobs:
       - name: Install packages
         run: pip install -r requirements.txt
 
-      # race_id.txt を今回のレースIDとして取得
+      # ==================================================
+      # 今回レース
+      # ==================================================
+
       - name: Load race ID
         run: |
           RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
@@ -41,58 +44,93 @@ jobs:
           echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
           echo "Target race: $RACE_ID"
 
-      # 出馬表
       - name: Collect race
         run: python main_v3.py
 
-      # 対象レース以前の同日実レースを収集
+      # ==================================================
+      # 過去同条件レース
+      # ==================================================
+
+      - name: Find condition history races
+        run: python history_batch.py
+
+      - name: Collect condition history results
+        run: python history_collect.py
+
+      - name: Update history database
+        run: python history_db.py
+
+      - name: Build condition history
+        run: python condition_history.py
+
+      # ==================================================
+      # 当日データ
+      # ==================================================
+
       - name: Collect day races
         run: python day_races.py
 
-      # 当日の馬場状態・含水率・クッション値
       - name: Collect track condition
         run: python track_condition.py
 
-      # 当日バイアス解析
       - name: Analyze day bias
         run: python day_bias.py
 
-      # 今回出走馬の5代血統
+      # ==================================================
+      # 血統
+      # ==================================================
+
       - name: Collect pedigree
         run: python pedigree.py
 
       - name: Normalize pedigree
         run: python normalize_pedigree.py
 
-      # 各馬の過去成績
+      # 過去レース出走馬の血統データ
+      - name: Collect history pedigree
+        run: python history_pedigree.py
+
+      # ==================================================
+      # 今回出走馬の過去成績
+      # ==================================================
+
       - name: Collect runner history
         run: python runner_history.py
 
-      # 能力・発揮率
+      # ==================================================
+      # 個別解析
+      # ==================================================
+
       - name: Analyze runners
         run: python runner_analysis.py
 
-      # 前走課題・克服材料
       - name: Analyze previous race
         run: python previous_race_analysis.py
 
-      # 展開
       - name: Analyze pace
         run: python pace_analysis.py
 
-      # 過去の条件別血統統計
+      # ==================================================
+      # 血統統計
+      # ==================================================
+
       - name: Build bloodline statistics
         run: python bloodline_stats.py
 
-      # 今回の血統適性
       - name: Score race bloodlines
         run: python race_bloodline_score.py
 
+      # ==================================================
       # 最終統合
+      # ==================================================
+
       - name: Run final analysis
         run: python final_analysis.py
 
+      # ==================================================
       # 接続チェック
+      # ==================================================
+
       - name: Validate final analysis
         run: |
           python - <<'PY'
@@ -130,10 +168,99 @@ jobs:
                       f"({value}/{total})"
                   )
 
+          # ----------------------------------------------
+          # 履歴系接続確認
+          # ----------------------------------------------
+
+          required_files = [
+              "history_races.json",
+              "history_all.json",
+              "history_db.json",
+              "condition_history.json",
+              "day_races.json",
+              "track_condition.json",
+              "day_bias.json",
+          ]
+
+          for path in required_files:
+              if not os.path.exists(path):
+                  sys.exit(
+                      f"ERROR: required file missing: {path}"
+                  )
+
+              print("OK:", path)
+
+          # ----------------------------------------------
+          # history_races metadata確認
+          # ----------------------------------------------
+
+          with open(
+              "history_races.json",
+              encoding="utf-8"
+          ) as f:
+              history_races = json.load(f)
+
+          races = history_races.get(
+              "races",
+              []
+          )
+
+          if not races:
+              sys.exit(
+                  "ERROR: history_races.json has no races"
+              )
+
+          metadata_count = 0
+
+          for race in races:
+              if (
+                  race.get("race_name")
+                  and race.get("race_info_text")
+                  and race.get("race_class")
+                  and race.get("age_condition")
+              ):
+                  metadata_count += 1
+
+          print(
+              "History metadata:",
+              f"{metadata_count}/{len(races)}"
+          )
+
+          if metadata_count == 0:
+              sys.exit(
+                  "ERROR: history race metadata not collected"
+              )
+
+          # ----------------------------------------------
+          # 未来レース混入防止
+          # ----------------------------------------------
+
+          search = history_races.get(
+              "search",
+              {}
+          )
+
+          if search.get(
+              "future_races_excluded"
+          ) is not True:
+              sys.exit(
+                  "ERROR: future race exclusion not confirmed"
+              )
+
+          if search.get(
+              "target_race_excluded"
+          ) is not True:
+              sys.exit(
+                  "ERROR: target race exclusion not confirmed"
+              )
+
           print("FULL ANALYSIS VALIDATION OK")
           PY
 
-      # 全結果を保存
+      # ==================================================
+      # 全結果保存
+      # ==================================================
+
       - name: Save analysis
         run: |
           git config user.name "github-actions[bot]"
@@ -141,6 +268,11 @@ jobs:
 
           git add \
             race.json \
+            history_races.json \
+            history_all.json \
+            history_db.json \
+            condition_history.json \
+            history_pedigree.json \
             day_races.json \
             track_condition.json \
             day_bias.json \
