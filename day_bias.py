@@ -139,16 +139,64 @@ def get_race_number(race_id):
 
 
 # ============================================================
-# 通過順位解析
-#
-# 例:
-# 2-2
-# 4-4
-# 10-8
+# コーナー文字列正規化
 # ============================================================
 
-def parse_corner_positions(value):
-    text = clean_text(value)
+def normalize_corner_text(value):
+    text = clean_text(
+        value
+    )
+
+    if not text:
+        return ""
+
+    text = text.replace(
+        "（",
+        "("
+    )
+
+    text = text.replace(
+        "）",
+        ")"
+    )
+
+    text = text.replace(
+        "，",
+        ","
+    )
+
+    text = re.sub(
+        r"\s+",
+        "",
+        text
+    )
+
+    return text
+
+
+# ============================================================
+# コーナー隊列を馬番順に展開
+#
+# 例:
+#
+# (*8,12)(5,11)(1,7,10)(2,3)(6,4)9
+#
+# ↓
+#
+# [8,12,5,11,1,7,10,2,3,6,4,9]
+#
+# ()内で並走していても、
+# 「前のグループ→後ろのグループ」という順序は保持する。
+#
+# * は先頭表示なので除去。
+# - = 等は隊列の間隔を示す記号として扱い、
+# 馬番抽出時には無視する。
+# ============================================================
+
+def parse_corner_order(value):
+    text = normalize_corner_text(
+        value
+    )
 
     if not text:
         return []
@@ -158,45 +206,188 @@ def parse_corner_positions(value):
         text
     )
 
-    result = []
+    order = []
+
+    seen = set()
 
     for number in numbers:
+
         try:
-            result.append(
-                int(number)
+            horse_number = int(
+                number
             )
         except ValueError:
-            pass
+            continue
 
-    return result
+        if not (
+            1
+            <= horse_number
+            <= 18
+        ):
+            continue
+
+        if horse_number in seen:
+            continue
+
+        seen.add(
+            horse_number
+        )
+
+        order.append(
+            horse_number
+        )
+
+    return order
 
 
 # ============================================================
-# 脚質推定
+# 各馬のコーナー順位
 #
-# 通過順位からのみ判定。
-# 推測情報は使用しない。
+# 返り値:
+#
+# {
+#   8: 1,
+#   12: 2,
+#   5: 3,
+#   ...
+# }
+#
+# 同一グループ内の厳密な前後は判定できないため、
+# HTML上に記載された順番を位置番号として利用。
+#
+# バイアス判定では絶対順位より
+# 「前方・中団・後方」の大分類を重視する。
+# ============================================================
+
+def build_corner_position_map(
+    value
+):
+    order = parse_corner_order(
+        value
+    )
+
+    output = {}
+
+    for index, horse_number in enumerate(
+        order,
+        start=1
+    ):
+        output[
+            horse_number
+        ] = index
+
+    return output
+
+
+# ============================================================
+# 使用するコーナーを選択
+#
+# 原則:
+# 4角 → 3角 → 2角 → 1角
+#
+# 東京芝1400/1600などでは
+# 3角・4角が取得されているため4角を優先。
+#
+# 直線競走等でコーナーが無い場合は空。
+# ============================================================
+
+def select_reference_corner(
+    corner_positions
+):
+    if not isinstance(
+        corner_positions,
+        dict
+    ):
+        return (
+            "",
+            ""
+        )
+
+    for corner_number in [
+        "4",
+        "3",
+        "2",
+        "1",
+    ]:
+
+        value = clean_text(
+            corner_positions.get(
+                corner_number
+            )
+        )
+
+        if value:
+            return (
+                corner_number,
+                value
+            )
+
+    return (
+        "",
+        ""
+    )
+
+
+# ============================================================
+# 脚質分類
+#
+# 「馬番」ではなく、
+# 実際のコーナー隊列内の位置から分類する。
+#
+# 逃げ:
+#   コーナー隊列の先頭
+#
+# 先行:
+#   上位約1/3
+#
+# 中団:
+#   中央約1/3
+#
+# 後方:
+#   後ろ約1/3
+#
+# ただし逃げは必ず先頭1頭を独立。
+#
+# ※これは当日バイアス検出用の脚質分類であり、
+# 各馬の恒常的な脚質を決めるものではない。
 # ============================================================
 
 def classify_running_style(
-    corner_text
+    horse_number,
+    position_map
 ):
-    positions = parse_corner_positions(
-        corner_text
-    )
-
-    if not positions:
+    if horse_number is None:
         return ""
 
-    first = positions[0]
+    if not position_map:
+        return ""
 
-    if first == 1:
+    position = position_map.get(
+        horse_number
+    )
+
+    if position is None:
+        return ""
+
+    field_size = len(
+        position_map
+    )
+
+    if field_size <= 0:
+        return ""
+
+    if position == 1:
         return "逃げ"
 
-    if first <= 4:
+    position_rate = (
+        position
+        / field_size
+    )
+
+    if position_rate <= 0.35:
         return "先行"
 
-    if first <= 9:
+    if position_rate <= 0.70:
         return "中団"
 
     return "後方"
@@ -337,13 +528,17 @@ previous_race_numbers = list(
 # ============================================================
 
 status = ""
+
 reference_race_count = 0
 
 time_bias = ""
+
 inside_outside_bias = ""
+
 running_style_bias = ""
 
 confidence = 0.0
+
 reason = ""
 
 reference_races = []
@@ -365,13 +560,22 @@ top3_style_counts = {
 top3_samples = 0
 
 winner_last3f = []
+
 top3_last3f = []
 
 inside_top3 = 0
+
 outside_top3 = 0
+
 middle_top3 = 0
 
 future_race_detected = False
+
+corner_connected_race_count = 0
+
+corner_missing_race_numbers = []
+
+reference_corner_numbers = {}
 
 
 # ============================================================
@@ -421,11 +625,10 @@ else:
         or []
     )
 
-    # --------------------------------------------------------
-    # 安全確認
-    #
-    # 対象R以降が混入していたら停止
-    # --------------------------------------------------------
+
+    # ========================================================
+    # 未来レース混入チェック
+    # ========================================================
 
     for item in collected_races:
 
@@ -439,7 +642,9 @@ else:
             continue
 
         if item_race_no >= race_no:
+
             future_race_detected = True
+
             break
 
 
@@ -451,12 +656,14 @@ else:
         )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # 同一馬場のみ使用
     #
     # 芝 → 芝
     # ダート → ダート
-    # --------------------------------------------------------
+    #
+    # 障害は芝とは別扱い。
+    # ========================================================
 
     for item in collected_races:
 
@@ -519,6 +726,12 @@ else:
 
     for item in reference_races:
 
+        item_race_no = safe_int(
+            item.get(
+                "race_number"
+            )
+        )
+
         results = (
             item.get(
                 "results",
@@ -527,7 +740,68 @@ else:
             or []
         )
 
+
+        # ----------------------------------------------------
+        # レース単位のcorner_positionsから
+        # 使用するコーナーを選択
+        # ----------------------------------------------------
+
+        corner_positions = (
+            item.get(
+                "corner_positions",
+                {}
+            )
+            or {}
+        )
+
+        (
+            reference_corner_number,
+            reference_corner_text
+        ) = select_reference_corner(
+            corner_positions
+        )
+
+
+        if reference_corner_text:
+
+            position_map = (
+                build_corner_position_map(
+                    reference_corner_text
+                )
+            )
+
+        else:
+
+            position_map = {}
+
+
+        if position_map:
+
+            corner_connected_race_count += 1
+
+            if item_race_no is not None:
+
+                reference_corner_numbers[
+                    str(item_race_no)
+                ] = (
+                    reference_corner_number
+                )
+
+        else:
+
+            if item_race_no is not None:
+
+                corner_missing_race_numbers.append(
+                    item_race_no
+                )
+
+
         valid_results = []
+
+
+        # ====================================================
+        # 各馬
+        # ====================================================
 
         for result in results:
 
@@ -540,11 +814,6 @@ else:
             if finish is None:
                 continue
 
-            style = classify_running_style(
-                result.get(
-                    "corner"
-                )
-            )
 
             horse_number = safe_int(
                 result.get(
@@ -552,11 +821,44 @@ else:
                 )
             )
 
+
             last3f = safe_float(
                 result.get(
                     "last3f"
                 )
             )
+
+
+            # ------------------------------------------------
+            # 修正点
+            #
+            # 旧:
+            # result.get("corner")
+            #
+            # 新:
+            # race単位のcorner_positionsから
+            # horse_numberに対応する位置を復元
+            # ------------------------------------------------
+
+            style = classify_running_style(
+                horse_number,
+                position_map
+            )
+
+
+            corner_position = None
+
+            if (
+                horse_number is not None
+                and position_map
+            ):
+
+                corner_position = (
+                    position_map.get(
+                        horse_number
+                    )
+                )
+
 
             record = {
                 "finish":
@@ -570,35 +872,55 @@ else:
 
                 "last3f":
                     last3f,
+
+                "corner_number":
+                    reference_corner_number,
+
+                "corner_position":
+                    corner_position,
             }
+
 
             valid_results.append(
                 record
             )
 
+
             if style in style_counts:
+
                 style_counts[
                     style
                 ] += 1
 
 
-        # ----------------------------------------------------
+        # ====================================================
         # 上位3頭
-        # ----------------------------------------------------
+        # ====================================================
 
         top3 = [
             x
             for x in valid_results
-            if 1 <= x[
-                "finish"
-            ] <= 3
+            if (
+                1
+                <= x[
+                    "finish"
+                ]
+                <= 3
+            )
         ]
+
 
         for result in top3:
 
             style = result[
                 "style"
             ]
+
+
+            # ------------------------------------------------
+            # 脚質サンプルは
+            # 実際に位置を取得できた馬だけ加算
+            # ------------------------------------------------
 
             if style in top3_style_counts:
 
@@ -610,11 +932,10 @@ else:
 
 
             # ------------------------------------------------
-            # 馬番を内・中・外に簡易分類
+            # 馬番による内・中・外
             #
-            # 枠順ではなく馬番。
-            # これ単独で能力評価には使わない。
-            # 当日傾向の補助のみ。
+            # 当日傾向の補助。
+            # 能力評価には直接使用しない。
             # ------------------------------------------------
 
             horse_number = result[
@@ -624,20 +945,28 @@ else:
             if horse_number is not None:
 
                 if horse_number <= 5:
+
                     inside_top3 += 1
 
                 elif horse_number >= 11:
+
                     outside_top3 += 1
 
                 else:
+
                     middle_top3 += 1
 
+
+            # ------------------------------------------------
+            # 上がり
+            # ------------------------------------------------
 
             last3f = result[
                 "last3f"
             ]
 
             if last3f is not None:
+
                 top3_last3f.append(
                     last3f
                 )
@@ -650,6 +979,7 @@ else:
                 == 1
                 and last3f is not None
             ):
+
                 winner_last3f.append(
                     last3f
                 )
@@ -657,6 +987,10 @@ else:
 
     # ========================================================
     # 脚質バイアス
+    #
+    # 逃げ＋先行 vs 中団＋後方
+    #
+    # サンプル不足時は無理に判定しない。
     # ========================================================
 
     front_top3 = (
@@ -690,17 +1024,21 @@ else:
             / top3_samples
         )
 
+
         if front_rate >= 0.67:
+
             running_style_bias = (
                 "逃げ・先行有利"
             )
 
         elif back_rate >= 0.67:
+
             running_style_bias = (
                 "差し有利"
             )
 
         else:
+
             running_style_bias = (
                 "大きな偏りなし"
             )
@@ -718,6 +1056,7 @@ else:
         + outside_top3
     )
 
+
     if position_samples >= 3:
 
         inside_rate = (
@@ -730,17 +1069,21 @@ else:
             / position_samples
         )
 
+
         if inside_rate >= 0.60:
+
             inside_outside_bias = (
                 "内寄り優勢"
             )
 
         elif outside_rate >= 0.60:
+
             inside_outside_bias = (
                 "外寄り優勢"
             )
 
         else:
+
             inside_outside_bias = (
                 "大きな偏りなし"
             )
@@ -749,10 +1092,8 @@ else:
     # ========================================================
     # 時計バイアス
     #
-    # 絶対時計との比較基準がまだないため、
-    # 上がりだけで高速・低速とは断定しない。
-    #
-    # ここは意図的にニュートラル。
+    # 基準時計未接続なので、
+    # 上がりだけから高速・低速を断定しない。
     # ========================================================
 
     time_bias = ""
@@ -761,25 +1102,31 @@ else:
     # ========================================================
     # 信頼度
     #
-    # 同一馬場の参考レース数だけで決める。
+    # 同一馬場の参考レース数を基本とする。
     # ========================================================
 
     if reference_race_count >= 5:
+
         confidence = 1.0
 
     elif reference_race_count == 4:
+
         confidence = 0.8
 
     elif reference_race_count == 3:
+
         confidence = 0.6
 
     elif reference_race_count == 2:
+
         confidence = 0.4
 
     elif reference_race_count == 1:
+
         confidence = 0.2
 
     else:
+
         confidence = 0.0
 
 
@@ -811,6 +1158,9 @@ else:
             f"同馬場の実レース"
             f"{reference_race_count}件を使用。"
             f"対象レース以降のデータは使用していない。"
+            f"通過順位接続"
+            f"{corner_connected_race_count}/"
+            f"{reference_race_count}件。"
             f"時計傾向は基準時計未接続のため"
             f"現段階では判定しない。"
         )
@@ -823,6 +1173,7 @@ else:
 average_top3_last3f = None
 
 if top3_last3f:
+
     average_top3_last3f = round(
         statistics.mean(
             top3_last3f
@@ -834,6 +1185,7 @@ if top3_last3f:
 average_winner_last3f = None
 
 if winner_last3f:
+
     average_winner_last3f = round(
         statistics.mean(
             winner_last3f
@@ -886,6 +1238,15 @@ output = {
         )
         for item in reference_races
     ],
+
+    "corner_connected_race_count":
+        corner_connected_race_count,
+
+    "corner_missing_race_numbers":
+        corner_missing_race_numbers,
+
+    "reference_corner_numbers":
+        reference_corner_numbers,
 
     "time_bias":
         time_bias,
@@ -972,6 +1333,7 @@ save_json(
 # ============================================================
 
 print()
+
 print(
     "===== DAY BIAS ====="
 )
@@ -1034,8 +1396,30 @@ print(
 )
 
 print(
+    "corner connected:",
+    corner_connected_race_count,
+    "/",
+    reference_race_count
+)
+
+print(
+    "reference corners:",
+    reference_corner_numbers
+)
+
+print(
+    "corner missing races:",
+    corner_missing_race_numbers
+)
+
+print(
     "top3 sample count:",
     top3_samples
+)
+
+print(
+    "style counts:",
+    style_counts
 )
 
 print(
@@ -1063,6 +1447,11 @@ print(
 print(
     "average top3 last3f:",
     average_top3_last3f
+)
+
+print(
+    "average winner last3f:",
+    average_winner_last3f
 )
 
 print(
