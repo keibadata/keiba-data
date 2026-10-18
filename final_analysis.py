@@ -204,7 +204,9 @@ ability_data = load_json("runner_analysis.json")
 previous_data = load_json("previous_race_analysis.json")
 pace_data = load_json("pace_analysis.json")
 blood_data = load_json("race_bloodline_score.json")
+
 track_data_raw = load_json("track_condition.json")
+day_bias_data_raw = load_json("day_bias.json")
 body_weight_data_raw = load_json("body_weight.json")
 
 
@@ -218,7 +220,10 @@ race_id = str(
 
 
 # =====================================
-# 当日馬場 Race ID確認
+# track_condition.json
+# Race ID確認
+#
+# 含水率・クッション値等の実測値
 # =====================================
 
 track_race_id = str(
@@ -235,6 +240,51 @@ if track_race_id_matched:
     track_data = track_data_raw
 else:
     track_data = {}
+
+
+# =====================================
+# day_bias.json
+# Race ID確認
+#
+# 対象レース以前の実レースだけから
+# 当日バイアスを取得
+# =====================================
+
+day_bias_race_id = str(
+    day_bias_data_raw.get("race_id", "")
+).strip()
+
+day_bias_race_id_matched = (
+    bool(race_id)
+    and bool(day_bias_race_id)
+    and race_id == day_bias_race_id
+)
+
+day_bias_future_safe = (
+    day_bias_data_raw.get(
+        "future_race_usage"
+    ) is False
+)
+
+day_bias_status = str(
+    day_bias_data_raw.get(
+        "status",
+        ""
+    )
+).strip()
+
+day_bias_status_valid = (
+    day_bias_status == "analyzed"
+)
+
+if (
+    day_bias_race_id_matched
+    and day_bias_future_safe
+    and day_bias_status_valid
+):
+    day_bias_data = day_bias_data_raw
+else:
+    day_bias_data = {}
 
 
 # =====================================
@@ -350,72 +400,149 @@ def get_age(runner):
 
 
 # =====================================
-# 当日馬場
+# 当日馬場・当日バイアス
+#
+# track_condition.json:
+#   クッション値・含水率等
+#
+# day_bias.json:
+#   対象Rより前の実レースから
+#   脚質・内外・時計傾向
+#
+# 能力そのものは変更しない。
+# 今回能力発揮率だけを補正する。
 # =====================================
 
-def evaluate_track_condition(track, running_style):
-
-    if not track:
-        return (
-            0.0,
-            ["当日馬場データなし・補正なし"]
-        )
+def evaluate_track_condition(
+    track,
+    day_bias,
+    running_style
+):
 
     score = 0.0
     reasons = []
 
-    track_condition = str(
-        track.get("track_condition", "")
+    style = str(
+        running_style or "不明"
     ).strip()
 
+    # ---------------------------------
+    # 実測馬場
+    # ---------------------------------
+
+    if track:
+
+        track_condition = str(
+            track.get(
+                "track_condition",
+                ""
+            )
+        ).strip()
+
+        cushion = track.get(
+            "cushion_value"
+        )
+
+        moisture_4 = track.get(
+            "moisture_4corner"
+        )
+
+        moisture_finish = track.get(
+            "moisture_finish"
+        )
+
+        if track_condition:
+            reasons.append(
+                "馬場:" + track_condition
+            )
+
+        if cushion not in (None, ""):
+            reasons.append(
+                "クッション値:"
+                + str(cushion)
+            )
+
+        if (
+            moisture_4 not in (None, "")
+            or moisture_finish not in (None, "")
+        ):
+            reasons.append(
+                "含水率:"
+                + str(moisture_4)
+                + "/"
+                + str(moisture_finish)
+            )
+
+    else:
+        reasons.append(
+            "当日馬場実測データなし"
+        )
+
+    # ---------------------------------
+    # day_bias未接続
+    # ---------------------------------
+
+    if not day_bias:
+
+        reasons.append(
+            "当日実レースバイアス未接続"
+        )
+
+        reasons.append(
+            "馬場による発揮率補正なし"
+        )
+
+        return (
+            0.0,
+            reasons
+        )
+
+    # ---------------------------------
+    # day_bias
+    # ---------------------------------
+
     time_bias = str(
-        track.get("time_bias", "")
+        day_bias.get(
+            "time_bias",
+            ""
+        )
     ).strip()
 
     inside_outside = str(
-        track.get("inside_outside_bias", "")
+        day_bias.get(
+            "inside_outside_bias",
+            ""
+        )
     ).strip()
 
     style_bias = str(
-        track.get("running_style_bias", "")
+        day_bias.get(
+            "running_style_bias",
+            ""
+        )
     ).strip()
-
-    cushion = track.get("cushion_value")
-    moisture_4 = track.get("moisture_4corner")
-    moisture_finish = track.get("moisture_finish")
 
     reference_count = int(
         get_number(
-            track,
+            day_bias,
             "reference_race_count",
             default=0
         )
     )
 
-    style = str(
-        running_style or "不明"
+    confidence = get_optional_number(
+        day_bias,
+        "confidence"
     )
 
-    if track_condition:
-        reasons.append(
-            "馬場:" + track_condition
-        )
+    if confidence is None:
+        confidence = 0.0
 
-    if cushion not in (None, ""):
-        reasons.append(
-            "クッション値:" + str(cushion)
-        )
-
-    if (
-        moisture_4 not in (None, "")
-        or moisture_finish not in (None, "")
-    ):
-        reasons.append(
-            "含水率:"
-            + str(moisture_4)
-            + "/"
-            + str(moisture_finish)
-        )
+    confidence = clamp(
+        confidence,
+        0.0,
+        1.0
+    )
 
     if time_bias:
         reasons.append(
@@ -432,6 +559,20 @@ def evaluate_track_condition(track, running_style):
             "脚質傾向:" + style_bias
         )
 
+    reasons.append(
+        "当日バイアス参考"
+        + str(reference_count)
+        + "R"
+    )
+
+    reasons.append(
+        "当日バイアス信頼度:"
+        + format(
+            confidence,
+            ".2f"
+        )
+    )
+
     # ---------------------------------
     # 脚質バイアス
     # ---------------------------------
@@ -441,26 +582,59 @@ def evaluate_track_condition(track, running_style):
         if style == "逃げ":
             score += 1.2
 
-        elif style in ("先行", "好位"):
+        elif style in (
+            "先行",
+            "好位"
+        ):
             score += 0.5
 
-        elif style in ("中団後", "後方"):
+        elif style in (
+            "中団後",
+            "後方"
+        ):
             score -= 0.5
 
     elif style_bias == "先行有利":
 
-        if style in ("逃げ", "先行"):
+        if style in (
+            "逃げ",
+            "先行"
+        ):
             score += 0.9
 
         elif style == "好位":
             score += 0.5
 
-        elif style in ("中団後", "後方"):
+        elif style in (
+            "中団後",
+            "後方"
+        ):
+            score -= 0.5
+
+    elif style_bias == "逃げ・先行有利":
+
+        if style == "逃げ":
+            score += 1.0
+
+        elif style in (
+            "先行",
+            "好位"
+        ):
+            score += 0.8
+
+        elif style in (
+            "中団後",
+            "後方"
+        ):
             score -= 0.5
 
     elif style_bias == "差し有利":
 
-        if style in ("差し", "中団", "中団後"):
+        if style in (
+            "差し",
+            "中団",
+            "中団後"
+        ):
             score += 0.8
 
         elif style == "逃げ":
@@ -471,18 +645,36 @@ def evaluate_track_condition(track, running_style):
 
     elif style_bias == "追込有利":
 
-        if style in ("差し", "中団後", "後方"):
+        if style in (
+            "差し",
+            "中団後",
+            "後方"
+        ):
             score += 0.9
 
-        elif style in ("逃げ", "先行"):
+        elif style in (
+            "逃げ",
+            "先行"
+        ):
             score -= 0.6
 
+    elif style_bias == "大きな偏りなし":
+
+        reasons.append(
+            "脚質バイアス明確差なし"
+        )
+
     # ---------------------------------
-    # 内外
-    # 枠単独評価は禁止
+    # 内外バイアス
+    #
+    # 馬番だけで直接加点しない。
+    # 脚質との接続時だけ小幅補正。
     # ---------------------------------
 
-    if inside_outside == "内有利":
+    if inside_outside in (
+        "内有利",
+        "内寄り優勢"
+    ):
 
         if style in (
             "逃げ",
@@ -490,11 +682,15 @@ def evaluate_track_condition(track, running_style):
             "好位"
         ):
             score += 0.3
+
             reasons.append(
-                "内有利×前目脚質"
+                "内優勢×前目脚質"
             )
 
-    elif inside_outside == "外有利":
+    elif inside_outside in (
+        "外有利",
+        "外寄り優勢"
+    ):
 
         if style in (
             "差し",
@@ -503,41 +699,33 @@ def evaluate_track_condition(track, running_style):
             "後方"
         ):
             score += 0.3
+
             reasons.append(
-                "外有利×差し系脚質"
+                "外優勢×差し系脚質"
             )
 
-    # ---------------------------------
-    # 信頼度
-    # ---------------------------------
-
-    if reference_count <= 0:
-        confidence = 0.0
-
-    elif reference_count == 1:
-        confidence = 0.50
-
-    elif reference_count == 2:
-        confidence = 0.70
-
-    elif reference_count == 3:
-        confidence = 0.85
-
-    else:
-        confidence = 1.00
-
-    if (
-        reference_count <= 0
-        and (
-            style_bias
-            or inside_outside
-        )
-    ):
-        confidence = 0.50
+    elif inside_outside == "大きな偏りなし":
 
         reasons.append(
-            "参考レース数不明・暫定評価"
+            "内外バイアス明確差なし"
         )
+
+    # ---------------------------------
+    # 時計傾向
+    #
+    # 現在はday_bias側で基準時計未接続。
+    # 空欄なら一切補正しない。
+    # ---------------------------------
+
+    if not time_bias:
+        reasons.append(
+            "時計傾向未判定・補正なし"
+        )
+
+    # ---------------------------------
+    # day_biasで算出済みのconfidenceを
+    # そのまま使用
+    # ---------------------------------
 
     score *= confidence
 
@@ -547,19 +735,15 @@ def evaluate_track_condition(track, running_style):
         1.5
     )
 
-    if reference_count > 0:
-        reasons.append(
-            "参考レース"
-            + str(reference_count)
-            + "R"
-        )
-
     if score == 0:
         reasons.append(
             "馬場による発揮率補正なし"
         )
 
-    return score, reasons
+    return (
+        score,
+        reasons
+    )
 
 
 # =====================================
@@ -655,18 +839,10 @@ def evaluate_body_weight(
             "馬体重増減不明"
         )
 
-    # ---------------------------------
-    # 2歳馬
-    # ---------------------------------
-
     if age == 2:
         reasons.append(
             "2歳馬・馬体増は成長分を考慮"
         )
-
-    # ---------------------------------
-    # 斤量体重比
-    # ---------------------------------
 
     if (
         carried_weight is not None
@@ -697,7 +873,6 @@ def evaluate_body_weight(
             + "%"
         )
 
-        # 小幅補正のみ
         if weight_ratio >= 13.5:
             adjustment -= 0.4
 
@@ -721,11 +896,6 @@ def evaluate_body_weight(
         reasons.append(
             "斤量不明・斤量体重比補正なし"
         )
-
-    # ---------------------------------
-    # 馬体増減
-    # 単独では加減点しない
-    # ---------------------------------
 
     if change is not None:
 
@@ -906,10 +1076,6 @@ def evaluate_body_issue_connection(
         for keyword in thin_keywords
     )
 
-    # ---------------------------------
-    # 太め系
-    # ---------------------------------
-
     if heavy_issue:
 
         reasons.append(
@@ -950,10 +1116,6 @@ def evaluate_body_issue_connection(
                 "太め系課題の克服確認できず"
             )
 
-    # ---------------------------------
-    # 細化・馬体維持系
-    # ---------------------------------
-
     if thin_issue:
 
         reasons.append(
@@ -962,8 +1124,6 @@ def evaluate_body_issue_connection(
 
         if change >= 4:
 
-            # 2歳の増加は成長分もあるため
-            # 馬体増だけでは強く加点しない
             if age == 2:
                 score += 0.2
 
@@ -1215,13 +1375,9 @@ def evaluate_bloodline(data):
         )
     )
 
-    # 該当祖先なし
-    # ニュートラル
     if matched <= 0:
         adjustment = 0.0
 
-    # 明確なプラス祖先なし
-    # 強いマイナスにはしない
     elif positive <= 0:
         adjustment = clamp(
             score,
@@ -1432,10 +1588,6 @@ for runner in runners:
         runner
     )
 
-    # ---------------------------------
-    # 能力
-    # ---------------------------------
-
     ability_score = get_number(
         ability,
         "ability_score",
@@ -1461,22 +1613,14 @@ for runner in runners:
         )
     )
 
-    # ---------------------------------
-    # 馬場
-    # ---------------------------------
-
     (
         track_rate_adjustment,
         track_reasons
     ) = evaluate_track_condition(
         track_data,
+        day_bias_data,
         running_style
     )
-
-    # ---------------------------------
-    # 馬体重
-    # race.json最優先
-    # ---------------------------------
 
     body_result = evaluate_body_weight(
         runner,
@@ -1489,10 +1633,6 @@ for runner in runners:
         ]
     )
 
-    # ---------------------------------
-    # 馬体重 × 前走課題
-    # ---------------------------------
-
     (
         body_issue_adjustment,
         body_issue_reasons
@@ -1500,10 +1640,6 @@ for runner in runners:
         body_result,
         previous_horse
     )
-
-    # ---------------------------------
-    # 今回能力発揮率
-    # ---------------------------------
 
     adjusted_performance_rate = clamp(
         original_performance_rate
@@ -1514,19 +1650,11 @@ for runner in runners:
         110.0
     )
 
-    # ---------------------------------
-    # 能力 × 発揮率
-    # ---------------------------------
-
     base_performance = (
         ability_score
         * adjusted_performance_rate
         / 100.0
     )
-
-    # ---------------------------------
-    # 条件適性
-    # ---------------------------------
 
     condition_adjustment = clamp(
         (
@@ -1538,10 +1666,6 @@ for runner in runners:
         2.0
     )
 
-    # ---------------------------------
-    # 前走
-    # ---------------------------------
-
     (
         previous_adj,
         previous_reasons,
@@ -1552,10 +1676,6 @@ for runner in runners:
         previous_horse
     )
 
-    # ---------------------------------
-    # 展開
-    # ---------------------------------
-
     (
         pace_adj,
         pace_reasons
@@ -1563,20 +1683,12 @@ for runner in runners:
         pace
     )
 
-    # ---------------------------------
-    # 血統
-    # ---------------------------------
-
     (
         blood_adj,
         blood_reasons
     ) = evaluate_bloodline(
         blood
     )
-
-    # ---------------------------------
-    # 最終
-    # ---------------------------------
 
     final_score = (
         base_performance
@@ -2028,33 +2140,93 @@ output = {
         "moisture_finish":
             track_data.get(
                 "moisture_finish"
+            )
+    },
+
+    "day_bias": {
+
+        "source_available":
+            bool(
+                day_bias_data_raw
             ),
 
-        "time_bias":
-            track_data.get(
-                "time_bias",
-                ""
+        "source_race_id":
+            day_bias_race_id,
+
+        "race_id_matched":
+            day_bias_race_id_matched,
+
+        "future_race_usage":
+            day_bias_data_raw.get(
+                "future_race_usage"
             ),
 
-        "inside_outside_bias":
-            track_data.get(
-                "inside_outside_bias",
-                ""
-            ),
+        "future_safe":
+            day_bias_future_safe,
 
-        "running_style_bias":
-            track_data.get(
-                "running_style_bias",
-                ""
+        "status":
+            day_bias_status,
+
+        "applied":
+            bool(
+                day_bias_data
             ),
 
         "reference_race_count":
             int(
                 get_number(
-                    track_data,
+                    day_bias_data,
                     "reference_race_count",
                     default=0
                 )
+            ),
+
+        "reference_race_numbers":
+            day_bias_data.get(
+                "reference_race_numbers",
+                []
+            ),
+
+        "corner_connected_race_count":
+            int(
+                get_number(
+                    day_bias_data,
+                    "corner_connected_race_count",
+                    default=0
+                )
+            ),
+
+        "top3_sample_count":
+            int(
+                get_number(
+                    day_bias_data,
+                    "top3_sample_count",
+                    default=0
+                )
+            ),
+
+        "confidence":
+            get_optional_number(
+                day_bias_data,
+                "confidence"
+            ),
+
+        "time_bias":
+            day_bias_data.get(
+                "time_bias",
+                ""
+            ),
+
+        "inside_outside_bias":
+            day_bias_data.get(
+                "inside_outside_bias",
+                ""
+            ),
+
+        "running_style_bias":
+            day_bias_data.get(
+                "running_style_bias",
+                ""
             )
     },
 
@@ -2096,6 +2268,18 @@ output = {
             True,
 
         "track_affects_performance_rate_not_ability":
+            True,
+
+        "day_bias_affects_performance_rate_not_ability":
+            True,
+
+        "day_bias_requires_matching_race_id":
+            True,
+
+        "day_bias_requires_no_future_race_usage":
+            True,
+
+        "day_bias_confidence_used_directly":
             True,
 
         "body_weight_primary_source_is_race_json":
@@ -2195,6 +2379,40 @@ output = {
                 track_data
             ),
 
+        "day_bias_source_available":
+            bool(
+                day_bias_data_raw
+            ),
+
+        "day_bias_race_id_matched":
+            day_bias_race_id_matched,
+
+        "day_bias_future_safe":
+            day_bias_future_safe,
+
+        "day_bias_applied":
+            bool(
+                day_bias_data
+            ),
+
+        "day_bias_reference_race_count":
+            int(
+                get_number(
+                    day_bias_data,
+                    "reference_race_count",
+                    default=0
+                )
+            ),
+
+        "day_bias_top3_sample_count":
+            int(
+                get_number(
+                    day_bias_data,
+                    "top3_sample_count",
+                    default=0
+                )
+            ),
+
         "track_effective_count":
             track_effective_count,
 
@@ -2246,6 +2464,64 @@ print(
 print(
     "track race id matched:",
     track_race_id_matched
+)
+
+print(
+    "day bias race id:",
+    day_bias_race_id
+)
+
+print(
+    "day bias race id matched:",
+    day_bias_race_id_matched
+)
+
+print(
+    "day bias future safe:",
+    day_bias_future_safe
+)
+
+print(
+    "day bias status:",
+    day_bias_status
+)
+
+print(
+    "day bias applied:",
+    bool(
+        day_bias_data
+    )
+)
+
+print(
+    "day bias reference races:",
+    day_bias_data.get(
+        "reference_race_numbers",
+        []
+    )
+)
+
+print(
+    "day bias confidence:",
+    day_bias_data.get(
+        "confidence"
+    )
+)
+
+print(
+    "day bias running style:",
+    day_bias_data.get(
+        "running_style_bias",
+        ""
+    )
+)
+
+print(
+    "day bias inside/outside:",
+    day_bias_data.get(
+        "inside_outside_bias",
+        ""
+    )
 )
 
 print(
