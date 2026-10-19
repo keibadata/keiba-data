@@ -70,6 +70,11 @@ jobs:
       - name: Collect day races
         run: python day_races.py
 
+      # 当日の同一馬場レースについて
+      # 距離・クラス・年齢条件別の過去基準時計を作る
+      - name: Build day time history
+        run: python day_time_history.py
+
       - name: Collect track condition
         run: python track_condition.py
 
@@ -86,7 +91,6 @@ jobs:
       - name: Normalize pedigree
         run: python normalize_pedigree.py
 
-      # 過去レース出走馬の血統データ
       - name: Collect history pedigree
         run: python history_pedigree.py
 
@@ -178,6 +182,7 @@ jobs:
               "history_db.json",
               "condition_history.json",
               "day_races.json",
+              "day_time_history.json",
               "track_condition.json",
               "day_bias.json",
           ]
@@ -254,6 +259,48 @@ jobs:
                   "ERROR: target race exclusion not confirmed"
               )
 
+          # ----------------------------------------------
+          # day_time_history 接続確認
+          # ----------------------------------------------
+
+          with open(
+              "day_time_history.json",
+              encoding="utf-8"
+          ) as f:
+              day_time = json.load(f)
+
+          if (
+              day_time.get("target_race_id")
+              != os.environ.get("RACE_ID")
+          ):
+              sys.exit(
+                  "ERROR: day_time_history race_id mismatch"
+              )
+
+          if (
+              day_time.get("future_race_usage")
+              is not False
+          ):
+              sys.exit(
+                  "ERROR: future race used in day_time_history"
+              )
+
+          print(
+              "Day time references:",
+              day_time.get(
+                  "reference_race_count",
+                  0
+              )
+          )
+
+          print(
+              "Day time baselines:",
+              day_time.get(
+                  "baseline_connected_count",
+                  0
+              )
+          )
+
           print("FULL ANALYSIS VALIDATION OK")
           PY
 
@@ -274,6 +321,7 @@ jobs:
             condition_history.json \
             history_pedigree.json \
             day_races.json \
+            day_time_history.json \
             track_condition.json \
             day_bias.json \
             pedigree.json \
