@@ -175,7 +175,9 @@ def parse_result_row(row, corners):
     )
 
     if detail_right:
-        parts = list(detail_right.stripped_strings)
+        parts = list(
+            detail_right.stripped_strings
+        )
 
         if parts:
             m = re.match(
@@ -251,16 +253,24 @@ def parse_result_row(row, corners):
     passing_parts = []
 
     if passing_1c != "":
-        passing_parts.append(f"1C:{passing_1c}")
+        passing_parts.append(
+            f"1C:{passing_1c}"
+        )
 
     if passing_2c != "":
-        passing_parts.append(f"2C:{passing_2c}")
+        passing_parts.append(
+            f"2C:{passing_2c}"
+        )
 
     if passing_3c != "":
-        passing_parts.append(f"3C:{passing_3c}")
+        passing_parts.append(
+            f"3C:{passing_3c}"
+        )
 
     if passing_4c != "":
-        passing_parts.append(f"4C:{passing_4c}")
+        passing_parts.append(
+            f"4C:{passing_4c}"
+        )
 
     return {
         "rank": rank,
@@ -301,7 +311,9 @@ def find_result_rows(soup):
 
 
 def collect_one_race(race):
-    race_id = str(race.get("race_id", ""))
+    race_id = str(
+        race.get("race_id", "")
+    )
 
     html = get_html(race_id)
 
@@ -312,6 +324,51 @@ def collect_one_race(race):
 
     corners = parse_corners(soup)
     rows = find_result_rows(soup)
+
+    # ==========================================
+    # history_races.json から引き継ぐメタデータ
+    # ==========================================
+
+    race_date = str(
+        race.get("race_date", "")
+    )
+
+    racecourse = str(
+        race.get("racecourse", "")
+    )
+
+    race_number = str(
+        race.get("race_number", "")
+    )
+
+    surface = str(
+        race.get("surface", "")
+    )
+
+    distance = race.get(
+        "distance",
+        0
+    )
+
+    track_condition = str(
+        race.get("track_condition", "")
+    )
+
+    race_name = str(
+        race.get("race_name", "")
+    ).strip()
+
+    race_info_text = str(
+        race.get("race_info_text", "")
+    ).strip()
+
+    race_class = str(
+        race.get("race_class", "")
+    ).strip()
+
+    age_condition = str(
+        race.get("age_condition", "")
+    ).strip()
 
     results = []
     seen = set()
@@ -325,43 +382,56 @@ def collect_one_race(race):
         if not item:
             continue
 
-        key = item["horse_id"] or item["horse_name"]
+        key = (
+            item["horse_id"]
+            or item["horse_name"]
+        )
 
         if key in seen:
             continue
 
         seen.add(key)
 
+        # ======================================
+        # レース情報を各結果にも保持
+        # ======================================
+
         item["race_id"] = race_id
-        item["race_date"] = race.get("race_date", "")
-        item["racecourse"] = race.get("racecourse", "東京")
-        item["race_number"] = race.get("race_number", "")
-        item["surface"] = race.get("surface", "芝")
-        item["distance"] = race.get("distance", 1400)
-        item["track_condition"] = race.get(
-            "track_condition",
-            ""
-        )
+        item["race_date"] = race_date
+        item["racecourse"] = racecourse
+        item["race_number"] = race_number
+        item["surface"] = surface
+        item["distance"] = distance
+        item["track_condition"] = track_condition
+
+        item["race_name"] = race_name
+        item["race_info_text"] = race_info_text
+        item["race_class"] = race_class
+        item["age_condition"] = age_condition
 
         results.append(item)
 
     return {
         "race_id": race_id,
-        "race_date": race.get("race_date", ""),
-        "racecourse": race.get("racecourse", "東京"),
-        "race_number": race.get("race_number", ""),
-        "surface": race.get("surface", "芝"),
-        "distance": race.get("distance", 1400),
-        "track_condition": race.get(
-            "track_condition",
-            ""
-        ),
+        "race_date": race_date,
+        "racecourse": racecourse,
+        "race_number": race_number,
+        "surface": surface,
+        "distance": distance,
+        "track_condition": track_condition,
+
+        "race_name": race_name,
+        "race_info_text": race_info_text,
+        "race_class": race_class,
+        "age_condition": age_condition,
+
         "corner_order": {
             "1c": corners["corner_1"],
             "2c": corners["corner_2"],
             "3c": corners["corner_3"],
             "4c": corners["corner_4"],
         },
+
         "result_count": len(results),
         "results": results,
     }
@@ -375,8 +445,6 @@ def load_target_races():
     ) as f:
         data = json.load(f)
 
-    # history_races.json が
-    # 配列そのものでも、オブジェクト内の races でも対応
     if isinstance(data, list):
         return data
 
@@ -386,7 +454,10 @@ def load_target_races():
             "target_races",
             "history_races",
         ):
-            if isinstance(data.get(key), list):
+            if isinstance(
+                data.get(key),
+                list
+            ):
                 return data[key]
 
     raise RuntimeError(
@@ -406,10 +477,20 @@ def main():
     all_results = []
     errors = []
 
-    for index, race in enumerate(races, start=1):
-        race_id = str(race.get("race_id", ""))
+    metadata_complete = 0
 
-        if not re.fullmatch(r"\d{12}", race_id):
+    for index, race in enumerate(
+        races,
+        start=1
+    ):
+        race_id = str(
+            race.get("race_id", "")
+        )
+
+        if not re.fullmatch(
+            r"\d{12}",
+            race_id
+        ):
             errors.append({
                 "race_id": race_id,
                 "error": "race_id不正",
@@ -422,41 +503,88 @@ def main():
         )
 
         try:
-            result = collect_one_race(race)
+            result = collect_one_race(
+                race
+            )
 
-            all_races.append(result)
-            all_results.extend(result["results"])
+            all_races.append(
+                result
+            )
+
+            all_results.extend(
+                result["results"]
+            )
+
+            if (
+                result.get("race_name")
+                and result.get("race_info_text")
+                and result.get("race_class")
+                and result.get("age_condition")
+            ):
+                metadata_complete += 1
 
             print(
                 "  成功:",
                 result["result_count"],
-                "頭"
+                "頭",
+                "|",
+                result.get(
+                    "race_name",
+                    ""
+                ),
+                "|",
+                result.get(
+                    "race_class",
+                    ""
+                ),
+                "|",
+                result.get(
+                    "age_condition",
+                    ""
+                ),
             )
 
         except Exception as e:
-            print("  失敗:", str(e))
+            print(
+                "  失敗:",
+                str(e)
+            )
 
             errors.append({
                 "race_id": race_id,
                 "error": str(e),
             })
 
-        # 取得先への負荷を抑える
         time.sleep(1.5)
 
     output = {
         "updated_at": datetime.now(
             timezone.utc
         ).isoformat(),
+
         "source": "netkeiba",
-        "target": {
-            "racecourse": "東京",
-            "surface": "芝",
-            "distance": 1400,
+
+        "metadata": {
+            "race_name_connected": True,
+            "race_info_text_connected": True,
+            "race_class_connected": True,
+            "age_condition_connected": True,
+            "metadata_complete_race_count":
+                metadata_complete,
         },
-        "race_count": len(all_races),
-        "horse_result_count": len(all_results),
-        "error_count": len(errors),
+
+        "race_count": len(
+            all_races
+        ),
+
+        "horse_result_count": len(
+            all_results
+        ),
+
+        "error_count": len(
+            errors
+        ),
+
         "races": all_races,
         "results": all_results,
         "errors": errors,
@@ -478,12 +606,23 @@ def main():
     print("history_all.json 作成完了")
     print("成功レース:", len(all_races))
     print("全出走結果:", len(all_results))
+    print(
+        "metadata完全:",
+        metadata_complete,
+        "/",
+        len(all_races),
+    )
     print("失敗:", len(errors))
     print("============================")
 
     if not all_results:
         raise RuntimeError(
             "過去成績を1頭も取得できませんでした"
+        )
+
+    if metadata_complete == 0:
+        raise RuntimeError(
+            "レースクラス・年齢条件を1件も接続できませんでした"
         )
 
 
