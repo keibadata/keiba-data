@@ -13,6 +13,10 @@ TEMP_FILE = "history.json"
 WAIT_SECONDS = 2
 
 
+# =========================================================
+# JSON
+# =========================================================
+
 def load_json(path, default=None):
     if not os.path.exists(path):
         return default if default is not None else {}
@@ -30,6 +34,10 @@ def save_json(path, data):
             indent=2,
         )
 
+
+# =========================================================
+# 条件正規化
+# =========================================================
 
 def normalize_surface(value):
     value = str(value or "").strip()
@@ -96,6 +104,10 @@ def condition_key(condition):
     )
 
 
+# =========================================================
+# 既存DB
+# =========================================================
+
 def get_existing_races(database):
     if isinstance(database, list):
         return database
@@ -103,7 +115,10 @@ def get_existing_races(database):
     if not isinstance(database, dict):
         return []
 
-    races = database.get("races", [])
+    races = database.get(
+        "races",
+        []
+    )
 
     if isinstance(races, list):
         return races
@@ -128,20 +143,141 @@ def validate_target_condition(condition):
         )
 
 
+# =========================================================
+# レースmetadata
+# =========================================================
+
+def extract_metadata(race):
+    """
+    history_races.json から
+    history_db.json に永続保存するmetadataを抽出。
+    """
+
+    if not isinstance(race, dict):
+        return {}
+
+    return {
+        "race_date": str(
+            race.get("race_date", "")
+        ).strip(),
+
+        "race_number": str(
+            race.get("race_number", "")
+        ).strip(),
+
+        "track_condition": str(
+            race.get("track_condition", "")
+        ).strip(),
+
+        "race_name": str(
+            race.get("race_name", "")
+        ).strip(),
+
+        "race_info_text": str(
+            race.get("race_info_text", "")
+        ).strip(),
+
+        "race_class": str(
+            race.get("race_class", "")
+        ).strip(),
+
+        "age_condition": str(
+            race.get("age_condition", "")
+        ).strip(),
+    }
+
+
+def apply_metadata(
+    target,
+    source_race,
+    requested_condition,
+):
+    """
+    history_races.json の確定情報を
+    history_db.json のレースへ接続。
+
+    空値では既存値を消さない。
+    """
+
+    if not isinstance(target, dict):
+        target = {}
+
+    target["racecourse"] = (
+        requested_condition["racecourse"]
+    )
+
+    target["surface"] = (
+        requested_condition["surface"]
+    )
+
+    target["distance"] = (
+        requested_condition["distance"]
+    )
+
+    metadata = extract_metadata(
+        source_race
+    )
+
+    for key, value in metadata.items():
+        if value not in ("", None):
+            target[key] = value
+
+    return target
+
+
+def metadata_complete(race):
+    """
+    時計基準作成に必要なmetadata。
+
+    track_condition は取得できないケースがあるため
+    完全判定の必須項目にはしない。
+    """
+
+    if not isinstance(race, dict):
+        return False
+
+    required = (
+        "race_name",
+        "race_info_text",
+        "race_class",
+        "age_condition",
+    )
+
+    return all(
+        str(
+            race.get(key, "")
+        ).strip()
+        for key in required
+    )
+
+
+# =========================================================
+# MAIN
+# =========================================================
+
 def main():
     race_list = load_json(
         RACE_LIST_FILE
     )
 
-    races = race_list.get("races", [])
+    races = race_list.get(
+        "races",
+        []
+    )
 
-    if not isinstance(races, list) or not races:
+    if (
+        not isinstance(races, list)
+        or not races
+    ):
         raise RuntimeError(
             "history_races.json に races がありません"
         )
 
     target_condition = normalize_condition(
-        race_list.get("condition", {})
+        race_list.get(
+            "condition",
+            {}
+        )
     )
 
     validate_target_condition(
@@ -154,18 +290,25 @@ def main():
 
     print("==============================")
     print("条件別履歴DB 更新開始")
+
     print(
         "対象条件:",
         target_condition["racecourse"],
         target_condition["surface"],
         target_condition["distance"],
     )
-    print("対象レース数:", len(races))
+
+    print(
+        "対象レース数:",
+        len(races)
+    )
+
     print("==============================")
 
-    # -----------------------------------------
-    # 既存DBを読み込む
-    # -----------------------------------------
+
+    # =====================================================
+    # 既存 history_db.json 読み込み
+    # =====================================================
 
     existing_database = load_json(
         OUTPUT_FILE,
@@ -176,16 +319,20 @@ def main():
         existing_database
     )
 
-    # race_id単位で保持。
-    # 既存データは消さない。
     race_map = {}
 
     for race in existing_races:
-        if not isinstance(race, dict):
+        if not isinstance(
+            race,
+            dict
+        ):
             continue
 
         race_id = str(
-            race.get("race_id", "")
+            race.get(
+                "race_id",
+                ""
+            )
         ).strip()
 
         if not race_id:
@@ -193,46 +340,36 @@ def main():
 
         race_map[race_id] = race
 
-    existing_count = len(race_map)
-
     print(
         "既存DBレース数:",
-        existing_count
+        len(race_map)
     )
 
-    # -----------------------------------------
-    # 今回条件の既存レースID
-    # -----------------------------------------
 
-    existing_target_ids = set()
-
-    for race_id, race in race_map.items():
-        if condition_key(
-            race_condition(race)
-        ) == target_key:
-            existing_target_ids.add(
-                race_id
-            )
-
-    print(
-        "今回条件の既存レース:",
-        len(existing_target_ids)
-    )
+    # =====================================================
+    # 更新カウンター
+    # =====================================================
 
     collected_count = 0
-    skipped_count = 0
+    reused_count = 0
+    metadata_updated_count = 0
+
     errors = []
 
-    # -----------------------------------------
-    # 必要なレースだけ新規取得
-    # -----------------------------------------
+
+    # =====================================================
+    # history_races.json の各レースを処理
+    # =====================================================
 
     for index, race in enumerate(
         races,
-        start=1
+        start=1,
     ):
         race_id = str(
-            race.get("race_id", "")
+            race.get(
+                "race_id",
+                ""
+            )
         ).strip()
 
         if not race_id:
@@ -247,7 +384,9 @@ def main():
         )
 
         if (
-            condition_key(requested_condition)
+            condition_key(
+                requested_condition
+            )
             != target_key
         ):
             errors.append({
@@ -259,17 +398,60 @@ def main():
             })
             continue
 
-        # すでに同じrace_idがDBにあれば再取得しない
+
+        # =================================================
+        # 既存レース
+        #
+        # 全頭結果は取り直さない。
+        # metadataだけ更新する。
+        # =================================================
+
         if race_id in race_map:
-            print(
-                f"[{index}/{len(races)}] "
-                f"既存データ使用: {race_id}"
+            before = json.dumps(
+                race_map[race_id],
+                ensure_ascii=False,
+                sort_keys=True,
             )
 
-            skipped_count += 1
+            race_map[race_id] = (
+                apply_metadata(
+                    race_map[race_id],
+                    race,
+                    requested_condition,
+                )
+            )
+
+            after = json.dumps(
+                race_map[race_id],
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+
+            reused_count += 1
+
+            if before != after:
+                metadata_updated_count += 1
+
+                print(
+                    f"[{index}/{len(races)}] "
+                    f"既存結果再利用＋metadata更新: "
+                    f"{race_id}"
+                )
+
+            else:
+                print(
+                    f"[{index}/{len(races)}] "
+                    f"既存結果再利用: "
+                    f"{race_id}"
+                )
+
             continue
 
-        print("")
+
+        # =================================================
+        # DBに存在しないレースのみ新規取得
+        # =================================================
+
         print(
             f"[{index}/{len(races)}] "
             f"新規取得: {race_id}"
@@ -302,35 +484,11 @@ def main():
                     "history.json のrace_idが一致しません"
                 )
 
-            # history.py側で条件が欠ける場合に備えて
-            # history_races.jsonの確定条件を接続
-            result["racecourse"] = (
-                requested_condition[
-                    "racecourse"
-                ]
+            result = apply_metadata(
+                result,
+                race,
+                requested_condition,
             )
-
-            result["surface"] = (
-                requested_condition[
-                    "surface"
-                ]
-            )
-
-            result["distance"] = (
-                requested_condition[
-                    "distance"
-                ]
-            )
-
-            if race.get("race_date"):
-                result["race_date"] = (
-                    race["race_date"]
-                )
-
-            if race.get("race_number"):
-                result["race_number"] = (
-                    race["race_number"]
-                )
 
             result_count = len(
                 result.get(
@@ -345,6 +503,7 @@ def main():
                 )
 
             race_map[race_id] = result
+
             collected_count += 1
 
             print(
@@ -372,18 +531,21 @@ def main():
                 WAIT_SECONDS
             )
 
-    # -----------------------------------------
-    # DB全体を再構築
-    # -----------------------------------------
+
+    # =====================================================
+    # DB全体再構築
+    # =====================================================
 
     all_races = list(
         race_map.values()
     )
 
-    # race_idで安定ソート
     all_races.sort(
         key=lambda x: str(
-            x.get("race_id", "")
+            x.get(
+                "race_id",
+                ""
+            )
         )
     )
 
@@ -397,11 +559,17 @@ def main():
         for race in all_races
     )
 
+
+    # =====================================================
     # 条件別件数
+    # =====================================================
+
     condition_counts = {}
 
     for race in all_races:
-        c = race_condition(race)
+        c = race_condition(
+            race
+        )
 
         key = (
             f'{c["racecourse"]}|'
@@ -416,6 +584,103 @@ def main():
             )
             + 1
         )
+
+
+    # =====================================================
+    # 今回条件だけ抽出
+    # =====================================================
+
+    target_races_in_db = [
+        race
+        for race in all_races
+        if (
+            condition_key(
+                race_condition(race)
+            )
+            == target_key
+        )
+    ]
+
+
+    # =====================================================
+    # metadata完全数
+    # =====================================================
+
+    metadata_complete_count = sum(
+        1
+        for race in target_races_in_db
+        if metadata_complete(race)
+    )
+
+
+    # =====================================================
+    # クラス・年齢・馬場状態集計
+    # =====================================================
+
+    race_class_counts = {}
+    age_condition_counts = {}
+    track_condition_counts = {}
+
+    for race in target_races_in_db:
+
+        race_class = str(
+            race.get(
+                "race_class",
+                ""
+            )
+        ).strip() or "不明"
+
+        age_condition = str(
+            race.get(
+                "age_condition",
+                ""
+            )
+        ).strip() or "不明"
+
+        track_condition = str(
+            race.get(
+                "track_condition",
+                ""
+            )
+        ).strip() or "不明"
+
+
+        race_class_counts[
+            race_class
+        ] = (
+            race_class_counts.get(
+                race_class,
+                0
+            )
+            + 1
+        )
+
+
+        age_condition_counts[
+            age_condition
+        ] = (
+            age_condition_counts.get(
+                age_condition,
+                0
+            )
+            + 1
+        )
+
+
+        track_condition_counts[
+            track_condition
+        ] = (
+            track_condition_counts.get(
+                track_condition,
+                0
+            )
+            + 1
+        )
+
+
+    # =====================================================
+    # history_db.json
+    # =====================================================
 
     database = {
         "updated_at": datetime.now(
@@ -445,73 +710,137 @@ def main():
         ),
 
         "latest_update": {
+
             "requested_race_count": len(
                 races
             ),
+
             "newly_collected_count": (
                 collected_count
             ),
+
             "existing_reused_count": (
-                skipped_count
+                reused_count
             ),
+
+            "metadata_updated_count": (
+                metadata_updated_count
+            ),
+
+            "metadata_complete_count": (
+                metadata_complete_count
+            ),
+
+            "target_condition_race_count": (
+                len(target_races_in_db)
+            ),
+
+            "race_class_counts": (
+                race_class_counts
+            ),
+
+            "age_condition_counts": (
+                age_condition_counts
+            ),
+
+            "track_condition_counts": (
+                track_condition_counts
+            ),
+
             "error_count": len(
                 errors
             ),
+
             "errors": errors,
         },
 
         "races": all_races,
     }
 
+
     save_json(
         OUTPUT_FILE,
         database
     )
 
-    # -----------------------------------------
-    # 最終安全確認
-    # -----------------------------------------
 
-    target_races_in_db = [
-        race
-        for race in all_races
-        if condition_key(
-            race_condition(race)
-        ) == target_key
-    ]
+    # =====================================================
+    # 最終確認
+    # =====================================================
 
     print("")
     print("==============================")
     print("history_db.json 更新完了")
+
     print(
         "DB総レース数:",
         len(all_races)
     )
+
     print(
         "DB総出走数:",
         total_horses
     )
+
     print(
         "今回新規取得:",
         collected_count
     )
+
     print(
-        "既存再利用:",
-        skipped_count
+        "既存結果再利用:",
+        reused_count
     )
+
+    print(
+        "metadata更新:",
+        metadata_updated_count
+    )
+
     print(
         "今回条件DBレース:",
         len(target_races_in_db)
     )
+
+    print(
+        "metadata完全:",
+        metadata_complete_count,
+        "/",
+        len(target_races_in_db)
+    )
+
+    print(
+        "クラス内訳:",
+        race_class_counts
+    )
+
+    print(
+        "年齢条件内訳:",
+        age_condition_counts
+    )
+
+    print(
+        "馬場状態内訳:",
+        track_condition_counts
+    )
+
     print(
         "取得失敗:",
         len(errors)
     )
+
     print("==============================")
+
 
     if not target_races_in_db:
         raise RuntimeError(
             "今回条件の過去レースがDBに1件もありません"
+        )
+
+    if metadata_complete_count == 0:
+        raise RuntimeError(
+            "時計基準に必要なレースmetadataが"
+            "1件も接続されていません"
         )
 
 
