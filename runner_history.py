@@ -6,6 +6,7 @@ from datetime import datetime, timezone, timedelta
 import requests
 from bs4 import BeautifulSoup
 
+
 RACE_FILE = "race.json"
 OUTPUT_FILE = "runner_history.json"
 
@@ -63,9 +64,93 @@ def get_html(url):
     raise RuntimeError(last_error or "取得失敗")
 
 
-def load_runners():
+def parse_date(value):
+    text = clean_text(value)
+
+    if not text:
+        return None
+
+    text = (
+        text.replace("年", "/")
+        .replace("月", "/")
+        .replace("日", "")
+        .replace("-", "/")
+        .replace(".", "/")
+    )
+
+    text = re.sub(r"\s+", "", text)
+
+    patterns = [
+        "%Y/%m/%d",
+        "%Y/%m/%d/",
+        "%Y/%m/%d(%a)",
+    ]
+
+    for pattern in patterns:
+        try:
+            return datetime.strptime(text, pattern).date()
+        except Exception:
+            pass
+
+    match = re.search(
+        r"(\d{4})/(\d{1,2})/(\d{1,2})",
+        text
+    )
+
+    if match:
+        try:
+            return datetime(
+                int(match.group(1)),
+                int(match.group(2)),
+                int(match.group(3))
+            ).date()
+        except Exception:
+            return None
+
+    return None
+
+
+def extract_target_date(data):
+    if not isinstance(data, dict):
+        return None
+
+    candidate_keys = [
+        "race_date",
+        "date",
+        "target_date",
+    ]
+
+    for key in candidate_keys:
+        value = data.get(key)
+
+        parsed = parse_date(value)
+
+        if parsed is not None:
+            return parsed
+
+    race_info = data.get("race_info")
+
+    if isinstance(race_info, dict):
+        for key in candidate_keys:
+            parsed = parse_date(race_info.get(key))
+
+            if parsed is not None:
+                return parsed
+
+    return None
+
+
+def load_race_and_runners():
     with open(RACE_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
+
+    target_date = extract_target_date(data)
+
+    if target_date is None:
+        raise RuntimeError(
+            "race.json から対象レース日を取得できません。"
+            "未来情報リーク防止のため処理を停止します。"
+        )
 
     candidates = []
 
@@ -75,7 +160,7 @@ def load_runners():
             "horses",
             "entries",
             "race_entries",
-            "results"
+            "results",
         ]:
             if isinstance(data.get(key), list):
                 candidates = data[key]
@@ -83,10 +168,13 @@ def load_runners():
 
         if not candidates:
             for value in data.values():
-                if isinstance(value, list) and value:
-                    if isinstance(value[0], dict):
-                        candidates = value
-                        break
+                if (
+                    isinstance(value, list)
+                    and value
+                    and isinstance(value[0], dict)
+                ):
+                    candidates = value
+                    break
 
     elif isinstance(data, list):
         candidates = data
@@ -120,34 +208,10 @@ def load_runners():
             runners.append({
                 "horse_id": horse_id,
                 "horse_name": horse_name,
-                "horse_number": horse_number
+                "horse_number": horse_number,
             })
 
-    return runners
-
-
-def table_headers(table):
-    rows = table.find_all("tr")
-
-    if not rows:
-        return []
-
-    for row in rows[:3]:
-        headers = [
-            clean_text(x.get_text(" ", strip=True))
-            for x in row.find_all(["th", "td"])
-        ]
-
-        joined = " ".join(headers)
-
-        if (
-            "日付" in joined
-            and ("着順" in joined or "着" in joined)
-            and ("レース名" in joined or "レース" in joined)
-        ):
-            return headers
-
-    return []
+    return data, target_date, runners
 
 
 def find_result_table(soup):
@@ -155,7 +219,9 @@ def find_result_table(soup):
     best_score = -1
 
     for table in soup.find_all("table"):
-        text = clean_text(table.get_text(" ", strip=True))
+        text = clean_text(
+            table.get_text(" ", strip=True)
+        )
 
         score = 0
 
@@ -175,7 +241,9 @@ def find_result_table(soup):
             if keyword in text:
                 score += 1
 
-        row_count = len(table.find_all("tr"))
+        row_count = len(
+            table.find_all("tr")
+        )
 
         if row_count >= 2:
             score += 2
@@ -207,8 +275,12 @@ def normalize_header(header):
 
 def get_value(record, names):
     for name in names:
-        if name in record and clean_text(record[name]):
+        if (
+            name in record
+            and clean_text(record[name])
+        ):
             return clean_text(record[name])
+
     return ""
 
 
@@ -225,7 +297,11 @@ def parse_distance_surface(value):
     elif "障" in text:
         surface = "障害"
 
-    match = re.search(r"(\d{3,4})", text)
+    match = re.search(
+        r"(\d{3,4})",
+        text
+    )
+
     if match:
         distance = match.group(1)
 
@@ -239,21 +315,37 @@ def parse_result_table(table):
     headers = []
 
     for i, row in enumerate(rows[:5]):
-        cells = row.find_all(["th", "td"])
+        cells = row.find_all(
+            ["th", "td"]
+        )
+
         values = [
-            normalize_header(x.get_text(" ", strip=True))
+            normalize_header(
+                x.get_text(
+                    " ",
+                    strip=True
+                )
+            )
             for x in cells
         ]
 
         joined = " ".join(values)
 
-        if "日付" in joined and ("着順" in joined or "着" in joined):
+        if (
+            "日付" in joined
+            and (
+                "着順" in joined
+                or "着" in joined
+            )
+        ):
             headers = values
             header_index = i
             break
 
     if header_index is None:
-        raise RuntimeError("競走成績ヘッダーを判定できません")
+        raise RuntimeError(
+            "競走成績ヘッダーを判定できません"
+        )
 
     results = []
 
@@ -264,7 +356,12 @@ def parse_result_table(table):
             continue
 
         values = [
-            clean_text(cell.get_text(" ", strip=True))
+            clean_text(
+                cell.get_text(
+                    " ",
+                    strip=True
+                )
+            )
             for cell in cells
         ]
 
@@ -286,20 +383,24 @@ def parse_result_table(table):
             ["日付"]
         )
 
+        if not race_date:
+            continue
+
         rank = get_value(
             record,
             ["着順", "着"]
         )
-
-        if not race_date:
-            continue
 
         distance_raw = get_value(
             record,
             ["距離"]
         )
 
-        surface, distance = parse_distance_surface(distance_raw)
+        surface, distance = (
+            parse_distance_surface(
+                distance_raw
+            )
+        )
 
         race_name = get_value(
             record,
@@ -343,7 +444,12 @@ def parse_result_table(table):
             ),
             "last3f": get_value(
                 record,
-                ["上がり", "上り", "上り3F", "上がり3F"]
+                [
+                    "上がり",
+                    "上り",
+                    "上り3F",
+                    "上がり3F",
+                ]
             ),
             "horse_weight": get_value(
                 record,
@@ -364,57 +470,219 @@ def parse_result_table(table):
     return results
 
 
-def collect_horse_history(horse):
+def filter_past_races(
+    results,
+    target_date
+):
+    valid = []
+
+    excluded_same_day = 0
+    excluded_future = 0
+    excluded_unknown_date = 0
+
+    for result in results:
+        race_date = parse_date(
+            result.get("date")
+        )
+
+        if race_date is None:
+            excluded_unknown_date += 1
+            continue
+
+        if race_date == target_date:
+            excluded_same_day += 1
+            continue
+
+        if race_date > target_date:
+            excluded_future += 1
+            continue
+
+        valid.append(result)
+
+    valid.sort(
+        key=lambda x: (
+            parse_date(
+                x.get("date")
+            )
+            or datetime.min.date()
+        ),
+        reverse=True
+    )
+
+    return {
+        "valid": valid,
+        "excluded_same_day": (
+            excluded_same_day
+        ),
+        "excluded_future": (
+            excluded_future
+        ),
+        "excluded_unknown_date": (
+            excluded_unknown_date
+        ),
+    }
+
+
+def collect_horse_history(
+    horse,
+    target_date
+):
     horse_id = horse["horse_id"]
 
-    url = BASE_URL.format(horse_id=horse_id)
+    url = BASE_URL.format(
+        horse_id=horse_id
+    )
 
     html = get_html(url)
 
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(
+        html,
+        "html.parser"
+    )
 
     table = find_result_table(soup)
 
     if table is None:
         title = ""
+
         if soup.title:
-            title = clean_text(soup.title.get_text(" ", strip=True))
+            title = clean_text(
+                soup.title.get_text(
+                    " ",
+                    strip=True
+                )
+            )
 
         raise RuntimeError(
-            "競走成績テーブルなし / title=" + title
+            "競走成績テーブルなし"
+            " / title="
+            + title
         )
 
-    results = parse_result_table(table)
+    raw_results = parse_result_table(
+        table
+    )
 
-    if not results:
-        raise RuntimeError("競走成績0件")
+    if not raw_results:
+        raise RuntimeError(
+            "競走成績0件"
+        )
+
+    filtered = filter_past_races(
+        raw_results,
+        target_date
+    )
+
+    results = filtered["valid"]
 
     return {
         "horse_id": horse_id,
-        "horse_name": horse["horse_name"],
-        "horse_number": horse["horse_number"],
+        "horse_name": horse[
+            "horse_name"
+        ],
+        "horse_number": horse[
+            "horse_number"
+        ],
         "source_url": url,
-        "past_race_count": len(results),
+
+        "raw_race_count": len(
+            raw_results
+        ),
+
+        "past_race_count": len(
+            results
+        ),
+
+        "excluded_same_day_count":
+            filtered[
+                "excluded_same_day"
+            ],
+
+        "excluded_future_count":
+            filtered[
+                "excluded_future"
+            ],
+
+        "excluded_unknown_date_count":
+            filtered[
+                "excluded_unknown_date"
+            ],
+
         "past_races": results,
     }
 
 
 def main():
-    runners = load_runners()
+    (
+        race_data,
+        target_date,
+        runners,
+    ) = load_race_and_runners()
+
+    target_race_id = clean_text(
+        race_data.get("race_id")
+        if isinstance(
+            race_data,
+            dict
+        )
+        else ""
+    )
 
     output = {
         "updated_at": now_jst(),
         "source": "netkeiba",
         "source_race_file": RACE_FILE,
-        "target_horse_count": len(runners),
+
+        "target_race_id":
+            target_race_id,
+
+        "target_date":
+            target_date.isoformat(),
+
+        "future_race_usage": False,
+
+        "target_horse_count":
+            len(runners),
+
         "collected_horse_count": 0,
+
+        "total_raw_race_count": 0,
+
         "total_past_race_count": 0,
+
+        "excluded_same_day_count": 0,
+
+        "excluded_future_count": 0,
+
+        "excluded_unknown_date_count": 0,
+
         "error_count": 0,
         "errors": [],
         "horses": [],
     }
 
-    for index, horse in enumerate(runners, start=1):
+    print("")
+    print(
+        "===== Runner History ====="
+    )
+    print(
+        "target race id:",
+        target_race_id
+    )
+    print(
+        "target date:",
+        target_date.isoformat()
+    )
+    print(
+        "future race usage:",
+        False
+    )
+    print("")
+
+    for index, horse in enumerate(
+        runners,
+        start=1
+    ):
         print(
             f"[{index}/{len(runners)}] "
             f"{horse['horse_name']} "
@@ -422,34 +690,140 @@ def main():
         )
 
         try:
-            data = collect_horse_history(horse)
+            data = (
+                collect_horse_history(
+                    horse,
+                    target_date
+                )
+            )
 
-            output["horses"].append(data)
-            output["collected_horse_count"] += 1
-            output["total_past_race_count"] += data["past_race_count"]
+            output[
+                "horses"
+            ].append(data)
+
+            output[
+                "collected_horse_count"
+            ] += 1
+
+            output[
+                "total_raw_race_count"
+            ] += data[
+                "raw_race_count"
+            ]
+
+            output[
+                "total_past_race_count"
+            ] += data[
+                "past_race_count"
+            ]
+
+            output[
+                "excluded_same_day_count"
+            ] += data[
+                "excluded_same_day_count"
+            ]
+
+            output[
+                "excluded_future_count"
+            ] += data[
+                "excluded_future_count"
+            ]
+
+            output[
+                "excluded_unknown_date_count"
+            ] += data[
+                "excluded_unknown_date_count"
+            ]
 
             print(
-                "  OK:",
-                data["past_race_count"],
-                "races"
+                "  raw:",
+                data[
+                    "raw_race_count"
+                ],
+                "/ valid past:",
+                data[
+                    "past_race_count"
+                ],
+                "/ same-day excluded:",
+                data[
+                    "excluded_same_day_count"
+                ],
+                "/ future excluded:",
+                data[
+                    "excluded_future_count"
+                ],
+                "/ unknown-date excluded:",
+                data[
+                    "excluded_unknown_date_count"
+                ],
             )
 
         except Exception as e:
             message = str(e)
 
-            output["errors"].append({
-                "horse_id": horse["horse_id"],
-                "horse_name": horse["horse_name"],
-                "error": message,
+            output[
+                "errors"
+            ].append({
+                "horse_id":
+                    horse[
+                        "horse_id"
+                    ],
+                "horse_name":
+                    horse[
+                        "horse_name"
+                    ],
+                "error":
+                    message,
             })
 
-            output["error_count"] += 1
+            output[
+                "error_count"
+            ] += 1
 
-            print("  ERROR:", message)
+            print(
+                "  ERROR:",
+                message
+            )
 
-        time.sleep(REQUEST_INTERVAL)
+        time.sleep(
+            REQUEST_INTERVAL
+        )
 
-    output["updated_at"] = now_jst()
+    output[
+        "updated_at"
+    ] = now_jst()
+
+    # 最終リーク検査
+    leak_found = False
+
+    for horse in output["horses"]:
+        for race in horse.get(
+            "past_races",
+            []
+        ):
+            race_date = parse_date(
+                race.get("date")
+            )
+
+            if (
+                race_date is None
+                or race_date >= target_date
+            ):
+                leak_found = True
+
+    output[
+        "future_race_usage"
+    ] = leak_found
+
+    output[
+        "leak_check_passed"
+    ] = not leak_found
+
+    if leak_found:
+        raise RuntimeError(
+            "未来情報リークを検出しました。"
+            "runner_history.json は保存しません。"
+        )
 
     with open(
         OUTPUT_FILE,
@@ -464,11 +838,69 @@ def main():
         )
 
     print("")
-    print("===== Runner History =====")
-    print("target:", output["target_horse_count"])
-    print("collected:", output["collected_horse_count"])
-    print("past races:", output["total_past_race_count"])
-    print("errors:", output["error_count"])
+    print(
+        "===== Runner History Result ====="
+    )
+    print(
+        "target:",
+        output[
+            "target_horse_count"
+        ]
+    )
+    print(
+        "collected:",
+        output[
+            "collected_horse_count"
+        ]
+    )
+    print(
+        "raw races:",
+        output[
+            "total_raw_race_count"
+        ]
+    )
+    print(
+        "valid past races:",
+        output[
+            "total_past_race_count"
+        ]
+    )
+    print(
+        "same-day excluded:",
+        output[
+            "excluded_same_day_count"
+        ]
+    )
+    print(
+        "future excluded:",
+        output[
+            "excluded_future_count"
+        ]
+    )
+    print(
+        "unknown-date excluded:",
+        output[
+            "excluded_unknown_date_count"
+        ]
+    )
+    print(
+        "future race usage:",
+        output[
+            "future_race_usage"
+        ]
+    )
+    print(
+        "leak check passed:",
+        output[
+            "leak_check_passed"
+        ]
+    )
+    print(
+        "errors:",
+        output[
+            "error_count"
+        ]
+    )
 
 
 if __name__ == "__main__":
