@@ -99,9 +99,6 @@ jobs:
       - name: Collect runner history
         run: python runner_history.py
 
-      # 各馬の過去走時計を
-      # 同競馬場・同芝ダ・同距離の過去基準時計と比較する
-      # 未接続は未知数として減点しない
       - name: Analyze runner time fit
         run: python runner_time_fit.py
 
@@ -136,7 +133,7 @@ jobs:
         run: python final_analysis.py
 
       # ==================================================
-      # 接続チェック
+      # 接続・安全性チェック
       # ==================================================
 
       - name: Validate final analysis
@@ -154,47 +151,28 @@ jobs:
           ) as f:
               data = json.load(f)
 
+          if data.get("race_id") != race_id:
+              sys.exit(
+                  "ERROR: final_analysis race_id mismatch"
+              )
+
           s = data.get(
               "summary",
               {}
           )
 
-          total = s.get(
-              "runner_count",
-              0
+          total = int(
+              s.get(
+                  "runner_count",
+                  0
+              )
+              or 0
           )
 
-          checks = {
-              "ranked":
-                  s.get(
-                      "ranked_count",
-                      0
-                  ),
-
-              "ability":
-                  s.get(
-                      "ability_connected_count",
-                      0
-                  ),
-
-              "previous":
-                  s.get(
-                      "previous_connected_count",
-                      0
-                  ),
-
-              "pace":
-                  s.get(
-                      "pace_connected_count",
-                      0
-                  ),
-
-              "bloodline":
-                  s.get(
-                      "bloodline_connected_count",
-                      0
-                  ),
-          }
+          if total <= 0:
+              sys.exit(
+                  "ERROR: no runners"
+              )
 
           print(
               "Target race:",
@@ -206,12 +184,60 @@ jobs:
               total
           )
 
-          if total <= 0:
-              sys.exit(
-                  "ERROR: no runners"
-              )
+          # ==============================================
+          # 各解析ファイルの「レコード接続」を確認
+          #
+          # ability_known_count は能力判明頭数なので
+          # 全頭一致を要求しない。
+          # ==============================================
 
-          for name, value in checks.items():
+          ability_records = int(
+              s.get(
+                  "ability_record_connected_count",
+                  0
+              )
+              or 0
+          )
+
+          previous_connected = int(
+              s.get(
+                  "previous_connected_count",
+                  0
+              )
+              or 0
+          )
+
+          pace_connected = int(
+              s.get(
+                  "pace_connected_count",
+                  0
+              )
+              or 0
+          )
+
+          bloodline_connected = int(
+              s.get(
+                  "bloodline_connected_count",
+                  0
+              )
+              or 0
+          )
+
+          record_checks = {
+              "ability records":
+                  ability_records,
+
+              "previous records":
+                  previous_connected,
+
+              "pace records":
+                  pace_connected,
+
+              "bloodline records":
+                  bloodline_connected,
+          }
+
+          for name, value in record_checks.items():
               print(
                   f"{name}: {value}/{total}"
               )
@@ -222,9 +248,223 @@ jobs:
                       f"({value}/{total})"
                   )
 
-          # ----------------------------------------------
+          # ==============================================
+          # 能力判明 / UNKNOWN
+          #
+          # UNKNOWNは正常な状態。
+          # ranked_count == total を要求しない。
+          # ==============================================
+
+          ability_known = int(
+              s.get(
+                  "ability_known_count",
+                  0
+              )
+              or 0
+          )
+
+          ability_unknown = int(
+              s.get(
+                  "ability_unknown_count",
+                  0
+              )
+              or 0
+          )
+
+          ranked = int(
+              s.get(
+                  "ranked_count",
+                  0
+              )
+              or 0
+          )
+
+          unranked_unknown = int(
+              s.get(
+                  "unranked_unknown_count",
+                  0
+              )
+              or 0
+          )
+
+          print(
+              "Ability known:",
+              f"{ability_known}/{total}"
+          )
+
+          print(
+              "Ability unknown:",
+              f"{ability_unknown}/{total}"
+          )
+
+          print(
+              "Ranked:",
+              f"{ranked}/{total}"
+          )
+
+          print(
+              "Unranked unknown:",
+              f"{unranked_unknown}/{total}"
+          )
+
+          if (
+              ability_known
+              + ability_unknown
+              != total
+          ):
+              sys.exit(
+                  "ERROR: ability known/unknown count mismatch "
+                  f"({ability_known}+{ability_unknown}!={total})"
+              )
+
+          if ranked != ability_known:
+              sys.exit(
+                  "ERROR: ranked count must equal "
+                  "known ability count "
+                  f"({ranked}!={ability_known})"
+              )
+
+          if (
+              ranked
+              + unranked_unknown
+              != total
+          ):
+              sys.exit(
+                  "ERROR: ranked + unknown count mismatch "
+                  f"({ranked}+{unranked_unknown}!={total})"
+              )
+
+          # ==============================================
+          # ranking配列そのものも確認
+          # ==============================================
+
+          ranking = data.get(
+              "ranking",
+              []
+          )
+
+          if len(ranking) != total:
+              sys.exit(
+                  "ERROR: ranking record count mismatch "
+                  f"({len(ranking)}/{total})"
+              )
+
+          actual_ranked = 0
+          actual_unknown = 0
+
+          for horse in ranking:
+              ability_is_known = bool(
+                  horse.get(
+                      "ability_known",
+                      False
+                  )
+              )
+
+              rank = horse.get(
+                  "rank"
+              )
+
+              final_score = horse.get(
+                  "final_score"
+              )
+
+              ability_score = horse.get(
+                  "ability_score"
+              )
+
+              if ability_is_known:
+                  actual_ranked += 1
+
+                  if rank is None:
+                      sys.exit(
+                          "ERROR: known ability horse "
+                          "has no rank: "
+                          + str(
+                              horse.get(
+                                  "horse_name",
+                                  ""
+                              )
+                          )
+                      )
+
+                  if final_score is None:
+                      sys.exit(
+                          "ERROR: known ability horse "
+                          "has no final_score: "
+                          + str(
+                              horse.get(
+                                  "horse_name",
+                                  ""
+                              )
+                          )
+                      )
+
+                  if ability_score is None:
+                      sys.exit(
+                          "ERROR: ability_known horse "
+                          "has null ability_score: "
+                          + str(
+                              horse.get(
+                                  "horse_name",
+                                  ""
+                              )
+                          )
+                      )
+
+              else:
+                  actual_unknown += 1
+
+                  if rank is not None:
+                      sys.exit(
+                          "ERROR: unknown ability horse "
+                          "must not be ranked: "
+                          + str(
+                              horse.get(
+                                  "horse_name",
+                                  ""
+                              )
+                          )
+                      )
+
+                  if final_score is not None:
+                      sys.exit(
+                          "ERROR: unknown ability horse "
+                          "must not have final_score: "
+                          + str(
+                              horse.get(
+                                  "horse_name",
+                                  ""
+                              )
+                          )
+                      )
+
+                  if ability_score is not None:
+                      sys.exit(
+                          "ERROR: unknown ability horse "
+                          "must not have imputed ability_score: "
+                          + str(
+                              horse.get(
+                                  "horse_name",
+                                  ""
+                              )
+                          )
+                      )
+
+          if actual_ranked != ranked:
+              sys.exit(
+                  "ERROR: actual ranked count mismatch "
+                  f"({actual_ranked}/{ranked})"
+              )
+
+          if actual_unknown != unranked_unknown:
+              sys.exit(
+                  "ERROR: actual unknown count mismatch "
+                  f"({actual_unknown}/{unranked_unknown})"
+              )
+
+          # ==============================================
           # 必須ファイル
-          # ----------------------------------------------
+          # ==============================================
 
           required_files = [
               "history_races.json",
@@ -251,9 +491,9 @@ jobs:
                   path
               )
 
-          # ----------------------------------------------
-          # history_races metadata確認
-          # ----------------------------------------------
+          # ==============================================
+          # history_races metadata
+          # ==============================================
 
           with open(
               "history_races.json",
@@ -292,9 +532,9 @@ jobs:
                   "ERROR: history race metadata not collected"
               )
 
-          # ----------------------------------------------
+          # ==============================================
           # history未来レース混入防止
-          # ----------------------------------------------
+          # ==============================================
 
           search = history_races.get(
               "search",
@@ -315,9 +555,9 @@ jobs:
                   "ERROR: target race exclusion not confirmed"
               )
 
-          # ----------------------------------------------
+          # ==============================================
           # day_time_history
-          # ----------------------------------------------
+          # ==============================================
 
           with open(
               "day_time_history.json",
@@ -371,9 +611,9 @@ jobs:
               )
           )
 
-          # ----------------------------------------------
+          # ==============================================
           # day_bias
-          # ----------------------------------------------
+          # ==============================================
 
           with open(
               "day_bias.json",
@@ -421,9 +661,9 @@ jobs:
               )
           )
 
-          # ----------------------------------------------
+          # ==============================================
           # runner_time_fit
-          # ----------------------------------------------
+          # ==============================================
 
           with open(
               "runner_time_fit.json",
@@ -449,6 +689,16 @@ jobs:
           ):
               sys.exit(
                   "ERROR: future race used in runner_time_fit"
+              )
+
+          if (
+              runner_time.get(
+                  "leak_check_passed"
+              )
+              is not True
+          ):
+              sys.exit(
+                  "ERROR: runner_time_fit leak check failed"
               )
 
           target_horses = int(
@@ -498,13 +748,20 @@ jobs:
               baseline_conditions
           )
 
-          # ここでは接続0頭でも失敗させない。
-          # 基準時計なし＝未知数であり、
-          # 低評価にはしない。
           if target_horses != total:
               sys.exit(
                   "ERROR: runner_time_fit horse count mismatch "
                   f"({target_horses}/{total})"
+              )
+
+          # ==============================================
+          # 最終
+          # ==============================================
+
+          if ability_known == 0:
+              print(
+                  "No known ability data: "
+                  "all horses remain UNKNOWN and unranked."
               )
 
           print(
