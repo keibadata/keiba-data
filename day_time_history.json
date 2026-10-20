@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-20T21:32:46.658261+09:00",
+  "updated_at": "2026-10-20T22:11:08.991358+09:00",
   "target_race_id": "202605040505",
   "race_date": "2026-10-12",
   "racecourse": "東京",
@@ -7,11 +7,16 @@
   "future_race_usage": false,
   "same_day_excluded": true,
   "same_meeting_excluded": true,
+  "unknown_date_excluded": true,
   "excluded_meeting_key": "2026050405",
   "venue_validation_by_race_id": true,
   "minimum_history_sample": 5,
+  "search_stop_at_minimum": true,
   "reference_race_count": 2,
   "baseline_connected_count": 2,
+  "excluded_current_meeting_count": 6,
+  "excluded_nonpast_count": 0,
+  "excluded_unknown_date_count": 0,
   "reference_races": [
     {
       "race_id": "202605040502",
@@ -28,6 +33,7 @@
       "baseline_connected": true,
       "baseline_sample_count": 8,
       "baseline_median_seconds": 81.9,
+      "baseline_mad_seconds": 0.2,
       "time_delta_seconds": 0.7
     },
     {
@@ -45,6 +51,7 @@
       "baseline_connected": true,
       "baseline_sample_count": 5,
       "baseline_median_seconds": 107.5,
+      "baseline_mad_seconds": 0.4,
       "time_delta_seconds": 1.4
     }
   ],
@@ -55,10 +62,19 @@
       "distance": 1400,
       "race_class": "未勝利",
       "age_condition": "2歳",
-      "cache_used": false,
-      "cache_sample_count": 4,
+      "minimum_required_sample": 5,
+      "cache_sample_count": 8,
+      "remote_search_used": false,
+      "remote_match_count": 0,
+      "source_counts": {
+        "history_db": 0,
+        "day_time_history_cache": 8,
+        "remote_search": 0
+      },
       "sample_count": 8,
+      "baseline_available": true,
       "median_winner_time_seconds": 81.9,
+      "median_absolute_deviation_seconds": 0.2,
       "races": [
         {
           "race_id": "202605040202",
@@ -68,7 +84,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:21.8",
-          "winner_time_seconds": 81.8
+          "winner_time_seconds": 81.8,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505050702",
@@ -78,7 +95,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:21.7",
-          "winner_time_seconds": 81.7
+          "winner_time_seconds": 81.7,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505050602",
@@ -88,7 +106,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:21.3",
-          "winner_time_seconds": 81.3
+          "winner_time_seconds": 81.3,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505050403",
@@ -98,7 +117,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:22.1",
-          "winner_time_seconds": 82.1
+          "winner_time_seconds": 82.1,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505050203",
@@ -108,7 +128,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:21.5",
-          "winner_time_seconds": 81.5
+          "winner_time_seconds": 81.5,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505041002",
@@ -118,7 +139,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:23.5",
-          "winner_time_seconds": 83.5
+          "winner_time_seconds": 83.5,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505040703",
@@ -128,7 +150,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:22.1",
-          "winner_time_seconds": 82.1
+          "winner_time_seconds": 82.1,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505040503",
@@ -138,7 +161,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:22.0",
-          "winner_time_seconds": 82.0
+          "winner_time_seconds": 82.0,
+          "source": "day_time_history_cache"
         }
       ]
     },
@@ -148,10 +172,19 @@
       "distance": 1800,
       "race_class": "未勝利",
       "age_condition": "2歳",
-      "cache_used": true,
+      "minimum_required_sample": 5,
       "cache_sample_count": 5,
+      "remote_search_used": false,
+      "remote_match_count": 0,
+      "source_counts": {
+        "history_db": 0,
+        "day_time_history_cache": 5,
+        "remote_search": 0
+      },
       "sample_count": 5,
+      "baseline_available": true,
       "median_winner_time_seconds": 107.5,
+      "median_absolute_deviation_seconds": 0.4,
       "races": [
         {
           "race_id": "202605040201",
@@ -161,7 +194,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:46.7",
-          "winner_time_seconds": 106.7
+          "winner_time_seconds": 106.7,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505050703",
@@ -171,7 +205,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:47.9",
-          "winner_time_seconds": 107.9
+          "winner_time_seconds": 107.9,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505050502",
@@ -181,7 +216,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:47.2",
-          "winner_time_seconds": 107.2
+          "winner_time_seconds": 107.2,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505041103",
@@ -191,7 +227,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:47.5",
-          "winner_time_seconds": 107.5
+          "winner_time_seconds": 107.5,
+          "source": "day_time_history_cache"
         },
         {
           "race_id": "202505040303",
@@ -201,7 +238,8 @@
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:48.6",
-          "winner_time_seconds": 108.6
+          "winner_time_seconds": 108.6,
+          "source": "day_time_history_cache"
         }
       ]
     }
