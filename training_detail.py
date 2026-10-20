@@ -2,16 +2,18 @@ import json
 import re
 import time
 from datetime import datetime, timezone, timedelta
+from urllib.parse import urlencode
 
 import requests
 from bs4 import BeautifulSoup
+
 
 RACE_FILE = "race.json"
 DETECTION_FILE = "training.json"
 OUTPUT_FILE = "training_detail.json"
 
 TIMEOUT = 20
-REQUEST_INTERVAL = 1.2
+REQUEST_INTERVAL = 1.0
 MAX_RETRIES = 3
 
 HEADERS = {
@@ -30,9 +32,10 @@ def now_jst():
     ).isoformat()
 
 
-def text(value):
+def clean_text(value):
     if value is None:
         return ""
+
     return re.sub(
         r"\s+",
         " ",
@@ -41,11 +44,9 @@ def text(value):
 
 
 def fetch(url):
-
     last_error = ""
 
     for attempt in range(MAX_RETRIES):
-
         try:
             response = requests.get(
                 url,
@@ -54,18 +55,14 @@ def fetch(url):
             )
 
             if response.status_code == 200:
-
                 response.encoding = (
                     response.apparent_encoding
                     or response.encoding
                     or "utf-8"
                 )
-
                 return response
 
-            last_error = (
-                f"HTTP {response.status_code}"
-            )
+            last_error = f"HTTP {response.status_code}"
 
         except Exception as e:
             last_error = str(e)
@@ -80,7 +77,6 @@ def fetch(url):
 
 
 def get_horses(race):
-
     for key in (
         "horses",
         "runners",
@@ -94,135 +90,149 @@ def get_horses(race):
     return []
 
 
-def normalize_time_values(value):
+def get_race_id(race):
+    return clean_text(
+        race.get("race_id")
+        or race.get("target_race_id")
+    )
 
-    s = text(value)
 
-    values = re.findall(
-        r"(?<!\d)(\d{2,3}\.\d)(?!\d)",
+def normalize_number(value):
+    try:
+        return int(str(value).strip())
+    except Exception:
+        return None
+
+
+def extract_time_values(value):
+    """
+    追い切り時計候補。
+
+    例:
+    82.4
+    66.7
+    51.8
+    37.4
+    11.6
+
+    日付・馬体重・年などを極力拾わない。
+    """
+
+    s = clean_text(value)
+
+    raw_values = re.findall(
+        r"(?<![\d.])(\d{1,3}\.\d)(?![\d.])",
         s
     )
 
     result = []
 
-    for v in values:
-
+    for raw in raw_values:
         try:
-            n = float(v)
+            number = float(raw)
         except Exception:
             continue
 
-        # 追い切り時計として極端な値を除外
-        if 10.0 <= n <= 150.0:
-            result.append(n)
+        if 10.0 <= number <= 150.0:
+            result.append(number)
 
     return result
 
 
-def detect_course(value):
-
-    s = text(value)
-
-    patterns = [
-        ("坂路", ["坂路"]),
-        ("CW", ["CW", "ＣＷ"]),
-        ("W", [
-            "南W",
-            "美浦W",
-            "ウッド",
-            "Ｗ"
-        ]),
-        ("栗東芝", ["栗東芝"]),
-        ("美浦芝", ["美浦芝"]),
-        ("ポリ", [
-            "ポリ",
-            "P",
-            "Ｐ"
-        ])
-    ]
-
-    for course, words in patterns:
-
-        for word in words:
-
-            if word in s:
-                return course
-
-    return ""
-
-
-def looks_like_training(value):
-
-    s = text(value)
-
-    if not s:
-        return False
-
-    keywords = [
-        "調教",
-        "追い切",
-        "坂路",
-        "CW",
-        "ＣＷ",
-        "南W",
-        "美浦W",
-        "ウッド",
-        "栗東",
-        "美浦",
-        "併せ",
-        "馬なり",
-        "一杯",
-        "強め"
-    ]
-
-    keyword_hit = any(
-        word in s
-        for word in keywords
-    )
-
-    times = normalize_time_values(s)
-
-    return (
-        keyword_hit
-        and len(times) >= 1
-    )
-
-
 def extract_date(value):
-
-    s = text(value)
+    s = clean_text(value)
 
     patterns = [
         r"(\d{1,2}/\d{1,2})",
-        r"(\d{1,2}月\d{1,2}日)"
+        r"(\d{1,2}月\d{1,2}日)",
     ]
 
     for pattern in patterns:
-
-        m = re.search(
+        match = re.search(
             pattern,
             s
         )
 
-        if m:
-            return m.group(1)
+        if match:
+            return match.group(1)
+
+    return ""
+
+
+def detect_course(value):
+    s = clean_text(value)
+
+    checks = [
+        ("栗東坂路", ["栗東坂路"]),
+        ("美浦坂路", ["美浦坂路"]),
+        ("坂路", ["坂路"]),
+        ("CW", ["CW", "ＣＷ"]),
+        (
+            "美浦W",
+            [
+                "美浦W",
+                "美浦Ｗ",
+                "南W",
+                "南Ｗ",
+                "美浦ウッド"
+            ]
+        ),
+        (
+            "栗東CW",
+            [
+                "栗東CW",
+                "栗東ＣＷ"
+            ]
+        ),
+        (
+            "ウッド",
+            [
+                "ウッド",
+                "Ｗコース"
+            ]
+        ),
+        (
+            "ポリ",
+            [
+                "ポリ",
+                "ポリトラック"
+            ]
+        ),
+        (
+            "芝",
+            [
+                "芝コース",
+                "栗東芝",
+                "美浦芝"
+            ]
+        ),
+    ]
+
+    for course, words in checks:
+        if any(
+            word in s
+            for word in words
+        ):
+            return course
 
     return ""
 
 
 def extract_effort(value):
+    s = clean_text(value)
 
-    s = text(value)
-
-    for word in (
+    words = [
         "馬なり",
         "一杯",
         "強め",
         "末強め",
         "直強め",
-        "仕掛け"
-    ):
+        "仕掛け",
+        "Ｇ前仕掛け",
+        "叩一杯",
+    ]
 
+    for word in words:
         if word in s:
             return word
 
@@ -230,247 +240,147 @@ def extract_effort(value):
 
 
 def extract_pairing(value):
-
-    s = text(value)
+    s = clean_text(value)
 
     keywords = [
         "併せ",
         "先着",
         "遅れ",
-        "同入"
+        "同入",
     ]
 
-    found = [
-        x
-        for x in keywords
-        if x in s
+    hits = [
+        word
+        for word in keywords
+        if word in s
     ]
 
-    if not found:
+    if not hits:
         return ""
 
-    # 長大なHTML文章を保存しない
-    if len(s) <= 180:
+    if len(s) <= 200:
         return s
 
-    for word in found:
+    first_index = min(
+        s.find(word)
+        for word in hits
+        if s.find(word) >= 0
+    )
 
-        index = s.find(word)
+    start = max(
+        0,
+        first_index - 70
+    )
 
-        if index >= 0:
+    end = min(
+        len(s),
+        first_index + 130
+    )
 
-            start = max(
-                0,
-                index - 60
-            )
+    return s[start:end]
 
-            end = min(
-                len(s),
-                index + 100
-            )
 
-            return s[start:end]
+def training_keyword_hit(value):
+    s = clean_text(value)
 
-    return ""
+    keywords = [
+        "調教",
+        "追い切",
+        "追切",
+        "坂路",
+        "CW",
+        "ＣＷ",
+        "南W",
+        "南Ｗ",
+        "美浦W",
+        "美浦Ｗ",
+        "ウッド",
+        "馬なり",
+        "一杯",
+        "強め",
+        "仕掛け",
+        "併せ",
+    ]
+
+    return any(
+        word in s
+        for word in keywords
+    )
+
+
+def is_plausible_training_block(value):
+    s = clean_text(value)
+
+    if not s:
+        return False
+
+    times = extract_time_values(s)
+
+    if not times:
+        return False
+
+    keyword = training_keyword_hit(s)
+    course = detect_course(s)
+
+    # 時計だけでは追い切りと断定しない
+    if not keyword and not course:
+        return False
+
+    return True
 
 
 def parse_training_block(value):
+    raw = clean_text(value)
 
-    raw = text(value)
+    if not is_plausible_training_block(raw):
+        return None
 
-    times = normalize_time_values(
-        raw
-    )
+    times = extract_time_values(raw)
 
     if not times:
         return None
 
+    course = detect_course(raw)
+    effort = extract_effort(raw)
+
     return {
-        "date":
-            extract_date(raw),
-
-        "course":
-            detect_course(raw),
-
-        "times":
-            times,
-
-        # 最後の区間値を終い候補として保持。
-        # この時点では能力加点しない。
-        "last_section_candidate":
+        "date": extract_date(raw),
+        "course": course,
+        "times": times,
+        "last_section_candidate": (
             times[-1]
-            if times else None,
-
-        "effort":
-            extract_effort(raw),
-
-        "pairing":
-            extract_pairing(raw),
-
-        "raw":
-            raw[:500]
+            if times
+            else None
+        ),
+        "effort": effort,
+        "pairing": extract_pairing(raw),
+        "raw": raw[:600],
     }
 
 
-def extract_from_tables(soup):
-
-    blocks = []
-
-    for table_index, table in enumerate(
-        soup.find_all("table")
-    ):
-
-        rows = table.find_all("tr")
-
-        for row_index, row in enumerate(rows):
-
-            cells = [
-                text(cell.get_text(
-                    " ",
-                    strip=True
-                ))
-                for cell in row.find_all(
-                    ["th", "td"]
-                )
-            ]
-
-            if not cells:
-                continue
-
-            joined = " | ".join(
-                cells
-            )
-
-            if not looks_like_training(
-                joined
-            ):
-                continue
-
-            parsed = parse_training_block(
-                joined
-            )
-
-            if parsed is None:
-                continue
-
-            parsed[
-                "source_type"
-            ] = "table"
-
-            parsed[
-                "table_index"
-            ] = table_index
-
-            parsed[
-                "row_index"
-            ] = row_index
-
-            blocks.append(
-                parsed
-            )
-
-    return blocks
-
-
-def extract_from_text(soup):
-
-    blocks = []
-
-    lines = [
-        text(x)
-        for x in soup.stripped_strings
-    ]
-
-    # 1行では分割されるページがあるので
-    # 周辺行も結合する
-    for i in range(len(lines)):
-
-        current = lines[i]
-
-        neighborhood = " | ".join(
-            lines[
-                max(0, i - 2):
-                min(len(lines), i + 5)
-            ]
-        )
-
-        if not looks_like_training(
-            neighborhood
-        ):
-            continue
-
-        parsed = parse_training_block(
-            neighborhood
-        )
-
-        if parsed is None:
-            continue
-
-        parsed[
-            "source_type"
-        ] = "text"
-
-        parsed[
-            "line_index"
-        ] = i
-
-        blocks.append(
-            parsed
-        )
-
-    return blocks
-
-
-def deduplicate(blocks):
-
-    unique = []
-    seen = set()
-
-    for block in blocks:
-
-        key = (
-            block.get("date", ""),
-            block.get("course", ""),
-            tuple(
-                block.get(
-                    "times",
-                    []
-                )
-            ),
-            block.get(
-                "effort",
-                ""
-            )
-        )
-
-        if key in seen:
-            continue
-
-        seen.add(key)
-        unique.append(block)
-
-    return unique
-
-
 def quality_score(block):
-
     score = 0
 
     if block.get("date"):
         score += 2
 
     if block.get("course"):
-        score += 2
+        score += 3
 
     times = block.get(
         "times",
         []
     )
 
-    if len(times) >= 4:
+    if len(times) >= 5:
+        score += 5
+
+    elif len(times) >= 4:
         score += 4
+
     elif len(times) >= 2:
         score += 2
+
     elif len(times) == 1:
         score += 1
 
@@ -483,8 +393,120 @@ def quality_score(block):
     return score
 
 
-def inspect_url(url):
+def extract_tables(soup):
+    blocks = []
 
+    tables = soup.find_all("table")
+
+    for table_index, table in enumerate(tables):
+        rows = table.find_all("tr")
+
+        for row_index, row in enumerate(rows):
+            cells = [
+                clean_text(
+                    cell.get_text(
+                        " ",
+                        strip=True
+                    )
+                )
+                for cell in row.find_all(
+                    ["th", "td"]
+                )
+            ]
+
+            if not cells:
+                continue
+
+            joined = " | ".join(cells)
+
+            parsed = parse_training_block(
+                joined
+            )
+
+            if parsed is None:
+                continue
+
+            parsed["source_type"] = "table"
+            parsed["table_index"] = table_index
+            parsed["row_index"] = row_index
+            parsed["quality_score"] = (
+                quality_score(parsed)
+            )
+
+            blocks.append(parsed)
+
+    return blocks
+
+
+def extract_text_windows(soup):
+    blocks = []
+
+    strings = [
+        clean_text(value)
+        for value in soup.stripped_strings
+        if clean_text(value)
+    ]
+
+    for index in range(len(strings)):
+        start = max(
+            0,
+            index - 3
+        )
+
+        end = min(
+            len(strings),
+            index + 7
+        )
+
+        window = " | ".join(
+            strings[start:end]
+        )
+
+        parsed = parse_training_block(
+            window
+        )
+
+        if parsed is None:
+            continue
+
+        parsed["source_type"] = "text"
+        parsed["line_index"] = index
+        parsed["quality_score"] = (
+            quality_score(parsed)
+        )
+
+        blocks.append(parsed)
+
+    return blocks
+
+
+def deduplicate(blocks):
+    result = []
+    seen = set()
+
+    for block in blocks:
+        key = (
+            block.get("date", ""),
+            block.get("course", ""),
+            tuple(
+                block.get(
+                    "times",
+                    []
+                )
+            ),
+            block.get("effort", ""),
+        )
+
+        if key in seen:
+            continue
+
+        seen.add(key)
+        result.append(block)
+
+    return result
+
+
+def inspect_page(url):
     response = fetch(url)
 
     soup = BeautifulSoup(
@@ -492,65 +514,114 @@ def inspect_url(url):
         "html.parser"
     )
 
-    blocks = extract_from_tables(
+    title = ""
+
+    if soup.title:
+        title = clean_text(
+            soup.title.get_text(
+                " ",
+                strip=True
+            )
+        )
+
+    page_text = clean_text(
+        soup.get_text(
+            " ",
+            strip=True
+        )
+    )
+
+    blocks = extract_tables(
         soup
     )
 
-    # table抽出が弱い場合だけ
-    # 全文側も追加
-    if len(blocks) < 2:
+    # table以外に描画されるケースへの保険
+    text_blocks = extract_text_windows(
+        soup
+    )
 
-        blocks.extend(
-            extract_from_text(
-                soup
-            )
-        )
+    blocks.extend(
+        text_blocks
+    )
 
     blocks = deduplicate(
         blocks
     )
 
-    for block in blocks:
-
-        block[
-            "quality_score"
-        ] = quality_score(
-            block
-        )
-
     blocks.sort(
-        key=lambda x:
-            x.get(
-                "quality_score",
-                0
-            ),
+        key=lambda x: x.get(
+            "quality_score",
+            0
+        ),
         reverse=True
     )
 
     return {
-        "title":
-            text(
-                soup.title.get_text(
-                    " ",
-                    strip=True
-                )
-                if soup.title
-                else ""
-            ),
-
-        "training_block_count":
-            len(blocks),
-
-        "training_blocks":
-            blocks[:20]
+        "title": title,
+        "http_status": response.status_code,
+        "html_length": len(response.text),
+        "table_count": len(
+            soup.find_all("table")
+        ),
+        "page_has_training_keyword": (
+            training_keyword_hit(
+                page_text
+            )
+        ),
+        "page_time_like_value_count": len(
+            extract_time_values(
+                page_text
+            )
+        ),
+        "training_block_count": len(
+            blocks
+        ),
+        "training_blocks": blocks[:30],
     }
 
 
-def horse_urls(horse_id):
+def build_candidate_urls(
+    race_id,
+    horse_id
+):
+    """
+    race_id付きURLを優先。
 
-    return [
+    race.netkeiba の調教画面は
+    レース文脈を必要とするケースがあるため、
+    race_id + horse_id の候補を先に試す。
+    """
+
+    candidates = []
+
+    if race_id:
+        params = urlencode({
+            "race_id": race_id,
+            "horse_id": horse_id,
+        })
+
+        candidates.extend([
+            (
+                "netkeiba_training_race_horse",
+                (
+                    "https://race.netkeiba.com/"
+                    "training/training.html?"
+                    + params
+                )
+            ),
+            (
+                "netkeiba_training_race",
+                (
+                    "https://race.netkeiba.com/"
+                    "training/training.html"
+                    f"?race_id={race_id}"
+                )
+            ),
+        ])
+
+    candidates.extend([
         (
-            "netkeiba_training",
+            "netkeiba_training_horse",
             (
                 "https://race.netkeiba.com/"
                 "training/training.html"
@@ -563,174 +634,222 @@ def horse_urls(horse_id):
                 "https://db.netkeiba.com/"
                 f"horse/{horse_id}/"
             )
+        ),
+    ])
+
+    unique = []
+    seen = set()
+
+    for source, url in candidates:
+        if url in seen:
+            continue
+
+        seen.add(url)
+
+        unique.append(
+            (source, url)
         )
-    ]
+
+    return unique
 
 
-def analyze_horse(horse):
+def block_matches_horse(
+    block,
+    horse_name
+):
+    """
+    race_id単位のページには複数馬が含まれる可能性がある。
 
-    horse_id = text(
+    raw内に馬名がある場合は一致確認。
+    馬名自体がページ構造上省略される場合もあるので、
+    horse_nameが無いだけでは即除外しない。
+    """
+
+    raw = clean_text(
+        block.get("raw")
+    )
+
+    if not raw:
+        return False
+
+    if horse_name and horse_name in raw:
+        return True
+
+    return None
+
+
+def select_blocks_for_horse(
+    blocks,
+    horse_name,
+    source_name
+):
+    if not blocks:
+        return []
+
+    # race全体ページでは他馬混入を避ける
+    if source_name == "netkeiba_training_race":
+        matched = [
+            block
+            for block in blocks
+            if block_matches_horse(
+                block,
+                horse_name
+            ) is True
+        ]
+
+        return matched
+
+    return blocks
+
+
+def analyze_horse(
+    race_id,
+    horse
+):
+    horse_id = clean_text(
         horse.get("horse_id")
     )
 
+    horse_number = clean_text(
+        horse.get("horse_number")
+    )
+
+    horse_name = clean_text(
+        horse.get("horse_name")
+    )
+
     result = {
-        "horse_id":
-            horse_id,
-
-        "horse_number":
-            text(
-                horse.get(
-                    "horse_number"
-                )
-            ),
-
-        "horse_name":
-            text(
-                horse.get(
-                    "horse_name"
-                )
-            ),
-
-        "detail_found":
-            False,
-
-        "source":
-            "",
-
-        "source_url":
-            "",
-
-        "training_count":
-            0,
-
-        "training":
-            [],
-
-        "checks":
-            [],
-
-        "error":
-            ""
+        "horse_id": horse_id,
+        "horse_number": horse_number,
+        "horse_name": horse_name,
+        "detail_found": False,
+        "source": "",
+        "source_url": "",
+        "training_count": 0,
+        "training": [],
+        "checks": [],
+        "error": "",
     }
 
     if not horse_id:
-
-        result["error"] = (
-            "horse_idなし"
-        )
-
+        result["error"] = "horse_idなし"
         return result
 
     best = None
 
-    for source_name, url in horse_urls(
+    candidates = build_candidate_urls(
+        race_id,
         horse_id
-    ):
+    )
 
+    for source_name, url in candidates:
         check = {
-            "source":
-                source_name,
-
-            "url":
-                url,
-
-            "ok":
-                False,
-
-            "training_block_count":
-                0,
-
-            "error":
-                ""
+            "source": source_name,
+            "url": url,
+            "http_ok": False,
+            "title": "",
+            "html_length": 0,
+            "table_count": 0,
+            "page_has_training_keyword": False,
+            "page_time_like_value_count": 0,
+            "training_block_count": 0,
+            "horse_training_block_count": 0,
+            "error": "",
         }
 
         try:
-
-            inspection = inspect_url(
+            inspection = inspect_page(
                 url
             )
 
-            check["ok"] = True
-
+            check["http_ok"] = True
+            check["title"] = inspection[
+                "title"
+            ]
+            check["html_length"] = inspection[
+                "html_length"
+            ]
+            check["table_count"] = inspection[
+                "table_count"
+            ]
+            check[
+                "page_has_training_keyword"
+            ] = inspection[
+                "page_has_training_keyword"
+            ]
+            check[
+                "page_time_like_value_count"
+            ] = inspection[
+                "page_time_like_value_count"
+            ]
             check[
                 "training_block_count"
             ] = inspection[
                 "training_block_count"
             ]
 
-            result["checks"].append(
-                check
+            selected_blocks = (
+                select_blocks_for_horse(
+                    inspection[
+                        "training_blocks"
+                    ],
+                    horse_name,
+                    source_name
+                )
             )
 
-            blocks = inspection[
-                "training_blocks"
-            ]
+            check[
+                "horse_training_block_count"
+            ] = len(
+                selected_blocks
+            )
 
-            if blocks:
+            if selected_blocks:
+                candidate_score = sum(
+                    block.get(
+                        "quality_score",
+                        0
+                    )
+                    for block in selected_blocks[:5]
+                )
 
                 candidate = {
-                    "source":
-                        source_name,
-
-                    "url":
-                        url,
-
-                    "blocks":
-                        blocks,
-
-                    "score":
-                        sum(
-                            x[
-                                "quality_score"
-                            ]
-                            for x in blocks[
-                                :5
-                            ]
-                        )
+                    "source": source_name,
+                    "url": url,
+                    "blocks": selected_blocks,
+                    "score": candidate_score,
                 }
 
                 if (
                     best is None
-                    or
-                    candidate["score"]
-                    >
-                    best["score"]
+                    or candidate["score"]
+                    > best["score"]
                 ):
                     best = candidate
 
         except Exception as e:
-
             check["error"] = str(e)
 
-            result["checks"].append(
-                check
-            )
+        result["checks"].append(
+            check
+        )
 
         time.sleep(
             REQUEST_INTERVAL
         )
 
     if best is not None:
-
-        result[
-            "detail_found"
-        ] = True
-
-        result[
+        result["detail_found"] = True
+        result["source"] = best[
             "source"
-        ] = best["source"]
-
-        result[
-            "source_url"
-        ] = best["url"]
-
-        result[
-            "training"
-        ] = best["blocks"]
-
-        result[
-            "training_count"
-        ] = len(
+        ]
+        result["source_url"] = best[
+            "url"
+        ]
+        result["training"] = best[
+            "blocks"
+        ]
+        result["training_count"] = len(
             best["blocks"]
         )
 
@@ -738,38 +857,48 @@ def analyze_horse(horse):
 
 
 def main():
-
     with open(
         RACE_FILE,
         "r",
         encoding="utf-8"
     ) as f:
-
         race = json.load(f)
+
+    race_id = get_race_id(
+        race
+    )
+
+    if not race_id:
+        raise RuntimeError(
+            "race.jsonにrace_idがありません"
+        )
 
     horses = get_horses(
         race
     )
 
     if not horses:
-
         raise RuntimeError(
             "race.jsonから出走馬を取得できません"
         )
 
     results = []
 
-    for i, horse in enumerate(
+    for index, horse in enumerate(
         horses,
         start=1
     ):
+        horse_name = clean_text(
+            horse.get("horse_name")
+        )
 
         print(
-            f"[{i}/{len(horses)}] "
-            f"{text(horse.get('horse_name'))}"
+            f"[{index}/{len(horses)}] "
+            f"{horse_name}"
         )
 
         result = analyze_horse(
+            race_id,
             horse
         )
 
@@ -779,65 +908,80 @@ def main():
 
         print(
             " detail:",
-            result[
-                "detail_found"
-            ],
+            result["detail_found"],
             " blocks:",
-            result[
-                "training_count"
-            ]
+            result["training_count"]
         )
 
-    detail_count = sum(
+        for check in result["checks"]:
+            print(
+                "  ",
+                check["source"],
+                "http=",
+                check["http_ok"],
+                "tables=",
+                check["table_count"],
+                "time_like=",
+                check[
+                    "page_time_like_value_count"
+                ],
+                "blocks=",
+                check[
+                    "training_block_count"
+                ],
+                "horse_blocks=",
+                check[
+                    "horse_training_block_count"
+                ],
+                "error=",
+                check["error"],
+            )
+
+    detail_found_count = sum(
         1
-        for x in results
-        if x["detail_found"]
+        for result in results
+        if result["detail_found"]
+    )
+
+    total_training_blocks = sum(
+        result["training_count"]
+        for result in results
     )
 
     output = {
-        "updated_at":
-            now_jst(),
-
-        "source_race_file":
-            RACE_FILE,
-
-        "purpose":
-            "objective_training_detail_extraction",
-
+        "updated_at": now_jst(),
+        "source_race_file": RACE_FILE,
+        "source_detection_file": (
+            DETECTION_FILE
+        ),
+        "target_race_id": race_id,
+        "purpose": (
+            "objective_training_detail_extraction"
+        ),
         "summary": {
-            "horse_count":
-                len(results),
-
-            "detail_found_count":
-                detail_count,
-
-            "detail_not_found_count":
+            "horse_count": len(results),
+            "detail_found_count": (
+                detail_found_count
+            ),
+            "detail_not_found_count": (
                 len(results)
-                - detail_count
+                - detail_found_count
+            ),
+            "total_training_blocks": (
+                total_training_blocks
+            ),
         },
-
         "rules": {
-            "training_is_supporting_data":
-                True,
-
-            "final_workout_not_independent_bonus":
-                True,
-
-            "training_used_for_condition":
-                True,
-
-            "training_used_for_issue_resolution":
-                True,
-
-            "unknown_not_penalized":
-                True,
-
-            "internet_prediction_not_used":
-                True
+            "training_is_supporting_data": True,
+            "final_workout_not_independent_bonus": True,
+            "training_used_for_condition_check": True,
+            "training_used_for_issue_resolution_check": True,
+            "unknown_not_penalized": True,
+            "keyword_only_not_counted_as_training": True,
+            "time_value_required": True,
+            "target_race_context_used": True,
         },
-
-        "horses":
-            results
+        "horses": results,
     }
 
     with open(
@@ -845,7 +989,6 @@ def main():
         "w",
         encoding="utf-8"
     ) as f:
-
         json.dump(
             output,
             f,
@@ -853,24 +996,32 @@ def main():
             indent=2
         )
 
+    print()
+    print("TRAINING DETAIL SUMMARY")
     print(
-        "===== Training Detail ====="
+        "target race:",
+        race_id
     )
-
     print(
         "horses:",
         len(results)
     )
-
     print(
         "detail found:",
-        detail_count
+        detail_found_count
     )
-
     print(
-        "not found:",
+        "detail unknown:",
         len(results)
-        - detail_count
+        - detail_found_count
+    )
+    print(
+        "training blocks:",
+        total_training_blocks
+    )
+    print(
+        "saved:",
+        OUTPUT_FILE
     )
 
 
