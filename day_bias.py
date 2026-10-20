@@ -12,11 +12,24 @@ from datetime import datetime, timezone, timedelta
 RACE_FILE = "race.json"
 TRACK_FILE = "track_condition.json"
 DAY_RACES_FILE = "day_races.json"
+DAY_TIME_HISTORY_FILE = "day_time_history.json"
 OUTPUT_FILE = "day_bias.json"
 
-JST = timezone(
-    timedelta(hours=9)
-)
+JST = timezone(timedelta(hours=9))
+
+# robust z-score:
+# 0.6745 * (x - median) / MAD
+# と同値の
+# (x - median) / (1.4826 * MAD)
+MAD_SCALE = 1.4826
+
+# 時計バイアス判定
+TIME_STRONG_THRESHOLD = 1.50
+TIME_MILD_THRESHOLD = 0.75
+
+# MADが極端に小さい場合の暴走防止。
+# MAD自体は保存値を使うが、標準化時の分母だけ下限を置く。
+MIN_SCALED_DISPERSION_SECONDS = 0.20
 
 
 # ============================================================
@@ -24,11 +37,7 @@ JST = timezone(
 # ============================================================
 
 def now_jst():
-    return datetime.now(
-        JST
-    ).isoformat(
-        timespec="seconds"
-    )
+    return datetime.now(JST).isoformat(timespec="seconds")
 
 
 def load_json(path):
@@ -36,23 +45,14 @@ def load_json(path):
         return {}
 
     try:
-        with open(
-            path,
-            "r",
-            encoding="utf-8"
-        ) as f:
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
-
     except Exception:
         return {}
 
 
 def save_json(path, data):
-    with open(
-        path,
-        "w",
-        encoding="utf-8"
-    ) as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(
             data,
             f,
@@ -93,20 +93,14 @@ def normalize_surface(value):
 def safe_int(value):
     try:
         return int(value)
-    except (
-        TypeError,
-        ValueError
-    ):
+    except (TypeError, ValueError):
         return None
 
 
 def safe_float(value):
     try:
         return float(value)
-    except (
-        TypeError,
-        ValueError
-    ):
+    except (TypeError, ValueError):
         return None
 
 
@@ -115,20 +109,13 @@ def safe_float(value):
 # ============================================================
 
 def get_race_number(race_id):
-    race_id = clean_text(
-        race_id
-    )
+    race_id = clean_text(race_id)
 
-    if not re.fullmatch(
-        r"\d{12}",
-        race_id
-    ):
+    if not re.fullmatch(r"\d{12}", race_id):
         return None
 
     try:
-        race_no = int(
-            race_id[-2:]
-        )
+        race_no = int(race_id[-2:])
     except ValueError:
         return None
 
@@ -139,218 +126,77 @@ def get_race_number(race_id):
 
 
 # ============================================================
-# コーナー文字列正規化
+# コーナー処理
 # ============================================================
 
 def normalize_corner_text(value):
-    text = clean_text(
-        value
-    )
+    text = clean_text(value)
 
     if not text:
         return ""
 
-    text = text.replace(
-        "（",
-        "("
-    )
-
-    text = text.replace(
-        "）",
-        ")"
-    )
-
-    text = text.replace(
-        "，",
-        ","
-    )
-
-    text = re.sub(
-        r"\s+",
-        "",
-        text
-    )
+    text = text.replace("（", "(")
+    text = text.replace("）", ")")
+    text = text.replace("，", ",")
+    text = re.sub(r"\s+", "", text)
 
     return text
 
 
-# ============================================================
-# コーナー隊列を馬番順に展開
-#
-# 例:
-#
-# (*8,12)(5,11)(1,7,10)(2,3)(6,4)9
-#
-# ↓
-#
-# [8,12,5,11,1,7,10,2,3,6,4,9]
-#
-# ()内で並走していても、
-# 「前のグループ→後ろのグループ」という順序は保持する。
-#
-# * は先頭表示なので除去。
-# - = 等は隊列の間隔を示す記号として扱い、
-# 馬番抽出時には無視する。
-# ============================================================
-
 def parse_corner_order(value):
-    text = normalize_corner_text(
-        value
-    )
+    text = normalize_corner_text(value)
 
     if not text:
         return []
 
-    numbers = re.findall(
-        r"\d+",
-        text
-    )
+    numbers = re.findall(r"\d+", text)
 
     order = []
-
     seen = set()
 
     for number in numbers:
-
         try:
-            horse_number = int(
-                number
-            )
+            horse_number = int(number)
         except ValueError:
             continue
 
-        if not (
-            1
-            <= horse_number
-            <= 18
-        ):
+        if not 1 <= horse_number <= 18:
             continue
 
         if horse_number in seen:
             continue
 
-        seen.add(
-            horse_number
-        )
-
-        order.append(
-            horse_number
-        )
+        seen.add(horse_number)
+        order.append(horse_number)
 
     return order
 
 
-# ============================================================
-# 各馬のコーナー順位
-#
-# 返り値:
-#
-# {
-#   8: 1,
-#   12: 2,
-#   5: 3,
-#   ...
-# }
-#
-# 同一グループ内の厳密な前後は判定できないため、
-# HTML上に記載された順番を位置番号として利用。
-#
-# バイアス判定では絶対順位より
-# 「前方・中団・後方」の大分類を重視する。
-# ============================================================
-
-def build_corner_position_map(
-    value
-):
-    order = parse_corner_order(
-        value
-    )
+def build_corner_position_map(value):
+    order = parse_corner_order(value)
 
     output = {}
 
-    for index, horse_number in enumerate(
-        order,
-        start=1
-    ):
-        output[
-            horse_number
-        ] = index
+    for index, horse_number in enumerate(order, start=1):
+        output[horse_number] = index
 
     return output
 
 
-# ============================================================
-# 使用するコーナーを選択
-#
-# 原則:
-# 4角 → 3角 → 2角 → 1角
-#
-# 東京芝1400/1600などでは
-# 3角・4角が取得されているため4角を優先。
-#
-# 直線競走等でコーナーが無い場合は空。
-# ============================================================
+def select_reference_corner(corner_positions):
+    if not isinstance(corner_positions, dict):
+        return "", ""
 
-def select_reference_corner(
-    corner_positions
-):
-    if not isinstance(
-        corner_positions,
-        dict
-    ):
-        return (
-            "",
-            ""
-        )
-
-    for corner_number in [
-        "4",
-        "3",
-        "2",
-        "1",
-    ]:
-
+    for corner_number in ["4", "3", "2", "1"]:
         value = clean_text(
-            corner_positions.get(
-                corner_number
-            )
+            corner_positions.get(corner_number)
         )
 
         if value:
-            return (
-                corner_number,
-                value
-            )
+            return corner_number, value
 
-    return (
-        "",
-        ""
-    )
+    return "", ""
 
-
-# ============================================================
-# 脚質分類
-#
-# 「馬番」ではなく、
-# 実際のコーナー隊列内の位置から分類する。
-#
-# 逃げ:
-#   コーナー隊列の先頭
-#
-# 先行:
-#   上位約1/3
-#
-# 中団:
-#   中央約1/3
-#
-# 後方:
-#   後ろ約1/3
-#
-# ただし逃げは必ず先頭1頭を独立。
-#
-# ※これは当日バイアス検出用の脚質分類であり、
-# 各馬の恒常的な脚質を決めるものではない。
-# ============================================================
 
 def classify_running_style(
     horse_number,
@@ -362,16 +208,12 @@ def classify_running_style(
     if not position_map:
         return ""
 
-    position = position_map.get(
-        horse_number
-    )
+    position = position_map.get(horse_number)
 
     if position is None:
         return ""
 
-    field_size = len(
-        position_map
-    )
+    field_size = len(position_map)
 
     if field_size <= 0:
         return ""
@@ -379,10 +221,7 @@ def classify_running_style(
     if position == 1:
         return "逃げ"
 
-    position_rate = (
-        position
-        / field_size
-    )
+    position_rate = position / field_size
 
     if position_rate <= 0.35:
         return "先行"
@@ -394,21 +233,222 @@ def classify_running_style(
 
 
 # ============================================================
+# 時計バイアス
+# ============================================================
+
+def calculate_time_bias(
+    day_time_history,
+    target_race_id
+):
+    result = {
+        "connected": False,
+        "status": "not_connected",
+        "time_bias": "",
+        "score": None,
+        "reference_count": 0,
+        "scores": [],
+        "reference_details": [],
+        "reason": "",
+    }
+
+    if not day_time_history:
+        result["status"] = "file_not_found"
+        result["reason"] = (
+            "day_time_history.json が存在しないため"
+            "時計バイアスを判定しない。"
+        )
+        return result
+
+    history_target_id = clean_text(
+        day_time_history.get("target_race_id")
+    )
+
+    if history_target_id != target_race_id:
+        raise SystemExit(
+            "ERROR: day_time_history.json race_id mismatch"
+        )
+
+    if day_time_history.get("future_race_usage") is True:
+        raise SystemExit(
+            "ERROR: day_time_history.json に未来レース使用フラグがあります"
+        )
+
+    if day_time_history.get("leak_check_passed") is not True:
+        raise SystemExit(
+            "ERROR: day_time_history.json leak check failed"
+        )
+
+    if safe_int(
+        day_time_history.get("error_count")
+    ) not in (None, 0):
+        result["status"] = "history_error"
+        result["reason"] = (
+            "day_time_history.json にエラーがあるため"
+            "時計バイアスを判定しない。"
+        )
+        return result
+
+    references = (
+        day_time_history.get(
+            "reference_races",
+            []
+        )
+        or []
+    )
+
+    for ref in references:
+        if not isinstance(ref, dict):
+            continue
+
+        if ref.get("baseline_connected") is not True:
+            continue
+
+        race_id = clean_text(
+            ref.get("race_id")
+        )
+
+        race_number = safe_int(
+            ref.get("race_number")
+        )
+
+        distance = safe_int(
+            ref.get("distance")
+        )
+
+        sample_count = safe_int(
+            ref.get("baseline_sample_count")
+        )
+
+        delta = safe_float(
+            ref.get("time_delta_seconds")
+        )
+
+        mad = safe_float(
+            ref.get("baseline_mad_seconds")
+        )
+
+        baseline_median = safe_float(
+            ref.get("baseline_median_seconds")
+        )
+
+        actual = safe_float(
+            ref.get("winner_time_seconds")
+        )
+
+        if sample_count is None or sample_count < 5:
+            continue
+
+        if delta is None:
+            continue
+
+        if mad is None or mad <= 0:
+            continue
+
+        scaled_dispersion = (
+            MAD_SCALE * mad
+        )
+
+        # MADが極端に小さい時だけ、
+        # 標準化スコアの暴走を防止する。
+        denominator = max(
+            scaled_dispersion,
+            MIN_SCALED_DISPERSION_SECONDS
+        )
+
+        robust_z = (
+            delta / denominator
+        )
+
+        robust_z = round(
+            robust_z,
+            3
+        )
+
+        result["scores"].append(
+            robust_z
+        )
+
+        result["reference_details"].append({
+            "race_id": race_id,
+            "race_number": race_number,
+            "distance": distance,
+            "sample_count": sample_count,
+            "actual_seconds": actual,
+            "baseline_median_seconds": baseline_median,
+            "mad_seconds": mad,
+            "time_delta_seconds": delta,
+            "scaled_dispersion_seconds": round(
+                scaled_dispersion,
+                4
+            ),
+            "robust_z": robust_z,
+        })
+
+    result["reference_count"] = len(
+        result["scores"]
+    )
+
+    if not result["scores"]:
+        result["status"] = "no_valid_baseline"
+        result["reason"] = (
+            "有効な基準時計サンプルがないため"
+            "時計バイアスを判定しない。"
+        )
+        return result
+
+    # 距離ごとの生秒差ではなく、
+    # 各条件内で標準化した値の中央値を使う。
+    combined_score = statistics.median(
+        result["scores"]
+    )
+
+    combined_score = round(
+        combined_score,
+        3
+    )
+
+    result["score"] = combined_score
+    result["connected"] = True
+    result["status"] = "analyzed"
+
+    if combined_score <= -TIME_STRONG_THRESHOLD:
+        time_bias = "高速"
+
+    elif combined_score <= -TIME_MILD_THRESHOLD:
+        time_bias = "やや高速"
+
+    elif combined_score >= TIME_STRONG_THRESHOLD:
+        time_bias = "低速"
+
+    elif combined_score >= TIME_MILD_THRESHOLD:
+        time_bias = "やや低速"
+
+    else:
+        time_bias = "標準"
+
+    result["time_bias"] = time_bias
+
+    result["reason"] = (
+        f"基準時計接続{result['reference_count']}件。"
+        f"距離別の実測－基準中央値をMADで標準化し、"
+        f"robust z-scoreの中央値"
+        f"{combined_score}で判定。"
+        f"異なる距離の生時計差は直接平均していない。"
+    )
+
+    return result
+
+
+# ============================================================
 # 入力
 # ============================================================
 
-race = load_json(
-    RACE_FILE
+race = load_json(RACE_FILE)
+track_condition = load_json(TRACK_FILE)
+day_races = load_json(DAY_RACES_FILE)
+day_time_history = load_json(
+    DAY_TIME_HISTORY_FILE
 )
-
-track_condition = load_json(
-    TRACK_FILE
-)
-
-day_races = load_json(
-    DAY_RACES_FILE
-)
-
 
 if not race:
     raise SystemExit(
@@ -417,45 +457,30 @@ if not race:
 
 
 race_id = clean_text(
-    race.get(
-        "race_id"
-    )
+    race.get("race_id")
 )
 
 race_date = clean_text(
-    race.get(
-        "race_date"
-    )
-    or race.get(
-        "date"
-    )
+    race.get("race_date")
+    or race.get("date")
 )
 
 racecourse = clean_text(
-    race.get(
-        "track"
-    )
-    or race.get(
-        "racecourse"
-    )
+    race.get("track")
+    or race.get("racecourse")
 )
 
 surface = normalize_surface(
-    race.get(
-        "surface"
-    )
+    race.get("surface")
 )
 
 distance = safe_int(
-    race.get(
-        "distance"
-    )
+    race.get("distance")
 )
 
 race_no = get_race_number(
     race_id
 )
-
 
 if race_no is None:
     raise SystemExit(
@@ -468,9 +493,7 @@ if race_no is None:
 # ============================================================
 
 track_race_id = clean_text(
-    track_condition.get(
-        "race_id"
-    )
+    track_condition.get("race_id")
 )
 
 track_matched = (
@@ -492,9 +515,7 @@ if (
 # ============================================================
 
 day_races_race_id = clean_text(
-    day_races.get(
-        "race_id"
-    )
+    day_races.get("race_id")
 )
 
 day_races_matched = (
@@ -516,10 +537,7 @@ if (
 # ============================================================
 
 previous_race_numbers = list(
-    range(
-        1,
-        race_no
-    )
+    range(1, race_no)
 )
 
 
@@ -564,9 +582,7 @@ winner_last3f = []
 top3_last3f = []
 
 inside_top3 = 0
-
 outside_top3 = 0
-
 middle_top3 = 0
 
 future_race_detected = False
@@ -578,12 +594,24 @@ corner_missing_race_numbers = []
 reference_corner_numbers = {}
 
 
+# 時計
+time_analysis = {
+    "connected": False,
+    "status": "not_run",
+    "time_bias": "",
+    "score": None,
+    "reference_count": 0,
+    "scores": [],
+    "reference_details": [],
+    "reason": "",
+}
+
+
 # ============================================================
 # 1R
 # ============================================================
 
 if race_no == 1:
-
     status = "no_previous_races"
 
     reason = (
@@ -599,10 +627,7 @@ if race_no == 1:
 # ============================================================
 
 elif not day_races:
-
-    status = (
-        "day_races_not_found"
-    )
+    status = "day_races_not_found"
 
     reason = (
         "対象レースより前のRは存在するが、"
@@ -616,7 +641,6 @@ elif not day_races:
 # ============================================================
 
 else:
-
     collected_races = (
         day_races.get(
             "collected_races",
@@ -625,52 +649,35 @@ else:
         or []
     )
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 未来レース混入チェック
-    # ========================================================
+    # --------------------------------------------------------
 
     for item in collected_races:
-
         item_race_no = safe_int(
-            item.get(
-                "race_number"
-            )
+            item.get("race_number")
         )
 
         if item_race_no is None:
             continue
 
         if item_race_no >= race_no:
-
             future_race_detected = True
-
             break
 
-
     if future_race_detected:
-
         raise SystemExit(
             "ERROR: day_races.json に"
             "対象レース以降のデータが混入しています"
         )
 
-
-    # ========================================================
-    # 同一馬場のみ使用
-    #
-    # 芝 → 芝
-    # ダート → ダート
-    #
-    # 障害は芝とは別扱い。
-    # ========================================================
+    # --------------------------------------------------------
+    # 同一馬場だけ
+    # --------------------------------------------------------
 
     for item in collected_races:
-
         item_race_no = safe_int(
-            item.get(
-                "race_number"
-            )
+            item.get("race_number")
         )
 
         if item_race_no is None:
@@ -680,18 +687,14 @@ else:
             continue
 
         item_surface = normalize_surface(
-            item.get(
-                "surface"
-            )
+            item.get("surface")
         )
 
         if item_surface != surface:
             continue
 
         if (
-            item.get(
-                "status"
-            )
+            item.get("status")
             not in [
                 "ok",
                 "condition_parse_incomplete",
@@ -714,22 +717,17 @@ else:
             item
         )
 
-
     reference_race_count = len(
         reference_races
     )
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 各参考レース解析
-    # ========================================================
+    # --------------------------------------------------------
 
     for item in reference_races:
-
         item_race_no = safe_int(
-            item.get(
-                "race_number"
-            )
+            item.get("race_number")
         )
 
         results = (
@@ -739,12 +737,6 @@ else:
             )
             or []
         )
-
-
-        # ----------------------------------------------------
-        # レース単位のcorner_positionsから
-        # 使用するコーナーを選択
-        # ----------------------------------------------------
 
         corner_positions = (
             item.get(
@@ -761,90 +753,53 @@ else:
             corner_positions
         )
 
-
         if reference_corner_text:
-
             position_map = (
                 build_corner_position_map(
                     reference_corner_text
                 )
             )
-
         else:
-
             position_map = {}
 
-
         if position_map:
-
             corner_connected_race_count += 1
 
             if item_race_no is not None:
-
                 reference_corner_numbers[
                     str(item_race_no)
-                ] = (
-                    reference_corner_number
-                )
+                ] = reference_corner_number
 
         else:
-
             if item_race_no is not None:
-
                 corner_missing_race_numbers.append(
                     item_race_no
                 )
 
-
         valid_results = []
 
-
-        # ====================================================
-        # 各馬
-        # ====================================================
-
-        for result in results:
-
+        for race_result in results:
             finish = safe_int(
-                result.get(
-                    "finish"
-                )
+                race_result.get("finish")
             )
 
             if finish is None:
                 continue
 
-
             horse_number = safe_int(
-                result.get(
+                race_result.get(
                     "horse_number"
                 )
             )
 
-
             last3f = safe_float(
-                result.get(
-                    "last3f"
-                )
+                race_result.get("last3f")
             )
-
-
-            # ------------------------------------------------
-            # 修正点
-            #
-            # 旧:
-            # result.get("corner")
-            #
-            # 新:
-            # race単位のcorner_positionsから
-            # horse_numberに対応する位置を復元
-            # ------------------------------------------------
 
             style = classify_running_style(
                 horse_number,
                 position_map
             )
-
 
             corner_position = None
 
@@ -852,168 +807,90 @@ else:
                 horse_number is not None
                 and position_map
             ):
-
                 corner_position = (
                     position_map.get(
                         horse_number
                     )
                 )
 
-
             record = {
-                "finish":
-                    finish,
-
-                "style":
-                    style,
-
-                "horse_number":
-                    horse_number,
-
-                "last3f":
-                    last3f,
-
+                "finish": finish,
+                "style": style,
+                "horse_number": horse_number,
+                "last3f": last3f,
                 "corner_number":
                     reference_corner_number,
-
                 "corner_position":
                     corner_position,
             }
 
-
-            valid_results.append(
-                record
-            )
-
+            valid_results.append(record)
 
             if style in style_counts:
-
-                style_counts[
-                    style
-                ] += 1
-
-
-        # ====================================================
-        # 上位3頭
-        # ====================================================
+                style_counts[style] += 1
 
         top3 = [
             x
             for x in valid_results
-            if (
-                1
-                <= x[
-                    "finish"
-                ]
-                <= 3
-            )
+            if 1 <= x["finish"] <= 3
         ]
 
-
-        for result in top3:
-
-            style = result[
-                "style"
-            ]
-
-
-            # ------------------------------------------------
-            # 脚質サンプルは
-            # 実際に位置を取得できた馬だけ加算
-            # ------------------------------------------------
+        for race_result in top3:
+            style = race_result["style"]
 
             if style in top3_style_counts:
-
                 top3_style_counts[
                     style
                 ] += 1
 
                 top3_samples += 1
 
-
-            # ------------------------------------------------
-            # 馬番による内・中・外
-            #
-            # 当日傾向の補助。
-            # 能力評価には直接使用しない。
-            # ------------------------------------------------
-
-            horse_number = result[
+            horse_number = race_result[
                 "horse_number"
             ]
 
             if horse_number is not None:
-
                 if horse_number <= 5:
-
                     inside_top3 += 1
 
                 elif horse_number >= 11:
-
                     outside_top3 += 1
 
                 else:
-
                     middle_top3 += 1
 
-
-            # ------------------------------------------------
-            # 上がり
-            # ------------------------------------------------
-
-            last3f = result[
+            last3f = race_result[
                 "last3f"
             ]
 
             if last3f is not None:
-
                 top3_last3f.append(
                     last3f
                 )
 
-
             if (
-                result[
-                    "finish"
-                ]
-                == 1
+                race_result["finish"] == 1
                 and last3f is not None
             ):
-
                 winner_last3f.append(
                     last3f
                 )
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 脚質バイアス
-    #
-    # 逃げ＋先行 vs 中団＋後方
-    #
-    # サンプル不足時は無理に判定しない。
-    # ========================================================
+    # --------------------------------------------------------
 
     front_top3 = (
-        top3_style_counts[
-            "逃げ"
-        ]
-        + top3_style_counts[
-            "先行"
-        ]
+        top3_style_counts["逃げ"]
+        + top3_style_counts["先行"]
     )
 
     back_top3 = (
-        top3_style_counts[
-            "中団"
-        ]
-        + top3_style_counts[
-            "後方"
-        ]
+        top3_style_counts["中団"]
+        + top3_style_counts["後方"]
     )
 
-
     if top3_samples >= 3:
-
         front_rate = (
             front_top3
             / top3_samples
@@ -1024,31 +901,24 @@ else:
             / top3_samples
         )
 
-
         if front_rate >= 0.67:
-
             running_style_bias = (
                 "逃げ・先行有利"
             )
 
         elif back_rate >= 0.67:
-
             running_style_bias = (
                 "差し有利"
             )
 
         else:
-
             running_style_bias = (
                 "大きな偏りなし"
             )
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 内外バイアス
-    #
-    # 馬番だけなので強い判定にはしない。
-    # ========================================================
+    # --------------------------------------------------------
 
     position_samples = (
         inside_top3
@@ -1056,9 +926,7 @@ else:
         + outside_top3
     )
 
-
     if position_samples >= 3:
-
         inside_rate = (
             inside_top3
             / position_samples
@@ -1069,73 +937,64 @@ else:
             / position_samples
         )
 
-
         if inside_rate >= 0.60:
-
             inside_outside_bias = (
                 "内寄り優勢"
             )
 
         elif outside_rate >= 0.60:
-
             inside_outside_bias = (
                 "外寄り優勢"
             )
 
         else:
-
             inside_outside_bias = (
                 "大きな偏りなし"
             )
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 時計バイアス
-    #
-    # 基準時計未接続なので、
-    # 上がりだけから高速・低速を断定しない。
-    # ========================================================
+    # --------------------------------------------------------
 
-    time_bias = ""
+    time_analysis = calculate_time_bias(
+        day_time_history,
+        race_id
+    )
 
+    time_bias = time_analysis[
+        "time_bias"
+    ]
 
-    # ========================================================
+    # --------------------------------------------------------
     # 信頼度
     #
-    # 同一馬場の参考レース数を基本とする。
-    # ========================================================
+    # 従来通り同日参考レース数を基本とする。
+    # 時計のrobust zは別フィールドで保持する。
+    # --------------------------------------------------------
 
     if reference_race_count >= 5:
-
         confidence = 1.0
 
     elif reference_race_count == 4:
-
         confidence = 0.8
 
     elif reference_race_count == 3:
-
         confidence = 0.6
 
     elif reference_race_count == 2:
-
         confidence = 0.4
 
     elif reference_race_count == 1:
-
         confidence = 0.2
 
     else:
-
         confidence = 0.0
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # status
-    # ========================================================
+    # --------------------------------------------------------
 
     if reference_race_count == 0:
-
         status = (
             "no_same_surface_reference"
         )
@@ -1148,10 +1007,23 @@ else:
         )
 
     else:
+        status = "analyzed"
 
-        status = (
-            "analyzed"
-        )
+        time_reason = ""
+
+        if time_analysis["connected"]:
+            time_reason = (
+                f"時計基準接続"
+                f"{time_analysis['reference_count']}件、"
+                f"時計判定={time_bias}、"
+                f"標準化スコア="
+                f"{time_analysis['score']}。"
+            )
+        else:
+            time_reason = (
+                "時計基準は有効サンプル不足のため"
+                "判定していない。"
+            )
 
         reason = (
             f"対象レース以前の同日・同競馬場・"
@@ -1161,8 +1033,7 @@ else:
             f"通過順位接続"
             f"{corner_connected_race_count}/"
             f"{reference_race_count}件。"
-            f"時計傾向は基準時計未接続のため"
-            f"現段階では判定しない。"
+            f"{time_reason}"
         )
 
 
@@ -1173,7 +1044,6 @@ else:
 average_top3_last3f = None
 
 if top3_last3f:
-
     average_top3_last3f = round(
         statistics.mean(
             top3_last3f
@@ -1185,7 +1055,6 @@ if top3_last3f:
 average_winner_last3f = None
 
 if winner_last3f:
-
     average_winner_last3f = round(
         statistics.mean(
             winner_last3f
@@ -1199,29 +1068,17 @@ if winner_last3f:
 # ============================================================
 
 output = {
-    "race_id":
-        race_id,
-
-    "race_date":
-        race_date,
-
-    "racecourse":
-        racecourse,
-
-    "surface":
-        surface,
-
-    "distance":
-        distance,
-
-    "race_number":
-        race_no,
+    "race_id": race_id,
+    "race_date": race_date,
+    "racecourse": racecourse,
+    "surface": surface,
+    "distance": distance,
+    "race_number": race_no,
 
     "eligible_previous_race_numbers":
         previous_race_numbers,
 
-    "future_race_usage":
-        False,
+    "future_race_usage": False,
 
     "day_races_connected":
         day_races_matched,
@@ -1233,9 +1090,7 @@ output = {
         reference_race_count,
 
     "reference_race_numbers": [
-        item.get(
-            "race_number"
-        )
+        item.get("race_number")
         for item in reference_races
     ],
 
@@ -1250,6 +1105,27 @@ output = {
 
     "time_bias":
         time_bias,
+
+    "time_bias_connected":
+        time_analysis["connected"],
+
+    "time_bias_status":
+        time_analysis["status"],
+
+    "time_bias_score":
+        time_analysis["score"],
+
+    "time_bias_reference_count":
+        time_analysis["reference_count"],
+
+    "time_bias_reference_scores":
+        time_analysis["scores"],
+
+    "time_bias_reference_details":
+        time_analysis["reference_details"],
+
+    "time_bias_reason":
+        time_analysis["reason"],
 
     "inside_outside_bias":
         inside_outside_bias,
@@ -1290,32 +1166,29 @@ output = {
     "track_condition_connected":
         track_matched,
 
-    "moisture_finish":
-        (
-            track_condition.get(
-                "moisture_finish"
-            )
-            if track_matched
-            else None
-        ),
+    "moisture_finish": (
+        track_condition.get(
+            "moisture_finish"
+        )
+        if track_matched
+        else None
+    ),
 
-    "moisture_4corner":
-        (
-            track_condition.get(
-                "moisture_4corner"
-            )
-            if track_matched
-            else None
-        ),
+    "moisture_4corner": (
+        track_condition.get(
+            "moisture_4corner"
+        )
+        if track_matched
+        else None
+    ),
 
-    "cushion_value":
-        (
-            track_condition.get(
-                "cushion_value"
-            )
-            if track_matched
-            else None
-        ),
+    "cushion_value": (
+        track_condition.get(
+            "cushion_value"
+        )
+        if track_matched
+        else None
+    ),
 
     "updated_at":
         now_jst(),
@@ -1333,35 +1206,12 @@ save_json(
 # ============================================================
 
 print()
-
-print(
-    "===== DAY BIAS ====="
-)
-
-print(
-    "race id:",
-    race_id
-)
-
-print(
-    "date:",
-    race_date
-)
-
-print(
-    "racecourse:",
-    racecourse
-)
-
-print(
-    "surface:",
-    surface
-)
-
-print(
-    "race number:",
-    race_no
-)
+print("===== DAY BIAS =====")
+print("race id:", race_id)
+print("date:", race_date)
+print("racecourse:", racecourse)
+print("surface:", surface)
+print("race number:", race_no)
 
 print(
     "eligible previous races:",
@@ -1455,8 +1305,33 @@ print(
 )
 
 print(
+    "time bias connected:",
+    time_analysis["connected"]
+)
+
+print(
+    "time bias references:",
+    time_analysis["reference_count"]
+)
+
+print(
+    "time bias scores:",
+    time_analysis["scores"]
+)
+
+print(
+    "time bias score:",
+    time_analysis["score"]
+)
+
+print(
     "time bias:",
     time_bias
+)
+
+print(
+    "time bias reason:",
+    time_analysis["reason"]
 )
 
 print(
@@ -1466,23 +1341,17 @@ print(
 
 print(
     "moisture finish:",
-    output[
-        "moisture_finish"
-    ]
+    output["moisture_finish"]
 )
 
 print(
     "moisture 4corner:",
-    output[
-        "moisture_4corner"
-    ]
+    output["moisture_4corner"]
 )
 
 print(
     "cushion value:",
-    output[
-        "cushion_value"
-    ]
+    output["cushion_value"]
 )
 
 print(
@@ -1500,6 +1369,4 @@ print(
     OUTPUT_FILE
 )
 
-print(
-    "===================="
-)
+print("====================")
