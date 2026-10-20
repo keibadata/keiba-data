@@ -22,7 +22,10 @@ HEADERS = {
         "AppleWebKit/605.1.15 (KHTML, like Gecko) "
         "Version/18.0 Mobile/15E148 Safari/604.1"
     ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept": (
+        "text/html,application/xhtml+xml,"
+        "application/xml;q=0.9,*/*;q=0.8"
+    ),
     "Accept-Language": "ja-JP,ja;q=0.9,en;q=0.7",
 }
 
@@ -35,7 +38,12 @@ def now_jst():
 def clean_text(value):
     if value is None:
         return ""
-    return re.sub(r"\s+", " ", str(value)).strip()
+
+    return re.sub(
+        r"\s+",
+        " ",
+        str(value)
+    ).strip()
 
 
 def get_html(url):
@@ -50,10 +58,14 @@ def get_html(url):
             )
 
             if response.status_code == 200:
-                response.encoding = response.apparent_encoding
+                response.encoding = (
+                    response.apparent_encoding
+                )
                 return response.text
 
-            last_error = f"HTTP {response.status_code}"
+            last_error = (
+                f"HTTP {response.status_code}"
+            )
 
         except Exception as e:
             last_error = str(e)
@@ -61,7 +73,9 @@ def get_html(url):
         if attempt < MAX_RETRIES - 1:
             time.sleep(2 + attempt)
 
-    raise RuntimeError(last_error or "取得失敗")
+    raise RuntimeError(
+        last_error or "取得失敗"
+    )
 
 
 def parse_date(value):
@@ -71,68 +85,62 @@ def parse_date(value):
         return None
 
     text = (
-        text.replace("年", "/")
+        text
+        .replace("年", "/")
         .replace("月", "/")
         .replace("日", "")
         .replace("-", "/")
         .replace(".", "/")
     )
 
-    text = re.sub(r"\s+", "", text)
-
-    patterns = [
-        "%Y/%m/%d",
-        "%Y/%m/%d/",
-        "%Y/%m/%d(%a)",
-    ]
-
-    for pattern in patterns:
-        try:
-            return datetime.strptime(text, pattern).date()
-        except Exception:
-            pass
-
     match = re.search(
         r"(\d{4})/(\d{1,2})/(\d{1,2})",
         text
     )
 
-    if match:
-        try:
-            return datetime(
-                int(match.group(1)),
-                int(match.group(2)),
-                int(match.group(3))
-            ).date()
-        except Exception:
-            return None
+    if not match:
+        return None
 
-    return None
+    try:
+        return datetime(
+            int(match.group(1)),
+            int(match.group(2)),
+            int(match.group(3))
+        ).date()
+
+    except Exception:
+        return None
 
 
 def extract_target_date(data):
     if not isinstance(data, dict):
         return None
 
-    candidate_keys = [
+    for key in [
         "race_date",
         "date",
         "target_date",
-    ]
-
-    for key in candidate_keys:
-        value = data.get(key)
-
-        parsed = parse_date(value)
+    ]:
+        parsed = parse_date(
+            data.get(key)
+        )
 
         if parsed is not None:
             return parsed
 
-    race_info = data.get("race_info")
+    race_info = data.get(
+        "race_info"
+    )
 
     if isinstance(race_info, dict):
-        for key in candidate_keys:
-            parsed = parse_date(race_info.get(key))
+        for key in [
+            "race_date",
+            "date",
+            "target_date",
+        ]:
+            parsed = parse_date(
+                race_info.get(key)
+            )
 
             if parsed is not None:
                 return parsed
@@ -141,43 +149,38 @@ def extract_target_date(data):
 
 
 def load_race_and_runners():
-    with open(RACE_FILE, "r", encoding="utf-8") as f:
+    with open(
+        RACE_FILE,
+        "r",
+        encoding="utf-8"
+    ) as f:
         data = json.load(f)
 
-    target_date = extract_target_date(data)
+    target_date = extract_target_date(
+        data
+    )
 
     if target_date is None:
         raise RuntimeError(
-            "race.json から対象レース日を取得できません。"
-            "未来情報リーク防止のため処理を停止します。"
+            "race.jsonから対象日を取得できません。"
+            "リーク防止のため停止します。"
         )
 
     candidates = []
 
     if isinstance(data, dict):
         for key in [
-            "runners",
             "horses",
+            "runners",
             "entries",
             "race_entries",
             "results",
         ]:
-            if isinstance(data.get(key), list):
-                candidates = data[key]
+            value = data.get(key)
+
+            if isinstance(value, list):
+                candidates = value
                 break
-
-        if not candidates:
-            for value in data.values():
-                if (
-                    isinstance(value, list)
-                    and value
-                    and isinstance(value[0], dict)
-                ):
-                    candidates = value
-                    break
-
-    elif isinstance(data, list):
-        candidates = data
 
     runners = []
 
@@ -204,62 +207,29 @@ def load_race_and_runners():
             or item.get("umaban")
         )
 
-        if horse_id:
-            runners.append({
-                "horse_id": horse_id,
-                "horse_name": horse_name,
-                "horse_number": horse_number,
-            })
+        if not horse_id:
+            continue
 
-    return data, target_date, runners
+        runners.append({
+            "horse_id": horse_id,
+            "horse_name": horse_name,
+            "horse_number": horse_number,
+        })
 
-
-def find_result_table(soup):
-    best_table = None
-    best_score = -1
-
-    for table in soup.find_all("table"):
-        text = clean_text(
-            table.get_text(" ", strip=True)
+    if not runners:
+        raise RuntimeError(
+            "race.jsonから出走馬を取得できません"
         )
 
-        score = 0
-
-        keywords = [
-            "日付",
-            "開催",
-            "レース名",
-            "着順",
-            "距離",
-            "タイム",
-            "通過",
-            "上り",
-            "馬体重",
-        ]
-
-        for keyword in keywords:
-            if keyword in text:
-                score += 1
-
-        row_count = len(
-            table.find_all("tr")
-        )
-
-        if row_count >= 2:
-            score += 2
-
-        if score > best_score:
-            best_score = score
-            best_table = table
-
-    if best_score < 5:
-        return None
-
-    return best_table
+    return (
+        data,
+        target_date,
+        runners
+    )
 
 
-def normalize_header(header):
-    h = clean_text(header)
+def normalize_header(value):
+    text = clean_text(value)
 
     replacements = {
         "着 順": "着順",
@@ -270,16 +240,23 @@ def normalize_header(header):
         "馬場": "馬場状態",
     }
 
-    return replacements.get(h, h)
+    return replacements.get(
+        text,
+        text
+    )
 
 
-def get_value(record, names):
+def get_value(
+    record,
+    names
+):
     for name in names:
-        if (
-            name in record
-            and clean_text(record[name])
-        ):
-            return clean_text(record[name])
+        value = clean_text(
+            record.get(name)
+        )
+
+        if value:
+            return value
 
     return ""
 
@@ -292,8 +269,10 @@ def parse_distance_surface(value):
 
     if "芝" in text:
         surface = "芝"
+
     elif "ダ" in text:
         surface = "ダート"
+
     elif "障" in text:
         surface = "障害"
 
@@ -305,31 +284,110 @@ def parse_distance_surface(value):
     if match:
         distance = match.group(1)
 
-    return surface, distance
+    return (
+        surface,
+        distance
+    )
 
 
-def parse_result_table(table):
+def table_score(table):
+    text = clean_text(
+        table.get_text(
+            " ",
+            strip=True
+        )
+    )
+
+    score = 0
+
+    required = [
+        "日付",
+        "着順",
+    ]
+
+    for word in required:
+        if word in text:
+            score += 3
+
+    optional = [
+        "開催",
+        "レース",
+        "距離",
+        "タイム",
+        "通過",
+        "上り",
+        "上がり",
+        "馬体重",
+        "騎手",
+        "斤量",
+    ]
+
+    for word in optional:
+        if word in text:
+            score += 1
+
     rows = table.find_all("tr")
 
-    header_index = None
-    headers = []
+    if len(rows) >= 2:
+        score += 2
 
-    for i, row in enumerate(rows[:5]):
+    return score
+
+
+def find_result_tables(soup):
+    candidates = []
+
+    for index, table in enumerate(
+        soup.find_all("table")
+    ):
+        score = table_score(
+            table
+        )
+
+        if score >= 8:
+            candidates.append(
+                (
+                    score,
+                    index,
+                    table
+                )
+            )
+
+    candidates.sort(
+        key=lambda x: (
+            -x[0],
+            x[1]
+        )
+    )
+
+    return [
+        table
+        for _, _, table
+        in candidates
+    ]
+
+
+def find_headers(rows):
+    for row_index, row in enumerate(
+        rows[:10]
+    ):
         cells = row.find_all(
             ["th", "td"]
         )
 
         values = [
             normalize_header(
-                x.get_text(
+                cell.get_text(
                     " ",
                     strip=True
                 )
             )
-            for x in cells
+            for cell in cells
         ]
 
-        joined = " ".join(values)
+        joined = " ".join(
+            values
+        )
 
         if (
             "日付" in joined
@@ -338,19 +396,66 @@ def parse_result_table(table):
                 or "着" in joined
             )
         ):
-            headers = values
-            header_index = i
-            break
+            return (
+                row_index,
+                values
+            )
+
+    return (
+        None,
+        []
+    )
+
+
+def extract_race_id_from_row(row):
+    for link in row.find_all(
+        "a",
+        href=True
+    ):
+        href = clean_text(
+            link.get("href")
+        )
+
+        patterns = [
+            r"/race/(\d{12})",
+            r"race_id=(\d{12})",
+        ]
+
+        for pattern in patterns:
+            match = re.search(
+                pattern,
+                href
+            )
+
+            if match:
+                return match.group(1)
+
+    return ""
+
+
+def parse_result_table(table):
+    rows = table.find_all(
+        "tr"
+    )
+
+    (
+        header_index,
+        headers
+    ) = find_headers(
+        rows
+    )
 
     if header_index is None:
-        raise RuntimeError(
-            "競走成績ヘッダーを判定できません"
-        )
+        return []
 
     results = []
 
-    for row in rows[header_index + 1:]:
-        cells = row.find_all("td")
+    for row in rows[
+        header_index + 1:
+    ]:
+        cells = row.find_all(
+            "td"
+        )
 
         if not cells:
             continue
@@ -370,11 +475,15 @@ def parse_result_table(table):
 
         record = {}
 
-        for i, value in enumerate(values):
+        for i, value in enumerate(
+            values
+        ):
             if i < len(headers):
                 key = headers[i]
             else:
-                key = f"column_{i + 1}"
+                key = (
+                    f"column_{i + 1}"
+                )
 
             record[key] = value
 
@@ -383,107 +492,257 @@ def parse_result_table(table):
             ["日付"]
         )
 
-        if not race_date:
+        if parse_date(
+            race_date
+        ) is None:
             continue
-
-        rank = get_value(
-            record,
-            ["着順", "着"]
-        )
 
         distance_raw = get_value(
             record,
             ["距離"]
         )
 
-        surface, distance = (
-            parse_distance_surface(
-                distance_raw
-            )
-        )
-
-        race_name = get_value(
-            record,
-            ["レース名", "レース"]
+        (
+            surface,
+            distance
+        ) = parse_distance_surface(
+            distance_raw
         )
 
         result = {
-            "date": race_date,
-            "meeting": get_value(
-                record,
-                ["開催"]
-            ),
-            "race_name": race_name,
-            "rank": rank,
-            "jockey": get_value(
-                record,
-                ["騎手"]
-            ),
-            "carried_weight": get_value(
-                record,
-                ["斤量"]
-            ),
-            "surface": surface,
-            "distance": distance,
-            "distance_raw": distance_raw,
-            "track_condition": get_value(
-                record,
-                ["馬場状態", "馬場"]
-            ),
-            "time": get_value(
-                record,
-                ["タイム"]
-            ),
-            "margin": get_value(
-                record,
-                ["着差"]
-            ),
-            "passing": get_value(
-                record,
-                ["通過"]
-            ),
-            "last3f": get_value(
-                record,
-                [
-                    "上がり",
-                    "上り",
-                    "上り3F",
-                    "上がり3F",
-                ]
-            ),
-            "horse_weight": get_value(
-                record,
-                ["馬体重"]
-            ),
-            "odds": get_value(
-                record,
-                ["オッズ"]
-            ),
-            "popularity": get_value(
-                record,
-                ["人気"]
-            ),
+            "race_id":
+                extract_race_id_from_row(
+                    row
+                ),
+
+            "date":
+                race_date,
+
+            "meeting":
+                get_value(
+                    record,
+                    ["開催"]
+                ),
+
+            "race_name":
+                get_value(
+                    record,
+                    [
+                        "レース名",
+                        "レース",
+                    ]
+                ),
+
+            "rank":
+                get_value(
+                    record,
+                    [
+                        "着順",
+                        "着",
+                    ]
+                ),
+
+            "jockey":
+                get_value(
+                    record,
+                    ["騎手"]
+                ),
+
+            "carried_weight":
+                get_value(
+                    record,
+                    ["斤量"]
+                ),
+
+            "surface":
+                surface,
+
+            "distance":
+                distance,
+
+            "distance_raw":
+                distance_raw,
+
+            "track_condition":
+                get_value(
+                    record,
+                    [
+                        "馬場状態",
+                        "馬場",
+                    ]
+                ),
+
+            "time":
+                get_value(
+                    record,
+                    ["タイム"]
+                ),
+
+            "margin":
+                get_value(
+                    record,
+                    ["着差"]
+                ),
+
+            "passing":
+                get_value(
+                    record,
+                    ["通過"]
+                ),
+
+            "last3f":
+                get_value(
+                    record,
+                    [
+                        "上がり",
+                        "上り",
+                        "上り3F",
+                        "上がり3F",
+                    ]
+                ),
+
+            "horse_weight":
+                get_value(
+                    record,
+                    ["馬体重"]
+                ),
+
+            "odds":
+                get_value(
+                    record,
+                    ["オッズ"]
+                ),
+
+            "popularity":
+                get_value(
+                    record,
+                    ["人気"]
+                ),
         }
 
-        results.append(result)
+        results.append(
+            result
+        )
 
     return results
 
 
+def result_identity(result):
+    race_id = clean_text(
+        result.get("race_id")
+    )
+
+    if race_id:
+        return (
+            "race_id",
+            race_id
+        )
+
+    return (
+        "fallback",
+        clean_text(
+            result.get("date")
+        ),
+        clean_text(
+            result.get("meeting")
+        ),
+        clean_text(
+            result.get("race_name")
+        ),
+        clean_text(
+            result.get("distance_raw")
+        ),
+    )
+
+
+def deduplicate_results(results):
+    seen = set()
+    unique = []
+
+    for result in results:
+        key = result_identity(
+            result
+        )
+
+        if key in seen:
+            continue
+
+        seen.add(key)
+
+        unique.append(
+            result
+        )
+
+    return unique
+
+
+def collect_all_result_rows(
+    soup
+):
+    tables = find_result_tables(
+        soup
+    )
+
+    all_results = []
+
+    parsed_table_count = 0
+
+    for table in tables:
+        results = parse_result_table(
+            table
+        )
+
+        if not results:
+            continue
+
+        parsed_table_count += 1
+
+        all_results.extend(
+            results
+        )
+
+    all_results = (
+        deduplicate_results(
+            all_results
+        )
+    )
+
+    return (
+        all_results,
+        len(tables),
+        parsed_table_count
+    )
+
+
 def filter_past_races(
     results,
-    target_date
+    target_date,
+    target_race_id
 ):
     valid = []
 
+    excluded_target_race = 0
     excluded_same_day = 0
     excluded_future = 0
     excluded_unknown_date = 0
 
     for result in results:
+        race_id = clean_text(
+            result.get("race_id")
+        )
+
         race_date = parse_date(
             result.get("date")
         )
+
+        if (
+            target_race_id
+            and race_id
+            and race_id
+            == target_race_id
+        ):
+            excluded_target_race += 1
+            continue
 
         if race_date is None:
             excluded_unknown_date += 1
@@ -497,12 +756,14 @@ def filter_past_races(
             excluded_future += 1
             continue
 
-        valid.append(result)
+        valid.append(
+            result
+        )
 
     valid.sort(
-        key=lambda x: (
+        key=lambda item: (
             parse_date(
-                x.get("date")
+                item.get("date")
             )
             or datetime.min.date()
         ),
@@ -510,88 +771,103 @@ def filter_past_races(
     )
 
     return {
-        "valid": valid,
-        "excluded_same_day": (
-            excluded_same_day
-        ),
-        "excluded_future": (
-            excluded_future
-        ),
-        "excluded_unknown_date": (
-            excluded_unknown_date
-        ),
+        "valid":
+            valid,
+
+        "excluded_target_race":
+            excluded_target_race,
+
+        "excluded_same_day":
+            excluded_same_day,
+
+        "excluded_future":
+            excluded_future,
+
+        "excluded_unknown_date":
+            excluded_unknown_date,
     }
 
 
 def collect_horse_history(
     horse,
-    target_date
+    target_date,
+    target_race_id
 ):
-    horse_id = horse["horse_id"]
+    horse_id = horse[
+        "horse_id"
+    ]
 
     url = BASE_URL.format(
         horse_id=horse_id
     )
 
-    html = get_html(url)
+    html = get_html(
+        url
+    )
 
     soup = BeautifulSoup(
         html,
         "html.parser"
     )
 
-    table = find_result_table(soup)
-
-    if table is None:
-        title = ""
-
-        if soup.title:
-            title = clean_text(
-                soup.title.get_text(
-                    " ",
-                    strip=True
-                )
-            )
-
-        raise RuntimeError(
-            "競走成績テーブルなし"
-            " / title="
-            + title
-        )
-
-    raw_results = parse_result_table(
-        table
+    (
+        raw_results,
+        candidate_table_count,
+        parsed_table_count
+    ) = collect_all_result_rows(
+        soup
     )
 
-    if not raw_results:
-        raise RuntimeError(
-            "競走成績0件"
-        )
-
+    # 競走歴0件は新馬なら正常。
+    # テーブルが存在しないこと自体は
+    # エラーにしない。
     filtered = filter_past_races(
         raw_results,
-        target_date
+        target_date,
+        target_race_id
     )
 
-    results = filtered["valid"]
+    results = filtered[
+        "valid"
+    ]
 
     return {
-        "horse_id": horse_id,
-        "horse_name": horse[
-            "horse_name"
-        ],
-        "horse_number": horse[
-            "horse_number"
-        ],
-        "source_url": url,
+        "horse_id":
+            horse_id,
 
-        "raw_race_count": len(
-            raw_results
-        ),
+        "horse_name":
+            horse[
+                "horse_name"
+            ],
 
-        "past_race_count": len(
-            results
-        ),
+        "horse_number":
+            horse[
+                "horse_number"
+            ],
+
+        "source_url":
+            url,
+
+        "candidate_table_count":
+            candidate_table_count,
+
+        "parsed_table_count":
+            parsed_table_count,
+
+        "raw_race_count":
+            len(
+                raw_results
+            ),
+
+        "past_race_count":
+            len(
+                results
+            ),
+
+        "excluded_target_race_count":
+            filtered[
+                "excluded_target_race"
+            ],
 
         "excluded_same_day_count":
             filtered[
@@ -608,7 +884,8 @@ def collect_horse_history(
                 "excluded_unknown_date"
             ],
 
-        "past_races": results,
+        "past_races":
+            results,
     }
 
 
@@ -616,22 +893,24 @@ def main():
     (
         race_data,
         target_date,
-        runners,
+        runners
     ) = load_race_and_runners()
 
     target_race_id = clean_text(
-        race_data.get("race_id")
-        if isinstance(
-            race_data,
-            dict
+        race_data.get(
+            "race_id"
         )
-        else ""
     )
 
     output = {
-        "updated_at": now_jst(),
-        "source": "netkeiba",
-        "source_race_file": RACE_FILE,
+        "updated_at":
+            now_jst(),
+
+        "source":
+            "netkeiba",
+
+        "source_race_file":
+            RACE_FILE,
 
         "target_race_id":
             target_race_id,
@@ -639,44 +918,78 @@ def main():
         "target_date":
             target_date.isoformat(),
 
-        "future_race_usage": False,
+        "future_race_usage":
+            False,
+
+        "leak_check_passed":
+            False,
 
         "target_horse_count":
             len(runners),
 
-        "collected_horse_count": 0,
+        "collected_horse_count":
+            0,
 
-        "total_raw_race_count": 0,
+        "horses_with_past_races":
+            0,
 
-        "total_past_race_count": 0,
+        "horses_without_past_races":
+            0,
 
-        "excluded_same_day_count": 0,
+        "total_candidate_table_count":
+            0,
 
-        "excluded_future_count": 0,
+        "total_parsed_table_count":
+            0,
 
-        "excluded_unknown_date_count": 0,
+        "total_raw_race_count":
+            0,
 
-        "error_count": 0,
-        "errors": [],
-        "horses": [],
+        "total_past_race_count":
+            0,
+
+        "excluded_target_race_count":
+            0,
+
+        "excluded_same_day_count":
+            0,
+
+        "excluded_future_count":
+            0,
+
+        "excluded_unknown_date_count":
+            0,
+
+        "error_count":
+            0,
+
+        "errors":
+            [],
+
+        "horses":
+            [],
     }
 
     print("")
     print(
         "===== Runner History ====="
     )
+
     print(
         "target race id:",
         target_race_id
     )
+
     print(
         "target date:",
         target_date.isoformat()
     )
+
     print(
-        "future race usage:",
-        False
+        "target horses:",
+        len(runners)
     )
+
     print("")
 
     for index, horse in enumerate(
@@ -693,17 +1006,32 @@ def main():
             data = (
                 collect_horse_history(
                     horse,
-                    target_date
+                    target_date,
+                    target_race_id
                 )
             )
 
             output[
                 "horses"
-            ].append(data)
+            ].append(
+                data
+            )
 
             output[
                 "collected_horse_count"
             ] += 1
+
+            output[
+                "total_candidate_table_count"
+            ] += data[
+                "candidate_table_count"
+            ]
+
+            output[
+                "total_parsed_table_count"
+            ] += data[
+                "parsed_table_count"
+            ]
 
             output[
                 "total_raw_race_count"
@@ -718,6 +1046,12 @@ def main():
             ]
 
             output[
+                "excluded_target_race_count"
+            ] += data[
+                "excluded_target_race_count"
+            ]
+
+            output[
                 "excluded_same_day_count"
             ] += data[
                 "excluded_same_day_count"
@@ -734,32 +1068,58 @@ def main():
             ] += data[
                 "excluded_unknown_date_count"
             ]
+
+            if (
+                data[
+                    "past_race_count"
+                ] > 0
+            ):
+                output[
+                    "horses_with_past_races"
+                ] += 1
+
+            else:
+                output[
+                    "horses_without_past_races"
+                ] += 1
 
             print(
-                "  raw:",
+                "  tables:",
+                data[
+                    "parsed_table_count"
+                ],
+                "/",
+                data[
+                    "candidate_table_count"
+                ],
+                "| raw:",
                 data[
                     "raw_race_count"
                 ],
-                "/ valid past:",
+                "| valid past:",
                 data[
                     "past_race_count"
                 ],
-                "/ same-day excluded:",
+                "| target excluded:",
+                data[
+                    "excluded_target_race_count"
+                ],
+                "| same-day excluded:",
                 data[
                     "excluded_same_day_count"
                 ],
-                "/ future excluded:",
+                "| future excluded:",
                 data[
                     "excluded_future_count"
-                ],
-                "/ unknown-date excluded:",
-                data[
-                    "excluded_unknown_date_count"
-                ],
+                ]
             )
 
         except Exception as e:
             message = str(e)
+
+            output[
+                "error_count"
+            ] += 1
 
             output[
                 "errors"
@@ -768,17 +1128,15 @@ def main():
                     horse[
                         "horse_id"
                     ],
+
                 "horse_name":
                     horse[
                         "horse_name"
                     ],
+
                 "error":
                     message,
             })
-
-            output[
-                "error_count"
-            ] += 1
 
             print(
                 "  ERROR:",
@@ -789,26 +1147,42 @@ def main():
             REQUEST_INTERVAL
         )
 
-    output[
-        "updated_at"
-    ] = now_jst()
-
+    # ---------------------------------------------
     # 最終リーク検査
+    # ---------------------------------------------
+
     leak_found = False
 
-    for horse in output["horses"]:
-        for race in horse.get(
+    for horse in output[
+        "horses"
+    ]:
+        for past in horse.get(
             "past_races",
             []
         ):
-            race_date = parse_date(
-                race.get("date")
+            past_race_id = clean_text(
+                past.get(
+                    "race_id"
+                )
+            )
+
+            past_date = parse_date(
+                past.get(
+                    "date"
+                )
             )
 
             if (
-                race_date is None
-                or race_date >= target_date
+                target_race_id
+                and past_race_id
+                == target_race_id
             ):
+                leak_found = True
+
+            if past_date is None:
+                leak_found = True
+
+            elif past_date >= target_date:
                 leak_found = True
 
     output[
@@ -819,10 +1193,14 @@ def main():
         "leak_check_passed"
     ] = not leak_found
 
+    output[
+        "updated_at"
+    ] = now_jst()
+
     if leak_found:
         raise RuntimeError(
-            "未来情報リークを検出しました。"
-            "runner_history.json は保存しません。"
+            "runner_historyで未来情報リークを検出。"
+            "JSONは保存しません。"
         )
 
     with open(
@@ -841,60 +1219,105 @@ def main():
     print(
         "===== Runner History Result ====="
     )
+
     print(
-        "target:",
+        "target horses:",
         output[
             "target_horse_count"
         ]
     )
+
     print(
-        "collected:",
+        "collected horses:",
         output[
             "collected_horse_count"
         ]
     )
+
+    print(
+        "horses with past races:",
+        output[
+            "horses_with_past_races"
+        ]
+    )
+
+    print(
+        "horses without past races:",
+        output[
+            "horses_without_past_races"
+        ]
+    )
+
+    print(
+        "candidate tables:",
+        output[
+            "total_candidate_table_count"
+        ]
+    )
+
+    print(
+        "parsed tables:",
+        output[
+            "total_parsed_table_count"
+        ]
+    )
+
     print(
         "raw races:",
         output[
             "total_raw_race_count"
         ]
     )
+
     print(
         "valid past races:",
         output[
             "total_past_race_count"
         ]
     )
+
+    print(
+        "target race excluded:",
+        output[
+            "excluded_target_race_count"
+        ]
+    )
+
     print(
         "same-day excluded:",
         output[
             "excluded_same_day_count"
         ]
     )
+
     print(
         "future excluded:",
         output[
             "excluded_future_count"
         ]
     )
+
     print(
         "unknown-date excluded:",
         output[
             "excluded_unknown_date_count"
         ]
     )
+
     print(
         "future race usage:",
         output[
             "future_race_usage"
         ]
     )
+
     print(
         "leak check passed:",
         output[
             "leak_check_passed"
         ]
     )
+
     print(
         "errors:",
         output[
