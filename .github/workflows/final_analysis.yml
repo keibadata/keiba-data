@@ -103,6 +103,19 @@ jobs:
         run: python runner_time_fit.py
 
       # ==================================================
+      # 調教
+      #
+      # ここでは取得・接続まで。
+      # 調教単独で能力点は作らない。
+      # ==================================================
+
+      - name: Detect training sources
+        run: python training_collect.py
+
+      - name: Collect training details
+        run: python training_detail.py
+
+      # ==================================================
       # 個別解析
       # ==================================================
 
@@ -185,10 +198,7 @@ jobs:
           )
 
           # ==============================================
-          # 各解析ファイルの「レコード接続」を確認
-          #
-          # ability_known_count は能力判明頭数なので
-          # 全頭一致を要求しない。
+          # 各解析ファイルのレコード接続
           # ==============================================
 
           ability_records = int(
@@ -238,6 +248,7 @@ jobs:
           }
 
           for name, value in record_checks.items():
+
               print(
                   f"{name}: {value}/{total}"
               )
@@ -250,9 +261,6 @@ jobs:
 
           # ==============================================
           # 能力判明 / UNKNOWN
-          #
-          # UNKNOWNは正常な状態。
-          # ranked_count == total を要求しない。
           # ==============================================
 
           ability_known = int(
@@ -335,7 +343,7 @@ jobs:
               )
 
           # ==============================================
-          # ranking配列そのものも確認
+          # ranking配列
           # ==============================================
 
           ranking = data.get(
@@ -353,6 +361,7 @@ jobs:
           actual_unknown = 0
 
           for horse in ranking:
+
               ability_is_known = bool(
                   horse.get(
                       "ability_known",
@@ -373,6 +382,7 @@ jobs:
               )
 
               if ability_is_known:
+
                   actual_ranked += 1
 
                   if rank is None:
@@ -412,6 +422,7 @@ jobs:
                       )
 
               else:
+
                   actual_unknown += 1
 
                   if rank is not None:
@@ -477,9 +488,12 @@ jobs:
               "day_bias.json",
               "runner_history.json",
               "runner_time_fit.json",
+              "training.json",
+              "training_detail.json",
           ]
 
           for path in required_files:
+
               if not os.path.exists(path):
                   sys.exit(
                       "ERROR: required file missing: "
@@ -489,6 +503,175 @@ jobs:
               print(
                   "OK:",
                   path
+              )
+
+          # ==============================================
+          # 調教データ接続
+          #
+          # 調教が見つからない馬はUNKNOWNとして正常。
+          # 「全頭分のレコードがあるか」だけ必須。
+          # ==============================================
+
+          with open(
+              "training.json",
+              encoding="utf-8"
+          ) as f:
+              training_source = json.load(f)
+
+          source_summary = training_source.get(
+              "summary",
+              {}
+          )
+
+          source_horse_count = int(
+              source_summary.get(
+                  "horse_count",
+                  0
+              )
+              or 0
+          )
+
+          source_found_count = int(
+              source_summary.get(
+                  "training_data_found_count",
+                  0
+              )
+              or 0
+          )
+
+          if source_horse_count != total:
+              sys.exit(
+                  "ERROR: training source horse count mismatch "
+                  f"({source_horse_count}/{total})"
+              )
+
+          print(
+              "Training source records:",
+              f"{source_horse_count}/{total}"
+          )
+
+          print(
+              "Training source found:",
+              f"{source_found_count}/{total}"
+          )
+
+          with open(
+              "training_detail.json",
+              encoding="utf-8"
+          ) as f:
+              training_detail = json.load(f)
+
+          training_horses = training_detail.get(
+              "horses",
+              []
+          )
+
+          training_summary = training_detail.get(
+              "summary",
+              {}
+          )
+
+          detail_horse_count = int(
+              training_summary.get(
+                  "horse_count",
+                  0
+              )
+              or 0
+          )
+
+          detail_found_count = int(
+              training_summary.get(
+                  "detail_found_count",
+                  0
+              )
+              or 0
+          )
+
+          detail_not_found_count = int(
+              training_summary.get(
+                  "detail_not_found_count",
+                  0
+              )
+              or 0
+          )
+
+          if detail_horse_count != total:
+              sys.exit(
+                  "ERROR: training detail horse count mismatch "
+                  f"({detail_horse_count}/{total})"
+              )
+
+          if len(training_horses) != total:
+              sys.exit(
+                  "ERROR: training horse records incomplete "
+                  f"({len(training_horses)}/{total})"
+              )
+
+          if (
+              detail_found_count
+              + detail_not_found_count
+              != total
+          ):
+              sys.exit(
+                  "ERROR: training found/not-found count mismatch "
+                  f"({detail_found_count}+"
+                  f"{detail_not_found_count}!={total})"
+              )
+
+          race_horse_ids = {
+              str(x.get("horse_id", "")).strip()
+              for x in ranking
+              if str(
+                  x.get(
+                      "horse_id",
+                      ""
+                  )
+              ).strip()
+          }
+
+          training_horse_ids = {
+              str(x.get("horse_id", "")).strip()
+              for x in training_horses
+              if str(
+                  x.get(
+                      "horse_id",
+                      ""
+                  )
+              ).strip()
+          }
+
+          if (
+              race_horse_ids
+              and
+              training_horse_ids
+              and
+              race_horse_ids
+              != training_horse_ids
+          ):
+              sys.exit(
+                  "ERROR: training horse IDs do not match "
+                  "final analysis runners"
+              )
+
+          print(
+              "Training detail records:",
+              f"{detail_horse_count}/{total}"
+          )
+
+          print(
+              "Training detail found:",
+              f"{detail_found_count}/{total}"
+          )
+
+          print(
+              "Training detail unknown:",
+              f"{detail_not_found_count}/{total}"
+          )
+
+          if detail_found_count == 0:
+              print(
+                  "Training data unavailable: "
+                  "all horses remain UNKNOWN for training."
               )
 
           # ==============================================
@@ -514,6 +697,7 @@ jobs:
           metadata_count = 0
 
           for race in races:
+
               if (
                   race.get("race_name")
                   and race.get("race_info_text")
@@ -792,6 +976,8 @@ jobs:
             pedigree.json \
             runner_history.json \
             runner_time_fit.json \
+            training.json \
+            training_detail.json \
             runner_analysis.json \
             previous_race_analysis.json \
             pace_analysis.json \
