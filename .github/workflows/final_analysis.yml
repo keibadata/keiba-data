@@ -70,8 +70,6 @@ jobs:
       - name: Collect day races
         run: python day_races.py
 
-      # 当日の同一馬場レースについて
-      # 距離・クラス・年齢条件別の過去基準時計を作る
       - name: Build day time history
         run: python day_time_history.py
 
@@ -100,6 +98,12 @@ jobs:
 
       - name: Collect runner history
         run: python runner_history.py
+
+      # 各馬の過去走時計を
+      # 同競馬場・同芝ダ・同距離の過去基準時計と比較する
+      # 未接続は未知数として減点しない
+      - name: Analyze runner time fit
+        run: python runner_time_fit.py
 
       # ==================================================
       # 個別解析
@@ -142,29 +146,75 @@ jobs:
           import os
           import sys
 
-          with open("final_analysis.json", encoding="utf-8") as f:
+          race_id = os.environ.get("RACE_ID")
+
+          with open(
+              "final_analysis.json",
+              encoding="utf-8"
+          ) as f:
               data = json.load(f)
 
-          s = data.get("summary", {})
+          s = data.get(
+              "summary",
+              {}
+          )
 
-          total = s.get("runner_count", 0)
+          total = s.get(
+              "runner_count",
+              0
+          )
 
           checks = {
-              "ranked": s.get("ranked_count", 0),
-              "ability": s.get("ability_connected_count", 0),
-              "previous": s.get("previous_connected_count", 0),
-              "pace": s.get("pace_connected_count", 0),
-              "bloodline": s.get("bloodline_connected_count", 0),
+              "ranked":
+                  s.get(
+                      "ranked_count",
+                      0
+                  ),
+
+              "ability":
+                  s.get(
+                      "ability_connected_count",
+                      0
+                  ),
+
+              "previous":
+                  s.get(
+                      "previous_connected_count",
+                      0
+                  ),
+
+              "pace":
+                  s.get(
+                      "pace_connected_count",
+                      0
+                  ),
+
+              "bloodline":
+                  s.get(
+                      "bloodline_connected_count",
+                      0
+                  ),
           }
 
-          print("Target race:", os.environ.get("RACE_ID"))
-          print("Runners:", total)
+          print(
+              "Target race:",
+              race_id
+          )
+
+          print(
+              "Runners:",
+              total
+          )
 
           if total <= 0:
-              sys.exit("ERROR: no runners")
+              sys.exit(
+                  "ERROR: no runners"
+              )
 
           for name, value in checks.items():
-              print(f"{name}: {value}/{total}")
+              print(
+                  f"{name}: {value}/{total}"
+              )
 
               if value != total:
                   sys.exit(
@@ -173,7 +223,7 @@ jobs:
                   )
 
           # ----------------------------------------------
-          # 履歴系接続確認
+          # 必須ファイル
           # ----------------------------------------------
 
           required_files = [
@@ -185,15 +235,21 @@ jobs:
               "day_time_history.json",
               "track_condition.json",
               "day_bias.json",
+              "runner_history.json",
+              "runner_time_fit.json",
           ]
 
           for path in required_files:
               if not os.path.exists(path):
                   sys.exit(
-                      f"ERROR: required file missing: {path}"
+                      "ERROR: required file missing: "
+                      + path
                   )
 
-              print("OK:", path)
+              print(
+                  "OK:",
+                  path
+              )
 
           # ----------------------------------------------
           # history_races metadata確認
@@ -237,7 +293,7 @@ jobs:
               )
 
           # ----------------------------------------------
-          # 未来レース混入防止
+          # history未来レース混入防止
           # ----------------------------------------------
 
           search = history_races.get(
@@ -260,7 +316,7 @@ jobs:
               )
 
           # ----------------------------------------------
-          # day_time_history 接続確認
+          # day_time_history
           # ----------------------------------------------
 
           with open(
@@ -270,19 +326,33 @@ jobs:
               day_time = json.load(f)
 
           if (
-              day_time.get("target_race_id")
-              != os.environ.get("RACE_ID")
+              day_time.get(
+                  "target_race_id"
+              )
+              != race_id
           ):
               sys.exit(
                   "ERROR: day_time_history race_id mismatch"
               )
 
           if (
-              day_time.get("future_race_usage")
+              day_time.get(
+                  "future_race_usage"
+              )
               is not False
           ):
               sys.exit(
                   "ERROR: future race used in day_time_history"
+              )
+
+          if (
+              day_time.get(
+                  "leak_check_passed"
+              )
+              is not True
+          ):
+              sys.exit(
+                  "ERROR: day_time_history leak check failed"
               )
 
           print(
@@ -301,7 +371,145 @@ jobs:
               )
           )
 
-          print("FULL ANALYSIS VALIDATION OK")
+          # ----------------------------------------------
+          # day_bias
+          # ----------------------------------------------
+
+          with open(
+              "day_bias.json",
+              encoding="utf-8"
+          ) as f:
+              day_bias = json.load(f)
+
+          if (
+              day_bias.get("race_id")
+              != race_id
+          ):
+              sys.exit(
+                  "ERROR: day_bias race_id mismatch"
+              )
+
+          if (
+              day_bias.get(
+                  "future_race_usage"
+              )
+              is not False
+          ):
+              sys.exit(
+                  "ERROR: future race used in day_bias"
+              )
+
+          print(
+              "Day bias time connected:",
+              day_bias.get(
+                  "time_bias_connected"
+              )
+          )
+
+          print(
+              "Day bias time:",
+              day_bias.get(
+                  "time_bias",
+                  ""
+              )
+          )
+
+          print(
+              "Day bias time score:",
+              day_bias.get(
+                  "time_bias_score"
+              )
+          )
+
+          # ----------------------------------------------
+          # runner_time_fit
+          # ----------------------------------------------
+
+          with open(
+              "runner_time_fit.json",
+              encoding="utf-8"
+          ) as f:
+              runner_time = json.load(f)
+
+          if (
+              runner_time.get(
+                  "target_race_id"
+              )
+              != race_id
+          ):
+              sys.exit(
+                  "ERROR: runner_time_fit race_id mismatch"
+              )
+
+          if (
+              runner_time.get(
+                  "future_race_usage"
+              )
+              is not False
+          ):
+              sys.exit(
+                  "ERROR: future race used in runner_time_fit"
+              )
+
+          target_horses = int(
+              runner_time.get(
+                  "target_horse_count",
+                  0
+              )
+              or 0
+          )
+
+          connected_horses = int(
+              runner_time.get(
+                  "connected_horse_count",
+                  0
+              )
+              or 0
+          )
+
+          connected_past_races = int(
+              runner_time.get(
+                  "connected_past_race_count",
+                  0
+              )
+              or 0
+          )
+
+          baseline_conditions = int(
+              runner_time.get(
+                  "baseline_condition_count",
+                  0
+              )
+              or 0
+          )
+
+          print(
+              "Runner time horses:",
+              f"{connected_horses}/{target_horses}"
+          )
+
+          print(
+              "Runner time connected past races:",
+              connected_past_races
+          )
+
+          print(
+              "Runner time baseline conditions:",
+              baseline_conditions
+          )
+
+          # ここでは接続0頭でも失敗させない。
+          # 基準時計なし＝未知数であり、
+          # 低評価にはしない。
+          if target_horses != total:
+              sys.exit(
+                  "ERROR: runner_time_fit horse count mismatch "
+                  f"({target_horses}/{total})"
+              )
+
+          print(
+              "FULL ANALYSIS VALIDATION OK"
+          )
           PY
 
       # ==================================================
@@ -326,6 +534,7 @@ jobs:
             day_bias.json \
             pedigree.json \
             runner_history.json \
+            runner_time_fit.json \
             runner_analysis.json \
             previous_race_analysis.json \
             pace_analysis.json \
