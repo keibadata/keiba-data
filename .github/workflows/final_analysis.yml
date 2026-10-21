@@ -93,7 +93,7 @@ jobs:
         run: python history_pedigree.py
 
       # ==================================================
-      # 今回出走馬の過去成績
+      # 出走馬過去成績
       # ==================================================
 
       - name: Collect runner history
@@ -103,20 +103,11 @@ jobs:
         run: python runner_time_fit.py
 
       # ==================================================
-      # 調教
-      #
-      # ここでは取得・接続まで。
-      # 調教単独で能力点は作らない。
-      # ==================================================
-
-      - name: Detect training sources
-        run: python training_collect.py
-
-      - name: Collect training details
-        run: python training_detail.py
-
-      # ==================================================
       # 個別解析
+      #
+      # 調教は使用しない。
+      # training_collect.py / training_detail.py は
+      # 本Workflowから完全除外。
       # ==================================================
 
       - name: Analyze runners
@@ -146,7 +137,7 @@ jobs:
         run: python final_analysis.py
 
       # ==================================================
-      # 接続・安全性チェック
+      # 最終安全チェック
       # ==================================================
 
       - name: Validate final analysis
@@ -156,211 +147,136 @@ jobs:
           import os
           import sys
 
-          race_id = os.environ.get("RACE_ID")
+          race_id = os.environ["RACE_ID"]
 
-          with open(
-              "final_analysis.json",
-              encoding="utf-8"
-          ) as f:
+          with open("final_analysis.json", encoding="utf-8") as f:
               data = json.load(f)
 
-          if data.get("race_id") != race_id:
-              sys.exit(
-                  "ERROR: final_analysis race_id mismatch"
-              )
+          if str(data.get("race_id", "")).strip() != race_id:
+              sys.exit("ERROR: final_analysis race_id mismatch")
 
-          s = data.get(
-              "summary",
-              {}
-          )
+          summary = data.get("summary", {})
+          ranking = data.get("ranking", [])
 
-          total = int(
-              s.get(
-                  "runner_count",
-                  0
-              )
-              or 0
-          )
+          total = int(summary.get("runner_count", 0) or 0)
 
           if total <= 0:
-              sys.exit(
-                  "ERROR: no runners"
-              )
-
-          print(
-              "Target race:",
-              race_id
-          )
-
-          print(
-              "Runners:",
-              total
-          )
-
-          # ==============================================
-          # 各解析ファイルのレコード接続
-          # ==============================================
-
-          ability_records = int(
-              s.get(
-                  "ability_record_connected_count",
-                  0
-              )
-              or 0
-          )
-
-          previous_connected = int(
-              s.get(
-                  "previous_connected_count",
-                  0
-              )
-              or 0
-          )
-
-          pace_connected = int(
-              s.get(
-                  "pace_connected_count",
-                  0
-              )
-              or 0
-          )
-
-          bloodline_connected = int(
-              s.get(
-                  "bloodline_connected_count",
-                  0
-              )
-              or 0
-          )
-
-          record_checks = {
-              "ability records":
-                  ability_records,
-
-              "previous records":
-                  previous_connected,
-
-              "pace records":
-                  pace_connected,
-
-              "bloodline records":
-                  bloodline_connected,
-          }
-
-          for name, value in record_checks.items():
-
-              print(
-                  f"{name}: {value}/{total}"
-              )
-
-              if value != total:
-                  sys.exit(
-                      f"ERROR: {name} incomplete "
-                      f"({value}/{total})"
-                  )
-
-          # ==============================================
-          # 能力判明 / UNKNOWN
-          # ==============================================
-
-          ability_known = int(
-              s.get(
-                  "ability_known_count",
-                  0
-              )
-              or 0
-          )
-
-          ability_unknown = int(
-              s.get(
-                  "ability_unknown_count",
-                  0
-              )
-              or 0
-          )
-
-          ranked = int(
-              s.get(
-                  "ranked_count",
-                  0
-              )
-              or 0
-          )
-
-          unranked_unknown = int(
-              s.get(
-                  "unranked_unknown_count",
-                  0
-              )
-              or 0
-          )
-
-          print(
-              "Ability known:",
-              f"{ability_known}/{total}"
-          )
-
-          print(
-              "Ability unknown:",
-              f"{ability_unknown}/{total}"
-          )
-
-          print(
-              "Ranked:",
-              f"{ranked}/{total}"
-          )
-
-          print(
-              "Unranked unknown:",
-              f"{unranked_unknown}/{total}"
-          )
-
-          if (
-              ability_known
-              + ability_unknown
-              != total
-          ):
-              sys.exit(
-                  "ERROR: ability known/unknown count mismatch "
-                  f"({ability_known}+{ability_unknown}!={total})"
-              )
-
-          if ranked != ability_known:
-              sys.exit(
-                  "ERROR: ranked count must equal "
-                  "known ability count "
-                  f"({ranked}!={ability_known})"
-              )
-
-          if (
-              ranked
-              + unranked_unknown
-              != total
-          ):
-              sys.exit(
-                  "ERROR: ranked + unknown count mismatch "
-                  f"({ranked}+{unranked_unknown}!={total})"
-              )
-
-          # ==============================================
-          # ranking配列
-          # ==============================================
-
-          ranking = data.get(
-              "ranking",
-              []
-          )
+              sys.exit("ERROR: no runners")
 
           if len(ranking) != total:
               sys.exit(
-                  "ERROR: ranking record count mismatch "
+                  f"ERROR: ranking record count mismatch "
                   f"({len(ranking)}/{total})"
               )
 
-          actual_ranked = 0
+          print("Target race:", race_id)
+          print("Runners:", total)
+
+          # ----------------------------------------------
+          # 主要解析レコード
+          # ----------------------------------------------
+
+          record_checks = {
+              "ability records":
+                  int(
+                      summary.get(
+                          "ability_record_connected_count",
+                          0
+                      ) or 0
+                  ),
+
+              "previous records":
+                  int(
+                      summary.get(
+                          "previous_connected_count",
+                          0
+                      ) or 0
+                  ),
+
+              "pace records":
+                  int(
+                      summary.get(
+                          "pace_connected_count",
+                          0
+                      ) or 0
+                  ),
+
+              "bloodline records":
+                  int(
+                      summary.get(
+                          "bloodline_connected_count",
+                          0
+                      ) or 0
+                  ),
+          }
+
+          for name, count in record_checks.items():
+              print(f"{name}: {count}/{total}")
+
+              if count != total:
+                  sys.exit(
+                      f"ERROR: {name} incomplete "
+                      f"({count}/{total})"
+                  )
+
+          # ----------------------------------------------
+          # 能力判明 / UNKNOWN
+          # ----------------------------------------------
+
+          ability_known = int(
+              summary.get(
+                  "ability_known_count",
+                  0
+              ) or 0
+          )
+
+          ability_unknown = int(
+              summary.get(
+                  "ability_unknown_count",
+                  0
+              ) or 0
+          )
+
+          ranked_count = int(
+              summary.get(
+                  "ranked_count",
+                  0
+              ) or 0
+          )
+
+          unranked_unknown = int(
+              summary.get(
+                  "unranked_unknown_count",
+                  0
+              ) or 0
+          )
+
+          if ability_known + ability_unknown != total:
+              sys.exit(
+                  "ERROR: ability known/unknown count mismatch"
+              )
+
+          if ranked_count != ability_known:
+              sys.exit(
+                  "ERROR: ranked count must equal "
+                  "known ability count"
+              )
+
+          if ranked_count + unranked_unknown != total:
+              sys.exit(
+                  "ERROR: ranked + unknown count mismatch"
+              )
+
+          actual_known = 0
           actual_unknown = 0
 
           for horse in ranking:
+              name = str(
+                  horse.get(
+                      "horse_name",
+                      ""
+                  )
+              )
 
               ability_is_known = bool(
                   horse.get(
@@ -369,115 +285,149 @@ jobs:
                   )
               )
 
-              rank = horse.get(
-                  "rank"
+              ability_score = horse.get(
+                  "ability_score"
               )
 
               final_score = horse.get(
                   "final_score"
               )
 
-              ability_score = horse.get(
-                  "ability_score"
+              rank = horse.get(
+                  "rank"
+              )
+
+              condition_fit = horse.get(
+                  "condition_fit_score"
+              )
+
+              blood_adj = float(
+                  horse.get(
+                      "bloodline_adjustment",
+                      0
+                  ) or 0
               )
 
               if ability_is_known:
+                  actual_known += 1
 
-                  actual_ranked += 1
-
-                  if rank is None:
+                  if ability_score is None:
                       sys.exit(
-                          "ERROR: known ability horse "
-                          "has no rank: "
-                          + str(
-                              horse.get(
-                                  "horse_name",
-                                  ""
-                              )
-                          )
+                          "ERROR: known horse has "
+                          "null ability_score: "
+                          + name
                       )
 
                   if final_score is None:
                       sys.exit(
-                          "ERROR: known ability horse "
-                          "has no final_score: "
-                          + str(
-                              horse.get(
-                                  "horse_name",
-                                  ""
-                              )
-                          )
+                          "ERROR: known horse has "
+                          "null final_score: "
+                          + name
                       )
 
-                  if ability_score is None:
+                  if rank is None:
                       sys.exit(
-                          "ERROR: ability_known horse "
-                          "has null ability_score: "
-                          + str(
-                              horse.get(
-                                  "horse_name",
-                                  ""
-                              )
-                          )
+                          "ERROR: known horse has "
+                          "no rank: "
+                          + name
                       )
 
               else:
-
                   actual_unknown += 1
 
-                  if rank is not None:
+                  if ability_score is not None:
                       sys.exit(
-                          "ERROR: unknown ability horse "
-                          "must not be ranked: "
-                          + str(
-                              horse.get(
-                                  "horse_name",
-                                  ""
-                              )
-                          )
+                          "ERROR: UNKNOWN horse has "
+                          "imputed ability_score: "
+                          + name
                       )
 
                   if final_score is not None:
                       sys.exit(
-                          "ERROR: unknown ability horse "
-                          "must not have final_score: "
-                          + str(
-                              horse.get(
-                                  "horse_name",
-                                  ""
-                              )
-                          )
+                          "ERROR: UNKNOWN horse has "
+                          "final_score: "
+                          + name
                       )
 
-                  if ability_score is not None:
+                  if rank is not None:
                       sys.exit(
-                          "ERROR: unknown ability horse "
-                          "must not have imputed ability_score: "
-                          + str(
-                              horse.get(
-                                  "horse_name",
-                                  ""
-                              )
-                          )
+                          "ERROR: UNKNOWN horse is ranked: "
+                          + name
                       )
 
-          if actual_ranked != ranked:
+              # ------------------------------------------
+              # 血統単独補正禁止
+              #
+              # 条件適性UNKNOWNなら血統補正は必ず0。
+              # ------------------------------------------
+
+              if (
+                  condition_fit is None
+                  and abs(blood_adj) > 1e-9
+              ):
+                  sys.exit(
+                      "ERROR: bloodline adjustment applied "
+                      "without known condition fit: "
+                      + name
+                      + f" ({blood_adj})"
+                  )
+
+          if actual_known != ability_known:
               sys.exit(
-                  "ERROR: actual ranked count mismatch "
-                  f"({actual_ranked}/{ranked})"
+                  "ERROR: actual known count mismatch"
               )
 
-          if actual_unknown != unranked_unknown:
+          if actual_unknown != ability_unknown:
               sys.exit(
-                  "ERROR: actual unknown count mismatch "
-                  f"({actual_unknown}/{unranked_unknown})"
+                  "ERROR: actual unknown count mismatch"
               )
 
-          # ==============================================
-          # 必須ファイル
-          # ==============================================
+          # ----------------------------------------------
+          # リーク安全性
+          # ----------------------------------------------
+
+          day_bias = data.get(
+              "day_bias",
+              {}
+          )
+
+          if (
+              day_bias.get("source_available")
+              and not day_bias.get("future_safe")
+          ):
+              sys.exit(
+                  "ERROR: day bias future safety failed"
+              )
+
+          time_fit = data.get(
+              "runner_time_fit",
+              {}
+          )
+
+          if (
+              time_fit.get("source_available")
+              and not time_fit.get("future_safe")
+          ):
+              sys.exit(
+                  "ERROR: runner time fit future safety failed"
+              )
+
+          if (
+              time_fit.get("source_available")
+              and not time_fit.get("leak_check_passed")
+          ):
+              sys.exit(
+                  "ERROR: runner time fit leak check failed"
+              )
+
+          # ----------------------------------------------
+          # 必須生成ファイル
+          #
+          # training系は完全除外。
+          # ----------------------------------------------
 
           required_files = [
+              "race.json",
               "history_races.json",
               "history_all.json",
               "history_db.json",
@@ -488,476 +438,49 @@ jobs:
               "day_bias.json",
               "runner_history.json",
               "runner_time_fit.json",
-              "training.json",
-              "training_detail.json",
+              "runner_analysis.json",
+              "previous_race_analysis.json",
+              "pace_analysis.json",
+              "race_bloodline_score.json",
+              "final_analysis.json",
           ]
 
           for path in required_files:
-
               if not os.path.exists(path):
                   sys.exit(
                       "ERROR: required file missing: "
                       + path
                   )
 
-              print(
-                  "OK:",
-                  path
-              )
-
-          # ==============================================
-          # 調教データ接続
-          #
-          # 調教が見つからない馬はUNKNOWNとして正常。
-          # 「全頭分のレコードがあるか」だけ必須。
-          # ==============================================
-
-          with open(
-              "training.json",
-              encoding="utf-8"
-          ) as f:
-              training_source = json.load(f)
-
-          source_summary = training_source.get(
-              "summary",
-              {}
-          )
-
-          source_horse_count = int(
-              source_summary.get(
-                  "horse_count",
-                  0
-              )
-              or 0
-          )
-
-          source_found_count = int(
-              source_summary.get(
-                  "training_data_found_count",
-                  0
-              )
-              or 0
-          )
-
-          if source_horse_count != total:
-              sys.exit(
-                  "ERROR: training source horse count mismatch "
-                  f"({source_horse_count}/{total})"
-              )
-
+          print()
+          print("===== VALIDATION OK =====")
           print(
-              "Training source records:",
-              f"{source_horse_count}/{total}"
+              "Ability known:",
+              f"{ability_known}/{total}"
           )
-
           print(
-              "Training source found:",
-              f"{source_found_count}/{total}"
+              "Ability unknown:",
+              f"{ability_unknown}/{total}"
           )
-
-          with open(
-              "training_detail.json",
-              encoding="utf-8"
-          ) as f:
-              training_detail = json.load(f)
-
-          training_horses = training_detail.get(
-              "horses",
-              []
-          )
-
-          training_summary = training_detail.get(
-              "summary",
-              {}
-          )
-
-          detail_horse_count = int(
-              training_summary.get(
-                  "horse_count",
-                  0
-              )
-              or 0
-          )
-
-          detail_found_count = int(
-              training_summary.get(
-                  "detail_found_count",
-                  0
-              )
-              or 0
-          )
-
-          detail_not_found_count = int(
-              training_summary.get(
-                  "detail_not_found_count",
-                  0
-              )
-              or 0
-          )
-
-          if detail_horse_count != total:
-              sys.exit(
-                  "ERROR: training detail horse count mismatch "
-                  f"({detail_horse_count}/{total})"
-              )
-
-          if len(training_horses) != total:
-              sys.exit(
-                  "ERROR: training horse records incomplete "
-                  f"({len(training_horses)}/{total})"
-              )
-
-          if (
-              detail_found_count
-              + detail_not_found_count
-              != total
-          ):
-              sys.exit(
-                  "ERROR: training found/not-found count mismatch "
-                  f"({detail_found_count}+"
-                  f"{detail_not_found_count}!={total})"
-              )
-
-          race_horse_ids = {
-              str(x.get("horse_id", "")).strip()
-              for x in ranking
-              if str(
-                  x.get(
-                      "horse_id",
-                      ""
-                  )
-              ).strip()
-          }
-
-          training_horse_ids = {
-              str(x.get("horse_id", "")).strip()
-              for x in training_horses
-              if str(
-                  x.get(
-                      "horse_id",
-                      ""
-                  )
-              ).strip()
-          }
-
-          if (
-              race_horse_ids
-              and
-              training_horse_ids
-              and
-              race_horse_ids
-              != training_horse_ids
-          ):
-              sys.exit(
-                  "ERROR: training horse IDs do not match "
-                  "final analysis runners"
-              )
-
           print(
-              "Training detail records:",
-              f"{detail_horse_count}/{total}"
+              "Ranked:",
+              f"{ranked_count}/{total}"
           )
-
           print(
-              "Training detail found:",
-              f"{detail_found_count}/{total}"
+              "Training:",
+              "DISABLED"
           )
-
           print(
-              "Training detail unknown:",
-              f"{detail_not_found_count}/{total}"
-          )
-
-          if detail_found_count == 0:
-              print(
-                  "Training data unavailable: "
-                  "all horses remain UNKNOWN for training."
-              )
-
-          # ==============================================
-          # history_races metadata
-          # ==============================================
-
-          with open(
-              "history_races.json",
-              encoding="utf-8"
-          ) as f:
-              history_races = json.load(f)
-
-          races = history_races.get(
-              "races",
-              []
-          )
-
-          if not races:
-              sys.exit(
-                  "ERROR: history_races.json has no races"
-              )
-
-          metadata_count = 0
-
-          for race in races:
-
-              if (
-                  race.get("race_name")
-                  and race.get("race_info_text")
-                  and race.get("race_class")
-                  and race.get("age_condition")
-              ):
-                  metadata_count += 1
-
-          print(
-              "History metadata:",
-              f"{metadata_count}/{len(races)}"
-          )
-
-          if metadata_count == 0:
-              sys.exit(
-                  "ERROR: history race metadata not collected"
-              )
-
-          # ==============================================
-          # history未来レース混入防止
-          # ==============================================
-
-          search = history_races.get(
-              "search",
-              {}
-          )
-
-          if search.get(
-              "future_races_excluded"
-          ) is not True:
-              sys.exit(
-                  "ERROR: future race exclusion not confirmed"
-              )
-
-          if search.get(
-              "target_race_excluded"
-          ) is not True:
-              sys.exit(
-                  "ERROR: target race exclusion not confirmed"
-              )
-
-          # ==============================================
-          # day_time_history
-          # ==============================================
-
-          with open(
-              "day_time_history.json",
-              encoding="utf-8"
-          ) as f:
-              day_time = json.load(f)
-
-          if (
-              day_time.get(
-                  "target_race_id"
-              )
-              != race_id
-          ):
-              sys.exit(
-                  "ERROR: day_time_history race_id mismatch"
-              )
-
-          if (
-              day_time.get(
-                  "future_race_usage"
-              )
-              is not False
-          ):
-              sys.exit(
-                  "ERROR: future race used in day_time_history"
-              )
-
-          if (
-              day_time.get(
-                  "leak_check_passed"
-              )
-              is not True
-          ):
-              sys.exit(
-                  "ERROR: day_time_history leak check failed"
-              )
-
-          print(
-              "Day time references:",
-              day_time.get(
-                  "reference_race_count",
-                  0
-              )
-          )
-
-          print(
-              "Day time baselines:",
-              day_time.get(
-                  "baseline_connected_count",
-                  0
-              )
-          )
-
-          # ==============================================
-          # day_bias
-          # ==============================================
-
-          with open(
-              "day_bias.json",
-              encoding="utf-8"
-          ) as f:
-              day_bias = json.load(f)
-
-          if (
-              day_bias.get("race_id")
-              != race_id
-          ):
-              sys.exit(
-                  "ERROR: day_bias race_id mismatch"
-              )
-
-          if (
-              day_bias.get(
-                  "future_race_usage"
-              )
-              is not False
-          ):
-              sys.exit(
-                  "ERROR: future race used in day_bias"
-              )
-
-          print(
-              "Day bias time connected:",
-              day_bias.get(
-                  "time_bias_connected"
-              )
-          )
-
-          print(
-              "Day bias time:",
-              day_bias.get(
-                  "time_bias",
-                  ""
-              )
-          )
-
-          print(
-              "Day bias time score:",
-              day_bias.get(
-                  "time_bias_score"
-              )
-          )
-
-          # ==============================================
-          # runner_time_fit
-          # ==============================================
-
-          with open(
-              "runner_time_fit.json",
-              encoding="utf-8"
-          ) as f:
-              runner_time = json.load(f)
-
-          if (
-              runner_time.get(
-                  "target_race_id"
-              )
-              != race_id
-          ):
-              sys.exit(
-                  "ERROR: runner_time_fit race_id mismatch"
-              )
-
-          if (
-              runner_time.get(
-                  "future_race_usage"
-              )
-              is not False
-          ):
-              sys.exit(
-                  "ERROR: future race used in runner_time_fit"
-              )
-
-          if (
-              runner_time.get(
-                  "leak_check_passed"
-              )
-              is not True
-          ):
-              sys.exit(
-                  "ERROR: runner_time_fit leak check failed"
-              )
-
-          target_horses = int(
-              runner_time.get(
-                  "target_horse_count",
-                  0
-              )
-              or 0
-          )
-
-          connected_horses = int(
-              runner_time.get(
-                  "connected_horse_count",
-                  0
-              )
-              or 0
-          )
-
-          connected_past_races = int(
-              runner_time.get(
-                  "connected_past_race_count",
-                  0
-              )
-              or 0
-          )
-
-          baseline_conditions = int(
-              runner_time.get(
-                  "baseline_condition_count",
-                  0
-              )
-              or 0
-          )
-
-          print(
-              "Runner time horses:",
-              f"{connected_horses}/{target_horses}"
-          )
-
-          print(
-              "Runner time connected past races:",
-              connected_past_races
-          )
-
-          print(
-              "Runner time baseline conditions:",
-              baseline_conditions
-          )
-
-          if target_horses != total:
-              sys.exit(
-                  "ERROR: runner_time_fit horse count mismatch "
-                  f"({target_horses}/{total})"
-              )
-
-          # ==============================================
-          # 最終
-          # ==============================================
-
-          if ability_known == 0:
-              print(
-                  "No known ability data: "
-                  "all horses remain UNKNOWN and unranked."
-              )
-
-          print(
-              "FULL ANALYSIS VALIDATION OK"
+              "Bloodline standalone adjustment:",
+              "PROHIBITED"
           )
           PY
 
       # ==================================================
-      # 全結果保存
+      # 結果保存
       # ==================================================
 
-      - name: Save analysis
+      - name: Commit generated analysis files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -968,16 +491,15 @@ jobs:
             history_all.json \
             history_db.json \
             condition_history.json \
-            history_pedigree.json \
             day_races.json \
             day_time_history.json \
             track_condition.json \
             day_bias.json \
             pedigree.json \
+            normalized_pedigree.json \
+            history_pedigree.json \
             runner_history.json \
             runner_time_fit.json \
-            training.json \
-            training_detail.json \
             runner_analysis.json \
             previous_race_analysis.json \
             pace_analysis.json \
@@ -986,8 +508,9 @@ jobs:
             final_analysis.json
 
           if git diff --cached --quiet; then
-            echo "No changes"
-          else
-            git commit -m "Full analysis ${RACE_ID}"
-            git push
+            echo "No generated changes"
+            exit 0
           fi
+
+          git commit -m "Update full race analysis ${RACE_ID}"
+          git push
