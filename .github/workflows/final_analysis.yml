@@ -105,9 +105,7 @@ jobs:
       # ==================================================
       # 個別解析
       #
-      # 調教は使用しない。
-      # training_collect.py / training_detail.py は
-      # 本Workflowから完全除外。
+      # 調教は使用しない
       # ==================================================
 
       - name: Analyze runners
@@ -172,42 +170,31 @@ jobs:
           print("Target race:", race_id)
           print("Runners:", total)
 
-          # ----------------------------------------------
-          # 主要解析レコード
-          # ----------------------------------------------
-
           record_checks = {
-              "ability records":
-                  int(
-                      summary.get(
-                          "ability_record_connected_count",
-                          0
-                      ) or 0
-                  ),
-
-              "previous records":
-                  int(
-                      summary.get(
-                          "previous_connected_count",
-                          0
-                      ) or 0
-                  ),
-
-              "pace records":
-                  int(
-                      summary.get(
-                          "pace_connected_count",
-                          0
-                      ) or 0
-                  ),
-
-              "bloodline records":
-                  int(
-                      summary.get(
-                          "bloodline_connected_count",
-                          0
-                      ) or 0
-                  ),
+              "ability records": int(
+                  summary.get(
+                      "ability_record_connected_count",
+                      0
+                  ) or 0
+              ),
+              "previous records": int(
+                  summary.get(
+                      "previous_connected_count",
+                      0
+                  ) or 0
+              ),
+              "pace records": int(
+                  summary.get(
+                      "pace_connected_count",
+                      0
+                  ) or 0
+              ),
+              "bloodline records": int(
+                  summary.get(
+                      "bloodline_connected_count",
+                      0
+                  ) or 0
+              ),
           }
 
           for name, count in record_checks.items():
@@ -218,10 +205,6 @@ jobs:
                       f"ERROR: {name} incomplete "
                       f"({count}/{total})"
                   )
-
-          # ----------------------------------------------
-          # 能力判明 / UNKNOWN
-          # ----------------------------------------------
 
           ability_known = int(
               summary.get(
@@ -355,12 +338,7 @@ jobs:
                           + name
                       )
 
-              # ------------------------------------------
-              # 血統単独補正禁止
-              #
-              # 条件適性UNKNOWNなら血統補正は必ず0。
-              # ------------------------------------------
-
+              # 条件適性UNKNOWNなら血統補正禁止
               if (
                   condition_fit is None
                   and abs(blood_adj) > 1e-9
@@ -382,9 +360,9 @@ jobs:
                   "ERROR: actual unknown count mismatch"
               )
 
-          # ----------------------------------------------
+          # ==================================================
           # リーク安全性
-          # ----------------------------------------------
+          # ==================================================
 
           day_bias = data.get(
               "day_bias",
@@ -420,11 +398,12 @@ jobs:
                   "ERROR: runner time fit leak check failed"
               )
 
-          # ----------------------------------------------
+          # ==================================================
           # 必須生成ファイル
           #
+          # ここにあるものは必ず存在しなければ失敗。
           # training系は完全除外。
-          # ----------------------------------------------
+          # ==================================================
 
           required_files = [
               "race.json",
@@ -478,6 +457,9 @@ jobs:
 
       # ==================================================
       # 結果保存
+      #
+      # 必須・任意を問わず、実際に存在する生成ファイルだけ
+      # git add する。
       # ==================================================
 
       - name: Commit generated analysis files
@@ -485,27 +467,42 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add \
-            race.json \
-            history_races.json \
-            history_all.json \
-            history_db.json \
-            condition_history.json \
-            day_races.json \
-            day_time_history.json \
-            track_condition.json \
-            day_bias.json \
-            pedigree.json \
-            normalized_pedigree.json \
-            history_pedigree.json \
-            runner_history.json \
-            runner_time_fit.json \
-            runner_analysis.json \
-            previous_race_analysis.json \
-            pace_analysis.json \
-            bloodline_stats.json \
-            race_bloodline_score.json \
-            final_analysis.json
+          GENERATED_FILES=(
+            "race.json"
+            "history_races.json"
+            "history_all.json"
+            "history_db.json"
+            "condition_history.json"
+            "day_races.json"
+            "day_time_history.json"
+            "track_condition.json"
+            "day_bias.json"
+            "pedigree.json"
+            "normalized_pedigree.json"
+            "history_pedigree.json"
+            "runner_history.json"
+            "runner_time_fit.json"
+            "runner_analysis.json"
+            "previous_race_analysis.json"
+            "pace_analysis.json"
+            "bloodline_stats.json"
+            "race_bloodline_score.json"
+            "final_analysis.json"
+          )
+
+          ADDED_COUNT=0
+
+          for path in "${GENERATED_FILES[@]}"; do
+            if [ -f "$path" ]; then
+              echo "ADD: $path"
+              git add -- "$path"
+              ADDED_COUNT=$((ADDED_COUNT + 1))
+            else
+              echo "SKIP (not generated): $path"
+            fi
+          done
+
+          echo "Existing generated files: $ADDED_COUNT"
 
           if git diff --cached --quiet; then
             echo "No generated changes"
