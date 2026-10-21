@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime, timezone, timedelta
 
+
 OUTPUT_FILE = "final_analysis.json"
 
 
@@ -61,11 +62,7 @@ def get_optional_number(data, *keys):
 
 def get_number(data, *keys, default=0.0):
     value = get_optional_number(data, *keys)
-
-    if value is None:
-        return default
-
-    return value
+    return default if value is None else value
 
 
 def get_name(data):
@@ -129,17 +126,17 @@ def make_index(items):
             continue
 
         horse_id = get_id(item)
-        name = get_name(item)
-        number = get_number_string(item)
+        horse_name = get_name(item)
+        horse_number = get_number_string(item)
 
         if horse_id:
             by_id[horse_id] = item
 
-        if name:
-            by_name[name] = item
+        if horse_name:
+            by_name[horse_name] = item
 
-        if number:
-            by_number[number] = item
+        if horse_number:
+            by_number[horse_number] = item
 
     return {
         "id": by_id,
@@ -150,39 +147,19 @@ def make_index(items):
 
 def find_horse(index, runner):
     horse_id = get_id(runner)
-    name = get_name(runner)
-    number = get_number_string(runner)
+    horse_name = get_name(runner)
+    horse_number = get_number_string(runner)
 
     if horse_id and horse_id in index["id"]:
         return index["id"][horse_id]
 
-    if name and name in index["name"]:
-        return index["name"][name]
+    if horse_name and horse_name in index["name"]:
+        return index["name"][horse_name]
 
-    if number and number in index["number"]:
-        return index["number"][number]
+    if horse_number and horse_number in index["number"]:
+        return index["number"][horse_number]
 
     return {}
-
-
-def first_number(primary, secondary, *keys):
-    value = get_optional_number(
-        primary,
-        *keys
-    )
-
-    if value is not None:
-        return value, "race.json"
-
-    value = get_optional_number(
-        secondary,
-        *keys
-    )
-
-    if value is not None:
-        return value, "body_weight.json"
-
-    return None, ""
 
 
 def horse_number_sort_value(value):
@@ -192,8 +169,44 @@ def horse_number_sort_value(value):
         return 9999
 
 
+def get_age(runner):
+    sex_age = str(
+        runner.get("sex_age", "")
+    ).strip()
+
+    digits = "".join(
+        c for c in sex_age if c.isdigit()
+    )
+
+    if not digits:
+        return None
+
+    try:
+        return int(digits)
+    except ValueError:
+        return None
+
+
+def first_number(primary, secondary, *keys):
+    value = get_optional_number(primary, *keys)
+
+    if value is not None:
+        return value, "race.json"
+
+    value = get_optional_number(secondary, *keys)
+
+    if value is not None:
+        return value, "body_weight.json"
+
+    return None, ""
+
+
 # =========================================================
 # データ読み込み
+#
+# 重要:
+# training.json / training_detail.json は読み込まない。
+# 調教は自動解析から完全除外。
 # =========================================================
 
 race = load_json("race.json")
@@ -207,10 +220,6 @@ day_bias_data_raw = load_json("day_bias.json")
 body_weight_data_raw = load_json("body_weight.json")
 runner_time_fit_raw = load_json("runner_time_fit.json")
 
-
-# =========================================================
-# Race ID
-# =========================================================
 
 race_id = str(
     race.get("race_id", "")
@@ -382,7 +391,7 @@ time_fit_index = make_index(
 
 
 # =========================================================
-# レース展開
+# 展開
 # =========================================================
 
 race_scenario = pace_data.get(
@@ -413,34 +422,11 @@ front_candidate_count = int(
 
 
 # =========================================================
-# 年齢
-# =========================================================
-
-def get_age(runner):
-    sex_age = str(
-        runner.get("sex_age", "")
-    ).strip()
-
-    digits = "".join(
-        ch
-        for ch in sex_age
-        if ch.isdigit()
-    )
-
-    if not digits:
-        return None
-
-    try:
-        return int(digits)
-    except ValueError:
-        return None
-
-
-# =========================================================
 # 当日馬場
 #
-# 時計傾向そのものでは個体を加減点しない。
-# 脚質・内外の明確な当日傾向のみ発揮率へ反映。
+# 時計傾向単独では加減点しない。
+# 複数レースから確認された脚質・内外傾向のみ
+# 発揮率側へ小幅反映。
 # =========================================================
 
 def evaluate_track_condition(
@@ -456,34 +442,25 @@ def evaluate_track_condition(
     ).strip()
 
     if track:
-        track_condition = str(
+        condition = str(
             track.get(
                 "track_condition",
                 ""
             )
         ).strip()
 
-        cushion = track.get(
-            "cushion_value"
-        )
+        cushion = track.get("cushion_value")
+        moisture_4 = track.get("moisture_4corner")
+        moisture_finish = track.get("moisture_finish")
 
-        moisture_4 = track.get(
-            "moisture_4corner"
-        )
-
-        moisture_finish = track.get(
-            "moisture_finish"
-        )
-
-        if track_condition:
+        if condition:
             reasons.append(
-                "馬場:" + track_condition
+                "馬場:" + condition
             )
 
         if cushion not in (None, ""):
             reasons.append(
-                "クッション値:"
-                + str(cushion)
+                "クッション値:" + str(cushion)
             )
 
         if (
@@ -506,7 +483,6 @@ def evaluate_track_condition(
             "当日実レースバイアス未接続",
             "馬場による発揮率補正なし",
         ])
-
         return 0.0, reasons
 
     time_bias = str(
@@ -559,10 +535,6 @@ def evaluate_track_condition(
         reasons.append(
             "時計傾向単独では個体補正しない"
         )
-    else:
-        reasons.append(
-            "時計傾向未判定"
-        )
 
     if inside_outside:
         reasons.append(
@@ -582,11 +554,11 @@ def evaluate_track_condition(
 
     reasons.append(
         "当日バイアス信頼度:"
-        + format(
-            confidence,
-            ".2f"
-        )
+        + format(confidence, ".2f")
     )
+
+    # 単発レース程度では大きく動かさない。
+    # confidence を最後に掛ける。
 
     if style_bias == "逃げ有利":
         if style == "逃げ":
@@ -695,10 +667,9 @@ def evaluate_track_condition(
 # =========================================================
 # 時計環境
 #
-# runner_time_fit は「似た時計環境を経験したか」の診断。
-# それだけでは、その環境で能力を発揮できる証拠にならない。
-#
-# よって現段階では数値補正しない。
+# 「経験した」ことと「適性がある」ことを分離。
+# runner_time_fit は診断専用。
+# 数値補正しない。
 # =========================================================
 
 def evaluate_time_fit(data):
@@ -789,7 +760,7 @@ def evaluate_time_fit(data):
         )
     else:
         reasons.append(
-            "時計環境経験は診断のみ・成績根拠なしで数値補正しない"
+            "時計環境経験は診断のみ・数値補正なし"
         )
 
     return {
@@ -802,7 +773,10 @@ def evaluate_time_fit(data):
 
 
 # =========================================================
-# 馬体重
+# 馬体重・斤量
+#
+# 馬体増減だけでは能力評価しない。
+# 斤量体重比も小幅補正に限定。
 # =========================================================
 
 def evaluate_body_weight(
@@ -840,22 +814,14 @@ def evaluate_body_weight(
     weight_ratio = None
 
     sources = {
-        value
-        for value in (
+        x
+        for x in (
             body_source,
             change_source,
             carried_source,
         )
-        if value
+        if x
     }
-
-    if sources:
-        reasons.append(
-            "馬体データ:"
-            + "+".join(
-                sorted(sources)
-            )
-        )
 
     if body_weight is None or body_weight <= 0:
         return {
@@ -883,10 +849,6 @@ def evaluate_body_weight(
             + format(change, "+.0f")
             + "kg"
         )
-    else:
-        reasons.append(
-            "馬体重増減不明"
-        )
 
     if age == 2:
         reasons.append(
@@ -901,15 +863,6 @@ def evaluate_body_weight(
             carried_weight
             / body_weight
             * 100.0
-        )
-
-        reasons.append(
-            "斤量:"
-            + format(
-                carried_weight,
-                ".1f"
-            )
-            + "kg"
         )
 
         reasons.append(
@@ -933,16 +886,6 @@ def evaluate_body_weight(
                 "斤量体重比やや高め"
             )
 
-        else:
-            reasons.append(
-                "斤量体重比に明確な負荷なし"
-            )
-
-    else:
-        reasons.append(
-            "斤量不明・斤量体重比補正なし"
-        )
-
     if change is not None:
         abs_change = abs(change)
 
@@ -951,32 +894,19 @@ def evaluate_body_weight(
                 reasons.append(
                     "2歳・大幅馬体変動・状態確認必要"
                 )
-
-            elif abs_change >= 10:
-                reasons.append(
-                    "2歳・馬体変動あり・成長分含め単独評価しない"
-                )
-
             else:
                 reasons.append(
-                    "2歳・馬体変動は単独評価しない"
+                    "2歳・馬体増減単独では評価しない"
                 )
 
+        elif abs_change >= 20:
+            reasons.append(
+                "大幅馬体変動・状態確認必要"
+            )
         else:
-            if abs_change >= 20:
-                reasons.append(
-                    "大幅馬体変動・状態確認必要"
-                )
-
-            elif abs_change >= 10:
-                reasons.append(
-                    "馬体変動あり・単独評価しない"
-                )
-
-            else:
-                reasons.append(
-                    "馬体変動は通常範囲"
-                )
+            reasons.append(
+                "馬体増減単独では評価しない"
+            )
 
     adjustment = clamp(
         adjustment,
@@ -1007,7 +937,9 @@ def evaluate_body_weight(
 
 
 # =========================================================
-# 前走課題 × 馬体
+# 馬体 × 前走課題
+#
+# 馬体変動が前走の明確な課題に接続する場合のみ使用。
 # =========================================================
 
 def evaluate_body_issue_connection(
@@ -1070,9 +1002,7 @@ def evaluate_body_issue_connection(
         ]
 
     issue_text = " ".join(issues)
-    overcoming_text = " ".join(
-        overcoming
-    )
+    overcoming_text = " ".join(overcoming)
 
     score = 0.0
     reasons = []
@@ -1099,13 +1029,13 @@ def evaluate_body_issue_connection(
     )
 
     heavy_issue = any(
-        keyword in issue_text
-        for keyword in heavy_keywords
+        x in issue_text
+        for x in heavy_keywords
     )
 
     thin_issue = any(
-        keyword in issue_text
-        for keyword in thin_keywords
+        x in issue_text
+        for x in thin_keywords
     )
 
     if heavy_issue:
@@ -1120,8 +1050,8 @@ def evaluate_body_issue_connection(
             )
 
             if any(
-                keyword in overcoming_text
-                for keyword in (
+                x in overcoming_text
+                for x in (
                     "絞れた",
                     "引き締まった",
                     "良化",
@@ -1130,16 +1060,8 @@ def evaluate_body_issue_connection(
                 )
             ):
                 score += 0.2
-                reasons.append(
-                    "既存克服材料とも整合"
-                )
 
         elif change > 0:
-            reasons.append(
-                "太め系課題に対して馬体増・克服確認できず"
-            )
-
-        else:
             reasons.append(
                 "太め系課題の克服確認できず"
             )
@@ -1153,7 +1075,7 @@ def evaluate_body_issue_connection(
             if age == 2:
                 score += 0.2
                 reasons.append(
-                    "2歳馬体増・回復方向候補だが成長分も考慮"
+                    "2歳・回復方向候補だが成長分も考慮"
                 )
             else:
                 score += 0.4
@@ -1161,30 +1083,10 @@ def evaluate_body_issue_connection(
                     "馬体増で回復方向"
                 )
 
-            if any(
-                keyword in overcoming_text
-                for keyword in (
-                    "回復",
-                    "ふっくら",
-                    "良化",
-                    "維持",
-                    "戻った",
-                )
-            ):
-                score += 0.2
-                reasons.append(
-                    "既存克服材料とも整合"
-                )
-
         elif change <= -6:
             score -= 0.3
             reasons.append(
                 "さらに馬体減・課題継続注意"
-            )
-
-        else:
-            reasons.append(
-                "馬体維持系課題の克服不明"
             )
 
     if not heavy_issue and not thin_issue:
@@ -1204,6 +1106,9 @@ def evaluate_body_issue_connection(
 
 # =========================================================
 # 前走
+#
+# 課題抽出 → 克服材料を最重要視。
+# 未知数は減点しない。
 # =========================================================
 
 def evaluate_previous(data):
@@ -1286,44 +1191,41 @@ def evaluate_previous(data):
             "明確な前走課題なし"
         )
 
-    if overcoming:
-        if issues:
-            resolution_ratio = min(
-                len(overcoming)
-                / max(
-                    len(issues),
-                    1
-                ),
-                1.0
-            )
+    if overcoming and issues:
+        resolution_ratio = min(
+            len(overcoming)
+            / max(len(issues), 1),
+            1.0
+        )
 
-            overcoming_add = min(
-                0.6
-                + resolution_ratio * 0.9,
-                1.5
-            )
+        overcoming_add = min(
+            0.6
+            + resolution_ratio * 0.9,
+            1.5
+        )
 
-            score += overcoming_add
+        score += overcoming_add
 
-            reasons.append(
-                "課題克服材料"
-                + str(len(overcoming))
-                + "件"
-            )
+        reasons.append(
+            "課題克服材料"
+            + str(len(overcoming))
+            + "件"
+        )
 
-            reasons.append(
-                "課題克服比率:"
-                + format(
-                    resolution_ratio,
-                    ".2f"
-                )
+        reasons.append(
+            "課題克服比率:"
+            + format(
+                resolution_ratio,
+                ".2f"
             )
+        )
 
-        else:
-            score += 0.2
-            reasons.append(
-                "克服材料あり・対応課題不明"
-            )
+    elif overcoming:
+        score += 0.2
+
+        reasons.append(
+            "克服材料あり・対応課題不明"
+        )
 
     elif issues:
         reasons.append(
@@ -1337,14 +1239,12 @@ def evaluate_previous(data):
             + "件・減点なし"
         )
 
-    score = clamp(
-        score,
-        -1.3,
-        1.8
-    )
-
     return (
-        score,
+        clamp(
+            score,
+            -1.3,
+            1.8
+        ),
         reasons,
         len(positives),
         len(issues),
@@ -1354,16 +1254,33 @@ def evaluate_previous(data):
 
 # =========================================================
 # 血統
+#
+# ★重要ルール
+#
+# 血統は単独加点しない。
+#
+# condition_fit_score が UNKNOWN
+# → 必ず adjustment = 0
+#
+# condition_fit_score が既知
+# → その条件適性を補助する場合だけ使用。
+#
+# 独立条件適性が低い場合、
+# 血統だけで適性を反転させない。
 # =========================================================
 
-def evaluate_bloodline(data):
+def evaluate_bloodline(
+    data,
+    condition_fit
+):
     if not data:
         return (
             0.0,
+            False,
             ["血統データ不明"]
         )
 
-    score = get_number(
+    raw_score = get_number(
         data,
         "bloodline_score",
         default=0.0
@@ -1385,26 +1302,9 @@ def evaluate_bloodline(data):
         )
     )
 
-    if matched <= 0:
-        adjustment = 0.0
-
-    elif positive <= 0:
-        adjustment = clamp(
-            score,
-            -0.4,
-            0.0
-        )
-
-    else:
-        adjustment = clamp(
-            score,
-            -0.8,
-            0.8
-        )
-
     reasons = [
         "血統スコア"
-        + format(score, ".3f"),
+        + format(raw_score, ".3f"),
 
         "該当祖先"
         + str(matched)
@@ -1414,21 +1314,119 @@ def evaluate_bloodline(data):
         "血統は今回条件への補助のみ",
     ]
 
+    # -----------------------------------------------------
+    # 最重要:
+    # 独立条件適性が不明なら血統は絶対に点数化しない。
+    # -----------------------------------------------------
+
+    if condition_fit is None:
+        reasons.append(
+            "条件適性UNKNOWNのため血統補助適用なし"
+        )
+
+        return (
+            0.0,
+            False,
+            reasons
+        )
+
+    # 該当祖先なし
     if matched <= 0:
         reasons.append(
             "血統該当なし・ニュートラル"
         )
 
-    elif positive <= 0:
-        reasons.append(
-            "プラス祖先なし・血統単独の強い減点禁止"
+        return (
+            0.0,
+            False,
+            reasons
         )
 
-    return adjustment, reasons
+    # -----------------------------------------------------
+    # 条件適性が明確に低い場合
+    #
+    # プラス血統だけで不適条件をひっくり返さない。
+    # マイナス側の補助のみ許可。
+    # -----------------------------------------------------
+
+    if condition_fit < 45.0:
+        if raw_score < 0:
+            adjustment = clamp(
+                raw_score,
+                -0.4,
+                0.0
+            )
+
+            reasons.append(
+                "独立条件適性低め・血統マイナス補助のみ適用"
+            )
+
+            return (
+                adjustment,
+                adjustment != 0.0,
+                reasons
+            )
+
+        reasons.append(
+            "独立条件適性低め・血統プラスで反転させない"
+        )
+
+        return (
+            0.0,
+            False,
+            reasons
+        )
+
+    # -----------------------------------------------------
+    # プラス祖先なし
+    #
+    # 強い単独減点は禁止。
+    # -----------------------------------------------------
+
+    if positive <= 0:
+        adjustment = clamp(
+            raw_score,
+            -0.4,
+            0.0
+        )
+
+        reasons.append(
+            "プラス祖先なし・強い血統単独減点禁止"
+        )
+
+        return (
+            adjustment,
+            adjustment != 0.0,
+            reasons
+        )
+
+    # -----------------------------------------------------
+    # 条件適性が独立して確認されている場合のみ
+    # 血統を補助値として使用。
+    # -----------------------------------------------------
+
+    adjustment = clamp(
+        raw_score,
+        -0.8,
+        0.8
+    )
+
+    reasons.append(
+        "独立条件適性確認済み・血統を補助適用"
+    )
+
+    return (
+        adjustment,
+        adjustment != 0.0,
+        reasons
+    )
 
 
 # =========================================================
 # 展開
+#
+# 人気・枠だけでは評価しない。
+# スロー/ミドル/ハイの基本シナリオとの接続のみ。
 # =========================================================
 
 def evaluate_pace(data):
@@ -1515,6 +1513,7 @@ def evaluate_pace(data):
         and front_rate >= 0.50
     ):
         score += 0.3
+
         reasons.append(
             "先行位置を取りやすい構成"
         )
@@ -1524,12 +1523,14 @@ def evaluate_pace(data):
         and style == "逃げ"
     ):
         score -= 0.3
+
         reasons.append(
             "逃げ候補複数・ハナ争い注意"
         )
 
     if back_rate >= 0.60:
         score -= 0.6
+
         reasons.append(
             "後方位置依存注意"
         )
@@ -1561,6 +1562,7 @@ results = []
 
 
 for runner in runners:
+
     ability = find_horse(
         ability_index,
         runner
@@ -1593,10 +1595,6 @@ for runner in runners:
 
     # -----------------------------------------------------
     # 能力
-    #
-    # 重要:
-    # null を50点へ変換しない。
-    # UNKNOWNを架空の基準点でランキングしない。
     # -----------------------------------------------------
 
     ability_score = get_optional_number(
@@ -1644,6 +1642,10 @@ for runner in runners:
         )
     )
 
+    # -----------------------------------------------------
+    # 馬場
+    # -----------------------------------------------------
+
     (
         track_rate_adjustment,
         track_reasons
@@ -1653,15 +1655,21 @@ for runner in runners:
         running_style
     )
 
+    # -----------------------------------------------------
+    # 時計環境
+    # -----------------------------------------------------
+
     time_fit_result = evaluate_time_fit(
         time_fit_horse
     )
 
     time_fit_adjustment = (
-        time_fit_result[
-            "adjustment"
-        ]
+        time_fit_result["adjustment"]
     )
+
+    # -----------------------------------------------------
+    # 馬体
+    # -----------------------------------------------------
 
     body_result = evaluate_body_weight(
         runner,
@@ -1669,9 +1677,7 @@ for runner in runners:
     )
 
     body_weight_rate_adjustment = (
-        body_result[
-            "adjustment"
-        ]
+        body_result["adjustment"]
     )
 
     (
@@ -1681,6 +1687,10 @@ for runner in runners:
         body_result,
         previous_horse
     )
+
+    # -----------------------------------------------------
+    # 前走
+    # -----------------------------------------------------
 
     (
         previous_adj,
@@ -1692,6 +1702,10 @@ for runner in runners:
         previous_horse
     )
 
+    # -----------------------------------------------------
+    # 展開
+    # -----------------------------------------------------
+
     (
         pace_adj,
         pace_reasons
@@ -1699,12 +1713,30 @@ for runner in runners:
         pace
     )
 
+    # -----------------------------------------------------
+    # 血統
+    #
+    # condition_fit を必ず渡す。
+    # -----------------------------------------------------
+
     (
         blood_adj,
+        blood_support_applied,
         blood_reasons
     ) = evaluate_bloodline(
-        blood
+        blood,
+        condition_fit
     )
+
+    # -----------------------------------------------------
+    # 安全装置
+    #
+    # 条件適性UNKNOWNなら何があっても血統補正0。
+    # -----------------------------------------------------
+
+    if not condition_fit_known:
+        blood_adj = 0.0
+        blood_support_applied = False
 
     # -----------------------------------------------------
     # 発揮率
@@ -1759,8 +1791,7 @@ for runner in runners:
     # -----------------------------------------------------
     # 最終点
     #
-    # 能力がUNKNOWNなら作らない。
-    # 血統・馬体・展開だけで能力順位を作らない。
+    # 能力UNKNOWNなら作らない。
     # -----------------------------------------------------
 
     if base_performance is not None:
@@ -1859,7 +1890,7 @@ for runner in runners:
             "補正後発揮率UNKNOWN"
         )
 
-    if condition_fit is not None:
+    if condition_fit_known:
         reasons.append(
             "条件適性"
             + format(
@@ -1872,32 +1903,22 @@ for runner in runners:
             "条件適性UNKNOWN"
         )
 
+    reasons.extend(track_reasons)
     reasons.extend(
-        track_reasons
+        time_fit_result["reasons"]
     )
-
-    reasons.extend(
-        time_fit_result[
-            "reasons"
-        ]
-    )
-
     reasons.extend(
         body_result["reasons"]
     )
-
     reasons.extend(
         body_issue_reasons
     )
-
     reasons.extend(
         previous_reasons
     )
-
     reasons.extend(
         pace_reasons
     )
-
     reasons.extend(
         blood_reasons
     )
@@ -1925,9 +1946,7 @@ for runner in runners:
             ability_known,
 
         "ability_score":
-            round1(
-                ability_score
-            ),
+            round1(ability_score),
 
         "original_performance_rate":
             round1(
@@ -1945,9 +1964,7 @@ for runner in runners:
             ),
 
         "time_fit_label":
-            time_fit_result[
-                "label"
-            ],
+            time_fit_result["label"],
 
         "time_fit_evaluated_race_count":
             time_fit_result[
@@ -2024,9 +2041,7 @@ for runner in runners:
             ),
 
         "body_weight_source":
-            body_result[
-                "source"
-            ],
+            body_result["source"],
 
         "condition_fit_score":
             round1(
@@ -2060,6 +2075,7 @@ for runner in runners:
         "running_style":
             running_style,
 
+        # raw score は診断値として残す
         "bloodline_score":
             round(
                 get_number(
@@ -2070,10 +2086,14 @@ for runner in runners:
                 6
             ),
 
+        # 実際に最終点へ入った補正
         "bloodline_adjustment":
             round1(
                 blood_adj
             ),
+
+        "bloodline_support_applied":
+            blood_support_applied,
 
         "final_score":
             round1(
@@ -2100,8 +2120,8 @@ for runner in runners:
 # =========================================================
 # ランキング
 #
-# ability_known の馬だけ順位を付ける。
-# UNKNOWN馬は順位を付けない。
+# ability_known の馬だけ順位付け。
+# UNKNOWNは順位を作らない。
 # =========================================================
 
 known_results = [
@@ -2272,9 +2292,7 @@ race_json_body_weight_connected = sum(
     1
     for horse in results
     if (
-        horse[
-            "body_weight"
-        ] is not None
+        horse["body_weight"] is not None
         and horse[
             "body_weight_source"
         ] == "race.json"
@@ -2307,6 +2325,27 @@ body_weight_effective_count = sum(
         or horse[
             "body_weight_issue_adjustment"
         ] != 0
+    )
+)
+
+bloodline_effective_count = sum(
+    1
+    for horse in results
+    if horse[
+        "bloodline_adjustment"
+    ] != 0
+)
+
+bloodline_blocked_unknown_condition_count = sum(
+    1
+    for horse in results
+    if (
+        horse[
+            "condition_fit_score"
+        ] is None
+        and horse[
+            "bloodline_adjustment"
+        ] == 0
     )
 )
 
@@ -2536,6 +2575,18 @@ output = {
         "bloodline_cannot_create_ability_ranking":
             True,
 
+        "bloodline_is_condition_support_only":
+            True,
+
+        "bloodline_requires_known_condition_fit":
+            True,
+
+        "bloodline_cannot_reverse_unknown_condition":
+            True,
+
+        "bloodline_raw_score_is_diagnostic":
+            True,
+
         "track_affects_performance_rate_not_ability":
             True,
 
@@ -2611,9 +2662,6 @@ output = {
         "previous_issue_resolution_emphasized":
             True,
 
-        "bloodline_is_condition_support_only":
-            True,
-
         "bloodline_strong_negative_without_positive_match_prohibited":
             True,
 
@@ -2622,6 +2670,13 @@ output = {
 
         "internet_prediction_not_used":
             True,
+
+        # 調教はツールから完全除外
+        "training_data_used":
+            False,
+
+        "training_affects_score":
+            False,
     },
 
     "summary": {
@@ -2651,6 +2706,12 @@ output = {
 
         "bloodline_connected_count":
             blood_connected,
+
+        "bloodline_effective_count":
+            bloodline_effective_count,
+
+        "bloodline_blocked_unknown_condition_count":
+            bloodline_blocked_unknown_condition_count,
 
         "time_fit_record_connected_count":
             time_fit_connected,
@@ -2714,6 +2775,9 @@ output = {
 
         "body_weight_effective_count":
             body_weight_effective_count,
+
+        "training_used":
+            False,
     },
 
     "ranking":
@@ -2736,6 +2800,42 @@ with open(
         ensure_ascii=False,
         indent=2
     )
+
+
+# =========================================================
+# 最終自己検査
+# =========================================================
+
+for horse in results:
+
+    if (
+        horse["condition_fit_score"] is None
+        and horse["bloodline_adjustment"] != 0
+    ):
+        raise RuntimeError(
+            "bloodline standalone adjustment detected: "
+            + horse["horse_name"]
+        )
+
+    if not horse["ability_known"]:
+
+        if horse["ability_score"] is not None:
+            raise RuntimeError(
+                "UNKNOWN ability was imputed: "
+                + horse["horse_name"]
+            )
+
+        if horse["final_score"] is not None:
+            raise RuntimeError(
+                "UNKNOWN horse received final score: "
+                + horse["horse_name"]
+            )
+
+        if horse["rank"] is not None:
+            raise RuntimeError(
+                "UNKNOWN horse was ranked: "
+                + horse["horse_name"]
+            )
 
 
 # =========================================================
@@ -2800,6 +2900,11 @@ print(
 )
 
 print(
+    "training:",
+    "DISABLED"
+)
+
+print(
     "ability records:",
     ability_record_connected,
     "/",
@@ -2849,6 +2954,20 @@ print(
 )
 
 print(
+    "bloodline effective:",
+    bloodline_effective_count,
+    "/",
+    len(results)
+)
+
+print(
+    "bloodline blocked by unknown condition:",
+    bloodline_blocked_unknown_condition_count,
+    "/",
+    len(results)
+)
+
+print(
     "time fit records:",
     time_fit_connected,
     "/",
@@ -2883,9 +3002,11 @@ if ability_known_count == 0:
     print(
         "FINAL RANKING: no known ability data"
     )
+
     print(
         "UNKNOWN horses are intentionally not ranked."
     )
+
     print()
 
 
@@ -2923,6 +3044,10 @@ for horse in results:
         "時計",
         horse[
             "time_fit_label"
+        ],
+        "血統raw",
+        horse[
+            "bloodline_score"
         ],
         "血統補助",
         horse[
