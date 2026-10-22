@@ -1,0 +1,538 @@
+name: Race Debug Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_from:
+        description: "Start analysis from"
+        required: true
+        default: "history_pedigree"
+        type: choice
+        options:
+          - history_pedigree
+          - runner_history
+          - runner_analysis
+          - final_analysis
+
+permissions:
+  contents: write
+
+concurrency:
+  group: race-debug-analysis
+  cancel-in-progress: false
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ==================================================
+      # 基本準備
+      # ==================================================
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      - name: Load race ID
+        run: |
+          RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
+
+          if ! [[ "$RACE_ID" =~ ^[0-9]{12}$ ]]; then
+            echo "ERROR: race_id.txt must contain exactly 12 digits"
+            exit 1
+          fi
+
+          echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
+          echo "Target race: $RACE_ID"
+          echo "Debug start: ${{ inputs.start_from }}"
+
+      # ==================================================
+      # history_pedigree から開始
+      # ==================================================
+
+      - name: Collect history pedigree
+        if: inputs.start_from == 'history_pedigree'
+        run: python history_pedigree.py
+
+      # ==================================================
+      # runner_history
+      #
+      # history_pedigree または runner_history 開始時に実行
+      # ==================================================
+
+      - name: Collect runner history
+        if: |
+          inputs.start_from == 'history_pedigree' ||
+          inputs.start_from == 'runner_history'
+        run: python runner_history.py
+
+      - name: Analyze runner time fit
+        if: |
+          inputs.start_from == 'history_pedigree' ||
+          inputs.start_from == 'runner_history'
+        run: python runner_time_fit.py
+
+      # ==================================================
+      # 個別解析
+      # ==================================================
+
+      - name: Analyze runners
+        if: |
+          inputs.start_from == 'history_pedigree' ||
+          inputs.start_from == 'runner_history' ||
+          inputs.start_from == 'runner_analysis'
+        run: python runner_analysis.py
+
+      - name: Analyze previous race
+        if: |
+          inputs.start_from == 'history_pedigree' ||
+          inputs.start_from == 'runner_history' ||
+          inputs.start_from == 'runner_analysis'
+        run: python previous_race_analysis.py
+
+      - name: Analyze pace
+        if: |
+          inputs.start_from == 'history_pedigree' ||
+          inputs.start_from == 'runner_history' ||
+          inputs.start_from == 'runner_analysis'
+        run: python pace_analysis.py
+
+      # ==================================================
+      # 血統統計
+      # ==================================================
+
+      - name: Build bloodline statistics
+        if: |
+          inputs.start_from == 'history_pedigree' ||
+          inputs.start_from == 'runner_history' ||
+          inputs.start_from == 'runner_analysis'
+        run: python bloodline_stats.py
+
+      - name: Score race bloodlines
+        if: |
+          inputs.start_from == 'history_pedigree' ||
+          inputs.start_from == 'runner_history' ||
+          inputs.start_from == 'runner_analysis'
+        run: python race_bloodline_score.py
+
+      # ==================================================
+      # 最終統合
+      # ==================================================
+
+      - name: Run final analysis
+        run: python final_analysis.py
+
+      # ==================================================
+      # 最終安全チェック
+      # ==================================================
+
+      - name: Validate final analysis
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+
+          race_id = os.environ["RACE_ID"]
+
+          with open(
+              "final_analysis.json",
+              encoding="utf-8"
+          ) as f:
+              data = json.load(f)
+
+          actual_race_id = str(
+              data.get("race_id", "")
+          ).strip()
+
+          if actual_race_id != race_id:
+              sys.exit(
+                  "ERROR: final_analysis race_id mismatch "
+                  f"({actual_race_id} != {race_id})"
+              )
+
+          summary = data.get(
+              "summary",
+              {}
+          )
+
+          ranking = data.get(
+              "ranking",
+              []
+          )
+
+          total = int(
+              summary.get(
+                  "runner_count",
+                  0
+              ) or 0
+          )
+
+          if total <= 0:
+              sys.exit(
+                  "ERROR: no runners"
+              )
+
+          if len(ranking) != total:
+              sys.exit(
+                  "ERROR: ranking record count mismatch "
+                  f"({len(ranking)}/{total})"
+              )
+
+          record_checks = {
+              "ability records": int(
+                  summary.get(
+                      "ability_record_connected_count",
+                      0
+                  ) or 0
+              ),
+              "previous records": int(
+                  summary.get(
+                      "previous_connected_count",
+                      0
+                  ) or 0
+              ),
+              "pace records": int(
+                  summary.get(
+                      "pace_connected_count",
+                      0
+                  ) or 0
+              ),
+              "bloodline records": int(
+                  summary.get(
+                      "bloodline_connected_count",
+                      0
+                  ) or 0
+              ),
+          }
+
+          print(
+              "Target race:",
+              race_id
+          )
+
+          print(
+              "Runners:",
+              total
+          )
+
+          for name, count in record_checks.items():
+              print(
+                  f"{name}: {count}/{total}"
+              )
+
+              if count != total:
+                  sys.exit(
+                      f"ERROR: {name} incomplete "
+                      f"({count}/{total})"
+                  )
+
+          ability_known = int(
+              summary.get(
+                  "ability_known_count",
+                  0
+              ) or 0
+          )
+
+          ability_unknown = int(
+              summary.get(
+                  "ability_unknown_count",
+                  0
+              ) or 0
+          )
+
+          ranked_count = int(
+              summary.get(
+                  "ranked_count",
+                  0
+              ) or 0
+          )
+
+          unranked_unknown = int(
+              summary.get(
+                  "unranked_unknown_count",
+                  0
+              ) or 0
+          )
+
+          if (
+              ability_known
+              + ability_unknown
+              != total
+          ):
+              sys.exit(
+                  "ERROR: ability known/unknown "
+                  "count mismatch"
+              )
+
+          if ranked_count != ability_known:
+              sys.exit(
+                  "ERROR: ranked count must equal "
+                  "known ability count"
+              )
+
+          if (
+              ranked_count
+              + unranked_unknown
+              != total
+          ):
+              sys.exit(
+                  "ERROR: ranked + unknown "
+                  "count mismatch"
+              )
+
+          actual_known = 0
+          actual_unknown = 0
+
+          for horse in ranking:
+              name = str(
+                  horse.get(
+                      "horse_name",
+                      ""
+                  )
+              )
+
+              ability_is_known = bool(
+                  horse.get(
+                      "ability_known",
+                      False
+                  )
+              )
+
+              ability_score = horse.get(
+                  "ability_score"
+              )
+
+              final_score = horse.get(
+                  "final_score"
+              )
+
+              rank = horse.get(
+                  "rank"
+              )
+
+              condition_fit = horse.get(
+                  "condition_fit_score"
+              )
+
+              blood_adj = float(
+                  horse.get(
+                      "bloodline_adjustment",
+                      0
+                  ) or 0
+              )
+
+              if ability_is_known:
+                  actual_known += 1
+
+                  if ability_score is None:
+                      sys.exit(
+                          "ERROR: known horse has "
+                          "null ability_score: "
+                          + name
+                      )
+
+                  if final_score is None:
+                      sys.exit(
+                          "ERROR: known horse has "
+                          "null final_score: "
+                          + name
+                      )
+
+                  if rank is None:
+                      sys.exit(
+                          "ERROR: known horse has "
+                          "no rank: "
+                          + name
+                      )
+
+              else:
+                  actual_unknown += 1
+
+                  if ability_score is not None:
+                      sys.exit(
+                          "ERROR: UNKNOWN horse has "
+                          "imputed ability_score: "
+                          + name
+                      )
+
+                  if final_score is not None:
+                      sys.exit(
+                          "ERROR: UNKNOWN horse has "
+                          "final_score: "
+                          + name
+                      )
+
+                  if rank is not None:
+                      sys.exit(
+                          "ERROR: UNKNOWN horse is ranked: "
+                          + name
+                      )
+
+              # 条件適性UNKNOWNなら血統補正禁止
+              if (
+                  condition_fit is None
+                  and abs(blood_adj) > 1e-9
+              ):
+                  sys.exit(
+                      "ERROR: bloodline adjustment applied "
+                      "without known condition fit: "
+                      + name
+                      + f" ({blood_adj})"
+                  )
+
+          if actual_known != ability_known:
+              sys.exit(
+                  "ERROR: actual known count mismatch"
+              )
+
+          if actual_unknown != ability_unknown:
+              sys.exit(
+                  "ERROR: actual unknown count mismatch"
+              )
+
+          # ==================================================
+          # リーク安全性
+          # ==================================================
+
+          day_bias = data.get(
+              "day_bias",
+              {}
+          )
+
+          if (
+              day_bias.get("source_available")
+              and not day_bias.get("future_safe")
+          ):
+              sys.exit(
+                  "ERROR: day bias future safety failed"
+              )
+
+          time_fit = data.get(
+              "runner_time_fit",
+              {}
+          )
+
+          if (
+              time_fit.get("source_available")
+              and not time_fit.get("future_safe")
+          ):
+              sys.exit(
+                  "ERROR: runner time fit future safety failed"
+              )
+
+          if (
+              time_fit.get("source_available")
+              and not time_fit.get("leak_check_passed")
+          ):
+              sys.exit(
+                  "ERROR: runner time fit leak check failed"
+              )
+
+          required_files = [
+              "race.json",
+              "history_races.json",
+              "history_all.json",
+              "history_db.json",
+              "condition_history.json",
+              "day_races.json",
+              "day_time_history.json",
+              "track_condition.json",
+              "day_bias.json",
+              "runner_history.json",
+              "runner_time_fit.json",
+              "runner_analysis.json",
+              "previous_race_analysis.json",
+              "pace_analysis.json",
+              "race_bloodline_score.json",
+              "final_analysis.json",
+          ]
+
+          for path in required_files:
+              if not os.path.exists(path):
+                  sys.exit(
+                      "ERROR: required file missing: "
+                      + path
+                  )
+
+          print()
+          print(
+              "===== DEBUG VALIDATION OK ====="
+          )
+
+          print(
+              "Ability known:",
+              f"{ability_known}/{total}"
+          )
+
+          print(
+              "Ability unknown:",
+              f"{ability_unknown}/{total}"
+          )
+
+          print(
+              "Ranked:",
+              f"{ranked_count}/{total}"
+          )
+
+          print(
+              "Training:",
+              "DISABLED"
+          )
+
+          print(
+              "Bloodline standalone adjustment:",
+              "PROHIBITED"
+          )
+          PY
+
+      # ==================================================
+      # デバッグ結果保存
+      # ==================================================
+
+      - name: Commit debug analysis files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          GENERATED_FILES=(
+            "history_pedigree.json"
+            "runner_history.json"
+            "runner_time_fit.json"
+            "runner_analysis.json"
+            "previous_race_analysis.json"
+            "pace_analysis.json"
+            "bloodline_stats.json"
+            "race_bloodline_score.json"
+            "final_analysis.json"
+          )
+
+          for path in "${GENERATED_FILES[@]}"; do
+            if [ -f "$path" ]; then
+              echo "ADD: $path"
+              git add -- "$path"
+            else
+              echo "SKIP: $path"
+            fi
+          done
+
+          if git diff --cached --quiet; then
+            echo "No debug changes"
+            exit 0
+          fi
+
+          git commit -m \
+            "Update debug analysis ${RACE_ID} from ${{ inputs.start_from }}"
+
+          git push
