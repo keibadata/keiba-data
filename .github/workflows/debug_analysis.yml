@@ -48,17 +48,17 @@ jobs:
             pip install -r requirements.txt
           fi
 
+      # ==================================================
+      # 今回レース
+      # 本番 Race Full Analysis と同じ race_id.txt を使用
+      # ==================================================
+
       - name: Load race ID
         run: |
-          if [ ! -f current_race.txt ]; then
-            echo "ERROR: current_race.txt not found"
-            exit 1
-          fi
+          RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
 
-          RACE_ID="$(tr -d '[:space:]' < current_race.txt)"
-
-          if [ -z "$RACE_ID" ]; then
-            echo "ERROR: race ID is empty"
+          if ! [[ "$RACE_ID" =~ ^[0-9]{12}$ ]]; then
+            echo "ERROR: race_id.txt must contain exactly 12 digits"
             exit 1
           fi
 
@@ -107,7 +107,7 @@ jobs:
         run: python final_analysis.py
 
       # ==================================================
-      # 選択工程の出力だけ確認
+      # 選択工程の出力ファイルを決定
       # ==================================================
 
       - name: Resolve output file
@@ -155,7 +155,7 @@ jobs:
           echo "Output file: $OUTPUT"
 
       # ==================================================
-      # 選択工程の結果だけ保存
+      # 選択工程の出力だけ保存
       # ==================================================
 
       - name: Commit debug result
@@ -164,7 +164,7 @@ jobs:
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add "$OUTPUT_FILE"
+          git add -- "$OUTPUT_FILE"
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
