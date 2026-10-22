@@ -63,10 +63,133 @@ def get_existing_races(database):
     return []
 
 
+def print_input_diagnostics(runner_history):
+    print("==============================")
+    print("runner_history 診断")
+    print("cwd:", os.getcwd())
+    print(
+        "runner_history.json exists:",
+        os.path.exists(RUNNER_HISTORY_FILE),
+    )
+
+    if os.path.exists(RUNNER_HISTORY_FILE):
+        print(
+            "runner_history.json size:",
+            os.path.getsize(RUNNER_HISTORY_FILE),
+        )
+
+    print(
+        "root type:",
+        type(runner_history).__name__,
+    )
+
+    if isinstance(runner_history, dict):
+        print(
+            "root keys:",
+            sorted(runner_history.keys()),
+        )
+
+        print(
+            "target_race_id:",
+            runner_history.get("target_race_id"),
+        )
+
+        print(
+            "target_horse_count:",
+            runner_history.get("target_horse_count"),
+        )
+
+        print(
+            "collected_horse_count:",
+            runner_history.get("collected_horse_count"),
+        )
+
+        print(
+            "total_past_race_count:",
+            runner_history.get("total_past_race_count"),
+        )
+
+        horses = runner_history.get(
+            "horses",
+            [],
+        )
+
+        print(
+            "horses type:",
+            type(horses).__name__,
+        )
+
+        if isinstance(horses, list):
+            print(
+                "horses len:",
+                len(horses),
+            )
+
+            total_past = 0
+
+            for index, horse in enumerate(
+                horses,
+                start=1,
+            ):
+                if not isinstance(horse, dict):
+                    print(
+                        f"horse[{index}] invalid type:",
+                        type(horse).__name__,
+                    )
+                    continue
+
+                past_races = horse.get(
+                    "past_races",
+                    [],
+                )
+
+                past_count = (
+                    len(past_races)
+                    if isinstance(past_races, list)
+                    else -1
+                )
+
+                total_past += max(
+                    past_count,
+                    0,
+                )
+
+                print(
+                    f"horse[{index}]",
+                    clean(horse.get("horse_name")),
+                    "past_races:",
+                    past_count,
+                )
+
+            print(
+                "calculated total past_races:",
+                total_past,
+            )
+
+    print("==============================")
+
+
 def main():
     runner_history = load_json(
         RUNNER_HISTORY_FILE
     )
+
+    # ==========================================
+    # Action上で実際に読んでいる内容を診断
+    # ==========================================
+
+    print_input_diagnostics(
+        runner_history
+    )
+
+    if not isinstance(
+        runner_history,
+        dict,
+    ):
+        raise RuntimeError(
+            "runner_history.json の"
+            "ルートがdictではありません"
+        )
 
     target_race_id = clean(
         runner_history.get(
@@ -119,6 +242,15 @@ def main():
         or []
     )
 
+    if not isinstance(
+        horses,
+        list,
+    ):
+        raise RuntimeError(
+            "runner_history.json の "
+            "horses がlistではありません"
+        )
+
     for horse in horses:
         if not isinstance(
             horse,
@@ -145,6 +277,12 @@ def main():
             )
             or []
         )
+
+        if not isinstance(
+            past_races,
+            list,
+        ):
+            continue
 
         for past in past_races:
             if not isinstance(
@@ -208,6 +346,22 @@ def main():
         requested.keys()
     )
 
+    print(
+        "抽出したユニーク過去レース数:",
+        len(requested_ids),
+    )
+
+    if requested_ids:
+        print(
+            "先頭5 race_id:",
+            requested_ids[:5],
+        )
+
+    if not requested_ids:
+        raise RuntimeError(
+            "過去走race_idを1件も抽出できませんでした"
+        )
+
     # ==========================================
     # 既存DB
     # ==========================================
@@ -241,12 +395,8 @@ def main():
                 race_id
             ] = race
 
-    print(
-        "=============================="
-    )
-    print(
-        "出走馬過去走DB 更新開始"
-    )
+    print("==============================")
+    print("出走馬過去走DB 更新開始")
     print(
         "対象レース:",
         target_race_id,
@@ -259,9 +409,7 @@ def main():
         "既存DBレース数:",
         len(race_map),
     )
-    print(
-        "=============================="
-    )
+    print("==============================")
 
     reused_count = 0
     collected_count = 0
@@ -347,7 +495,6 @@ def main():
 
             collected_count += 1
 
-            # 途中失敗しても取得済みデータを残す
             interim_races = sorted(
                 race_map.values(),
                 key=lambda x: clean(
@@ -446,9 +593,7 @@ def main():
             target_race_id,
 
         "requested_race_count":
-            len(
-                requested_ids
-            ),
+            len(requested_ids),
 
         "connected_requested_race_count":
             connected_requested_count,
@@ -477,12 +622,8 @@ def main():
         database,
     )
 
-    print(
-        "=============================="
-    )
-    print(
-        "出走馬過去走DB 更新完了"
-    )
+    print("==============================")
+    print("出走馬過去走DB 更新完了")
     print(
         "必要レース:",
         len(requested_ids),
@@ -507,9 +648,7 @@ def main():
         "DB総レース数:",
         len(all_races),
     )
-    print(
-        "=============================="
-    )
+    print("==============================")
 
     if errors:
         raise RuntimeError(
