@@ -23,6 +23,12 @@ HEADERS = {
 
 WAIT_SECONDS = 1.0
 
+# 通信リトライ設定
+MAX_RETRIES = 3
+CONNECT_TIMEOUT = 10
+READ_TIMEOUT = 45
+RETRY_WAIT_SECONDS = 2.0
+
 
 def clean_text(value):
     if value is None:
@@ -124,16 +130,101 @@ def get_existing_pedigrees():
 def get_pedigree_html(horse_id):
     url = BASE_URL + horse_id + "/"
 
-    response = requests.get(
-        url,
-        headers=HEADERS,
-        timeout=30,
+    last_error = None
+
+    for attempt in range(
+        1,
+        MAX_RETRIES + 1
+    ):
+        try:
+            if attempt > 1:
+                print(
+                    f"  RETRY {attempt}/{MAX_RETRIES}:",
+                    horse_id,
+                )
+
+            response = requests.get(
+                url,
+                headers=HEADERS,
+                timeout=(
+                    CONNECT_TIMEOUT,
+                    READ_TIMEOUT,
+                ),
+            )
+
+            response.raise_for_status()
+            response.encoding = (
+                response.apparent_encoding
+            )
+
+            return response.text
+
+        except (
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+        ) as e:
+            last_error = e
+
+            print(
+                f"  通信失敗 "
+                f"{attempt}/{MAX_RETRIES}:",
+                str(e),
+            )
+
+            if attempt < MAX_RETRIES:
+                wait_seconds = (
+                    RETRY_WAIT_SECONDS
+                    * attempt
+                )
+
+                print(
+                    f"  {wait_seconds:.1f}秒後に"
+                    "再試行します"
+                )
+
+                time.sleep(
+                    wait_seconds
+                )
+
+        except requests.exceptions.HTTPError:
+            # 404等のHTTPエラーは、
+            # 同じURLへ繰り返しても改善しない可能性が高い。
+            raise
+
+        except requests.exceptions.RequestException as e:
+            last_error = e
+
+            print(
+                f"  リクエスト失敗 "
+                f"{attempt}/{MAX_RETRIES}:",
+                str(e),
+            )
+
+            if attempt < MAX_RETRIES:
+                wait_seconds = (
+                    RETRY_WAIT_SECONDS
+                    * attempt
+                )
+
+                print(
+                    f"  {wait_seconds:.1f}秒後に"
+                    "再試行します"
+                )
+
+                time.sleep(
+                    wait_seconds
+                )
+
+    if last_error is not None:
+        raise RuntimeError(
+            f"血統ページ取得に"
+            f"{MAX_RETRIES}回失敗しました: "
+            f"{last_error}"
+        )
+
+    raise RuntimeError(
+        "血統ページを取得できませんでした"
     )
-
-    response.raise_for_status()
-    response.encoding = response.apparent_encoding
-
-    return response.text
 
 
 def extract_horse_id(link):
