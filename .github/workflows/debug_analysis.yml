@@ -11,6 +11,7 @@ on:
         options:
           - history_pedigree
           - runner_history
+          - runner_race_db
           - runner_time_fit
           - runner_analysis
           - previous_race_analysis
@@ -48,11 +49,6 @@ jobs:
             pip install -r requirements.txt
           fi
 
-      # ==================================================
-      # 今回レース
-      # 本番 Race Full Analysis と同じ race_id.txt を使用
-      # ==================================================
-
       - name: Load race ID
         run: |
           RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
@@ -66,10 +62,6 @@ jobs:
           echo "Target race: $RACE_ID"
           echo "Debug target: ${{ inputs.target }}"
 
-      # ==================================================
-      # 選択した1工程だけ実行
-      # ==================================================
-
       - name: Collect history pedigree
         if: ${{ inputs.target == 'history_pedigree' }}
         run: python history_pedigree.py
@@ -77,6 +69,10 @@ jobs:
       - name: Collect runner history
         if: ${{ inputs.target == 'runner_history' }}
         run: python runner_history.py
+
+      - name: Collect runner race database
+        if: ${{ inputs.target == 'runner_race_db' }}
+        run: python runner_race_db.py
 
       - name: Analyze runner time fit
         if: ${{ inputs.target == 'runner_time_fit' }}
@@ -106,10 +102,6 @@ jobs:
         if: ${{ inputs.target == 'final_analysis' }}
         run: python final_analysis.py
 
-      # ==================================================
-      # 選択工程の出力ファイルを決定
-      # ==================================================
-
       - name: Resolve output file
         run: |
           case "${{ inputs.target }}" in
@@ -118,6 +110,9 @@ jobs:
               ;;
             runner_history)
               OUTPUT="runner_history.json"
+              ;;
+            runner_race_db)
+              OUTPUT="runner_race_db.json"
               ;;
             runner_time_fit)
               OUTPUT="runner_time_fit.json"
@@ -153,10 +148,6 @@ jobs:
 
           echo "OUTPUT_FILE=$OUTPUT" >> "$GITHUB_ENV"
           echo "Output file: $OUTPUT"
-
-      # ==================================================
-      # 選択工程の出力だけ保存
-      # ==================================================
 
       - name: Commit debug result
         run: |
