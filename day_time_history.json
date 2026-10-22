@@ -1,8 +1,8 @@
 {
-  "updated_at": "2026-10-22T06:14:38.188049+09:00",
+  "updated_at": "2026-10-22T19:35:26.555446+09:00",
   "target_race_id": "202608040708",
   "race_date": "2026-10-18",
-  "racecourse": "新潟",
+  "racecourse": "京都",
   "surface": "芝",
   "future_race_usage": false,
   "same_day_excluded": true,
@@ -13,7 +13,7 @@
   "minimum_history_sample": 5,
   "search_stop_at_minimum": true,
   "reference_race_count": 3,
-  "baseline_connected_count": 0,
+  "baseline_connected_count": 1,
   "excluded_current_meeting_count": 0,
   "excluded_nonpast_count": 0,
   "excluded_unknown_date_count": 0,
@@ -48,11 +48,11 @@
       "race_info_text": "サラ系２歳新馬[指]馬齢 本賞金：780、310、200、120、78万円",
       "race_class": "新馬",
       "age_condition": "2歳",
-      "baseline_connected": false,
-      "baseline_sample_count": 0,
-      "baseline_median_seconds": null,
-      "baseline_mad_seconds": null,
-      "time_delta_seconds": null
+      "baseline_connected": true,
+      "baseline_sample_count": 5,
+      "baseline_median_seconds": 121.9,
+      "baseline_mad_seconds": 0.4,
+      "time_delta_seconds": 0.2
     },
     {
       "race_id": "202608040706",
@@ -75,173 +75,207 @@
   ],
   "histories": [
     {
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "surface": "芝",
       "distance": 1400,
       "race_class": "未勝利",
       "age_condition": "2歳",
       "minimum_required_sample": 5,
-      "cache_sample_count": 4,
+      "cache_sample_count": 0,
       "remote_search_used": true,
-      "remote_match_count": 0,
+      "remote_match_count": 3,
       "source_counts": {
         "history_db": 0,
-        "day_time_history_cache": 4,
-        "remote_search": 0
+        "day_time_history_cache": 0,
+        "remote_search": 3
       },
-      "sample_count": 4,
+      "sample_count": 3,
       "baseline_available": false,
       "median_winner_time_seconds": null,
       "median_absolute_deviation_seconds": null,
       "races": [
         {
-          "race_id": "202604030201",
-          "race_date": "2026-08-23",
+          "race_id": "202608040503",
+          "race_date": "2026-10-12",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "age_condition": "2歳",
           "track_condition": "",
-          "winner_time": "1:21.7",
-          "winner_time_seconds": 81.7,
-          "source": "day_time_history_cache"
+          "winner_time": "1:20.8",
+          "winner_time_seconds": 80.8,
+          "source": "remote_search"
         },
         {
-          "race_id": "202604020501",
-          "race_date": "2026-08-09",
+          "race_id": "202508040102",
+          "race_date": "2025-11-09",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "age_condition": "2歳",
           "track_condition": "",
-          "winner_time": "1:21.7",
-          "winner_time_seconds": 81.7,
-          "source": "day_time_history_cache"
+          "winner_time": "1:20.9",
+          "winner_time_seconds": 80.9,
+          "source": "remote_search"
         },
         {
-          "race_id": "202604020201",
-          "race_date": "2026-07-26",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "track_condition": "",
-          "winner_time": "1:22.0",
-          "winner_time_seconds": 82.0,
-          "source": "day_time_history_cache"
-        },
-        {
-          "race_id": "202504040402",
+          "race_id": "202508030803",
           "race_date": "2025-10-26",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "age_condition": "2歳",
           "track_condition": "",
-          "winner_time": "1:23.2",
-          "winner_time_seconds": 83.2,
-          "source": "day_time_history_cache"
+          "winner_time": "1:21.3",
+          "winner_time_seconds": 81.3,
+          "source": "remote_search"
         }
       ]
     },
     {
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "surface": "芝",
       "distance": 2000,
       "race_class": "新馬",
       "age_condition": "2歳",
       "minimum_required_sample": 5,
-      "cache_sample_count": 1,
+      "cache_sample_count": 0,
       "remote_search_used": true,
-      "remote_match_count": 0,
+      "remote_match_count": 5,
       "source_counts": {
         "history_db": 0,
-        "day_time_history_cache": 1,
-        "remote_search": 0
+        "day_time_history_cache": 0,
+        "remote_search": 5
       },
-      "sample_count": 1,
-      "baseline_available": false,
-      "median_winner_time_seconds": null,
-      "median_absolute_deviation_seconds": null,
+      "sample_count": 5,
+      "baseline_available": true,
+      "median_winner_time_seconds": 121.9,
+      "median_absolute_deviation_seconds": 0.4,
       "races": [
         {
-          "race_id": "202604030202",
-          "race_date": "2026-08-23",
+          "race_id": "202608040405",
+          "race_date": "2026-10-12",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "age_condition": "2歳",
           "track_condition": "",
-          "winner_time": "2:07.5",
-          "winner_time_seconds": 127.5,
-          "source": "day_time_history_cache"
+          "winner_time": "2:00.6",
+          "winner_time_seconds": 120.6,
+          "source": "remote_search"
+        },
+        {
+          "race_id": "202608040205",
+          "race_date": "2026-10-04",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "track_condition": "",
+          "winner_time": "2:01.8",
+          "winner_time_seconds": 121.8,
+          "source": "remote_search"
+        },
+        {
+          "race_id": "202508040806",
+          "race_date": "2025-11-30",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "track_condition": "",
+          "winner_time": "2:02.3",
+          "winner_time_seconds": 122.3,
+          "source": "remote_search"
+        },
+        {
+          "race_id": "202508040405",
+          "race_date": "2025-11-16",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "track_condition": "",
+          "winner_time": "2:01.9",
+          "winner_time_seconds": 121.9,
+          "source": "remote_search"
+        },
+        {
+          "race_id": "202508040205",
+          "race_date": "2025-11-09",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "track_condition": "",
+          "winner_time": "2:04.5",
+          "winner_time_seconds": 124.5,
+          "source": "remote_search"
         }
       ]
     },
     {
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "surface": "芝",
       "distance": 1400,
       "race_class": "新馬",
       "age_condition": "2歳",
       "minimum_required_sample": 5,
-      "cache_sample_count": 4,
+      "cache_sample_count": 0,
       "remote_search_used": true,
-      "remote_match_count": 0,
+      "remote_match_count": 3,
       "source_counts": {
         "history_db": 0,
-        "day_time_history_cache": 4,
-        "remote_search": 0
+        "day_time_history_cache": 0,
+        "remote_search": 3
       },
-      "sample_count": 4,
+      "sample_count": 3,
       "baseline_available": false,
       "median_winner_time_seconds": null,
       "median_absolute_deviation_seconds": null,
       "races": [
         {
-          "race_id": "202604030304",
-          "race_date": "2026-08-30",
+          "race_id": "202608040204",
+          "race_date": "2026-10-04",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "age_condition": "2歳",
           "track_condition": "",
-          "winner_time": "1:23.1",
-          "winner_time_seconds": 83.1,
-          "source": "day_time_history_cache"
+          "winner_time": "1:20.5",
+          "winner_time_seconds": 80.5,
+          "source": "remote_search"
         },
         {
-          "race_id": "202604020702",
-          "race_date": "2026-08-16",
+          "race_id": "202508040106",
+          "race_date": "2025-11-09",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "track_condition": "",
+          "winner_time": "1:22.7",
+          "winner_time_seconds": 82.7,
+          "source": "remote_search"
+        },
+        {
+          "race_id": "202508030704",
+          "race_date": "2025-10-19",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "age_condition": "2歳",
           "track_condition": "",
           "winner_time": "1:22.2",
           "winner_time_seconds": 82.2,
-          "source": "day_time_history_cache"
-        },
-        {
-          "race_id": "202604020303",
-          "race_date": "2026-08-02",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "track_condition": "",
-          "winner_time": "1:21.6",
-          "winner_time_seconds": 81.6,
-          "source": "day_time_history_cache"
-        },
-        {
-          "race_id": "202504040205",
-          "race_date": "2025-10-19",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "track_condition": "",
-          "winner_time": "1:23.7",
-          "winner_time_seconds": 83.7,
-          "source": "day_time_history_cache"
+          "source": "remote_search"
         }
       ]
     }
   ],
   "leak_check_passed": true,
   "leak_race_ids": [],
-  "error_count": 0,
-  "errors": []
+  "error_count": 1,
+  "errors": [
+    {
+      "race_id": "202608020406",
+      "condition": {
+        "racecourse": "京都",
+        "surface": "芝",
+        "distance": 1400,
+        "race_class": "新馬",
+        "age_condition": "2歳"
+      },
+      "error": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))"
+    }
+  ]
 }
