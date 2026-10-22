@@ -1,0 +1,178 @@
+name: Race Debug Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Run only this step"
+        required: true
+        default: "history_pedigree"
+        type: choice
+        options:
+          - history_pedigree
+          - runner_history
+          - runner_time_fit
+          - runner_analysis
+          - previous_race_analysis
+          - pace_analysis
+          - bloodline_stats
+          - race_bloodline_score
+          - final_analysis
+
+permissions:
+  contents: write
+
+concurrency:
+  group: race-debug-analysis
+  cancel-in-progress: false
+
+jobs:
+  debug-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Load race ID
+        run: |
+          if [ ! -f current_race.txt ]; then
+            echo "ERROR: current_race.txt not found"
+            exit 1
+          fi
+
+          RACE_ID="$(tr -d '[:space:]' < current_race.txt)"
+
+          if [ -z "$RACE_ID" ]; then
+            echo "ERROR: race ID is empty"
+            exit 1
+          fi
+
+          echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
+          echo "Target race: $RACE_ID"
+          echo "Debug target: ${{ inputs.target }}"
+
+      # ==================================================
+      # 選択した1工程だけ実行
+      # ==================================================
+
+      - name: Collect history pedigree
+        if: ${{ inputs.target == 'history_pedigree' }}
+        run: python history_pedigree.py
+
+      - name: Collect runner history
+        if: ${{ inputs.target == 'runner_history' }}
+        run: python runner_history.py
+
+      - name: Analyze runner time fit
+        if: ${{ inputs.target == 'runner_time_fit' }}
+        run: python runner_time_fit.py
+
+      - name: Analyze runners
+        if: ${{ inputs.target == 'runner_analysis' }}
+        run: python runner_analysis.py
+
+      - name: Analyze previous race
+        if: ${{ inputs.target == 'previous_race_analysis' }}
+        run: python previous_race_analysis.py
+
+      - name: Analyze pace
+        if: ${{ inputs.target == 'pace_analysis' }}
+        run: python pace_analysis.py
+
+      - name: Build bloodline statistics
+        if: ${{ inputs.target == 'bloodline_stats' }}
+        run: python bloodline_stats.py
+
+      - name: Score race bloodlines
+        if: ${{ inputs.target == 'race_bloodline_score' }}
+        run: python race_bloodline_score.py
+
+      - name: Run final analysis
+        if: ${{ inputs.target == 'final_analysis' }}
+        run: python final_analysis.py
+
+      # ==================================================
+      # 選択工程の出力だけ確認
+      # ==================================================
+
+      - name: Resolve output file
+        run: |
+          case "${{ inputs.target }}" in
+            history_pedigree)
+              OUTPUT="history_pedigree.json"
+              ;;
+            runner_history)
+              OUTPUT="runner_history.json"
+              ;;
+            runner_time_fit)
+              OUTPUT="runner_time_fit.json"
+              ;;
+            runner_analysis)
+              OUTPUT="runner_analysis.json"
+              ;;
+            previous_race_analysis)
+              OUTPUT="previous_race_analysis.json"
+              ;;
+            pace_analysis)
+              OUTPUT="pace_analysis.json"
+              ;;
+            bloodline_stats)
+              OUTPUT="bloodline_stats.json"
+              ;;
+            race_bloodline_score)
+              OUTPUT="race_bloodline_score.json"
+              ;;
+            final_analysis)
+              OUTPUT="final_analysis.json"
+              ;;
+            *)
+              echo "ERROR: unknown target"
+              exit 1
+              ;;
+          esac
+
+          if [ ! -f "$OUTPUT" ]; then
+            echo "ERROR: output file not found: $OUTPUT"
+            exit 1
+          fi
+
+          echo "OUTPUT_FILE=$OUTPUT" >> "$GITHUB_ENV"
+          echo "Output file: $OUTPUT"
+
+      # ==================================================
+      # 選択工程の結果だけ保存
+      # ==================================================
+
+      - name: Commit debug result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add "$OUTPUT_FILE"
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m \
+            "Update debug ${{ inputs.target }} $RACE_ID"
+
+          git pull --rebase origin main
+          git push origin HEAD:main
