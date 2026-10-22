@@ -1,17 +1,37 @@
+import concurrent.futures
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 RUNNER_HISTORY_FILE = "runner_history.json"
 OUTPUT_FILE = "runner_race_db.json"
-TEMP_FILE = "history.json"
+HISTORY_SCRIPT = "history.py"
 
-WAIT_SECONDS = 2
+# GitHub Actions向け高速化
+MAX_WORKERS = 8
+FETCH_TIMEOUT_SECONDS = 90
+MAX_RETRIES = 2
+RETRY_WAIT_SECONDS = 2
+
+JST = timezone(timedelta(hours=9))
+
+
+def now_iso():
+    return datetime.now(JST).isoformat()
+
+
+def clean(value):
+    return str(value or "").strip()
+
+
+def valid_race_id(value):
+    return bool(re.fullmatch(r"\d{12}", clean(value)))
 
 
 def load_json(path, default=None):
@@ -23,7 +43,9 @@ def load_json(path, default=None):
 
 
 def save_json(path, data):
-    with open(path, "w", encoding="utf-8") as f:
+    temp_path = f"{path}.tmp"
+
+    with open(temp_path, "w", encoding="utf-8") as f:
         json.dump(
             data,
             f,
@@ -31,640 +53,688 @@ def save_json(path, data):
             indent=2,
         )
 
-
-def clean(value):
-    return str(value or "").strip()
+    os.replace(temp_path, path)
 
 
-def valid_race_id(value):
-    return bool(
-        re.fullmatch(
-            r"\d{12}",
-            clean(value),
-        )
-    )
+def get_existing_races(db):
+    races = db.get("races", [])
 
+    if isinstance(races, dict):
+        result = []
 
-def get_existing_races(database):
-    if isinstance(database, list):
-        return database
+        for race_id, race in races.items():
+            if not isinstance(race, dict):
+                continue
 
-    if not isinstance(database, dict):
-        return []
+            item = dict(race)
 
-    races = database.get(
-        "races",
-        [],
-    )
+            if not item.get("race_id"):
+                item["race_id"] = race_id
+
+            result.append(item)
+
+        return result
 
     if isinstance(races, list):
-        return races
+        return [
+            race
+            for race in races
+            if isinstance(race, dict)
+        ]
 
     return []
 
 
-def print_input_diagnostics(runner_history):
-    print("==============================")
-    print("runner_history 診断")
-    print("cwd:", os.getcwd())
-    print(
-        "runner_history.json exists:",
-        os.path.exists(RUNNER_HISTORY_FILE),
+def build_existing_index(races):
+    index = {}
+
+    for race in races:
+        race_id = clean(race.get("race_id"))
+
+        if not valid_race_id(race_id):
+            continue
+
+        results = race.get("results")
+
+        if not isinstance(results, list) or not results:
+            continue
+
+        index[race_id] = race
+
+    return index
+
+
+def collect_requested_race_ids(runner_history):
+    requested = set()
+
+    horses = runner_history.get("horses", []) or []
+
+    if not isinstance(horses, list):
+        return []
+
+    for horse in horses:
+        if not isinstance(horse, dict):
+            continue
+
+        past_races = horse.get("past_races", []) or []
+
+        if not isinstance(past_races, list):
+            continue
+
+        for past in past_races:
+            if not isinstance(past, dict):
+                continue
+
+            race_id = clean(past.get("race_id"))
+
+            if valid_race_id(race_id):
+                requested.add(race_id)
+
+    return sorted(requested)
+
+
+def parse_race_date(value):
+    text = clean(value)
+
+    if not text:
+        return None
+
+    for fmt in (
+        "%Y-%m-%d",
+        "%Y/%m/%d",
+        "%Y%m%d",
+    ):
+        try:
+            return datetime.strptime(text[:10], fmt).date()
+        except ValueError:
+            pass
+
+    try:
+        return datetime.fromisoformat(
+            text.replace("Z", "+00:00")
+        ).date()
+    except ValueError:
+        return None
+
+
+def get_target_date(runner_history):
+    target_date = parse_race_date(
+        runner_history.get("target_date")
     )
 
-    if os.path.exists(RUNNER_HISTORY_FILE):
-        print(
-            "runner_history.json size:",
-            os.path.getsize(RUNNER_HISTORY_FILE),
+    if target_date is None:
+        raise RuntimeError(
+            "runner_history.json の target_date を取得できません。"
         )
 
-    print(
-        "root type:",
-        type(runner_history).__name__,
-    )
+    return target_date
 
-    if isinstance(runner_history, dict):
-        print(
-            "root keys:",
-            sorted(runner_history.keys()),
-        )
 
-        print(
-            "target_race_id:",
-            runner_history.get("target_race_id"),
-        )
+def get_past_race_date_index(runner_history):
+    result = {}
 
-        print(
-            "target_horse_count:",
-            runner_history.get("target_horse_count"),
-        )
+    horses = runner_history.get("horses", []) or []
 
-        print(
-            "collected_horse_count:",
-            runner_history.get("collected_horse_count"),
-        )
+    if not isinstance(horses, list):
+        return result
 
-        print(
-            "total_past_race_count:",
-            runner_history.get("total_past_race_count"),
-        )
+    for horse in horses:
+        if not isinstance(horse, dict):
+            continue
 
-        horses = runner_history.get(
-            "horses",
-            [],
-        )
+        past_races = horse.get("past_races", []) or []
 
-        print(
-            "horses type:",
-            type(horses).__name__,
-        )
+        if not isinstance(past_races, list):
+            continue
 
-        if isinstance(horses, list):
-            print(
-                "horses len:",
-                len(horses),
+        for past in past_races:
+            if not isinstance(past, dict):
+                continue
+
+            race_id = clean(past.get("race_id"))
+
+            if not valid_race_id(race_id):
+                continue
+
+            race_date = (
+                past.get("race_date")
+                or past.get("date")
             )
 
-            total_past = 0
+            parsed = parse_race_date(race_date)
 
-            for index, horse in enumerate(
-                horses,
-                start=1,
-            ):
-                if not isinstance(horse, dict):
-                    print(
-                        f"horse[{index}] invalid type:",
-                        type(horse).__name__,
+            if parsed is not None:
+                result[race_id] = parsed
+
+    return result
+
+
+def run_history_fetch(race_id):
+    """
+    history.py は history.json という固定ファイル名を使うため、
+    並列実行時に衝突しないよう各レース専用の一時ディレクトリで実行する。
+    """
+
+    script_path = os.path.abspath(HISTORY_SCRIPT)
+
+    if not os.path.exists(script_path):
+        return {
+            "race_id": race_id,
+            "success": False,
+            "error": f"{HISTORY_SCRIPT} が見つかりません",
+        }
+
+    last_error = ""
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            with tempfile.TemporaryDirectory(
+                prefix=f"runner_race_{race_id}_"
+            ) as temp_dir:
+
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        script_path,
+                        race_id,
+                    ],
+                    cwd=temp_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=FETCH_TIMEOUT_SECONDS,
+                )
+
+                if result.returncode != 0:
+                    last_error = (
+                        result.stderr.strip()
+                        or result.stdout.strip()
+                        or f"returncode={result.returncode}"
                     )
-                    continue
 
-                past_races = horse.get(
-                    "past_races",
-                    [],
+                    if attempt < MAX_RETRIES:
+                        time.sleep(
+                            RETRY_WAIT_SECONDS * attempt
+                        )
+                        continue
+
+                    return {
+                        "race_id": race_id,
+                        "success": False,
+                        "error": last_error,
+                    }
+
+                history_path = os.path.join(
+                    temp_dir,
+                    "history.json",
                 )
 
-                past_count = (
-                    len(past_races)
-                    if isinstance(past_races, list)
-                    else -1
+                if not os.path.exists(history_path):
+                    last_error = (
+                        "history.py 実行後に "
+                        "history.json が生成されませんでした"
+                    )
+
+                    if attempt < MAX_RETRIES:
+                        time.sleep(
+                            RETRY_WAIT_SECONDS * attempt
+                        )
+                        continue
+
+                    return {
+                        "race_id": race_id,
+                        "success": False,
+                        "error": last_error,
+                    }
+
+                history = load_json(history_path)
+
+                if not isinstance(history, dict):
+                    last_error = (
+                        "history.json がdictではありません"
+                    )
+
+                    if attempt < MAX_RETRIES:
+                        time.sleep(
+                            RETRY_WAIT_SECONDS * attempt
+                        )
+                        continue
+
+                    return {
+                        "race_id": race_id,
+                        "success": False,
+                        "error": last_error,
+                    }
+
+                fetched_race_id = clean(
+                    history.get("race_id")
                 )
 
-                total_past += max(
-                    past_count,
-                    0,
-                )
+                if fetched_race_id != race_id:
+                    last_error = (
+                        "race_id不一致: "
+                        f"requested={race_id}, "
+                        f"fetched={fetched_race_id}"
+                    )
 
-                print(
-                    f"horse[{index}]",
-                    clean(horse.get("horse_name")),
-                    "past_races:",
-                    past_count,
-                )
+                    if attempt < MAX_RETRIES:
+                        time.sleep(
+                            RETRY_WAIT_SECONDS * attempt
+                        )
+                        continue
 
-            print(
-                "calculated total past_races:",
-                total_past,
+                    return {
+                        "race_id": race_id,
+                        "success": False,
+                        "error": last_error,
+                    }
+
+                results = history.get("results")
+
+                if not isinstance(results, list) or not results:
+                    last_error = "results が空です"
+
+                    if attempt < MAX_RETRIES:
+                        time.sleep(
+                            RETRY_WAIT_SECONDS * attempt
+                        )
+                        continue
+
+                    return {
+                        "race_id": race_id,
+                        "success": False,
+                        "error": last_error,
+                    }
+
+                history["runner_race_reference"] = True
+
+                return {
+                    "race_id": race_id,
+                    "success": True,
+                    "race": history,
+                    "attempt": attempt,
+                }
+
+        except subprocess.TimeoutExpired:
+            last_error = (
+                f"{FETCH_TIMEOUT_SECONDS}秒でタイムアウト"
             )
 
-    print("==============================")
+        except Exception as e:
+            last_error = f"{type(e).__name__}: {e}"
+
+        if attempt < MAX_RETRIES:
+            time.sleep(
+                RETRY_WAIT_SECONDS * attempt
+            )
+
+    return {
+        "race_id": race_id,
+        "success": False,
+        "error": last_error or "unknown error",
+    }
+
+
+def build_output(
+    runner_history,
+    target_date,
+    requested_ids,
+    race_index,
+    new_count,
+    reused_count,
+    errors,
+    skipped_future,
+):
+    connected_ids = [
+        race_id
+        for race_id in requested_ids
+        if race_id in race_index
+    ]
+
+    races = [
+        race_index[race_id]
+        for race_id in sorted(race_index.keys())
+    ]
+
+    return {
+        "updated_at": now_iso(),
+        "db_type": "runner_past_race_accumulated",
+        "source": RUNNER_HISTORY_FILE,
+        "target_race_id": clean(
+            runner_history.get("target_race_id")
+        ),
+        "target_date": target_date.isoformat(),
+        "future_race_usage": False,
+        "leak_check_passed": True,
+        "requested_race_count": len(requested_ids),
+        "connected_race_count": len(connected_ids),
+        "new_race_count": new_count,
+        "reused_race_count": reused_count,
+        "error_count": len(errors),
+        "skipped_future_count": len(skipped_future),
+        "missing_race_count": (
+            len(requested_ids)
+            - len(connected_ids)
+        ),
+        "errors": errors,
+        "skipped_future_races": skipped_future,
+        "races": races,
+    }
 
 
 def main():
+    print("runner_race_db.py 開始")
+
     runner_history = load_json(
         RUNNER_HISTORY_FILE
     )
 
-    # ==========================================
-    # Action上で実際に読んでいる内容を診断
-    # ==========================================
-
-    print_input_diagnostics(
-        runner_history
-    )
-
-    if not isinstance(
-        runner_history,
-        dict,
-    ):
+    if not isinstance(runner_history, dict):
         raise RuntimeError(
-            "runner_history.json の"
-            "ルートがdictではありません"
+            "runner_history.json が不正です。"
         )
 
     target_race_id = clean(
-        runner_history.get(
-            "target_race_id"
-        )
+        runner_history.get("target_race_id")
     )
 
-    if not valid_race_id(
-        target_race_id
-    ):
+    if not valid_race_id(target_race_id):
         raise RuntimeError(
             "runner_history.json の "
-            "target_race_id が不正です"
+            "target_race_id が不正です。"
         )
 
-    if (
-        runner_history.get(
-            "future_race_usage"
-        )
-        is not False
-    ):
-        raise RuntimeError(
-            "runner_history.json に"
-            "未来レース混入の可能性があります"
-        )
-
-    if (
-        runner_history.get(
-            "leak_check_passed"
-        )
-        is not True
-    ):
+    if runner_history.get("future_race_usage") is not False:
         raise RuntimeError(
             "runner_history.json の "
-            "leak_check_passed が "
-            "true ではありません"
+            "future_race_usage が false ではありません。"
         )
 
-    # ==========================================
-    # 全出走馬の過去走 race_id を収集
-    # ==========================================
-
-    requested = {}
-
-    horses = (
-        runner_history.get(
-            "horses",
-            [],
+    if runner_history.get("leak_check_passed") is not True:
+        raise RuntimeError(
+            "runner_history.json の "
+            "leak_check_passed が true ではありません。"
         )
-        or []
+
+    target_date = get_target_date(
+        runner_history
     )
 
-    if not isinstance(
-        horses,
-        list,
-    ):
-        raise RuntimeError(
-            "runner_history.json の "
-            "horses がlistではありません"
-        )
-
-    for horse in horses:
-        if not isinstance(
-            horse,
-            dict,
-        ):
-            continue
-
-        horse_id = clean(
-            horse.get(
-                "horse_id"
-            )
-        )
-
-        horse_name = clean(
-            horse.get(
-                "horse_name"
-            )
-        )
-
-        past_races = (
-            horse.get(
-                "past_races",
-                [],
-            )
-            or []
-        )
-
-        if not isinstance(
-            past_races,
-            list,
-        ):
-            continue
-
-        for past in past_races:
-            if not isinstance(
-                past,
-                dict,
-            ):
-                continue
-
-            race_id = clean(
-                past.get(
-                    "race_id"
-                )
-            )
-
-            if not valid_race_id(
-                race_id
-            ):
-                continue
-
-            if race_id == target_race_id:
-                continue
-
-            if race_id not in requested:
-                requested[race_id] = {
-                    "race_id": race_id,
-                    "date": clean(
-                        past.get(
-                            "date"
-                        )
-                    ),
-                    "race_name": clean(
-                        past.get(
-                            "race_name"
-                        )
-                    ),
-                    "referenced_by": [],
-                }
-
-            reference = {
-                "horse_id": horse_id,
-                "horse_name": horse_name,
-            }
-
-            if (
-                reference
-                not in requested[
-                    race_id
-                ][
-                    "referenced_by"
-                ]
-            ):
-                requested[
-                    race_id
-                ][
-                    "referenced_by"
-                ].append(
-                    reference
-                )
-
-    requested_ids = sorted(
-        requested.keys()
+    requested_ids = collect_requested_race_ids(
+        runner_history
     )
+
+    requested_ids = [
+        race_id
+        for race_id in requested_ids
+        if race_id != target_race_id
+    ]
 
     print(
-        "抽出したユニーク過去レース数:",
-        len(requested_ids),
+        f"抽出したユニーク過去レース数: "
+        f"{len(requested_ids)}"
     )
-
-    if requested_ids:
-        print(
-            "先頭5 race_id:",
-            requested_ids[:5],
-        )
 
     if not requested_ids:
         raise RuntimeError(
-            "過去走race_idを1件も抽出できませんでした"
+            "必要過去レース数が0件です。"
         )
 
-    # ==========================================
-    # 既存DB
-    # ==========================================
-
-    existing_database = load_json(
-        OUTPUT_FILE,
-        {},
+    past_date_index = get_past_race_date_index(
+        runner_history
     )
 
-    race_map = {}
+    skipped_future = []
 
-    for race in get_existing_races(
-        existing_database
-    ):
-        if not isinstance(
-            race,
-            dict,
+    filtered_requested_ids = []
+
+    for race_id in requested_ids:
+        race_date = past_date_index.get(race_id)
+
+        if (
+            race_date is not None
+            and race_date >= target_date
         ):
+            skipped_future.append(
+                {
+                    "race_id": race_id,
+                    "race_date": race_date.isoformat(),
+                    "reason": (
+                        "対象レース当日以降のため除外"
+                    ),
+                }
+            )
             continue
 
-        race_id = clean(
-            race.get(
-                "race_id"
-            )
+        filtered_requested_ids.append(race_id)
+
+    requested_ids = filtered_requested_ids
+
+    print(
+        f"未来リーク除外後の必要レース数: "
+        f"{len(requested_ids)}"
+    )
+
+    if skipped_future:
+        print(
+            f"未来リーク除外: "
+            f"{len(skipped_future)}件"
         )
 
-        if valid_race_id(
-            race_id
-        ):
-            race_map[
-                race_id
-            ] = race
+    existing_db = load_json(
+        OUTPUT_FILE,
+        default={},
+    )
 
-    print("==============================")
-    print("出走馬過去走DB 更新開始")
-    print(
-        "対象レース:",
-        target_race_id,
+    existing_races = get_existing_races(
+        existing_db
     )
-    print(
-        "必要過去レース数:",
-        len(requested_ids),
-    )
-    print(
-        "既存DBレース数:",
-        len(race_map),
-    )
-    print("==============================")
 
-    reused_count = 0
-    collected_count = 0
+    race_index = build_existing_index(
+        existing_races
+    )
+
+    reused_ids = [
+        race_id
+        for race_id in requested_ids
+        if race_id in race_index
+    ]
+
+    missing_ids = [
+        race_id
+        for race_id in requested_ids
+        if race_id not in race_index
+    ]
+
+    print(
+        f"既存DBレース数: "
+        f"{len(race_index)}"
+    )
+
+    print(
+        f"再利用: "
+        f"{len(reused_ids)}"
+    )
+
+    print(
+        f"新規取得対象: "
+        f"{len(missing_ids)}"
+    )
+
+    new_count = 0
     errors = []
 
-    # ==========================================
-    # 必要な過去走を取得
-    # ==========================================
-
-    for index, race_id in enumerate(
-        requested_ids,
-        start=1,
-    ):
-        if race_id in race_map:
-            reused_count += 1
-
-            print(
-                f"[{index}/{len(requested_ids)}] "
-                f"既存結果再利用: "
-                f"{race_id}"
-            )
-
-            continue
-
-        print(
-            f"[{index}/{len(requested_ids)}] "
-            f"新規取得: "
-            f"{race_id}"
-        )
-
-        try:
-            subprocess.run(
-                [
-                    sys.executable,
-                    "history.py",
-                    race_id,
-                ],
-                check=True,
-            )
-
-            result = load_json(
-                TEMP_FILE
-            )
-
-            if (
-                clean(
-                    result.get(
-                        "race_id"
-                    )
-                )
-                != race_id
-            ):
-                raise RuntimeError(
-                    "history.json の "
-                    "race_id が一致しません"
-                )
-
-            results = result.get(
-                "results",
-                [],
-            )
-
-            if (
-                not isinstance(
-                    results,
-                    list,
-                )
-                or not results
-            ):
-                raise RuntimeError(
-                    "出走結果が0件です"
-                )
-
-            result[
-                "runner_race_reference"
-            ] = requested[
-                race_id
-            ]
-
-            race_map[
-                race_id
-            ] = result
-
-            collected_count += 1
-
-            interim_races = sorted(
-                race_map.values(),
-                key=lambda x: clean(
-                    x.get(
-                        "race_id"
-                    )
-                ),
-            )
-
-            interim_database = {
-                "updated_at":
-                    datetime.now(
-                        timezone.utc
-                    ).isoformat(),
-
-                "source":
-                    "netkeiba",
-
-                "database_type":
-                    "runner_past_races_accumulated",
-
-                "target_race_id":
-                    target_race_id,
-
-                "races":
-                    interim_races,
-            }
-
-            save_json(
-                OUTPUT_FILE,
-                interim_database,
-            )
-
-            print(
-                "取得成功:",
-                race_id,
-                "出走馬",
-                len(results),
-                "頭",
-            )
-
-        except Exception as e:
-            print(
-                "取得失敗:",
-                race_id,
-                str(e),
-            )
-
-            errors.append({
-                "race_id":
-                    race_id,
-
-                "error":
-                    str(e),
-            })
-
-        if index < len(
-            requested_ids
-        ):
-            time.sleep(
-                WAIT_SECONDS
-            )
-
-    # ==========================================
-    # 最終DB
-    # ==========================================
-
-    all_races = sorted(
-        race_map.values(),
-        key=lambda x: clean(
-            x.get(
-                "race_id"
-            )
-        ),
+    # 取得開始前にも現在状態を保存
+    initial_output = build_output(
+        runner_history=runner_history,
+        target_date=target_date,
+        requested_ids=requested_ids,
+        race_index=race_index,
+        new_count=new_count,
+        reused_count=len(reused_ids),
+        errors=errors,
+        skipped_future=skipped_future,
     )
-
-    connected_requested_count = sum(
-        1
-        for race_id in requested_ids
-        if race_id in race_map
-    )
-
-    database = {
-        "updated_at":
-            datetime.now(
-                timezone.utc
-            ).isoformat(),
-
-        "source":
-            "netkeiba",
-
-        "database_type":
-            "runner_past_races_accumulated",
-
-        "target_race_id":
-            target_race_id,
-
-        "requested_race_count":
-            len(requested_ids),
-
-        "connected_requested_race_count":
-            connected_requested_count,
-
-        "newly_collected_count":
-            collected_count,
-
-        "existing_reused_count":
-            reused_count,
-
-        "error_count":
-            len(errors),
-
-        "errors":
-            errors,
-
-        "total_race_count":
-            len(all_races),
-
-        "races":
-            all_races,
-    }
 
     save_json(
         OUTPUT_FILE,
-        database,
+        initial_output,
     )
 
-    print("==============================")
-    print("出走馬過去走DB 更新完了")
-    print(
-        "必要レース:",
-        len(requested_ids),
-    )
-    print(
-        "接続済み:",
-        connected_requested_count,
-    )
-    print(
-        "新規取得:",
-        collected_count,
-    )
-    print(
-        "既存再利用:",
-        reused_count,
-    )
-    print(
-        "取得失敗:",
-        len(errors),
-    )
-    print(
-        "DB総レース数:",
-        len(all_races),
-    )
-    print("==============================")
+    if missing_ids:
+        print(
+            f"並列取得開始: "
+            f"workers={MAX_WORKERS}"
+        )
 
+        completed = 0
+        total = len(missing_ids)
+
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=MAX_WORKERS
+        ) as executor:
+
+            future_map = {
+                executor.submit(
+                    run_history_fetch,
+                    race_id,
+                ): race_id
+                for race_id in missing_ids
+            }
+
+            for future in concurrent.futures.as_completed(
+                future_map
+            ):
+                race_id = future_map[future]
+                completed += 1
+
+                try:
+                    result = future.result()
+                except Exception as e:
+                    result = {
+                        "race_id": race_id,
+                        "success": False,
+                        "error": (
+                            f"{type(e).__name__}: {e}"
+                        ),
+                    }
+
+                if result.get("success"):
+                    race = result.get("race")
+
+                    if isinstance(race, dict):
+                        race_index[race_id] = race
+                        new_count += 1
+
+                        print(
+                            f"[{completed}/{total}] "
+                            f"OK {race_id}"
+                        )
+
+                else:
+                    error = {
+                        "race_id": race_id,
+                        "error": clean(
+                            result.get("error")
+                        ),
+                    }
+
+                    errors.append(error)
+
+                    print(
+                        f"[{completed}/{total}] "
+                        f"ERROR {race_id}: "
+                        f"{error['error']}"
+                    )
+
+                # 1レース終了ごとに保存。
+                # Actionが途中停止しても取得済みデータを残す。
+                current_output = build_output(
+                    runner_history=runner_history,
+                    target_date=target_date,
+                    requested_ids=requested_ids,
+                    race_index=race_index,
+                    new_count=new_count,
+                    reused_count=len(reused_ids),
+                    errors=errors,
+                    skipped_future=skipped_future,
+                )
+
+                save_json(
+                    OUTPUT_FILE,
+                    current_output,
+                )
+
+    final_output = build_output(
+        runner_history=runner_history,
+        target_date=target_date,
+        requested_ids=requested_ids,
+        race_index=race_index,
+        new_count=new_count,
+        reused_count=len(reused_ids),
+        errors=errors,
+        skipped_future=skipped_future,
+    )
+
+    save_json(
+        OUTPUT_FILE,
+        final_output,
+    )
+
+    connected_count = (
+        final_output["connected_race_count"]
+    )
+
+    requested_count = (
+        final_output["requested_race_count"]
+    )
+
+    print("")
+    print("===== runner_race_db 結果 =====")
+    print(
+        f"必要過去レース数: "
+        f"{requested_count}"
+    )
+    print(
+        f"接続成功: "
+        f"{connected_count}"
+    )
+    print(
+        f"既存再利用: "
+        f"{len(reused_ids)}"
+    )
+    print(
+        f"新規取得成功: "
+        f"{new_count}"
+    )
+    print(
+        f"取得エラー: "
+        f"{len(errors)}"
+    )
+    print(
+        f"未来リーク除外: "
+        f"{len(skipped_future)}"
+    )
+    print(
+        f"未接続: "
+        f"{final_output['missing_race_count']}"
+    )
+    print("===============================")
+
+    # 今回は取得エラーを明示的に失敗扱いにする。
+    # NAR等の非対応レースが判明した場合は、
+    # 次段階で「非対応として正常スキップ」に分離する。
     if errors:
         raise RuntimeError(
-            "runner_race_db "
-            f"取得失敗が "
-            f"{len(errors)} 件あります"
+            f"過去レース取得エラーが "
+            f"{len(errors)}件あります。"
         )
 
-    if (
-        connected_requested_count
-        != len(requested_ids)
-    ):
+    if connected_count != requested_count:
         raise RuntimeError(
-            "必要な過去走を"
-            "すべて接続できませんでした"
+            "必要過去レースをすべて接続できませんでした。"
         )
+
+    print("runner_race_db.py 完了")
 
 
 if __name__ == "__main__":
