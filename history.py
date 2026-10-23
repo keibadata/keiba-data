@@ -27,7 +27,11 @@ def horse_id_from_href(href):
     if not href:
         return ""
 
-    m = re.search(r"/horse/(?:result/)?(\d+)", href)
+    m = re.search(
+        r"/horse/(?:result/)?(\d+)",
+        href
+    )
+
     return m.group(1) if m else ""
 
 
@@ -59,8 +63,104 @@ def get_html(race_id):
     return r.text
 
 
-def parse_race_info(soup, race_id):
+def detect_race_class(page_text):
+    text = re.sub(
+        r"\s+",
+        " ",
+        page_text
+    )
 
+    patterns = [
+        (r"(?:GⅠ|GI|ＧⅠ|ＧＩ|G1|Ｇ１)", "G1"),
+        (r"(?:GⅡ|GII|ＧⅡ|ＧＩＩ|G2|Ｇ２)", "G2"),
+        (r"(?:GⅢ|GIII|ＧⅢ|ＧＩＩＩ|G3|Ｇ３)", "G3"),
+        (
+            r"(?:リステッド|Listed|LISTED|\(L\)|（L）)",
+            "L"
+        ),
+        (
+            r"(?:オープン|OPEN|Open|OP)",
+            "OP"
+        ),
+        (
+            r"(?:3勝クラス|３勝クラス|1600万下)",
+            "3勝クラス"
+        ),
+        (
+            r"(?:2勝クラス|２勝クラス|1000万下)",
+            "2勝クラス"
+        ),
+        (
+            r"(?:1勝クラス|１勝クラス|500万下)",
+            "1勝クラス"
+        ),
+        (
+            r"(?:未勝利)",
+            "未勝利"
+        ),
+        (
+            r"(?:新馬)",
+            "新馬"
+        ),
+    ]
+
+    for pattern, label in patterns:
+        if re.search(
+            pattern,
+            text,
+            re.IGNORECASE
+        ):
+            return label
+
+    return ""
+
+
+def detect_age_condition(page_text):
+    text = re.sub(
+        r"\s+",
+        " ",
+        page_text
+    )
+
+    # 「3歳以上」等を「3歳」より先に判定する
+    patterns = [
+        (
+            r"(?:4歳以上|４歳以上|4才以上|４才以上)",
+            "4歳以上"
+        ),
+        (
+            r"(?:3歳以上|３歳以上|3才以上|３才以上)",
+            "3歳以上"
+        ),
+        (
+            r"(?:2歳以上|２歳以上|2才以上|２才以上)",
+            "2歳以上"
+        ),
+        (
+            r"(?:2歳|２歳|2才|２才)",
+            "2歳"
+        ),
+        (
+            r"(?:3歳|３歳|3才|３才)",
+            "3歳"
+        ),
+        (
+            r"(?:4歳|４歳|4才|４才)",
+            "4歳"
+        ),
+    ]
+
+    for pattern, label in patterns:
+        if re.search(
+            pattern,
+            text
+        ):
+            return label
+
+    return ""
+
+
+def parse_race_info(soup, race_id):
     page_text = soup.get_text(
         " ",
         strip=True
@@ -73,16 +173,24 @@ def parse_race_info(soup, race_id):
         "distance": "",
         "surface": "",
         "track_condition": "",
+        "race_class": "",
+        "age_condition": "",
     }
 
+    # ==========================================
     # 開催日
+    # ==========================================
+
     patterns = [
         r"(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日",
         r"(\d{4})[./-](\d{1,2})[./-](\d{1,2})",
     ]
 
     for pattern in patterns:
-        m = re.search(pattern, page_text)
+        m = re.search(
+            pattern,
+            page_text
+        )
 
         if m:
             info["race_date"] = (
@@ -92,7 +200,10 @@ def parse_race_info(soup, race_id):
             )
             break
 
+    # ==========================================
     # 競馬場
+    # ==========================================
+
     racecourses = [
         "札幌",
         "函館",
@@ -106,24 +217,59 @@ def parse_race_info(soup, race_id):
         "小倉",
     ]
 
-    for course in racecourses:
-        if course in page_text:
-            info["racecourse"] = course
-            break
+    # race_idから中央競馬場を優先判定
+    venue_map = {
+        "01": "札幌",
+        "02": "函館",
+        "03": "福島",
+        "04": "新潟",
+        "05": "東京",
+        "06": "中山",
+        "07": "中京",
+        "08": "京都",
+        "09": "阪神",
+        "10": "小倉",
+    }
+
+    if re.fullmatch(
+        r"\d{12}",
+        race_id
+    ):
+        venue_code = race_id[4:6]
+
+        if venue_code in venue_map:
+            info["racecourse"] = (
+                venue_map[venue_code]
+            )
+
+    # race_idから取れない場合だけ本文を見る
+    if not info["racecourse"]:
+        for course in racecourses:
+            if course in page_text:
+                info["racecourse"] = course
+                break
 
     # ==========================================
     # R
-    # race_id末尾2桁を使用
-    # 202605040502 → 02 → 2R
     # ==========================================
 
-    if re.fullmatch(r"\d{12}", race_id):
-        race_no = int(race_id[-2:])
+    if re.fullmatch(
+        r"\d{12}",
+        race_id
+    ):
+        race_no = int(
+            race_id[-2:]
+        )
 
         if 1 <= race_no <= 12:
-            info["race_number"] = f"{race_no}R"
+            info["race_number"] = (
+                f"{race_no}R"
+            )
 
+    # ==========================================
     # 芝・ダート・距離
+    # ==========================================
+
     distance_patterns = [
         r"(芝|ダート|ダ)\s*([12]\d{3})\s*[mｍ]",
         r"(芝|ダート|ダ)\s*([12]\d{3})",
@@ -131,7 +277,10 @@ def parse_race_info(soup, race_id):
     ]
 
     for pattern in distance_patterns:
-        m = re.search(pattern, page_text)
+        m = re.search(
+            pattern,
+            page_text
+        )
 
         if not m:
             continue
@@ -139,9 +288,14 @@ def parse_race_info(soup, race_id):
         g1 = m.group(1)
         g2 = m.group(2)
 
-        if g1 in ("芝", "ダート", "ダ"):
+        if g1 in (
+            "芝",
+            "ダート",
+            "ダ"
+        ):
             surface = g1
             distance = g2
+
         else:
             distance = g1
             surface = g2
@@ -150,12 +304,14 @@ def parse_race_info(soup, race_id):
             surface = "ダート"
 
         info["surface"] = surface
-        info["distance"] = int(distance)
+        info["distance"] = int(
+            distance
+        )
+
         break
 
     # ==========================================
     # 馬場状態
-    # HTML要素単位でも探索
     # ==========================================
 
     track_condition = ""
@@ -163,12 +319,23 @@ def parse_race_info(soup, race_id):
     candidates = []
 
     for tag in soup.find_all(
-        ["div", "span", "li", "p", "dd", "dt", "td", "th"]
+        [
+            "div",
+            "span",
+            "li",
+            "p",
+            "dd",
+            "dt",
+            "td",
+            "th",
+        ]
     ):
         value = txt(tag)
 
         if value:
-            candidates.append(value)
+            candidates.append(
+                value
+            )
 
     track_patterns = [
         r"馬場(?:状態)?\s*[:：]?\s*(良|稍重|重|不良)",
@@ -178,47 +345,102 @@ def parse_race_info(soup, race_id):
         r"(?:芝|ダート|ダ)[^。\n]{0,20}?(良|稍重|重|不良)",
     ]
 
-    # 小さいHTML要素を先に確認
     for value in candidates:
-
         if len(value) > 150:
             continue
 
         for pattern in track_patterns:
-            m = re.search(pattern, value)
+            m = re.search(
+                pattern,
+                value
+            )
 
             if m:
-                track_condition = m.group(1)
+                track_condition = (
+                    m.group(1)
+                )
                 break
 
         if track_condition:
             break
 
-    # 最後にページ全文でも確認
     if not track_condition:
-
         for pattern in track_patterns:
-            m = re.search(pattern, page_text)
+            m = re.search(
+                pattern,
+                page_text
+            )
 
             if m:
-                track_condition = m.group(1)
+                track_condition = (
+                    m.group(1)
+                )
                 break
 
-    info["track_condition"] = track_condition
+    info["track_condition"] = (
+        track_condition
+    )
 
-    print("----- レース基本情報 -----")
-    print("開催日:", info["race_date"])
-    print("競馬場:", info["racecourse"])
-    print("R:", info["race_number"])
-    print("距離:", info["distance"])
-    print("芝ダ:", info["surface"])
-    print("馬場:", info["track_condition"])
+    # ==========================================
+    # クラス
+    # ==========================================
+
+    info["race_class"] = (
+        detect_race_class(
+            page_text
+        )
+    )
+
+    # ==========================================
+    # 年齢条件
+    # ==========================================
+
+    info["age_condition"] = (
+        detect_age_condition(
+            page_text
+        )
+    )
+
+    print(
+        "----- レース基本情報 -----"
+    )
+    print(
+        "開催日:",
+        info["race_date"]
+    )
+    print(
+        "競馬場:",
+        info["racecourse"]
+    )
+    print(
+        "R:",
+        info["race_number"]
+    )
+    print(
+        "距離:",
+        info["distance"]
+    )
+    print(
+        "芝ダ:",
+        info["surface"]
+    )
+    print(
+        "馬場:",
+        info["track_condition"]
+    )
+    print(
+        "クラス:",
+        info["race_class"] or "不明"
+    )
+    print(
+        "年齢条件:",
+        info["age_condition"] or "不明"
+    )
 
     return info
 
 
 def parse_corners(soup):
-
     corners = {
         "corner_1": "",
         "corner_2": "",
@@ -228,25 +450,43 @@ def parse_corners(soup):
 
     target = soup.find(
         "table",
-        attrs={"summary": "コーナー通過順位"}
+        attrs={
+            "summary":
+                "コーナー通過順位"
+        }
     )
 
     if target is None:
-        print("コーナー通過順位テーブル: 見つからず")
+        print(
+            "コーナー通過順位テーブル: 見つからず"
+        )
+
         return corners
 
-    print("コーナー通過順位テーブル: 発見")
+    print(
+        "コーナー通過順位テーブル: 発見"
+    )
 
-    for tr in target.find_all("tr"):
-
+    for tr in target.find_all(
+        "tr"
+    ):
         th = tr.find("th")
         td = tr.find("td")
 
-        if th is None or td is None:
+        if (
+            th is None
+            or td is None
+        ):
             continue
 
-        label = th.get_text("", strip=True)
-        value = "".join(td.stripped_strings)
+        label = th.get_text(
+            "",
+            strip=True
+        )
+
+        value = "".join(
+            td.stripped_strings
+        )
 
         if "1コーナー" in label:
             corners["corner_1"] = value
@@ -260,17 +500,34 @@ def parse_corners(soup):
         elif "4コーナー" in label:
             corners["corner_4"] = value
 
-    print("1角:", corners["corner_1"])
-    print("2角:", corners["corner_2"])
-    print("3角:", corners["corner_3"])
-    print("4角:", corners["corner_4"])
+    print(
+        "1角:",
+        corners["corner_1"]
+    )
+    print(
+        "2角:",
+        corners["corner_2"]
+    )
+    print(
+        "3角:",
+        corners["corner_3"]
+    )
+    print(
+        "4角:",
+        corners["corner_4"]
+    )
 
     return corners
 
 
-def corner_position(corner_text, horse_number):
-
-    if not corner_text or not horse_number:
+def corner_position(
+    corner_text,
+    horse_number
+):
+    if (
+        not corner_text
+        or not horse_number
+    ):
         return ""
 
     numbers = re.findall(
@@ -278,18 +535,28 @@ def corner_position(corner_text, horse_number):
         corner_text
     )
 
-    target = str(horse_number)
+    target = str(
+        horse_number
+    )
 
     try:
-        return numbers.index(target) + 1
+        return (
+            numbers.index(target)
+            + 1
+        )
+
     except ValueError:
         return ""
 
 
-def parse_result_row(row, corners):
-
+def parse_result_row(
+    row,
+    corners
+):
     rank = txt(
-        row.select_one("td.Result_Num .Rank")
+        row.select_one(
+            "td.Result_Num .Rank"
+        )
     )
 
     rank = re.sub(
@@ -298,16 +565,22 @@ def parse_result_row(row, corners):
         rank
     ).strip()
 
-    nums = row.select("td.Num")
+    nums = row.select(
+        "td.Num"
+    )
 
     frame_number = ""
     horse_number = ""
 
     if len(nums) >= 1:
-        frame_number = txt(nums[0])
+        frame_number = txt(
+            nums[0]
+        )
 
     if len(nums) >= 2:
-        horse_number = txt(nums[1])
+        horse_number = txt(
+            nums[1]
+        )
 
     horse_el = row.select_one(
         ".Horse_Name a"
@@ -316,10 +589,15 @@ def parse_result_row(row, corners):
     if not horse_el:
         return None
 
-    horse_name = txt(horse_el)
+    horse_name = txt(
+        horse_el
+    )
 
     horse_id = horse_id_from_href(
-        horse_el.get("href", "")
+        horse_el.get(
+            "href",
+            ""
+        )
     )
 
     sex_age = ""
@@ -331,7 +609,9 @@ def parse_result_row(row, corners):
     )
 
     if detail_left:
-        left_text = txt(detail_left)
+        left_text = txt(
+            detail_left
+        )
 
         m = re.search(
             r"(牡|牝|セ|騸)\s*(\d+)",
@@ -339,7 +619,10 @@ def parse_result_row(row, corners):
         )
 
         if m:
-            sex_age = m.group(1) + m.group(2)
+            sex_age = (
+                m.group(1)
+                + m.group(2)
+            )
 
         m = re.search(
             r"(\d+)kg\s*\(([+\-−]?\d+)\)",
@@ -347,9 +630,16 @@ def parse_result_row(row, corners):
         )
 
         if m:
-            horse_weight = m.group(1)
+            horse_weight = (
+                m.group(1)
+            )
+
             weight_change = (
-                m.group(2).replace("−", "-")
+                m.group(2)
+                .replace(
+                    "−",
+                    "-"
+                )
             )
 
     jockey = ""
@@ -372,25 +662,36 @@ def parse_result_row(row, corners):
             )
 
             if m:
-                jockey = m.group(1).strip()
-                carried_weight = m.group(2)
+                jockey = (
+                    m.group(1)
+                    .strip()
+                )
+
+                carried_weight = (
+                    m.group(2)
+                )
 
         if len(parts) >= 2:
             trainer = parts[-1]
 
     race_time = txt(
-        row.select_one("td.Time dt span")
+        row.select_one(
+            "td.Time dt span"
+        )
     )
 
     if not race_time:
         race_time = txt(
-            row.select_one("td.Time dt")
+            row.select_one(
+                "td.Time dt"
+            )
         )
 
     margin = ""
 
-    for dd in row.select("td.Time dd"):
-
+    for dd in row.select(
+        "td.Time dd"
+    ):
         value = txt(dd)
 
         if not value:
@@ -407,8 +708,9 @@ def parse_result_row(row, corners):
 
     last3f = ""
 
-    for dd in row.select("td.Time dd"):
-
+    for dd in row.select(
+        "td.Time dd"
+    ):
         value = txt(dd)
 
         m = re.fullmatch(
@@ -417,18 +719,28 @@ def parse_result_row(row, corners):
         )
 
         if m:
-            last3f = m.group(1)
+            last3f = (
+                m.group(1)
+            )
             break
 
     odds = txt(
         row.select_one(
             "td.Odds .Odds_Ninki"
         )
-    ).replace("倍", "")
+    ).replace(
+        "倍",
+        ""
+    )
 
     popularity = txt(
-        row.select_one("td.Odds dd")
-    ).replace("人気", "")
+        row.select_one(
+            "td.Odds dd"
+        )
+    ).replace(
+        "人気",
+        ""
+    )
 
     passing_1c = corner_position(
         corners["corner_1"],
@@ -477,48 +789,96 @@ def parse_result_row(row, corners):
     )
 
     return {
-        "rank": rank,
-        "frame_number": frame_number,
-        "horse_number": horse_number,
-        "horse_id": horse_id,
-        "horse_name": horse_name,
-        "sex_age": sex_age,
-        "horse_weight": horse_weight,
-        "weight_change": weight_change,
-        "carried_weight": carried_weight,
-        "jockey": jockey,
-        "trainer": trainer,
-        "time": race_time,
-        "margin": margin,
-        "passing": passing,
-        "passing_1c": passing_1c,
-        "passing_2c": passing_2c,
-        "passing_3c": passing_3c,
-        "passing_4c": passing_4c,
-        "last3f": last3f,
-        "odds": odds,
-        "popularity": popularity,
+        "rank":
+            rank,
+
+        "frame_number":
+            frame_number,
+
+        "horse_number":
+            horse_number,
+
+        "horse_id":
+            horse_id,
+
+        "horse_name":
+            horse_name,
+
+        "sex_age":
+            sex_age,
+
+        "horse_weight":
+            horse_weight,
+
+        "weight_change":
+            weight_change,
+
+        "carried_weight":
+            carried_weight,
+
+        "jockey":
+            jockey,
+
+        "trainer":
+            trainer,
+
+        "time":
+            race_time,
+
+        "margin":
+            margin,
+
+        "passing":
+            passing,
+
+        "passing_1c":
+            passing_1c,
+
+        "passing_2c":
+            passing_2c,
+
+        "passing_3c":
+            passing_3c,
+
+        "passing_4c":
+            passing_4c,
+
+        "last3f":
+            last3f,
+
+        "odds":
+            odds,
+
+        "popularity":
+            popularity,
     }
 
 
 def find_all_result_rows(soup):
-
     rows = []
 
-    for tr in soup.select("tr"):
-
+    for tr in soup.select(
+        "tr"
+    ):
         if (
-            tr.select_one("td.Result_Num")
-            and tr.select_one(".Horse_Name a")
+            tr.select_one(
+                "td.Result_Num"
+            )
+            and tr.select_one(
+                ".Horse_Name a"
+            )
         ):
-            rows.append(tr)
+            rows.append(
+                tr
+            )
 
     return rows
 
 
 def get_race_result(race_id):
-
-    html = get_html(race_id)
+    html = get_html(
+        race_id
+    )
 
     soup = BeautifulSoup(
         html,
@@ -530,17 +890,23 @@ def get_race_result(race_id):
         race_id
     )
 
-    corners = parse_corners(soup)
+    corners = parse_corners(
+        soup
+    )
 
-    rows = find_all_result_rows(soup)
+    rows = find_all_result_rows(
+        soup
+    )
 
-    print("全結果行:", len(rows))
+    print(
+        "全結果行:",
+        len(rows)
+    )
 
     results = []
     seen = set()
 
     for row in rows:
-
         item = parse_result_row(
             row,
             corners
@@ -557,22 +923,36 @@ def get_race_result(race_id):
         if key in seen:
             continue
 
-        seen.add(key)
-        results.append(item)
+        seen.add(
+            key
+        )
 
-    print("重複除去後:", len(results))
+        results.append(
+            item
+        )
 
-    return results, corners, race_info
+    print(
+        "重複除去後:",
+        len(results)
+    )
+
+    return (
+        results,
+        corners,
+        race_info
+    )
 
 
 def main():
-
     if len(sys.argv) < 2:
         raise SystemExit(
             '使い方: python history.py "202605040502"'
         )
 
-    race_id = sys.argv[1].strip()
+    race_id = (
+        sys.argv[1]
+        .strip()
+    )
 
     if not re.fullmatch(
         r"\d{12}",
@@ -582,36 +962,80 @@ def main():
             f"race_id は12桁で指定してください: {race_id}"
         )
 
-    print("取得開始:", race_id)
+    print(
+        "取得開始:",
+        race_id
+    )
 
-    results, corners, race_info = (
-        get_race_result(race_id)
+    (
+        results,
+        corners,
+        race_info
+    ) = get_race_result(
+        race_id
     )
 
     data = {
-        "race_id": race_id,
-        "race_date": race_info["race_date"],
-        "racecourse": race_info["racecourse"],
-        "race_number": race_info["race_number"],
-        "distance": race_info["distance"],
-        "surface": race_info["surface"],
-        "track_condition": race_info["track_condition"],
+        "race_id":
+            race_id,
 
-        "updated_at": datetime.now(
-            timezone.utc
-        ).isoformat(),
+        "race_date":
+            race_info["race_date"],
 
-        "source": "netkeiba",
+        "racecourse":
+            race_info["racecourse"],
+
+        "race_number":
+            race_info["race_number"],
+
+        "distance":
+            race_info["distance"],
+
+        "surface":
+            race_info["surface"],
+
+        "track_condition":
+            race_info[
+                "track_condition"
+            ],
+
+        "race_class":
+            race_info[
+                "race_class"
+            ],
+
+        "age_condition":
+            race_info[
+                "age_condition"
+            ],
+
+        "updated_at":
+            datetime.now(
+                timezone.utc
+            ).isoformat(),
+
+        "source":
+            "netkeiba",
 
         "corner_order": {
-            "1c": corners["corner_1"],
-            "2c": corners["corner_2"],
-            "3c": corners["corner_3"],
-            "4c": corners["corner_4"],
+            "1c":
+                corners["corner_1"],
+
+            "2c":
+                corners["corner_2"],
+
+            "3c":
+                corners["corner_3"],
+
+            "4c":
+                corners["corner_4"],
         },
 
-        "result_count": len(results),
-        "results": results,
+        "result_count":
+            len(results),
+
+        "results":
+            results,
     }
 
     with open(
@@ -619,28 +1043,38 @@ def main():
         "w",
         encoding="utf-8"
     ) as f:
-
         json.dump(
             data,
             f,
             ensure_ascii=False,
-            indent=2,
+            indent=2
         )
-
-    print("取得件数:", len(results))
 
     print(
-        json.dumps(
-            data,
-            ensure_ascii=False,
-            indent=2,
-        )
+        "history.json 保存完了"
     )
 
-    if not results:
-        raise RuntimeError(
-            "結果行を取得できませんでした。"
-        )
+    print(
+        "race_id:",
+        race_id
+    )
+
+    print(
+        "race_class:",
+        race_info["race_class"]
+        or "不明"
+    )
+
+    print(
+        "age_condition:",
+        race_info["age_condition"]
+        or "不明"
+    )
+
+    print(
+        "result_count:",
+        len(results)
+    )
 
 
 if __name__ == "__main__":
