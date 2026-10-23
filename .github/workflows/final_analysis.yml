@@ -48,17 +48,49 @@ jobs:
         run: python main_v3.py
 
       # ==================================================
-      # 過去同条件レース
+      # 過去DB
+      #
+      # history_db.json は既存キャッシュを使用
+      # Full Analysisでは再収集しない
       # ==================================================
 
-      - name: Find condition history races
-        run: python history_batch.py
+      - name: Validate cached history database
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
 
-      - name: Collect condition history results
-        run: python history_collect.py
+          path = "history_db.json"
 
-      - name: Update history database
-        run: python history_db.py
+          if not os.path.exists(path):
+              sys.exit("ERROR: history_db.json is missing")
+
+          try:
+              with open(path, encoding="utf-8") as f:
+                  data = json.load(f)
+          except Exception as exc:
+              sys.exit(
+                  "ERROR: history_db.json cannot be loaded: "
+                  + str(exc)
+              )
+
+          if isinstance(data, dict):
+              races = data.get("races", [])
+          elif isinstance(data, list):
+              races = data
+          else:
+              races = []
+
+          if not isinstance(races, list) or not races:
+              sys.exit("ERROR: history_db.json has no race data")
+
+          print(
+              "Cached history database OK:",
+              len(races),
+              "races"
+          )
+          PY
 
       - name: Build condition history
         run: python condition_history.py
@@ -401,13 +433,11 @@ jobs:
               )
 
           # ==================================================
-          # 必須生成ファイル
+          # 必須生成・利用ファイル
           # ==================================================
 
           required_files = [
               "race.json",
-              "history_races.json",
-              "history_all.json",
               "history_db.json",
               "condition_history.json",
               "day_races.json",
@@ -466,9 +496,6 @@ jobs:
 
           GENERATED_FILES=(
             "race.json"
-            "history_races.json"
-            "history_all.json"
-            "history_db.json"
             "condition_history.json"
             "day_races.json"
             "day_time_history.json"
