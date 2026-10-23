@@ -99,6 +99,9 @@ jobs:
       - name: Collect runner history
         run: python runner_history.py
 
+      - name: Collect runner race database
+        run: python runner_race_db.py
+
       - name: Analyze runner time fit
         run: python runner_time_fit.py
 
@@ -338,7 +341,6 @@ jobs:
                           + name
                       )
 
-              # 条件適性UNKNOWNなら血統補正禁止
               if (
                   condition_fit is None
                   and abs(blood_adj) > 1e-9
@@ -400,9 +402,6 @@ jobs:
 
           # ==================================================
           # 必須生成ファイル
-          #
-          # ここにあるものは必ず存在しなければ失敗。
-          # training系は完全除外。
           # ==================================================
 
           required_files = [
@@ -416,6 +415,7 @@ jobs:
               "track_condition.json",
               "day_bias.json",
               "runner_history.json",
+              "runner_race_db.json",
               "runner_time_fit.json",
               "runner_analysis.json",
               "previous_race_analysis.json",
@@ -457,9 +457,6 @@ jobs:
 
       # ==================================================
       # 結果保存
-      #
-      # 必須・任意を問わず、実際に存在する生成ファイルだけ
-      # git add する。
       # ==================================================
 
       - name: Commit generated analysis files
@@ -481,6 +478,7 @@ jobs:
             "normalized_pedigree.json"
             "history_pedigree.json"
             "runner_history.json"
+            "runner_race_db.json"
             "runner_time_fit.json"
             "runner_analysis.json"
             "previous_race_analysis.json"
