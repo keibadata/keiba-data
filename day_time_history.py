@@ -15,10 +15,16 @@ HISTORY_DB_FILE = "history_db.json"
 OUTPUT_FILE = "day_time_history.json"
 
 MIN_HISTORY_PER_CONDITION = 5
-LOOKBACK_DAYS = 365
+
+# =========================================================
+# 重要
+# Full Analysis では過去365日のネット探索を行わない。
+# history_db.json + 既存 day_time_history.json を再利用する。
+# 5件未満は無理に基準を作らず「基準なし＝ニュートラル」。
+# =========================================================
+REMOTE_HISTORY_SEARCH = False
 
 REQUEST_WAIT = 0.20
-DATE_WAIT = 0.10
 
 HEADERS = {
     "User-Agent": (
@@ -177,6 +183,8 @@ def meeting_key(race_id):
 
 # =========================================================
 # HTTP
+# 当日の参考レース metadata 取得だけに使用。
+# 過去365日探索には使用しない。
 # =========================================================
 
 def get_html(url, params=None):
@@ -191,41 +199,6 @@ def get_html(url, params=None):
     response.encoding = response.apparent_encoding
 
     return response.text
-
-
-def extract_race_ids(html):
-    ids = re.findall(
-        r"race_id=(\d{12})",
-        html,
-    )
-
-    ids += re.findall(
-        r"/race/(?:result/)?(\d{12})",
-        html,
-    )
-
-    output = []
-    seen = set()
-
-    for race_id in ids:
-        if race_id in seen:
-            continue
-
-        seen.add(race_id)
-        output.append(race_id)
-
-    return output
-
-
-def find_races_from_date(date_string):
-    html = get_html(
-        "https://race.netkeiba.com/top/race_list.html",
-        {
-            "kaisai_date": date_string,
-        },
-    )
-
-    return extract_race_ids(html)
 
 
 # =========================================================
@@ -420,7 +393,7 @@ def extract_age_condition(
 
 
 # =========================================================
-# レースページ
+# 当日参考レースページ
 # =========================================================
 
 def parse_race_page(race_id):
@@ -893,7 +866,7 @@ for item in (
 
 
 print("==============================")
-print("DAY TIME HISTORY FAST SAFE")
+print("DAY TIME HISTORY CACHE ONLY")
 print("target:", target_race_id)
 print("target date:", target_date_text)
 print(
@@ -904,11 +877,18 @@ print(
     "reference races:",
     len(reference_races),
 )
+print(
+    "remote history search:",
+    REMOTE_HISTORY_SEARCH,
+)
 print("==============================")
 
 
 # =========================================================
-# 参考レース metadata
+# 当日参考レース metadata
+#
+# ここは数レースのみ。
+# 365日探索とは別。
 # =========================================================
 
 for reference in reference_races:
@@ -1031,6 +1011,7 @@ for reference in reference_races:
 
 # =========================================================
 # キャッシュ
+# history_db + 過去の day_time_history
 # =========================================================
 
 cache_pool = []
@@ -1100,6 +1081,11 @@ for history in (
 
 # =========================================================
 # 基準時計
+#
+# 重要：
+# キャッシュだけ使用。
+# 5件未満でもネット探索しない。
+# 5件未満 = baseline_available False
 # =========================================================
 
 histories = []
@@ -1120,38 +1106,24 @@ for condition in conditions:
     }
 
     def add_candidate(row):
-        nonlocal_exclusion = {
-            "current_meeting": False,
-            "nonpast": False,
-            "unknown_date": False,
-        }
-
         race_id = clean_text(
             row.get("race_id")
         )
 
         if not race_id:
-            return False, nonlocal_exclusion
+            return False, ""
 
         if race_id in seen_ids:
-            return False, nonlocal_exclusion
+            return False, ""
 
         if race_id in same_day_ids:
-            nonlocal_exclusion[
-                "current_meeting"
-            ] = True
-
-            return False, nonlocal_exclusion
+            return False, "current_meeting"
 
         if (
             meeting_key(race_id)
             == target_meeting_key
         ):
-            nonlocal_exclusion[
-                "current_meeting"
-            ] = True
-
-            return False, nonlocal_exclusion
+            return False, "current_meeting"
 
         if (
             venue_from_race_id(
@@ -1159,13 +1131,13 @@ for condition in conditions:
             )
             != condition["racecourse"]
         ):
-            return False, nonlocal_exclusion
+            return False, ""
 
         if not same_condition(
             row,
             condition,
         ):
-            return False, nonlocal_exclusion
+            return False, ""
 
         winner_seconds = (
             race_time_to_seconds(
@@ -1174,7 +1146,7 @@ for condition in conditions:
         )
 
         if winner_seconds is None:
-            return False, nonlocal_exclusion
+            return False, ""
 
         row_date = parse_date(
             row.get("race_date")
@@ -1182,25 +1154,18 @@ for condition in conditions:
 
         # 日付不明は安全側で不採用
         if row_date is None:
-            nonlocal_exclusion[
-                "unknown_date"
-            ] = True
+            return False, "unknown_date"
 
-            return False, nonlocal_exclusion
-
+        # 対象日以降は絶対に使わない
         if row_date >= target_date:
-            nonlocal_exclusion[
-                "nonpast"
-            ] = True
-
-            return False, nonlocal_exclusion
+            return False, "nonpast"
 
         source = clean_text(
             row.get("_source")
         )
 
         if source not in source_counts:
-            source = "remote_search"
+            source = "history_db"
 
         seen_ids.add(race_id)
 
@@ -1242,10 +1207,10 @@ for condition in conditions:
             "source": source,
         })
 
-        return True, nonlocal_exclusion
+        return True, ""
 
     # -----------------------------------------------------
-    # 既存データから最大限再利用
+    # キャッシュのみ検索
     # -----------------------------------------------------
 
     for row in cache_pool:
@@ -1253,17 +1218,13 @@ for condition in conditions:
             row
         )
 
-        if exclusion[
-            "current_meeting"
-        ]:
+        if exclusion == "current_meeting":
             excluded_current_meeting_count += 1
 
-        if exclusion["nonpast"]:
+        elif exclusion == "nonpast":
             excluded_nonpast_count += 1
 
-        if exclusion[
-            "unknown_date"
-        ]:
+        elif exclusion == "unknown_date":
             excluded_unknown_date_count += 1
 
     matched.sort(
@@ -1274,9 +1235,6 @@ for condition in conditions:
         reverse=True,
     )
 
-    # 基準は最低5件。
-    # キャッシュに5件以上ある場合は
-    # それ以上ネット取得しない。
     cache_sample_count = len(matched)
 
     print(
@@ -1287,195 +1245,29 @@ for condition in conditions:
         cache_sample_count,
     )
 
+    # =====================================================
+    # ★ 旧版との最大の違い
+    #
+    # 5件未満でも365日探索しない。
+    # キャッシュ不足は未知数として扱う。
+    # =====================================================
+
     remote_search_used = False
     remote_match_count = 0
 
-    # -----------------------------------------------------
-    # 5件未満の場合だけ検索
-    # -----------------------------------------------------
-
     if (
-        len(matched)
+        cache_sample_count
         < MIN_HISTORY_PER_CONDITION
     ):
-        remote_search_used = True
-
         print(
-            "SEARCH:",
+            "CACHE INSUFFICIENT:",
             condition["distance"],
             condition["race_class"],
             condition["age_condition"],
-            "need=",
-            (
-                MIN_HISTORY_PER_CONDITION
-                - len(matched)
-            ),
+            f"{cache_sample_count}/"
+            f"{MIN_HISTORY_PER_CONDITION}",
+            "-> baseline unavailable / neutral",
         )
-
-        for days_back in range(
-            1,
-            LOOKBACK_DAYS + 1,
-        ):
-            # ★ 最重要高速化
-            # 5件到達した瞬間に探索終了
-            if (
-                len(matched)
-                >= MIN_HISTORY_PER_CONDITION
-            ):
-                break
-
-            search_date = (
-                target_date
-                - timedelta(
-                    days=days_back
-                )
-            )
-
-            date_string = (
-                search_date.strftime(
-                    "%Y%m%d"
-                )
-            )
-
-            try:
-                race_ids = (
-                    find_races_from_date(
-                        date_string
-                    )
-                )
-
-            except Exception as exc:
-                errors.append({
-                    "date": (
-                        search_date.isoformat()
-                    ),
-                    "condition": condition,
-                    "error": str(exc),
-                })
-
-                continue
-
-            # race_idで対象競馬場だけ残す
-            race_ids = [
-                history_race_id
-                for history_race_id
-                in race_ids
-                if (
-                    venue_from_race_id(
-                        history_race_id
-                    )
-                    == condition[
-                        "racecourse"
-                    ]
-                )
-            ]
-
-            for history_race_id in race_ids:
-                # ★ ここでも5件到達で即終了
-                if (
-                    len(matched)
-                    >= MIN_HISTORY_PER_CONDITION
-                ):
-                    break
-
-                if (
-                    history_race_id
-                    in seen_ids
-                ):
-                    continue
-
-                if (
-                    history_race_id
-                    in same_day_ids
-                ):
-                    continue
-
-                if (
-                    meeting_key(
-                        history_race_id
-                    )
-                    == target_meeting_key
-                ):
-                    continue
-
-                try:
-                    info = parse_race_page(
-                        history_race_id
-                    )
-
-                    row = {
-                        **info,
-                        "race_date": (
-                            search_date.isoformat()
-                        ),
-                        "_source": (
-                            "remote_search"
-                        ),
-                    }
-
-                    added, exclusion = (
-                        add_candidate(row)
-                    )
-
-                    if exclusion[
-                        "current_meeting"
-                    ]:
-                        excluded_current_meeting_count += 1
-
-                    if exclusion[
-                        "nonpast"
-                    ]:
-                        excluded_nonpast_count += 1
-
-                    if exclusion[
-                        "unknown_date"
-                    ]:
-                        excluded_unknown_date_count += 1
-
-                    if added:
-                        remote_match_count += 1
-
-                        print(
-                            " MATCH:",
-                            history_race_id,
-                            search_date.isoformat(),
-                            info.get(
-                                "winner_time"
-                            ),
-                            "n=",
-                            len(matched),
-                            "/",
-                            MIN_HISTORY_PER_CONDITION,
-                        )
-
-                    time.sleep(
-                        REQUEST_WAIT
-                    )
-
-                except Exception as exc:
-                    errors.append({
-                        "race_id": (
-                            history_race_id
-                        ),
-                        "condition": (
-                            condition
-                        ),
-                        "error": str(exc),
-                    })
-
-            time.sleep(DATE_WAIT)
-
-    # -----------------------------------------------------
-    # 基準計算
-    # -----------------------------------------------------
-
-    matched.sort(
-        key=lambda row: (
-            row["race_date"],
-            row["race_id"],
-        ),
-        reverse=True,
-    )
 
     times = [
         row[
@@ -1487,10 +1279,12 @@ for condition in conditions:
     median_seconds = None
     mad_seconds = None
 
-    if (
+    baseline_available = (
         len(times)
         >= MIN_HISTORY_PER_CONDITION
-    ):
+    )
+
+    if baseline_available:
         median_seconds = round(
             statistics.median(times),
             2,
@@ -1521,11 +1315,15 @@ for condition in conditions:
         ),
         "sample_count": len(times),
         "baseline_available": (
-            len(times)
-            >= MIN_HISTORY_PER_CONDITION
+            baseline_available
             and median_seconds
             is not None
         ),
+        "insufficient_cache": (
+            len(times)
+            < MIN_HISTORY_PER_CONDITION
+        ),
+        "neutral_when_insufficient": True,
         "median_winner_time_seconds": (
             median_seconds
         ),
@@ -1547,7 +1345,7 @@ for condition in conditions:
         "MAD=",
         mad_seconds,
         "remote=",
-        remote_match_count,
+        0,
     )
 
 
@@ -1634,6 +1432,8 @@ for reference in reference_races:
             < MIN_HISTORY_PER_CONDITION
             or median_seconds is None
         ):
+            # キャッシュ不足。
+            # 評価を下げず、基準なしのまま。
             break
 
         reference[
@@ -1753,6 +1553,14 @@ connected_count = sum(
     )
 )
 
+insufficient_condition_count = sum(
+    1
+    for history in histories
+    if not history.get(
+        "baseline_available"
+    )
+)
+
 output = {
     "updated_at": (
         datetime.now(
@@ -1767,44 +1575,71 @@ output = {
     ),
     "racecourse": racecourse,
     "surface": target_surface,
+
+    # 安全性
     "future_race_usage": False,
     "same_day_excluded": True,
     "same_meeting_excluded": True,
     "unknown_date_excluded": True,
+
     "excluded_meeting_key": (
         target_meeting_key
     ),
+
     "venue_validation_by_race_id": (
         True
     ),
+
+    # 基準
     "minimum_history_sample": (
         MIN_HISTORY_PER_CONDITION
     ),
+
+    # 互換性維持
     "search_stop_at_minimum": True,
+
+    # 新仕様
+    "cache_only_mode": True,
+    "remote_history_search": False,
+    "neutral_when_cache_insufficient": True,
+
     "reference_race_count": (
         len(reference_races)
     ),
+
     "baseline_connected_count": (
         connected_count
     ),
+
+    "insufficient_condition_count": (
+        insufficient_condition_count
+    ),
+
     "excluded_current_meeting_count": (
         excluded_current_meeting_count
     ),
+
     "excluded_nonpast_count": (
         excluded_nonpast_count
     ),
+
     "excluded_unknown_date_count": (
         excluded_unknown_date_count
     ),
+
     "reference_races": (
         reference_races
     ),
+
     "histories": histories,
+
     "leak_check_passed": True,
     "leak_race_ids": [],
+
     "error_count": len(errors),
     "errors": errors,
 }
+
 
 save_json(
     OUTPUT_FILE,
@@ -1821,6 +1656,16 @@ print("DAY TIME HISTORY RESULT")
 print("saved:", OUTPUT_FILE)
 
 print(
+    "mode:",
+    "CACHE ONLY",
+)
+
+print(
+    "remote history search:",
+    False,
+)
+
+print(
     "reference:",
     len(reference_races),
 )
@@ -1832,13 +1677,18 @@ print(
 )
 
 print(
-    "search stop at minimum:",
-    True,
+    "insufficient conditions:",
+    insufficient_condition_count,
 )
 
 print(
     "minimum history sample:",
     MIN_HISTORY_PER_CONDITION,
+)
+
+print(
+    "neutral when insufficient:",
+    True,
 )
 
 print(
