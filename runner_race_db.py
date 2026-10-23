@@ -93,6 +93,54 @@ def save_json(path, data):
     )
 
 
+def parse_race_date(value):
+    text = clean(value)
+
+    if not text:
+        return None
+
+    for fmt in (
+        "%Y-%m-%d",
+        "%Y/%m/%d",
+        "%Y%m%d",
+    ):
+        try:
+            return datetime.strptime(
+                text[:10],
+                fmt,
+            ).date()
+
+        except ValueError:
+            pass
+
+    try:
+        return datetime.fromisoformat(
+            text.replace(
+                "Z",
+                "+00:00",
+            )
+        ).date()
+
+    except ValueError:
+        return None
+
+
+def get_target_date(runner_history):
+    target_date = parse_race_date(
+        runner_history.get(
+            "target_date"
+        )
+    )
+
+    if target_date is None:
+        raise RuntimeError(
+            "runner_history.json の "
+            "target_date を取得できません。"
+        )
+
+    return target_date
+
+
 def get_existing_races(db):
     races = db.get(
         "races",
@@ -136,14 +184,7 @@ def base_race_data_is_valid(race):
     if not valid_race_id(race_id):
         return False
 
-    results = race.get(
-        "results"
-    )
-
-    if (
-        not isinstance(results, list)
-        or not results
-    ):
+    if not is_jra_race_id(race_id):
         return False
 
     race_date = clean(
@@ -163,6 +204,10 @@ def base_race_data_is_valid(race):
         "distance"
     )
 
+    results = race.get(
+        "results"
+    )
+
     if not race_date:
         return False
 
@@ -178,18 +223,22 @@ def base_race_data_is_valid(race):
     ):
         return False
 
+    if (
+        not isinstance(results, list)
+        or not results
+    ):
+        return False
+
     return True
 
 
 def cache_has_required_fields(race):
     """
-    中央:
-      race_class / age_condition まで必要。
+    中央専用。
 
-    地方:
-      レース本体が正常なら保存・再利用可能。
-      race_class / age_condition が取れない場合は
-      runner_time_fit 側で未知数として扱う。
+    runner_time_fit で必要な
+    race_class / age_condition まで
+    入っているキャッシュだけ再利用する。
     """
 
     if not base_race_data_is_valid(
@@ -197,21 +246,16 @@ def cache_has_required_fields(race):
     ):
         return False
 
-    race_id = clean(
-        race.get("race_id")
-    )
-
-    if not is_jra_race_id(
-        race_id
-    ):
-        return True
-
     race_class = clean(
-        race.get("race_class")
+        race.get(
+            "race_class"
+        )
     )
 
     age_condition = clean(
-        race.get("age_condition")
+        race.get(
+            "age_condition"
+        )
     )
 
     if not race_class:
@@ -223,18 +267,30 @@ def cache_has_required_fields(race):
     return True
 
 
-def build_existing_index(races):
+def build_existing_index(
+    races,
+    requested_ids,
+):
+    requested_set = set(
+        requested_ids
+    )
+
     index = {}
 
     for race in races:
+        race_id = clean(
+            race.get(
+                "race_id"
+            )
+        )
+
+        if race_id not in requested_set:
+            continue
+
         if not cache_has_required_fields(
             race
         ):
             continue
-
-        race_id = clean(
-            race.get("race_id")
-        )
 
         index[
             race_id
@@ -243,10 +299,18 @@ def build_existing_index(races):
     return index
 
 
-def collect_requested_race_ids(
+def collect_requested_races(
     runner_history
 ):
-    requested = set()
+    """
+    runner_historyから
+    中央レースIDだけ抽出。
+
+    地方は今回明示的に除外する。
+    """
+
+    jra_ids = set()
+    local_ids = set()
 
     horses = runner_history.get(
         "horses",
@@ -257,7 +321,7 @@ def collect_requested_race_ids(
         horses,
         list,
     ):
-        return []
+        return [], []
 
     for horse in horses:
         if not isinstance(
@@ -290,66 +354,27 @@ def collect_requested_race_ids(
                 )
             )
 
-            if valid_race_id(
+            if not valid_race_id(
                 race_id
             ):
-                requested.add(
+                continue
+
+            if is_jra_race_id(
+                race_id
+            ):
+                jra_ids.add(
                     race_id
                 )
 
-    return sorted(
-        requested
+            else:
+                local_ids.add(
+                    race_id
+                )
+
+    return (
+        sorted(jra_ids),
+        sorted(local_ids),
     )
-
-
-def parse_race_date(value):
-    text = clean(value)
-
-    if not text:
-        return None
-
-    for fmt in (
-        "%Y-%m-%d",
-        "%Y/%m/%d",
-        "%Y%m%d",
-    ):
-        try:
-            return datetime.strptime(
-                text[:10],
-                fmt,
-            ).date()
-
-        except ValueError:
-            pass
-
-    try:
-        return datetime.fromisoformat(
-            text.replace(
-                "Z",
-                "+00:00",
-            )
-        ).date()
-
-    except ValueError:
-        return None
-
-
-def get_target_date(
-    runner_history
-):
-    target_date = parse_race_date(
-        runner_history.get(
-            "target_date"
-        )
-    )
-
-    if target_date is None:
-        raise RuntimeError(
-            "runner_history.json の "
-            "target_date を取得できません。"
-        )
-
-    return target_date
 
 
 def get_past_race_date_index(
@@ -450,12 +475,20 @@ def validate_fetched_history(
             ),
         )
 
+    if not is_jra_race_id(
+        race_id
+    ):
+        return (
+            False,
+            "地方レースは現在対象外です",
+        )
+
     if not base_race_data_is_valid(
         history
     ):
         return (
             False,
-            "レース基本情報またはresultsが不完全です",
+            "中央レース基本情報またはresultsが不完全です",
         )
 
     race_class = clean(
@@ -470,58 +503,33 @@ def validate_fetched_history(
         )
     )
 
-    if is_jra_race_id(
-        race_id
-    ):
-        if not race_class:
-            return (
-                False,
-                "中央レースのrace_classを取得できませんでした",
-            )
-
-        if not age_condition:
-            return (
-                False,
-                "中央レースのage_conditionを取得できませんでした",
-            )
-
-        history[
-            "condition_metadata_status"
-        ] = "complete"
-
-        history[
-            "race_class_unknown"
-        ] = False
-
-        history[
-            "age_condition_unknown"
-        ] = False
-
-    else:
-        history[
-            "race_class_unknown"
-        ] = not bool(
-            race_class
+    if not race_class:
+        return (
+            False,
+            "中央レースのrace_classを取得できませんでした",
         )
 
-        history[
-            "age_condition_unknown"
-        ] = not bool(
-            age_condition
+    if not age_condition:
+        return (
+            False,
+            "中央レースのage_conditionを取得できませんでした",
         )
 
-        if (
-            race_class
-            and age_condition
-        ):
-            history[
-                "condition_metadata_status"
-            ] = "complete"
+    history[
+        "condition_metadata_status"
+    ] = "complete"
 
-        else:
-            history[
-                "condition_metadata_status"
-            ] = "partial_unknown"
+    history[
+        "race_class_unknown"
+    ] = False
+
+    history[
+        "age_condition_unknown"
+    ] = False
+
+    history[
+        "runner_race_reference"
+    ] = True
 
     return (
         True,
@@ -538,17 +546,12 @@ def run_history_fetch(race_id):
         script_path
     ):
         return {
-            "race_id":
-                race_id,
-
-            "success":
-                False,
-
-            "error":
-                (
-                    f"{HISTORY_SCRIPT} "
-                    "が見つかりません"
-                ),
+            "race_id": race_id,
+            "success": False,
+            "error": (
+                f"{HISTORY_SCRIPT} "
+                "が見つかりません"
+            ),
         }
 
     last_error = ""
@@ -599,10 +602,8 @@ def run_history_fetch(race_id):
                     return {
                         "race_id":
                             race_id,
-
                         "success":
                             False,
-
                         "error":
                             last_error,
                     }
@@ -633,10 +634,8 @@ def run_history_fetch(race_id):
                     return {
                         "race_id":
                             race_id,
-
                         "success":
                             False,
-
                         "error":
                             last_error,
                     }
@@ -668,28 +667,19 @@ def run_history_fetch(race_id):
                     return {
                         "race_id":
                             race_id,
-
                         "success":
                             False,
-
                         "error":
                             last_error,
                     }
 
-                history[
-                    "runner_race_reference"
-                ] = True
-
                 return {
                     "race_id":
                         race_id,
-
                     "success":
                         True,
-
                     "race":
                         history,
-
                     "attempt":
                         attempt,
                 }
@@ -714,10 +704,8 @@ def run_history_fetch(race_id):
     return {
         "race_id":
             race_id,
-
         "success":
             False,
-
         "error":
             (
                 last_error
@@ -730,6 +718,7 @@ def build_output(
     runner_history,
     target_date,
     requested_ids,
+    excluded_local_ids,
     race_index,
     new_count,
     reused_count,
@@ -747,29 +736,17 @@ def build_output(
         race_index[
             race_id
         ]
-        for race_id
-        in sorted(
+        for race_id in sorted(
             race_index.keys()
         )
     ]
-
-    partial_unknown_count = sum(
-        1
-        for race in races
-        if (
-            race.get(
-                "condition_metadata_status"
-            )
-            == "partial_unknown"
-        )
-    )
 
     return {
         "updated_at":
             now_iso(),
 
         "db_type":
-            "runner_past_race_accumulated",
+            "runner_past_race_jra_only",
 
         "source":
             RUNNER_HISTORY_FILE,
@@ -783,6 +760,9 @@ def build_output(
 
         "target_date":
             target_date.isoformat(),
+
+        "mode":
+            "JRA_ONLY",
 
         "future_race_usage":
             False,
@@ -809,8 +789,13 @@ def build_output(
         "invalid_cache_count":
             invalid_cache_count,
 
-        "partial_unknown_count":
-            partial_unknown_count,
+        "excluded_local_race_count":
+            len(
+                excluded_local_ids
+            ),
+
+        "excluded_local_race_ids":
+            excluded_local_ids,
 
         "error_count":
             len(
@@ -842,6 +827,10 @@ def build_output(
 def main():
     print(
         "runner_race_db.py 開始"
+    )
+
+    print(
+        "MODE: JRA ONLY"
     )
 
     runner_history = load_json(
@@ -898,10 +887,11 @@ def main():
         runner_history
     )
 
-    requested_ids = (
-        collect_requested_race_ids(
-            runner_history
-        )
+    (
+        requested_ids,
+        excluded_local_ids,
+    ) = collect_requested_races(
+        runner_history
     )
 
     requested_ids = [
@@ -911,13 +901,18 @@ def main():
     ]
 
     print(
-        "抽出したユニーク過去レース数: "
+        "中央ユニーク過去レース数: "
         f"{len(requested_ids)}"
+    )
+
+    print(
+        "地方除外レース数: "
+        f"{len(excluded_local_ids)}"
     )
 
     if not requested_ids:
         raise RuntimeError(
-            "必要過去レース数が0件です。"
+            "中央の必要過去レース数が0件です。"
         )
 
     past_date_index = (
@@ -943,10 +938,8 @@ def main():
             skipped_future.append({
                 "race_id":
                     race_id,
-
                 "race_date":
                     race_date.isoformat(),
-
                 "reason":
                     "対象レース当日以降のため除外",
             })
@@ -962,7 +955,7 @@ def main():
     )
 
     print(
-        "未来リーク除外後の必要レース数: "
+        "未来リーク除外後の中央必要レース数: "
         f"{len(requested_ids)}"
     )
 
@@ -977,6 +970,10 @@ def main():
         )
     )
 
+    requested_set = set(
+        requested_ids
+    )
+
     invalid_cache_ids = []
 
     for race in existing_races:
@@ -986,12 +983,7 @@ def main():
             )
         )
 
-        if not valid_race_id(
-            race_id
-        ):
-            continue
-
-        if race_id not in requested_ids:
+        if race_id not in requested_set:
             continue
 
         if not cache_has_required_fields(
@@ -1003,7 +995,8 @@ def main():
 
     race_index = (
         build_existing_index(
-            existing_races
+            existing_races,
+            requested_ids,
         )
     )
 
@@ -1025,17 +1018,17 @@ def main():
     )
 
     print(
-        "有効キャッシュ: "
+        "中央有効キャッシュ: "
         f"{len(reused_ids)}"
     )
 
     print(
-        "旧・不完全キャッシュ: "
+        "中央旧・不完全キャッシュ: "
         f"{len(invalid_cache_ids)}"
     )
 
     print(
-        "再取得対象: "
+        "中央再取得対象: "
         f"{len(missing_ids)}"
     )
 
@@ -1046,13 +1039,18 @@ def main():
         runner_history=runner_history,
         target_date=target_date,
         requested_ids=requested_ids,
+        excluded_local_ids=(
+            excluded_local_ids
+        ),
         race_index=race_index,
         new_count=new_count,
         reused_count=len(
             reused_ids
         ),
         errors=errors,
-        skipped_future=skipped_future,
+        skipped_future=(
+            skipped_future
+        ),
         invalid_cache_count=len(
             invalid_cache_ids
         ),
@@ -1065,7 +1063,7 @@ def main():
 
     if missing_ids:
         print(
-            "並列取得開始: "
+            "中央並列取得開始: "
             f"workers={MAX_WORKERS}"
         )
 
@@ -1112,10 +1110,8 @@ def main():
                     result = {
                         "race_id":
                             race_id,
-
                         "success":
                             False,
-
                         "error":
                             (
                                 f"{type(e).__name__}: "
@@ -1140,23 +1136,19 @@ def main():
 
                         new_count += 1
 
-                        status = clean(
-                            race.get(
-                                "condition_metadata_status"
-                            )
-                        )
-
                         print(
                             f"[{completed}/{total}] "
                             f"OK {race_id} "
-                            f"status={status}"
+                            f"class="
+                            f"{clean(race.get('race_class'))} "
+                            f"age="
+                            f"{clean(race.get('age_condition'))}"
                         )
 
                 else:
                     error = {
                         "race_id":
                             race_id,
-
                         "error":
                             clean(
                                 result.get(
@@ -1186,6 +1178,9 @@ def main():
                         requested_ids=(
                             requested_ids
                         ),
+                        excluded_local_ids=(
+                            excluded_local_ids
+                        ),
                         race_index=(
                             race_index
                         ),
@@ -1214,13 +1209,18 @@ def main():
         runner_history=runner_history,
         target_date=target_date,
         requested_ids=requested_ids,
+        excluded_local_ids=(
+            excluded_local_ids
+        ),
         race_index=race_index,
         new_count=new_count,
         reused_count=len(
             reused_ids
         ),
         errors=errors,
-        skipped_future=skipped_future,
+        skipped_future=(
+            skipped_future
+        ),
         invalid_cache_count=len(
             invalid_cache_ids
         ),
@@ -1245,37 +1245,37 @@ def main():
 
     print("")
     print(
-        "===== runner_race_db 結果 ====="
+        "===== runner_race_db JRA結果 ====="
     )
 
     print(
-        "必要過去レース数: "
+        "中央必要過去レース数: "
         f"{requested_count}"
     )
 
     print(
-        "接続成功: "
+        "中央接続成功: "
         f"{connected_count}"
     )
 
     print(
-        "既存再利用: "
+        "中央既存再利用: "
         f"{len(reused_ids)}"
     )
 
     print(
-        "旧・不完全キャッシュ: "
+        "中央旧・不完全キャッシュ: "
         f"{len(invalid_cache_ids)}"
     )
 
     print(
-        "新規取得成功: "
+        "中央新規取得成功: "
         f"{new_count}"
     )
 
     print(
-        "条件情報一部未知: "
-        f"{final_output['partial_unknown_count']}"
+        "地方除外: "
+        f"{len(excluded_local_ids)}"
     )
 
     print(
@@ -1289,17 +1289,17 @@ def main():
     )
 
     print(
-        "未接続: "
+        "中央未接続: "
         f"{final_output['missing_race_count']}"
     )
 
     print(
-        "==============================="
+        "=================================="
     )
 
     if errors:
         raise RuntimeError(
-            "過去レース取得エラーが "
+            "中央過去レース取得エラーが "
             f"{len(errors)}件あります。"
         )
 
@@ -1308,7 +1308,7 @@ def main():
         != requested_count
     ):
         raise RuntimeError(
-            "必要過去レースを"
+            "中央必要過去レースを"
             "すべて接続できませんでした。"
         )
 
