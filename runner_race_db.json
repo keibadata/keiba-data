@@ -1,15 +1,25 @@
 {
-  "updated_at": "2026-10-23T17:12:41.154624+09:00",
-  "db_type": "runner_past_race_accumulated",
+  "updated_at": "2026-10-23T17:46:29.672915+09:00",
+  "db_type": "runner_past_race_jra_only",
   "source": "runner_history.json",
   "target_race_id": "202608040708",
   "target_date": "2026-10-18",
+  "mode": "JRA_ONLY",
   "future_race_usage": false,
   "leak_check_passed": true,
-  "requested_race_count": 137,
-  "connected_race_count": 137,
-  "new_race_count": 0,
-  "reused_race_count": 137,
+  "requested_race_count": 132,
+  "connected_race_count": 132,
+  "new_race_count": 132,
+  "reused_race_count": 0,
+  "invalid_cache_count": 132,
+  "excluded_local_race_count": 5,
+  "excluded_local_race_ids": [
+    "202650031710",
+    "202650040809",
+    "202650042810",
+    "202650090909",
+    "202651030307"
+  ],
   "error_count": 0,
   "skipped_future_count": 0,
   "missing_race_count": 0,
@@ -19,12 +29,14 @@
     {
       "race_id": "202305030804",
       "race_date": "2023-06-25",
-      "racecourse": "函館",
+      "racecourse": "東京",
       "race_number": "4R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:05.243450+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:10.229535+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "10(4,9)-(5,11)1,6(3,8,7)2",
@@ -288,17 +300,22 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202308011103",
       "race_date": "2023-05-27",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "3R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:05.151735+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:08.416112+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -723,17 +740,22 @@
           "popularity": "16"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202308030205",
       "race_date": "2023-11-05",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:05.174252+00:00",
+      "race_class": "新馬",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:10.428901+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1,5-3(2,7)(4,6)-8",
@@ -928,17 +950,22 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202308030502",
       "race_date": "2023-11-18",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "2R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "重",
-      "updated_at": "2026-10-22T22:55:04.409322+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:10.401330+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "9(4,11)(8,10)(7,15)2(5,16)3,6(1,14)=13,12",
@@ -1317,17 +1344,22 @@
           "popularity": "15"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202309030402",
       "race_date": "2023-06-11",
-      "racecourse": "函館",
+      "racecourse": "阪神",
       "race_number": "2R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:05.406570+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:10.425437+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4,6,16(2,8,9,15)3(11,14)1,13(12,7)(5,17)-10,18",
@@ -1752,17 +1784,22 @@
           "popularity": "15"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202309050102",
       "race_date": "2023-12-02",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "2R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:05.250913+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:10.353657+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1,4(3,5)-6,2,8=7   9",
@@ -1980,17 +2017,22 @@
           "popularity": ""
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202309050901",
       "race_date": "2023-12-28",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "1R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:05.403104+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:10.306237+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(6,*14)16-7(11,9)(4,8)13,3-(1,5,15,12)-(2,10)",
@@ -2369,17 +2411,22 @@
           "popularity": "6"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202310030502",
       "race_date": "2023-08-26",
-      "racecourse": "札幌",
+      "racecourse": "小倉",
       "race_number": "2R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:05.247024+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:10.225156+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "2,14(7,8)(3,13)4-(1,9)(5,15,6)12(10,16)11",
@@ -2758,6 +2805,9 @@
           "popularity": "16"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -2768,7 +2818,9 @@
       "distance": 1700,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:05.602738+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:09.479087+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*1,10,8,12)6-(2,13)-(3,5)14,11(4,7)15,9",
@@ -3124,6 +3176,9 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -3134,7 +3189,9 @@
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:07.104903+00:00",
+      "race_class": "新馬",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:10.668150+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "8,9(5,7)(1,3)(2,6)15-(4,11)13-14-10-12",
@@ -3490,6 +3547,9 @@
           "popularity": "5"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -3500,7 +3560,9 @@
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:06.441378+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:12.193451+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "12,9,5,11(7,8)(3,2)4-6,1,10",
@@ -3787,6 +3849,9 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -3797,7 +3862,9 @@
       "distance": 1600,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:06.495472+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:11.720368+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -4153,17 +4220,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202407020305",
       "race_date": "2024-08-17",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "5R",
       "distance": 1400,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:06.487328+00:00",
+      "race_class": "新馬",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:11.515156+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -4588,17 +4660,22 @@
           "popularity": "18"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202407030304",
       "race_date": "2024-09-14",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "4R",
       "distance": 1900,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:06.457407+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:12.140786+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "10(5,7,12)(4,8)9(2,3)6,1(11,13)",
@@ -4908,17 +4985,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202407030904",
       "race_date": "2024-09-29",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "4R",
       "distance": 1900,
       "surface": "ダート",
       "track_condition": "重",
-      "updated_at": "2026-10-22T22:55:06.781603+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:11.587239+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "9,3-2,7,8(1,4)6-5",
@@ -5136,17 +5218,22 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202407040407",
       "race_date": "2024-12-08",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "7R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:06.669997+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:11.499520+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1,3,6(7,5,15)(12,17)(10,18)14(4,16)11,9(8,13)2",
@@ -5571,17 +5658,22 @@
           "popularity": "18"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202407040505",
       "race_date": "2024-12-14",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "5R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:06.816243+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:11.626418+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(2,*16)(14,10)(1,9)(4,8)(6,12,15)(3,7,11)13(5,17)-18",
@@ -6006,17 +6098,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202407040604",
       "race_date": "2024-12-15",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "4R",
       "distance": 1600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:07.584307+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:11.700257+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -6395,17 +6492,22 @@
           "popularity": "16"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408010402",
       "race_date": "2024-01-13",
-      "racecourse": "中山",
+      "racecourse": "京都",
       "race_number": "2R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:07.531827+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:12.651440+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(1,10,12,*13)(9,11)-5(7,14)(3,6)4-8,2",
@@ -6738,17 +6840,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408030203",
       "race_date": "2024-04-21",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "3R",
       "distance": 1900,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:07.501554+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:12.893152+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "10(13,15)(2,6,12,14)(1,8)(5,7)11(3,16)4-9",
@@ -7127,17 +7234,22 @@
           "popularity": "15"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408030306",
       "race_date": "2024-04-27",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "6R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:08.010764+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:12.866233+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "7,3,4,5,6(1,10)-(2,9)-8",
@@ -7378,17 +7490,22 @@
           "popularity": "6"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408030703",
       "race_date": "2024-05-11",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "3R",
       "distance": 1900,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:07.964553+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:12.650938+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "3,4(5,6)12,13(7,11)(2,10)-8,1,9",
@@ -7698,17 +7815,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408030907",
       "race_date": "2024-05-18",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:08.103568+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:13.027360+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "12,3,2-8,4(11,10)5,6,7(9,1)",
@@ -7995,17 +8117,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408040307",
       "race_date": "2024-06-08",
-      "racecourse": "函館",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 1900,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:08.057911+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:13.110169+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6-12(8,15,16)(1,10,14)9(4,11)-2(5,13)-3-7",
@@ -8384,17 +8511,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408040607",
       "race_date": "2024-06-16",
-      "racecourse": "函館",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:08.148134+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:13.409014+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "10,7,3(1,11)(2,9)5,8,4-6",
@@ -8658,17 +8790,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408050205",
       "race_date": "2024-10-06",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:08.597522+00:00",
+      "race_class": "新馬",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:13.272310+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -8978,17 +9115,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408050305",
       "race_date": "2024-10-12",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:08.720269+00:00",
+      "race_class": "新馬",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:13.626115+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(8,*11)13(4,7)10(1,3)6(2,9)=12,5",
@@ -9298,17 +9440,22 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408050807",
       "race_date": "2024-10-27",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 1900,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:08.789830+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:14.047964+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "3,5(4,6,10)(2,7,9)-8-1-11",
@@ -9572,17 +9719,22 @@
           "popularity": "3"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408060303",
       "race_date": "2024-11-09",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "3R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:08.905108+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:13.793460+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(3,*5,11)(2,4,9)(1,8,10)(6,7)",
@@ -9846,17 +9998,22 @@
           "popularity": "8"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408060504",
       "race_date": "2024-11-16",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "4R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:09.389020+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:14.134608+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -10189,17 +10346,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408070105",
       "race_date": "2024-11-30",
-      "racecourse": "中山",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:09.363336+00:00",
+      "race_class": "新馬",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:14.038193+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -10509,17 +10671,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202408070903",
       "race_date": "2024-12-28",
-      "racecourse": "中山",
+      "racecourse": "京都",
       "race_number": "3R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:09.023622+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:14.300399+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(1,*12)6(2,15)4-8(7,10,16)(5,9,11)-14,13,3",
@@ -10898,17 +11065,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202410010307",
       "race_date": "2024-01-20",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "7R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:09.357288+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:14.382525+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "14,9(5,12)6(2,11,10)(1,8)(3,4)-13,15-7",
@@ -11264,17 +11436,22 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202410010707",
       "race_date": "2024-02-03",
-      "racecourse": "東京",
+      "racecourse": "小倉",
       "race_number": "7R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:09.674830+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:14.584474+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6,8(3,10,14)4(1,12,15)(2,11)(5,7)13,9",
@@ -11630,17 +11807,22 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202410020607",
       "race_date": "2024-02-25",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "7R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:09.769418+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:14.831130+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "10,8(2,3)-1,5(7,11)(13,9)6,12-4",
@@ -11950,17 +12132,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202410030508",
       "race_date": "2024-07-13",
-      "racecourse": "函館",
+      "racecourse": "小倉",
       "race_number": "8R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:10.269531+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:14.893192+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "8,13(1,14)(3,6)11,2,9,10(4,7)(5,12)",
@@ -12293,17 +12480,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202410030707",
       "race_date": "2024-07-20",
-      "racecourse": "札幌",
+      "racecourse": "小倉",
       "race_number": "7R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:09.969262+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:14.940133+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "11,3(7,6)(1,2,8)(5,10)=(4,9)",
@@ -12567,6 +12759,9 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -12577,7 +12772,9 @@
       "distance": 1800,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:10.166560+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:15.362282+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*2,3)12(1,5,4,8)10(6,9)-13-7-14-11",
@@ -12910,6 +13107,9 @@
           "popularity": "8"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -12920,7 +13120,9 @@
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:10.461129+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:15.266058+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "14-8-16(7,15)(10,13)9(1,2)-(4,3)6(12,5,11)",
@@ -13299,6 +13501,9 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -13309,7 +13514,9 @@
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:10.549829+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:15.697383+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "13,15,2-16(5,6)(3,10,8)(4,1,9,12)-(11,14)7",
@@ -13688,6 +13895,9 @@
           "popularity": "4"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -13698,7 +13908,9 @@
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:10.582569+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:15.670670+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*4,8,15,14)(1,7,16)(2,5,6)9(11,10)(3,13)-12",
@@ -14077,6 +14289,9 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -14087,7 +14302,9 @@
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:10.933386+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:15.834578+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "15(12,13)14(5,2,8)(1,10,11)3(4,7)(6,9)",
@@ -14443,17 +14660,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202504020408",
       "race_date": "2025-08-03",
-      "racecourse": "札幌",
+      "racecourse": "新潟",
       "race_number": "8R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:11.093401+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:16.395536+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "5(8,10)3,7(1,6)(4,9)(2,11)",
@@ -14717,17 +14939,22 @@
           "popularity": "3"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202504020811",
       "race_date": "2025-08-17",
-      "racecourse": "札幌",
+      "racecourse": "新潟",
       "race_number": "11R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:11.127822+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:16.137930+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "2,9=(1,4)(5,8)10,6-3,11-7",
@@ -14991,17 +15218,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202504030408",
       "race_date": "2025-08-31",
-      "racecourse": "札幌",
+      "racecourse": "新潟",
       "race_number": "8R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:11.301585+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:15.784378+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -15219,6 +15451,9 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -15229,7 +15464,9 @@
       "distance": 1800,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:11.479985+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:16.486642+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -15608,17 +15845,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202505020211",
       "race_date": "2025-04-27",
-      "racecourse": "福島",
+      "racecourse": "東京",
       "race_number": "11R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:11.757458+00:00",
+      "race_class": "G1",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:16.470234+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -16043,17 +16285,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507010305",
       "race_date": "2025-01-11",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "5R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:11.799267+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:16.871791+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*11,13)17(7,12)(9,14)4(6,18)(2,10)15(1,16)8-(5,3)",
@@ -16478,17 +16725,22 @@
           "popularity": "17"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507010501",
       "race_date": "2025-01-13",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "1R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:11.655356+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:16.848243+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*1,4)8(3,5)10(9,6)(11,15)(12,16)-(14,13)(2,7)",
@@ -16867,17 +17119,22 @@
           "popularity": "15"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507010809",
       "race_date": "2025-01-25",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "9R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:12.216498+00:00",
+      "race_class": "L",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:16.967253+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4,6,5,9(3,10)(2,8)(1,7)",
@@ -17118,17 +17375,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507030304",
       "race_date": "2025-08-02",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "4R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:12.472193+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:17.240355+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(4,*13)-3(10,11)2,8-(6,7)1-9(5,12)-14",
@@ -17461,17 +17723,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507030311",
       "race_date": "2025-08-02",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "11R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:12.338086+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:17.248837+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*10,11)(4,9)8(3,5,7)(1,6)(2,13)-12",
@@ -17781,17 +18048,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507030804",
       "race_date": "2025-08-17",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "4R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:12.471130+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:17.609429+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "3,11(5,13)7(2,6,12,10)(1,4,9)-8",
@@ -18101,17 +18373,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507040108",
       "race_date": "2025-08-23",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "8R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:12.486595+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:17.880376+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1-5-7-2(6,4)-(8,3)",
@@ -18306,17 +18583,22 @@
           "popularity": "8"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507040303",
       "race_date": "2025-08-30",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "3R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:12.726984+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:17.525810+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "14(1,7)(3,9)(11,6)-8,4-12,10,13(15,2)-5",
@@ -18672,17 +18954,22 @@
           "popularity": "15"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507050307",
       "race_date": "2025-12-13",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "7R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:12.932336+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:18.307550+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "13-9-11,15,4(5,12,17)8,3,18,1(16,14)2,7,10,6",
@@ -19107,17 +19394,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507050406",
       "race_date": "2025-12-14",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "6R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:13.036727+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:18.013738+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6,7(2,10,14)(1,8,18)9(5,11)3(15,12)16,4-17-13",
@@ -19542,17 +19834,22 @@
           "popularity": "17"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202507050409",
       "race_date": "2025-12-14",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "9R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:13.344797+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:18.307420+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1,9,5(6,10)(4,7)11-12,8,2-3",
@@ -19839,17 +20136,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508010705",
       "race_date": "2025-02-22",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:13.850493+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:18.346683+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "11,3(2,13)14(1,6,8)4,7,9-10(5,15)12",
@@ -20205,17 +20507,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508020106",
       "race_date": "2025-04-26",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "6R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:13.647484+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:18.888298+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "11,13-(10,14)(8,9)(6,12)3,1-7-2,4-5",
@@ -20548,17 +20855,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508020205",
       "race_date": "2025-04-27",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:13.817525+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:18.602714+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6,12,4(5,14)(1,9)(2,10)(3,7)-(11,8)13",
@@ -20891,17 +21203,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508020605",
       "race_date": "2025-05-11",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:14.027675+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:18.920301+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6(4,7)-(1,3)2(5,12)(9,10)11-8",
@@ -21188,17 +21505,22 @@
           "popularity": "3"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508021205",
       "race_date": "2025-06-01",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:13.670939+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:19.083451+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "7,5(6,11)3(9,8)(2,10,12)(1,4)13",
@@ -21508,17 +21830,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508030105",
       "race_date": "2025-10-04",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "重",
-      "updated_at": "2026-10-22T22:55:14.093277+00:00",
+      "race_class": "新馬",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:19.130920+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6(5,7)10(2,3,11)(8,4,9,12)(13,14)-1",
@@ -21851,17 +22178,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508030207",
       "race_date": "2025-10-05",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:14.216975+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:19.517573+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "11,1,2-5-8,10,7(6,4)12(3,9)",
@@ -22148,17 +22480,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508031102",
       "race_date": "2025-11-02",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "2R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:14.548835+00:00",
+      "race_class": "未勝利",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:19.301925+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*6,3)7(2,4)5-1",
@@ -22330,17 +22667,22 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508031107",
       "race_date": "2025-11-02",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:14.757773+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:19.611285+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "12,16(6,13)4,7(5,10)(1,8)-15,9(11,2)-3-14",
@@ -22719,17 +23061,22 @@
           "popularity": "15"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202508040307",
       "race_date": "2025-11-15",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:15.123245+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:19.792943+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(1,*5)(6,11)-8(2,9)-(4,16)-13-15-(3,7,14)-12,10",
@@ -23108,17 +23455,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202509010509",
       "race_date": "2025-03-15",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "9R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:15.390401+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:20.156581+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "12-(3,5)(2,4,9)(8,10)(7,11)6=1",
@@ -23405,17 +23757,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202509020109",
       "race_date": "2025-03-29",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "9R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:15.239275+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:20.222992+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -23748,17 +24105,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202509020604",
       "race_date": "2025-04-13",
-      "racecourse": "福島",
+      "racecourse": "阪神",
       "race_number": "4R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:15.580149+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:20.327515+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "9-(6,11)13(1,14)7(8,12)15,3,5,2,10   4",
@@ -24114,17 +24476,22 @@
           "popularity": ""
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202509030406",
       "race_date": "2025-06-15",
-      "racecourse": "函館",
+      "racecourse": "阪神",
       "race_number": "6R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "重",
-      "updated_at": "2026-10-22T22:55:15.250584+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:20.640452+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "16,7,6,15(2,8)(4,11)-(1,5)-3,14(10,13)-(9,12)",
@@ -24503,17 +24870,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202509030504",
       "race_date": "2025-06-21",
-      "racecourse": "函館",
+      "racecourse": "阪神",
       "race_number": "4R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:15.393365+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:20.585906+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*12,6,13)-(5,10,9)11,3-7-8-1,4=2",
@@ -24823,17 +25195,22 @@
           "popularity": "8"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202509030604",
       "race_date": "2025-06-22",
-      "racecourse": "函館",
+      "racecourse": "阪神",
       "race_number": "4R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:15.482504+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:20.882465+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "2,12,3(4,14)5(10,9,15)-(6,7,8)-(1,11)-13",
@@ -25189,17 +25566,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202509040406",
       "race_date": "2025-09-14",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "6R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:15.996987+00:00",
+      "race_class": "新馬",
+      "age_condition": "2歳",
+      "updated_at": "2026-10-23T08:46:21.018983+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*4,7)(6,10)8(2,11)5(1,12)(3,9)",
@@ -25486,17 +25868,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202509050707",
       "race_date": "2025-12-27",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "7R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:16.156331+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:21.078540+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -25852,17 +26239,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202510010206",
       "race_date": "2025-01-26",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "6R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:16.605625+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:21.471993+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "16,10,11-(4,8)(1,2,9)(14,13)5(3,17,15)6(7,12)",
@@ -26264,17 +26656,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202510010507",
       "race_date": "2025-02-08",
-      "racecourse": "東京",
+      "racecourse": "小倉",
       "race_number": "7R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:16.630205+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:21.823257+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "10,6(3,8)(9,12)(1,13)-(4,5)-7,11,2",
@@ -26584,17 +26981,22 @@
           "popularity": "2"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202510010807",
       "race_date": "2025-02-16",
-      "racecourse": "東京",
+      "racecourse": "小倉",
       "race_number": "7R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:16.529742+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:21.436904+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*15,8,12)-(3,11,16)(5,13)1(9,10)7,14-(2,4)6",
@@ -26973,17 +27375,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202510011108",
       "race_date": "2025-03-01",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "8R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:17.165766+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:21.625576+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*1,15)(2,4,9)(3,11)14(5,6)12,10,13,8,7",
@@ -27339,17 +27746,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202510020109",
       "race_date": "2025-06-28",
-      "racecourse": "函館",
+      "racecourse": "小倉",
       "race_number": "9R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:17.048920+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:21.807022+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "5-2-(1,3,8)-4,6-7",
@@ -27544,17 +27956,22 @@
           "popularity": "4"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202510020509",
       "race_date": "2025-07-12",
-      "racecourse": "函館",
+      "racecourse": "小倉",
       "race_number": "9R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:16.777815+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:21.920105+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "3-(5,4)(10,6)11,7,9,1,2,8",
@@ -27818,17 +28235,22 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202510020804",
       "race_date": "2025-07-20",
-      "racecourse": "函館",
+      "racecourse": "小倉",
       "race_number": "4R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:17.067570+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:22.480713+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "11,13,15,1,8,4(5,18)(16,14,12)(3,9)(2,6)-(7,10)17",
@@ -28253,6 +28675,9 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -28263,7 +28688,9 @@
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:17.226545+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:22.316487+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "3,9-(2,11)5,1,7,6,12(4,10,13)8-14",
@@ -28596,6 +29023,9 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -28606,7 +29036,9 @@
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:17.680614+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:22.625409+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*3,1)13-2,4(5,9)-(8,11)10,6-12=7   14",
@@ -28939,6 +29371,9 @@
           "popularity": ""
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -28949,7 +29384,9 @@
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:17.881056+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:22.517179+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "2,7(8,13)-9-(6,12)4(5,3)11-10,1",
@@ -29259,6 +29696,9 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -29269,7 +29709,9 @@
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:17.790497+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:22.973607+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "8,3,7,2(4,5)(1,6)",
@@ -29464,17 +29906,22 @@
           "popularity": "3"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202603020208",
       "race_date": "2026-06-28",
-      "racecourse": "函館",
+      "racecourse": "福島",
       "race_number": "8R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:18.337833+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:22.970116+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "3-11-10(1,7)(2,5)6,9,4,12-13,8",
@@ -29784,6 +30231,9 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -29794,7 +30244,9 @@
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:18.321313+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:23.229739+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "5,6(3,11)7(1,10,9)(4,8)14(2,12)-13",
@@ -30127,6 +30579,9 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
@@ -30137,7 +30592,9 @@
       "distance": 2400,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:18.348504+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:23.063531+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1-7=(8,10)9,11(5,14)-13(6,12)-(2,3)4",
@@ -30470,17 +30927,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202607010406",
       "race_date": "2026-03-22",
-      "racecourse": "中山",
+      "racecourse": "中京",
       "race_number": "6R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:18.342566+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:23.552306+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "14,12-2,13(1,6)17(4,9)7,5,10(3,15)8,16,11",
@@ -30882,17 +31344,22 @@
           "popularity": "17"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202607020311",
       "race_date": "2026-08-01",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "11R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:18.691765+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:23.676191+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*7,2)9,1,5(3,4)-6-8",
@@ -31110,17 +31577,22 @@
           "popularity": "4"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202607020809",
       "race_date": "2026-08-16",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "9R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:18.934973+00:00",
+      "race_class": "OP",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:23.804650+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "14(6,7)-(13,15)3(16,17)8(4,11,18)(2,9)12,10-1-5",
@@ -31545,17 +32017,22 @@
           "popularity": "18"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202607030205",
       "race_date": "2026-08-23",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "5R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:19.109985+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:24.005708+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4,11(3,6)-1-7,5,10,2,9-8",
@@ -31819,17 +32296,22 @@
           "popularity": "2"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202607030410",
       "race_date": "2026-08-30",
-      "racecourse": "札幌",
+      "racecourse": "中京",
       "race_number": "10R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:19.041298+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:24.449627+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*2,5)(1,9)-10(3,8)7-4,6",
@@ -32070,17 +32552,22 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608010406",
       "race_date": "2026-01-11",
-      "racecourse": "中山",
+      "racecourse": "京都",
       "race_number": "6R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:19.561298+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:24.391804+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "8,14-11(10,12)3,6(2,7,13)-4-5,1,9",
@@ -32413,17 +32900,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608010407",
       "race_date": "2026-01-11",
-      "racecourse": "中山",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:19.595709+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:24.170482+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "12,10-6-(3,2)13(1,8)14(5,4)(7,11,9)",
@@ -32756,17 +33248,22 @@
           "popularity": "8"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608020108",
       "race_date": "2026-01-31",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "8R",
       "distance": 1900,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:19.597158+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:24.325023+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "7,4(1,10)-2,9(3,8)5,6",
@@ -33007,17 +33504,22 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608020307",
       "race_date": "2026-02-07",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:19.386358+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:24.923276+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1-3,7(4,2)5-(8,6)-9",
@@ -33235,17 +33737,22 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608020607",
       "race_date": "2026-02-15",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:19.862051+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:24.687022+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "13,1,12-10(7,9)(3,5,11)-(8,6)-(2,4)",
@@ -33555,17 +34062,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608030205",
       "race_date": "2026-04-26",
-      "racecourse": "福島",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:20.092366+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:25.012246+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "11,12,6,9(2,10)(3,8,7)5,4,1",
@@ -33852,17 +34364,22 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608030306",
       "race_date": "2026-05-02",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "6R",
       "distance": 1800,
       "surface": "ダート",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:20.321469+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:25.105793+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6,9(2,7)11,10(1,4)(5,3)=8",
@@ -34126,17 +34643,22 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608030511",
       "race_date": "2026-05-09",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "11R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:20.373328+00:00",
+      "race_class": "G1",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:25.543991+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "14(8,12)(1,15)(7,5,16)(4,2)(9,6)-(3,10)13,11",
@@ -34515,17 +35037,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608030606",
       "race_date": "2026-05-10",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "6R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:20.620093+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:25.698712+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1,3(5,7)(8,9)(4,10)-2,6",
@@ -34766,17 +35293,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608030704",
       "race_date": "2026-05-16",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "4R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:20.962772+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:25.424941+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4,9(3,5)10,6,7(1,8)-2",
@@ -35017,17 +35549,22 @@
           "popularity": "6"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608030905",
       "race_date": "2026-05-23",
-      "racecourse": "新潟",
+      "racecourse": "京都",
       "race_number": "5R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:21.131416+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:25.777207+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "1,2(4,9)6(3,7,11)8-13-(5,10)-14-12",
@@ -35360,17 +35897,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202608031207",
       "race_date": "2026-05-31",
-      "racecourse": "東京",
+      "racecourse": "京都",
       "race_number": "7R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:21.025932+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:25.836611+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6=(4,5)-3,8-1,10(2,7)-9",
@@ -35611,17 +36153,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609010207",
       "race_date": "2026-02-22",
-      "racecourse": "東京",
+      "racecourse": "阪神",
       "race_number": "7R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:20.915519+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:25.967116+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4-6,9(2,5)(8,7)1,3",
@@ -35839,17 +36386,22 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609010607",
       "race_date": "2026-03-08",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "7R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:21.265499+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:26.365116+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "2-4,3,8,6-5(1,7)-9",
@@ -36067,17 +36619,22 @@
           "popularity": "5"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609011007",
       "race_date": "2026-03-22",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "7R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:21.514917+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:26.315214+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "11,3,5(4,9)(8,6)10,1-72",
@@ -36341,17 +36898,22 @@
           "popularity": ""
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609020708",
       "race_date": "2026-04-18",
-      "racecourse": "福島",
+      "racecourse": "阪神",
       "race_number": "8R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:21.738159+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:26.819877+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "5,6-(4,8)-1(2,7)-9-3",
@@ -36569,17 +37131,22 @@
           "popularity": "7"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609020805",
       "race_date": "2026-04-19",
-      "racecourse": "福島",
+      "racecourse": "阪神",
       "race_number": "5R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:21.738455+00:00",
+      "race_class": "OP",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:26.699896+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "7-(3,6)13,4-(11,8)-1-2,12,9-10-5",
@@ -36889,17 +37456,22 @@
           "popularity": "5"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609030407",
       "race_date": "2026-06-14",
-      "racecourse": "函館",
+      "racecourse": "阪神",
       "race_number": "7R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:21.879375+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:26.881850+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4,9,6,2(5,7)(1,8)11,3,10",
@@ -37163,17 +37735,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609030507",
       "race_date": "2026-06-20",
-      "racecourse": "函館",
+      "racecourse": "阪神",
       "race_number": "7R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:22.506238+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:27.071976+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4(3,13)16,8,14,12,7,5,15(10,11)-9,2-1-6",
@@ -37552,17 +38129,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609030604",
       "race_date": "2026-06-21",
-      "racecourse": "函館",
+      "racecourse": "阪神",
       "race_number": "4R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:22.195968+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:27.338665+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "12,4-1,10(3,6)13,16(18,17)-(14,11)-(9,15)8(7,5)-2",
@@ -37987,17 +38569,22 @@
           "popularity": "6"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609040507",
       "race_date": "2026-09-19",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "7R",
       "distance": 2400,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:22.305081+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:27.519159+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4,5,2-6(1,8)7,9-(10,3)11,12",
@@ -38284,17 +38871,22 @@
           "popularity": "8"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609040606",
       "race_date": "2026-09-20",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "6R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:22.543160+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:27.721163+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*11,2)(5,6)10,3(4,7)1,8,9",
@@ -38558,17 +39150,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202609040808",
       "race_date": "2026-09-26",
-      "racecourse": "中山",
+      "racecourse": "阪神",
       "race_number": "8R",
       "distance": 2200,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:22.782546+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:27.461585+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "8,5,7=9,6,11,4-3,1-10-2",
@@ -38832,17 +39429,22 @@
           "popularity": "10"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610010102",
       "race_date": "2026-01-24",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "2R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:23.082463+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:27.797200+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "4,8(1,9)10(2,3,16)15(5,11,14)12,7,13,6",
@@ -39221,17 +39823,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610010106",
       "race_date": "2026-01-24",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "6R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:22.997713+00:00",
+      "race_class": "新馬",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:28.192070+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "14(3,10)15(7,5,18)(16,6)(1,12,17)(2,8,11,13)-4,9",
@@ -39656,17 +40263,22 @@
           "popularity": "8"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610010107",
       "race_date": "2026-01-24",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "7R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:23.060820+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:28.371021+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "10-14(4,7)(1,15,5)(2,12)8,3(6,9,11)13",
@@ -40022,17 +40634,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610010212",
       "race_date": "2026-01-25",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "12R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:23.219176+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:28.196188+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "9-8(10,13)11,5-(2,7)12(1,3,6)4-14",
@@ -40365,17 +40982,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610010312",
       "race_date": "2026-01-31",
-      "racecourse": "東京",
+      "racecourse": "小倉",
       "race_number": "12R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:23.768601+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:28.801697+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*1,12)-2,8(4,9)5(6,10)(7,14)11,15,3,16,13",
@@ -40754,17 +41376,22 @@
           "popularity": "12"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610010807",
       "race_date": "2026-02-15",
-      "racecourse": "東京",
+      "racecourse": "小倉",
       "race_number": "7R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:23.563628+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:28.624315+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "2,4,3,6(1,12)5(7,8)10(9,14)-13,11",
@@ -41097,17 +41724,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610011008",
       "race_date": "2026-02-22",
-      "racecourse": "東京",
+      "racecourse": "小倉",
       "race_number": "8R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:23.702296+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:28.579078+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "3,4(6,11,12)(8,13)(1,14)-9(5,7)10,2",
@@ -41440,17 +42072,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610011102",
       "race_date": "2026-02-28",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "2R",
       "distance": 1200,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:24.099669+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:29.036070+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "",
@@ -41875,17 +42512,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610011106",
       "race_date": "2026-02-28",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "6R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:24.620982+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:29.067691+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "11-13(6,9)(7,15)1(3,5,12)(2,8)14(16,10)-4",
@@ -42264,17 +42906,22 @@
           "popularity": "14"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610011109",
       "race_date": "2026-02-28",
-      "racecourse": "中山",
+      "racecourse": "小倉",
       "race_number": "9R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "",
-      "updated_at": "2026-10-22T22:55:24.481481+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "4歳以上",
+      "updated_at": "2026-10-23T08:46:29.227269+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "8,12(5,13)9(2,6)16(1,10)14(3,15)7,11,4",
@@ -42653,17 +43300,22 @@
           "popularity": "13"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610020303",
       "race_date": "2026-07-04",
-      "racecourse": "函館",
+      "racecourse": "小倉",
       "race_number": "3R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "重",
-      "updated_at": "2026-10-22T22:55:24.678573+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:29.383569+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "6(10,16)(4,14)-(1,2)(3,11)8,9(5,15)13,12=7",
@@ -43042,17 +43694,22 @@
           "popularity": "9"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610020409",
       "race_date": "2026-07-05",
-      "racecourse": "函館",
+      "racecourse": "小倉",
       "race_number": "9R",
       "distance": 1800,
       "surface": "芝",
       "track_condition": "重",
-      "updated_at": "2026-10-22T22:55:24.172840+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:29.415237+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "(*2,3)-8,7,5,6(1,4)",
@@ -43247,17 +43904,22 @@
           "popularity": "4"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610020509",
       "race_date": "2026-07-11",
-      "racecourse": "函館",
+      "racecourse": "小倉",
       "race_number": "9R",
       "distance": 2600,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:24.951665+00:00",
+      "race_class": "1勝クラス",
+      "age_condition": "3歳以上",
+      "updated_at": "2026-10-23T08:46:29.501084+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "8,9,4(3,2,6)(7,10)(1,11)5",
@@ -43521,17 +44183,22 @@
           "popularity": "11"
         }
       ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     },
     {
       "race_id": "202610020603",
       "race_date": "2026-07-12",
-      "racecourse": "函館",
+      "racecourse": "小倉",
       "race_number": "3R",
       "distance": 2000,
       "surface": "芝",
       "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:24.824725+00:00",
+      "race_class": "未勝利",
+      "age_condition": "3歳",
+      "updated_at": "2026-10-23T08:46:29.567396+00:00",
       "source": "netkeiba",
       "corner_order": {
         "1c": "14,9,1,8,10,15,12(5,7)-(2,13)4(3,11)-6",
@@ -43887,226 +44554,9 @@
           "popularity": "10"
         }
       ],
-      "runner_race_reference": true
-    },
-    {
-      "race_id": "202650031710",
-      "race_date": "2026-03-17",
-      "racecourse": "",
-      "race_number": "10R",
-      "distance": 1400,
-      "surface": "ダート",
-      "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:24.857060+00:00",
-      "source": "netkeiba",
-      "corner_order": {
-        "1c": "4,6,12,2,8,9,1,7,(3,11),5,10",
-        "2c": "4,6,12,2,8,(1,9),7,3,11,5,10",
-        "3c": "4,(6,12),9,8,1,11,3,2,7,10,5",
-        "4c": "4,1,6,12,9,3,8,11,2,(7,10),5"
-      },
-      "result_count": 1,
-      "results": [
-        {
-          "rank": "2",
-          "frame_number": "8",
-          "horse_number": "11",
-          "horse_id": "2022106751",
-          "horse_name": "プレデスティナーレ",
-          "sex_age": "牡4",
-          "horse_weight": "475",
-          "weight_change": "-5",
-          "carried_weight": "57.0",
-          "jockey": "吉村智",
-          "trainer": "地方・飯田良弘",
-          "time": "1:32.2",
-          "margin": "3",
-          "passing": "1C:10 / 2C:10 / 3C:7 / 4C:8",
-          "passing_1c": 10,
-          "passing_2c": 10,
-          "passing_3c": 7,
-          "passing_4c": 8,
-          "last3f": "39.1",
-          "odds": "2.6",
-          "popularity": "2"
-        }
-      ],
-      "runner_race_reference": true
-    },
-    {
-      "race_id": "202650040809",
-      "race_date": "2026-04-08",
-      "racecourse": "",
-      "race_number": "9R",
-      "distance": 1400,
-      "surface": "ダート",
-      "track_condition": "良",
-      "updated_at": "2026-10-22T22:55:25.063406+00:00",
-      "source": "netkeiba",
-      "corner_order": {
-        "1c": "(6,8),11,9-10,(4,12),5,(1,7)-3,2",
-        "2c": "(6,8,11),9-10,12,4,5,(1,7)-3,2",
-        "3c": "(6,8,11),9-10,12,(4,1),(7,5)-3-2",
-        "4c": "(6,11),(8,9),(4,10),(7,12,1)-3,5-2"
-      },
-      "result_count": 1,
-      "results": [
-        {
-          "rank": "1",
-          "frame_number": "7",
-          "horse_number": "9",
-          "horse_id": "2022106751",
-          "horse_name": "プレデスティナーレ",
-          "sex_age": "牡4",
-          "horse_weight": "480",
-          "weight_change": "+5",
-          "carried_weight": "57.0",
-          "jockey": "吉村智",
-          "trainer": "地方・飯田良弘",
-          "time": "1:31.3",
-          "margin": "",
-          "passing": "1C:4 / 2C:4 / 3C:4 / 4C:4",
-          "passing_1c": 4,
-          "passing_2c": 4,
-          "passing_3c": 4,
-          "passing_4c": 4,
-          "last3f": "39.4",
-          "odds": "1.6",
-          "popularity": "1"
-        }
-      ],
-      "runner_race_reference": true
-    },
-    {
-      "race_id": "202650042810",
-      "race_date": "2026-04-28",
-      "racecourse": "",
-      "race_number": "10R",
-      "distance": 1400,
-      "surface": "ダート",
-      "track_condition": "",
-      "updated_at": "2026-10-22T22:55:25.120212+00:00",
-      "source": "netkeiba",
-      "corner_order": {
-        "1c": "1,10,2,(5,11),6,(7,9)-(4,8)-3",
-        "2c": "1,10,2,(6,5,11),7,9-(4,8)-3",
-        "3c": "(1,10,2),(5,11),6-7,9,8,4,3",
-        "4c": "(1,10,2),5,(6,11),7-9,8,(4,3)"
-      },
-      "result_count": 1,
-      "results": [
-        {
-          "rank": "1",
-          "frame_number": "2",
-          "horse_number": "2",
-          "horse_id": "2022106751",
-          "horse_name": "プレデスティナーレ",
-          "sex_age": "牡4",
-          "horse_weight": "483",
-          "weight_change": "+3",
-          "carried_weight": "57.0",
-          "jockey": "吉村智",
-          "trainer": "地方・飯田良弘",
-          "time": "1:32.8",
-          "margin": "",
-          "passing": "1C:3 / 2C:3 / 3C:3 / 4C:3",
-          "passing_1c": 3,
-          "passing_2c": 3,
-          "passing_3c": 3,
-          "passing_4c": 3,
-          "last3f": "39.7",
-          "odds": "1.2",
-          "popularity": "1"
-        }
-      ],
-      "runner_race_reference": true
-    },
-    {
-      "race_id": "202650090909",
-      "race_date": "2026-09-09",
-      "racecourse": "",
-      "race_number": "9R",
-      "distance": 1400,
-      "surface": "ダート",
-      "track_condition": "",
-      "updated_at": "2026-10-22T22:55:25.312047+00:00",
-      "source": "netkeiba",
-      "corner_order": {
-        "1c": "3,7,(2,8),(4,6),(1,5),9",
-        "2c": "3-7,(2,8),(4,6),5,(1,9)",
-        "3c": "4,(3,7,8),2,6-(1,5,9)",
-        "4c": "(2,4,7,8),3-6,1,5-9"
-      },
-      "result_count": 1,
-      "results": [
-        {
-          "rank": "1",
-          "frame_number": "8",
-          "horse_number": "8",
-          "horse_id": "2022106751",
-          "horse_name": "プレデスティナーレ",
-          "sex_age": "牡4",
-          "horse_weight": "486",
-          "weight_change": "+3",
-          "carried_weight": "58.0",
-          "jockey": "吉村智",
-          "trainer": "地方・飯田良弘",
-          "time": "1:31.0",
-          "margin": "",
-          "passing": "1C:4 / 2C:4 / 3C:4 / 4C:4",
-          "passing_1c": 4,
-          "passing_2c": 4,
-          "passing_3c": 4,
-          "passing_4c": 4,
-          "last3f": "38.8",
-          "odds": "5.0",
-          "popularity": "4"
-        }
-      ],
-      "runner_race_reference": true
-    },
-    {
-      "race_id": "202651030307",
-      "race_date": "2026-03-03",
-      "racecourse": "",
-      "race_number": "7R",
-      "distance": 1400,
-      "surface": "ダート",
-      "track_condition": "",
-      "updated_at": "2026-10-22T22:55:25.424847+00:00",
-      "source": "netkeiba",
-      "corner_order": {
-        "1c": "6,5,(1,2),7,8,9,4,3",
-        "2c": "6,5,2,1,7,8,(4,9),3",
-        "3c": "6,5,1,2,8,9,7,4,3",
-        "4c": "1,5,6,2,8,9,7,(3,4)"
-      },
-      "result_count": 1,
-      "results": [
-        {
-          "rank": "1",
-          "frame_number": "1",
-          "horse_number": "1",
-          "horse_id": "2022106751",
-          "horse_name": "プレデスティナーレ",
-          "sex_age": "牡4",
-          "horse_weight": "",
-          "weight_change": "",
-          "carried_weight": "57.0",
-          "jockey": "吉村智",
-          "trainer": "地方・飯田良弘",
-          "time": "1:34.4",
-          "margin": "",
-          "passing": "1C:3 / 2C:4 / 3C:3 / 4C:1",
-          "passing_1c": 3,
-          "passing_2c": 4,
-          "passing_3c": 3,
-          "passing_4c": 1,
-          "last3f": "39.7",
-          "odds": "1.5",
-          "popularity": "1"
-        }
-      ],
+      "condition_metadata_status": "complete",
+      "race_class_unknown": false,
+      "age_condition_unknown": false,
       "runner_race_reference": true
     }
   ]
