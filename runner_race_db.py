@@ -13,13 +13,25 @@ RUNNER_HISTORY_FILE = "runner_history.json"
 OUTPUT_FILE = "runner_race_db.json"
 HISTORY_SCRIPT = "history.py"
 
-# GitHub Actions向け高速化
 MAX_WORKERS = 8
 FETCH_TIMEOUT_SECONDS = 90
 MAX_RETRIES = 2
 RETRY_WAIT_SECONDS = 2
 
 JST = timezone(timedelta(hours=9))
+
+JRA_VENUE_CODES = {
+    "01",  # 札幌
+    "02",  # 函館
+    "03",  # 福島
+    "04",  # 新潟
+    "05",  # 東京
+    "06",  # 中山
+    "07",  # 中京
+    "08",  # 京都
+    "09",  # 阪神
+    "10",  # 小倉
+}
 
 
 def now_iso():
@@ -37,6 +49,15 @@ def valid_race_id(value):
             clean(value),
         )
     )
+
+
+def is_jra_race_id(race_id):
+    race_id = clean(race_id)
+
+    if not valid_race_id(race_id):
+        return False
+
+    return race_id[4:6] in JRA_VENUE_CODES
 
 
 def load_json(path, default=None):
@@ -104,16 +125,7 @@ def get_existing_races(db):
     return []
 
 
-def cache_has_required_fields(race):
-    """
-    runner_time_fit.py が実レース接続後に必要とする
-    最低限の情報が揃っているか確認する。
-
-    旧history.pyで作られたキャッシュには
-    race_class / age_condition が無いため、
-    そのキャッシュは再取得対象にする。
-    """
-
+def base_race_data_is_valid(race):
     if not isinstance(race, dict):
         return False
 
@@ -151,14 +163,6 @@ def cache_has_required_fields(race):
         "distance"
     )
 
-    race_class = clean(
-        race.get("race_class")
-    )
-
-    age_condition = clean(
-        race.get("age_condition")
-    )
-
     if not race_date:
         return False
 
@@ -174,7 +178,42 @@ def cache_has_required_fields(race):
     ):
         return False
 
-    # 今回追加した必須項目
+    return True
+
+
+def cache_has_required_fields(race):
+    """
+    中央:
+      race_class / age_condition まで必要。
+
+    地方:
+      レース本体が正常なら保存・再利用可能。
+      race_class / age_condition が取れない場合は
+      runner_time_fit 側で未知数として扱う。
+    """
+
+    if not base_race_data_is_valid(
+        race
+    ):
+        return False
+
+    race_id = clean(
+        race.get("race_id")
+    )
+
+    if not is_jra_race_id(
+        race_id
+    ):
+        return True
+
+    race_class = clean(
+        race.get("race_class")
+    )
+
+    age_condition = clean(
+        race.get("age_condition")
+    )
+
     if not race_class:
         return False
 
@@ -185,12 +224,6 @@ def cache_has_required_fields(race):
 
 
 def build_existing_index(races):
-    """
-    完全な新形式キャッシュだけ再利用する。
-    不完全な旧キャッシュはindexへ入れず、
-    missing_idsとして再取得させる。
-    """
-
     index = {}
 
     for race in races:
@@ -203,7 +236,9 @@ def build_existing_index(races):
             race.get("race_id")
         )
 
-        index[race_id] = race
+        index[
+            race_id
+        ] = race
 
     return index
 
@@ -218,11 +253,17 @@ def collect_requested_race_ids(
         [],
     ) or []
 
-    if not isinstance(horses, list):
+    if not isinstance(
+        horses,
+        list,
+    ):
         return []
 
     for horse in horses:
-        if not isinstance(horse, dict):
+        if not isinstance(
+            horse,
+            dict,
+        ):
             continue
 
         past_races = horse.get(
@@ -244,7 +285,9 @@ def collect_requested_race_ids(
                 continue
 
             race_id = clean(
-                past.get("race_id")
+                past.get(
+                    "race_id"
+                )
             )
 
             if valid_race_id(
@@ -275,6 +318,7 @@ def parse_race_date(value):
                 text[:10],
                 fmt,
             ).date()
+
         except ValueError:
             pass
 
@@ -318,7 +362,10 @@ def get_past_race_date_index(
         [],
     ) or []
 
-    if not isinstance(horses, list):
+    if not isinstance(
+        horses,
+        list,
+    ):
         return result
 
     for horse in horses:
@@ -347,7 +394,9 @@ def get_past_race_date_index(
                 continue
 
             race_id = clean(
-                past.get("race_id")
+                past.get(
+                    "race_id"
+                )
             )
 
             if not valid_race_id(
@@ -372,12 +421,115 @@ def get_past_race_date_index(
     return result
 
 
-def run_history_fetch(race_id):
-    """
-    history.py は history.json という固定ファイル名を使うため、
-    並列実行時に衝突しないよう各レース専用の一時ディレクトリで実行する。
-    """
+def validate_fetched_history(
+    history,
+    race_id,
+):
+    if not isinstance(
+        history,
+        dict,
+    ):
+        return (
+            False,
+            "history.json がdictではありません",
+        )
 
+    fetched_race_id = clean(
+        history.get(
+            "race_id"
+        )
+    )
+
+    if fetched_race_id != race_id:
+        return (
+            False,
+            (
+                "race_id不一致: "
+                f"requested={race_id}, "
+                f"fetched={fetched_race_id}"
+            ),
+        )
+
+    if not base_race_data_is_valid(
+        history
+    ):
+        return (
+            False,
+            "レース基本情報またはresultsが不完全です",
+        )
+
+    race_class = clean(
+        history.get(
+            "race_class"
+        )
+    )
+
+    age_condition = clean(
+        history.get(
+            "age_condition"
+        )
+    )
+
+    if is_jra_race_id(
+        race_id
+    ):
+        if not race_class:
+            return (
+                False,
+                "中央レースのrace_classを取得できませんでした",
+            )
+
+        if not age_condition:
+            return (
+                False,
+                "中央レースのage_conditionを取得できませんでした",
+            )
+
+        history[
+            "condition_metadata_status"
+        ] = "complete"
+
+        history[
+            "race_class_unknown"
+        ] = False
+
+        history[
+            "age_condition_unknown"
+        ] = False
+
+    else:
+        history[
+            "race_class_unknown"
+        ] = not bool(
+            race_class
+        )
+
+        history[
+            "age_condition_unknown"
+        ] = not bool(
+            age_condition
+        )
+
+        if (
+            race_class
+            and age_condition
+        ):
+            history[
+                "condition_metadata_status"
+            ] = "complete"
+
+        else:
+            history[
+                "condition_metadata_status"
+            ] = "partial_unknown"
+
+    return (
+        True,
+        "",
+    )
+
+
+def run_history_fetch(race_id):
     script_path = os.path.abspath(
         HISTORY_SCRIPT
     )
@@ -386,12 +538,17 @@ def run_history_fetch(race_id):
         script_path
     ):
         return {
-            "race_id": race_id,
-            "success": False,
-            "error": (
-                f"{HISTORY_SCRIPT} "
-                "が見つかりません"
-            ),
+            "race_id":
+                race_id,
+
+            "success":
+                False,
+
+            "error":
+                (
+                    f"{HISTORY_SCRIPT} "
+                    "が見つかりません"
+                ),
         }
 
     last_error = ""
@@ -440,14 +597,21 @@ def run_history_fetch(race_id):
                         continue
 
                     return {
-                        "race_id": race_id,
-                        "success": False,
-                        "error": last_error,
+                        "race_id":
+                            race_id,
+
+                        "success":
+                            False,
+
+                        "error":
+                            last_error,
                     }
 
-                history_path = os.path.join(
-                    temp_dir,
-                    "history.json",
+                history_path = (
+                    os.path.join(
+                        temp_dir,
+                        "history.json",
+                    )
                 )
 
                 if not os.path.exists(
@@ -467,49 +631,31 @@ def run_history_fetch(race_id):
                         continue
 
                     return {
-                        "race_id": race_id,
-                        "success": False,
-                        "error": last_error,
+                        "race_id":
+                            race_id,
+
+                        "success":
+                            False,
+
+                        "error":
+                            last_error,
                     }
 
                 history = load_json(
                     history_path
                 )
 
-                if not isinstance(
+                (
+                    valid,
+                    validation_error,
+                ) = validate_fetched_history(
                     history,
-                    dict,
-                ):
-                    last_error = (
-                        "history.json が"
-                        "dictではありません"
-                    )
-
-                    if attempt < MAX_RETRIES:
-                        time.sleep(
-                            RETRY_WAIT_SECONDS
-                            * attempt
-                        )
-                        continue
-
-                    return {
-                        "race_id": race_id,
-                        "success": False,
-                        "error": last_error,
-                    }
-
-                fetched_race_id = clean(
-                    history.get(
-                        "race_id"
-                    )
+                    race_id,
                 )
 
-                if fetched_race_id != race_id:
+                if not valid:
                     last_error = (
-                        "race_id不一致: "
-                        f"requested={race_id}, "
-                        f"fetched="
-                        f"{fetched_race_id}"
+                        validation_error
                     )
 
                     if attempt < MAX_RETRIES:
@@ -520,88 +666,14 @@ def run_history_fetch(race_id):
                         continue
 
                     return {
-                        "race_id": race_id,
-                        "success": False,
-                        "error": last_error,
-                    }
+                        "race_id":
+                            race_id,
 
-                results = history.get(
-                    "results"
-                )
+                        "success":
+                            False,
 
-                if (
-                    not isinstance(
-                        results,
-                        list,
-                    )
-                    or not results
-                ):
-                    last_error = (
-                        "results が空です"
-                    )
-
-                    if attempt < MAX_RETRIES:
-                        time.sleep(
-                            RETRY_WAIT_SECONDS
-                            * attempt
-                        )
-                        continue
-
-                    return {
-                        "race_id": race_id,
-                        "success": False,
-                        "error": last_error,
-                    }
-
-                # 新history.pyの必須項目確認
-                race_class = clean(
-                    history.get(
-                        "race_class"
-                    )
-                )
-
-                age_condition = clean(
-                    history.get(
-                        "age_condition"
-                    )
-                )
-
-                if not race_class:
-                    last_error = (
-                        "race_class を"
-                        "取得できませんでした"
-                    )
-
-                    if attempt < MAX_RETRIES:
-                        time.sleep(
-                            RETRY_WAIT_SECONDS
-                            * attempt
-                        )
-                        continue
-
-                    return {
-                        "race_id": race_id,
-                        "success": False,
-                        "error": last_error,
-                    }
-
-                if not age_condition:
-                    last_error = (
-                        "age_condition を"
-                        "取得できませんでした"
-                    )
-
-                    if attempt < MAX_RETRIES:
-                        time.sleep(
-                            RETRY_WAIT_SECONDS
-                            * attempt
-                        )
-                        continue
-
-                    return {
-                        "race_id": race_id,
-                        "success": False,
-                        "error": last_error,
+                        "error":
+                            last_error,
                     }
 
                 history[
@@ -609,10 +681,17 @@ def run_history_fetch(race_id):
                 ] = True
 
                 return {
-                    "race_id": race_id,
-                    "success": True,
-                    "race": history,
-                    "attempt": attempt,
+                    "race_id":
+                        race_id,
+
+                    "success":
+                        True,
+
+                    "race":
+                        history,
+
+                    "attempt":
+                        attempt,
                 }
 
         except subprocess.TimeoutExpired:
@@ -633,12 +712,17 @@ def run_history_fetch(race_id):
             )
 
     return {
-        "race_id": race_id,
-        "success": False,
-        "error": (
-            last_error
-            or "unknown error"
-        ),
+        "race_id":
+            race_id,
+
+        "success":
+            False,
+
+        "error":
+            (
+                last_error
+                or "unknown error"
+            ),
     }
 
 
@@ -660,12 +744,25 @@ def build_output(
     ]
 
     races = [
-        race_index[race_id]
+        race_index[
+            race_id
+        ]
         for race_id
         in sorted(
             race_index.keys()
         )
     ]
+
+    partial_unknown_count = sum(
+        1
+        for race in races
+        if (
+            race.get(
+                "condition_metadata_status"
+            )
+            == "partial_unknown"
+        )
+    )
 
     return {
         "updated_at":
@@ -694,10 +791,14 @@ def build_output(
             True,
 
         "requested_race_count":
-            len(requested_ids),
+            len(
+                requested_ids
+            ),
 
         "connected_race_count":
-            len(connected_ids),
+            len(
+                connected_ids
+            ),
 
         "new_race_count":
             new_count,
@@ -708,11 +809,18 @@ def build_output(
         "invalid_cache_count":
             invalid_cache_count,
 
+        "partial_unknown_count":
+            partial_unknown_count,
+
         "error_count":
-            len(errors),
+            len(
+                errors
+            ),
 
         "skipped_future_count":
-            len(skipped_future),
+            len(
+                skipped_future
+            ),
 
         "missing_race_count":
             (
@@ -858,12 +966,6 @@ def main():
         f"{len(requested_ids)}"
     )
 
-    if skipped_future:
-        print(
-            "未来リーク除外: "
-            f"{len(skipped_future)}件"
-        )
-
     existing_db = load_json(
         OUTPUT_FILE,
         default={},
@@ -875,12 +977,13 @@ def main():
         )
     )
 
-    # 旧キャッシュ数を明示
     invalid_cache_ids = []
 
     for race in existing_races:
         race_id = clean(
-            race.get("race_id")
+            race.get(
+                "race_id"
+            )
         )
 
         if not valid_race_id(
@@ -1037,9 +1140,16 @@ def main():
 
                         new_count += 1
 
+                        status = clean(
+                            race.get(
+                                "condition_metadata_status"
+                            )
+                        )
+
                         print(
                             f"[{completed}/{total}] "
-                            f"OK {race_id}"
+                            f"OK {race_id} "
+                            f"status={status}"
                         )
 
                 else:
@@ -1065,7 +1175,6 @@ def main():
                         f"{error['error']}"
                     )
 
-                # 1レース終了ごとに保存
                 current_output = (
                     build_output(
                         runner_history=(
@@ -1162,6 +1271,11 @@ def main():
     print(
         "新規取得成功: "
         f"{new_count}"
+    )
+
+    print(
+        "条件情報一部未知: "
+        f"{final_output['partial_unknown_count']}"
     )
 
     print(
