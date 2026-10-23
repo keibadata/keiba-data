@@ -1,4 +1,4 @@
-name: History Batch Test
+name: History Batch Fast Test
 
 on:
   workflow_dispatch:
@@ -22,8 +22,8 @@ jobs:
       - name: Install packages
         run: pip install -r requirements.txt
 
-      - name: Test history batch
-        run: python history_batch.py
+      - name: Test fast history batch
+        run: python history_batch_fast.py
 
       - name: Save test result
         run: |
@@ -35,6 +35,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Test history race discovery"
+            git commit -m "Test fast history race discovery"
             git push
           fi
