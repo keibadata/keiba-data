@@ -14,12 +14,22 @@ OUTPUT_FILE = "runner_time_fit.json"
 
 JST = timezone(timedelta(hours=9))
 
-MIN_BASELINE_SAMPLE = 5
+# 時計適性は補助診断。
+# 少数サンプルを強い能力評価には使わない。
+MIN_EXACT_SAMPLE = 3
+MIN_RELAXED_SAMPLE = 4
+MIN_DISTANCE_SAMPLE = 5
+
 MAD_SCALE = 1.4826
 MIN_SCALED_DISPERSION_SECONDS = 0.20
 
 STRONG_THRESHOLD = 1.50
 MILD_THRESHOLD = 0.75
+
+JRA_VENUE_CODES = {
+    "01", "02", "03", "04", "05",
+    "06", "07", "08", "09", "10",
+}
 
 
 def load_json(path):
@@ -39,7 +49,7 @@ def save_json(path, data):
             data,
             f,
             ensure_ascii=False,
-            indent=2
+            indent=2,
         )
 
 
@@ -50,7 +60,7 @@ def clean(value):
     return re.sub(
         r"\s+",
         " ",
-        str(value)
+        str(value),
     ).strip()
 
 
@@ -70,7 +80,10 @@ def parse_time(value):
     try:
         if ":" in text:
             minute, second = text.split(":", 1)
-            return float(minute) * 60.0 + float(second)
+            return (
+                float(minute) * 60.0
+                + float(second)
+            )
 
         return float(text)
 
@@ -95,7 +108,7 @@ def parse_date(value):
 
     match = re.search(
         r"(\d{4})/(\d{1,2})/(\d{1,2})",
-        text
+        text,
     )
 
     if not match:
@@ -105,7 +118,7 @@ def parse_date(value):
         return datetime(
             int(match.group(1)),
             int(match.group(2)),
-            int(match.group(3))
+            int(match.group(3)),
         ).date()
 
     except Exception:
@@ -115,7 +128,30 @@ def parse_date(value):
 def now_jst():
     return datetime.now(
         JST
-    ).isoformat(timespec="seconds")
+    ).isoformat(
+        timespec="seconds"
+    )
+
+
+def valid_race_id(value):
+    return bool(
+        re.fullmatch(
+            r"\d{12}",
+            clean(value),
+        )
+    )
+
+
+def is_jra_race_id(value):
+    race_id = clean(value)
+
+    if not valid_race_id(race_id):
+        return False
+
+    return (
+        race_id[4:6]
+        in JRA_VENUE_CODES
+    )
 
 
 def normalize_surface(value):
@@ -124,7 +160,10 @@ def normalize_surface(value):
     if text.startswith("芝"):
         return "芝"
 
-    if text.startswith("ダ") or "ダート" in text:
+    if (
+        text.startswith("ダ")
+        or "ダート" in text
+    ):
         return "ダート"
 
     if text.startswith("障"):
@@ -141,14 +180,32 @@ def normalize_class(value):
 
     upper = text.upper()
 
-    if "G1" in upper or "Ｇ１" in text:
+    if (
+        "G1" in upper
+        or "Ｇ１" in text
+        or "GⅠ" in upper
+    ):
         return "G1"
 
-    if "G2" in upper or "Ｇ２" in text:
+    if (
+        "G2" in upper
+        or "Ｇ２" in text
+        or "GⅡ" in upper
+    ):
         return "G2"
 
-    if "G3" in upper or "Ｇ３" in text:
+    if (
+        "G3" in upper
+        or "Ｇ３" in text
+        or "GⅢ" in upper
+    ):
         return "G3"
+
+    if (
+        "LISTED" in upper
+        or text == "L"
+    ):
+        return "L"
 
     if (
         "OPEN" in upper
@@ -157,13 +214,22 @@ def normalize_class(value):
     ):
         return "OP"
 
-    if "3勝" in text or "1600万" in text:
+    if (
+        "3勝" in text
+        or "1600万" in text
+    ):
         return "3勝クラス"
 
-    if "2勝" in text or "1000万" in text:
+    if (
+        "2勝" in text
+        or "1000万" in text
+    ):
         return "2勝クラス"
 
-    if "1勝" in text or "500万" in text:
+    if (
+        "1勝" in text
+        or "500万" in text
+    ):
         return "1勝クラス"
 
     if "未勝利" in text:
@@ -175,11 +241,61 @@ def normalize_class(value):
     return text
 
 
+def class_group(value):
+    """
+    完全一致が不足した場合だけ使う
+    緩和用クラスグループ。
+    """
+    value = normalize_class(value)
+
+    if value in {
+        "G1",
+        "G2",
+        "G3",
+        "L",
+        "OP",
+    }:
+        return "OPEN_GROUP"
+
+    if value in {
+        "3勝クラス",
+        "2勝クラス",
+        "1勝クラス",
+    }:
+        return value
+
+    if value in {
+        "未勝利",
+        "新馬",
+    }:
+        return value
+
+    return value
+
+
 def normalize_age(value):
     text = clean(value)
 
     if not text:
         return ""
+
+    if (
+        "4歳以上" in text
+        or "4才以上" in text
+    ):
+        return "4歳以上"
+
+    if (
+        "3歳以上" in text
+        or "3才以上" in text
+    ):
+        return "3歳以上"
+
+    if (
+        "2歳以上" in text
+        or "2才以上" in text
+    ):
+        return "2歳以上"
 
     if "2歳" in text:
         return "2歳"
@@ -187,11 +303,8 @@ def normalize_age(value):
     if "3歳" in text:
         return "3歳"
 
-    if "4歳以上" in text or "4才以上" in text:
-        return "4歳以上"
-
-    if "3歳以上" in text or "3才以上" in text:
-        return "3歳以上"
+    if "4歳" in text:
+        return "4歳"
 
     return text
 
@@ -199,33 +312,49 @@ def normalize_age(value):
 def get_history_races(database):
     races = database.get(
         "races",
-        []
+        [],
     )
 
     if isinstance(races, list):
-        return races
+        return [
+            race
+            for race in races
+            if isinstance(race, dict)
+        ]
 
     return []
 
 
 def get_winner_time(race):
-    results = race.get("results", []) or []
+    results = (
+        race.get(
+            "results",
+            [],
+        )
+        or []
+    )
 
     for result in results:
+        if not isinstance(
+            result,
+            dict,
+        ):
+            continue
+
         rank = clean(
             result.get("rank")
             or result.get("finish")
         )
 
-        rank_match = re.search(
+        match = re.search(
             r"\d+",
-            rank
+            rank,
         )
 
-        if (
-            not rank_match
-            or int(rank_match.group()) != 1
-        ):
+        if not match:
+            continue
+
+        if int(match.group()) != 1:
             continue
 
         value = (
@@ -233,7 +362,9 @@ def get_winner_time(race):
             or result.get("race_time")
         )
 
-        seconds = parse_time(value)
+        seconds = parse_time(
+            value
+        )
 
         if seconds is not None:
             return seconds
@@ -243,16 +374,15 @@ def get_winner_time(race):
 
 def build_race_index(
     races,
-    target_date
+    target_date,
 ):
     index = {}
 
     for race in races:
-        if not isinstance(race, dict):
-            continue
-
         race_id = clean(
-            race.get("race_id")
+            race.get(
+                "race_id"
+            )
         )
 
         if not race_id:
@@ -266,169 +396,521 @@ def build_race_index(
         if race_date is None:
             continue
 
-        # 対象日以降は絶対使用しない
+        # 未来リーク禁止
         if race_date >= target_date:
             continue
 
-        index[race_id] = race
+        index[
+            race_id
+        ] = race
 
     return index
 
 
-def baseline_key(
-    racecourse,
-    surface,
-    distance,
-    race_class,
-    age_condition
+def race_signature(race):
+    return {
+        "racecourse":
+            clean(
+                race.get(
+                    "racecourse"
+                )
+            ),
+
+        "surface":
+            normalize_surface(
+                race.get(
+                    "surface"
+                )
+            ),
+
+        "distance":
+            safe_int(
+                race.get(
+                    "distance"
+                )
+            ),
+
+        "race_class":
+            normalize_class(
+                race.get(
+                    "race_class"
+                )
+            ),
+
+        "class_group":
+            class_group(
+                race.get(
+                    "race_class"
+                )
+            ),
+
+        "age_condition":
+            normalize_age(
+                race.get(
+                    "age_condition"
+                )
+            ),
+    }
+
+
+def valid_reference_race(
+    race,
+    target_date,
 ):
-    return (
-        clean(racecourse),
-        normalize_surface(surface),
-        safe_int(distance),
-        normalize_class(race_class),
-        normalize_age(age_condition),
+    if not isinstance(
+        race,
+        dict,
+    ):
+        return False
+
+    race_id = clean(
+        race.get(
+            "race_id"
+        )
+    )
+
+    if not is_jra_race_id(
+        race_id
+    ):
+        return False
+
+    race_date = parse_date(
+        race.get("race_date")
+        or race.get("date")
+    )
+
+    if race_date is None:
+        return False
+
+    if race_date >= target_date:
+        return False
+
+    signature = race_signature(
+        race
+    )
+
+    if not signature[
+        "racecourse"
+    ]:
+        return False
+
+    if not signature[
+        "surface"
+    ]:
+        return False
+
+    if signature[
+        "distance"
+    ] is None:
+        return False
+
+    if get_winner_time(
+        race
+    ) is None:
+        return False
+
+    return True
+
+
+def merge_reference_races(
+    runner_races,
+    history_races,
+    target_date,
+):
+    """
+    runner_race_db と history_db を
+    基準時計候補として統合。
+
+    同一race_idは1件だけ。
+    対象日以降は使用しない。
+    地方は現在除外。
+    """
+    index = {}
+
+    for source_name, races in (
+        (
+            "history_db",
+            history_races,
+        ),
+        (
+            "runner_race_db",
+            runner_races,
+        ),
+    ):
+        for race in races:
+            if not valid_reference_race(
+                race,
+                target_date,
+            ):
+                continue
+
+            race_id = clean(
+                race.get(
+                    "race_id"
+                )
+            )
+
+            item = dict(
+                race
+            )
+
+            item[
+                "_time_fit_source"
+            ] = source_name
+
+            index[
+                race_id
+            ] = item
+
+    return list(
+        index.values()
     )
 
 
-def build_baselines(
-    history_races,
-    target_date
+def select_baseline_candidates(
+    target_race,
+    reference_races,
 ):
-    pools = {}
+    """
+    段階的に基準時計を探す。
 
-    for race in history_races:
-        if not isinstance(race, dict):
-            continue
+    LEVEL 1
+      競馬場・芝ダ・距離・クラス・年齢 完全一致
 
-        race_date = parse_date(
-            race.get("race_date")
-            or race.get("date")
+    LEVEL 2
+      競馬場・芝ダ・距離・クラス一致
+      年齢条件だけ緩和
+
+    LEVEL 3
+      競馬場・芝ダ・距離・クラスグループ一致
+
+    LEVEL 4
+      競馬場・芝ダ・距離一致
+
+    時計適性は補助診断なので、
+    緩和レベルも必ず出力する。
+    """
+    target = race_signature(
+        target_race
+    )
+
+    if (
+        not target["racecourse"]
+        or not target["surface"]
+        or target["distance"] is None
+    ):
+        return (
+            [],
+            "NONE",
+            "基準条件不足",
         )
 
-        if race_date is None:
-            continue
+    levels = [
+        {
+            "name":
+                "EXACT",
 
-        if race_date >= target_date:
-            continue
+            "description":
+                "競馬場・芝ダ・距離・クラス・年齢一致",
 
-        racecourse = clean(
-            race.get("racecourse")
+            "minimum":
+                MIN_EXACT_SAMPLE,
+
+            "match":
+                lambda sig: (
+                    sig["racecourse"]
+                    == target["racecourse"]
+                    and sig["surface"]
+                    == target["surface"]
+                    and sig["distance"]
+                    == target["distance"]
+                    and sig["race_class"]
+                    == target["race_class"]
+                    and sig["age_condition"]
+                    == target["age_condition"]
+                    and bool(
+                        target["race_class"]
+                    )
+                    and bool(
+                        target["age_condition"]
+                    )
+                ),
+        },
+
+        {
+            "name":
+                "CLASS_MATCH",
+
+            "description":
+                "競馬場・芝ダ・距離・クラス一致",
+
+            "minimum":
+                MIN_RELAXED_SAMPLE,
+
+            "match":
+                lambda sig: (
+                    sig["racecourse"]
+                    == target["racecourse"]
+                    and sig["surface"]
+                    == target["surface"]
+                    and sig["distance"]
+                    == target["distance"]
+                    and sig["race_class"]
+                    == target["race_class"]
+                    and bool(
+                        target["race_class"]
+                    )
+                ),
+        },
+
+        {
+            "name":
+                "CLASS_GROUP",
+
+            "description":
+                "競馬場・芝ダ・距離・クラス群一致",
+
+            "minimum":
+                MIN_RELAXED_SAMPLE,
+
+            "match":
+                lambda sig: (
+                    sig["racecourse"]
+                    == target["racecourse"]
+                    and sig["surface"]
+                    == target["surface"]
+                    and sig["distance"]
+                    == target["distance"]
+                    and sig["class_group"]
+                    == target["class_group"]
+                    and bool(
+                        target["class_group"]
+                    )
+                ),
+        },
+
+        {
+            "name":
+                "COURSE_DISTANCE",
+
+            "description":
+                "競馬場・芝ダ・距離一致",
+
+            "minimum":
+                MIN_DISTANCE_SAMPLE,
+
+            "match":
+                lambda sig: (
+                    sig["racecourse"]
+                    == target["racecourse"]
+                    and sig["surface"]
+                    == target["surface"]
+                    and sig["distance"]
+                    == target["distance"]
+                ),
+        },
+    ]
+
+    target_race_id = clean(
+        target_race.get(
+            "race_id"
         )
+    )
 
-        surface = normalize_surface(
-            race.get("surface")
-        )
+    for level in levels:
+        rows = []
 
-        distance = safe_int(
-            race.get("distance")
-        )
+        for race in reference_races:
+            race_id = clean(
+                race.get(
+                    "race_id"
+                )
+            )
 
-        race_class = normalize_class(
-            race.get("race_class")
-        )
+            # 自分自身のレースは
+            # 基準から必ず除外
+            if (
+                race_id
+                == target_race_id
+            ):
+                continue
 
-        age_condition = normalize_age(
-            race.get("age_condition")
-        )
+            sig = race_signature(
+                race
+            )
 
-        winner_time = get_winner_time(
-            race
-        )
+            if not level[
+                "match"
+            ](
+                sig
+            ):
+                continue
+
+            winner_time = (
+                get_winner_time(
+                    race
+                )
+            )
+
+            if winner_time is None:
+                continue
+
+            rows.append({
+                "race_id":
+                    race_id,
+
+                "winner_time_seconds":
+                    winner_time,
+
+                "source":
+                    clean(
+                        race.get(
+                            "_time_fit_source"
+                        )
+                    ),
+            })
 
         if (
-            not racecourse
-            or not surface
-            or distance is None
-            or not race_class
-            or not age_condition
-            or winner_time is None
+            len(rows)
+            >= level["minimum"]
         ):
-            continue
+            return (
+                rows,
+                level["name"],
+                level["description"],
+            )
 
-        key = baseline_key(
-            racecourse,
-            surface,
-            distance,
-            race_class,
-            age_condition
-        )
+    return (
+        [],
+        "NONE",
+        "基準時計サンプル不足",
+    )
 
-        pools.setdefault(
-            key,
-            []
-        ).append({
-            "race_id": clean(
-                race.get("race_id")
-            ),
-            "race_date": race_date.isoformat(),
-            "winner_time_seconds": winner_time,
-        })
 
-    baselines = {}
-
-    for key, rows in pools.items():
-        times = [
-            row["winner_time_seconds"]
-            for row in rows
+def calculate_environment(
+    winner_time,
+    baseline_rows,
+):
+    times = [
+        row[
+            "winner_time_seconds"
         ]
+        for row in baseline_rows
+    ]
 
-        if len(times) < MIN_BASELINE_SAMPLE:
-            continue
+    if not times:
+        return None
 
-        median = statistics.median(
-            times
+    median = statistics.median(
+        times
+    )
+
+    deviations = [
+        abs(
+            value
+            - median
         )
+        for value in times
+    ]
 
-        deviations = [
-            abs(value - median)
-            for value in times
-        ]
+    mad = statistics.median(
+        deviations
+    )
 
-        mad = statistics.median(
-            deviations
-        )
+    scaled_dispersion = max(
+        MAD_SCALE * mad,
+        MIN_SCALED_DISPERSION_SECONDS,
+    )
 
-        baselines[key] = {
-            "sample_count": len(times),
-            "median_seconds": round(
-                median,
-                3
-            ),
-            "mad_seconds": round(
-                mad,
-                3
-            ),
-            "race_ids": [
-                row["race_id"]
-                for row in rows
-            ],
-        }
+    delta = (
+        winner_time
+        - median
+    )
 
-    return baselines
+    robust_z = (
+        delta
+        / scaled_dispersion
+    )
+
+    return {
+        "sample_count":
+            len(times),
+
+        "median":
+            median,
+
+        "mad":
+            mad,
+
+        "delta":
+            delta,
+
+        "robust_z":
+            robust_z,
+    }
 
 
 def classify_environment(
-    robust_z
+    robust_z,
 ):
-    if robust_z <= -STRONG_THRESHOLD:
+    if (
+        robust_z
+        <= -STRONG_THRESHOLD
+    ):
         return "高速"
 
-    if robust_z <= -MILD_THRESHOLD:
+    if (
+        robust_z
+        <= -MILD_THRESHOLD
+    ):
         return "やや高速"
 
-    if robust_z >= STRONG_THRESHOLD:
+    if (
+        robust_z
+        >= STRONG_THRESHOLD
+    ):
         return "低速"
 
-    if robust_z >= MILD_THRESHOLD:
+    if (
+        robust_z
+        >= MILD_THRESHOLD
+    ):
         return "やや低速"
 
     return "標準"
 
 
+def normalize_current_bias(
+    value,
+):
+    text = clean(value)
+
+    mapping = {
+        "高速":
+            "高速",
+
+        "やや高速":
+            "やや高速",
+
+        "標準":
+            "標準",
+
+        "やや低速":
+            "やや低速",
+
+        "低速":
+            "低速",
+    }
+
+    return mapping.get(
+        text,
+        "",
+    )
+
+
 def environment_fit(
     historical_environment,
-    current_environment
+    current_environment,
 ):
     if (
         not historical_environment
@@ -445,14 +927,20 @@ def environment_fit(
     }
 
     if (
-        historical_environment not in scale
-        or current_environment not in scale
+        historical_environment
+        not in scale
+        or current_environment
+        not in scale
     ):
         return None
 
     difference = abs(
-        scale[historical_environment]
-        - scale[current_environment]
+        scale[
+            historical_environment
+        ]
+        - scale[
+            current_environment
+        ]
     )
 
     if difference == 0:
@@ -467,24 +955,32 @@ def environment_fit(
     return 0.0
 
 
-def classify_fit(
-    values
-):
+def classify_fit(values):
     if not values:
         return "未知数"
 
-    median_fit = statistics.median(
-        values
+    median_fit = (
+        statistics.median(
+            values
+        )
     )
 
     if median_fit >= 0.7:
-        return "同系統時計環境の経験あり"
+        return (
+            "同系統時計環境の経験あり"
+        )
 
     if median_fit >= 0.3:
         return "中間"
 
-    return "異なる時計環境の経験中心"
+    return (
+        "異なる時計環境の経験中心"
+    )
 
+
+# =========================================================
+# Load
+# =========================================================
 
 race = load_json(
     RACE_FILE
@@ -508,7 +1004,9 @@ day_bias = load_json(
 
 
 race_id = clean(
-    race.get("race_id")
+    race.get(
+        "race_id"
+    )
 )
 
 target_date = parse_date(
@@ -526,6 +1024,10 @@ if target_date is None:
         "ERROR: target date missing"
     )
 
+
+# =========================================================
+# Leak / consistency checks
+# =========================================================
 
 if (
     clean(
@@ -570,7 +1072,8 @@ runner_db_target = clean(
 
 if (
     runner_db_target
-    and runner_db_target != race_id
+    and runner_db_target
+    != race_id
 ):
     raise SystemExit(
         "ERROR: runner_race_db race mismatch"
@@ -588,65 +1091,85 @@ if (
     )
 
 
+# =========================================================
+# Current time bias
+# =========================================================
+
 day_bias_valid = (
     clean(
-        day_bias.get("race_id")
+        day_bias.get(
+            "race_id"
+        )
     )
     == race_id
+
     and day_bias.get(
         "future_race_usage"
     )
     is False
+
     and clean(
-        day_bias.get("status")
+        day_bias.get(
+            "status"
+        )
     )
     == "analyzed"
 )
 
 
 if day_bias_valid:
-    current_time_bias = clean(
-        day_bias.get(
-            "time_bias"
+    current_time_bias = (
+        normalize_current_bias(
+            day_bias.get(
+                "time_bias"
+            )
         )
     )
 else:
     current_time_bias = ""
 
 
-# -----------------------------------------
-# DBの役割を分離
-#
-# runner_race_db:
-#   現在出走馬の実際の過去走をrace_idで接続
-#
-# history_db:
-#   条件別の基準時計作成専用
-# -----------------------------------------
+# =========================================================
+# Build databases
+# =========================================================
 
-runner_races = get_history_races(
-    runner_race_db
+runner_races = (
+    get_history_races(
+        runner_race_db
+    )
 )
 
-history_races = get_history_races(
-    history_db
+history_races = (
+    get_history_races(
+        history_db
+    )
 )
 
-race_index = build_race_index(
-    runner_races,
-    target_date
+
+# 実際の過去走接続用
+race_index = (
+    build_race_index(
+        runner_races,
+        target_date,
+    )
 )
 
-baseline_race_index = build_race_index(
-    history_races,
-    target_date
+
+# 基準時計候補
+# history_dbだけに依存せず、
+# runner_race_dbの中央過去走も利用。
+reference_races = (
+    merge_reference_races(
+        runner_races,
+        history_races,
+        target_date,
+    )
 )
 
-baselines = build_baselines(
-    history_races,
-    target_date
-)
 
+# =========================================================
+# Analyze horses
+# =========================================================
 
 horses_output = []
 
@@ -657,24 +1180,35 @@ missing_race_id_count = 0
 race_not_in_runner_race_db_count = 0
 baseline_missing_count = 0
 
+exact_baseline_count = 0
+class_match_baseline_count = 0
+class_group_baseline_count = 0
+course_distance_baseline_count = 0
+
 
 for horse in (
     runner_history.get(
         "horses",
-        []
+        [],
     )
     or []
 ):
     horse_id = clean(
-        horse.get("horse_id")
+        horse.get(
+            "horse_id"
+        )
     )
 
     horse_name = clean(
-        horse.get("horse_name")
+        horse.get(
+            "horse_name"
+        )
     )
 
     horse_number = clean(
-        horse.get("horse_number")
+        horse.get(
+            "horse_number"
+        )
     )
 
     evaluated = []
@@ -683,33 +1217,41 @@ for horse in (
     for past in (
         horse.get(
             "past_races",
-            []
+            [],
         )
         or []
     ):
         past_date = parse_date(
             past.get("date")
+            or past.get(
+                "race_date"
+            )
         )
 
         if past_date is None:
             skipped.append({
                 "reason":
-                    "過去走日付不明"
+                    "過去走日付不明",
             })
             continue
 
-        if past_date >= target_date:
+        if (
+            past_date
+            >= target_date
+        ):
             skipped.append({
                 "date":
                     past_date.isoformat(),
 
                 "reason":
-                    "対象日以降のため除外"
+                    "対象日以降のため除外",
             })
             continue
 
         past_race_id = clean(
-            past.get("race_id")
+            past.get(
+                "race_id"
+            )
         )
 
         if not past_race_id:
@@ -727,7 +1269,25 @@ for horse in (
                     ),
 
                 "reason":
-                    "race_idなし"
+                    "race_idなし",
+            })
+            continue
+
+        # 今回は地方を評価対象外
+        if not is_jra_race_id(
+            past_race_id
+        ):
+            race_not_in_runner_race_db_count += 1
+
+            skipped.append({
+                "race_id":
+                    past_race_id,
+
+                "date":
+                    past_date.isoformat(),
+
+                "reason":
+                    "地方過去走は現在対象外",
             })
             continue
 
@@ -748,38 +1308,42 @@ for horse in (
                     past_date.isoformat(),
 
                 "reason":
-                    "runner_race_dbに同一レースなし"
+                    "runner_race_dbに同一中央レースなし",
             })
             continue
 
-        racecourse = clean(
-            historical_race.get(
+        signature = race_signature(
+            historical_race
+        )
+
+        racecourse = (
+            signature[
                 "racecourse"
-            )
+            ]
         )
 
-        surface = normalize_surface(
-            historical_race.get(
+        surface = (
+            signature[
                 "surface"
-            )
+            ]
         )
 
-        distance = safe_int(
-            historical_race.get(
+        distance = (
+            signature[
                 "distance"
-            )
+            ]
         )
 
-        race_class = normalize_class(
-            historical_race.get(
+        race_class = (
+            signature[
                 "race_class"
-            )
+            ]
         )
 
-        age_condition = normalize_age(
-            historical_race.get(
+        age_condition = (
+            signature[
                 "age_condition"
-            )
+            ]
         )
 
         track_condition = clean(
@@ -788,16 +1352,16 @@ for horse in (
             )
         )
 
-        winner_time = get_winner_time(
-            historical_race
+        winner_time = (
+            get_winner_time(
+                historical_race
+            )
         )
 
         if (
             not racecourse
             or not surface
             or distance is None
-            or not race_class
-            or not age_condition
             or winner_time is None
         ):
             skipped.append({
@@ -805,23 +1369,20 @@ for horse in (
                     past_race_id,
 
                 "reason":
-                    "過去レース情報不足"
+                    "過去レース基本情報不足",
             })
             continue
 
-        key = baseline_key(
-            racecourse,
-            surface,
-            distance,
-            race_class,
-            age_condition
+        (
+            baseline_rows,
+            baseline_level,
+            baseline_description,
+        ) = select_baseline_candidates(
+            historical_race,
+            reference_races,
         )
 
-        baseline = baselines.get(
-            key
-        )
-
-        if not baseline:
+        if not baseline_rows:
             baseline_missing_count += 1
 
             skipped.append({
@@ -844,98 +1405,81 @@ for horse in (
                     age_condition,
 
                 "reason":
-                    "同条件・同クラス・同年齢の基準時計不足"
+                    "段階緩和後も基準時計サンプル不足",
             })
             continue
 
-        # 基準時計はhistory_db側から取得する。
-        # 自分自身のrace_idが基準DBにも存在する場合は除外。
-        baseline_race_ids = (
-            baseline.get(
-                "race_ids",
-                []
+        calculation = (
+            calculate_environment(
+                winner_time,
+                baseline_rows,
             )
-            or []
         )
 
-        comparison_times = []
-
-        for comparison_race_id in baseline_race_ids:
-            if comparison_race_id == past_race_id:
-                continue
-
-            comparison_race = (
-                baseline_race_index.get(
-                    comparison_race_id
-                )
-            )
-
-            if not comparison_race:
-                continue
-
-            comparison_time = get_winner_time(
-                comparison_race
-            )
-
-            if comparison_time is not None:
-                comparison_times.append(
-                    comparison_time
-                )
-
-        if (
-            len(comparison_times)
-            < MIN_BASELINE_SAMPLE
-        ):
+        if calculation is None:
             baseline_missing_count += 1
-
-            skipped.append({
-                "race_id":
-                    past_race_id,
-
-                "reason":
-                    "自己レース除外後の基準時計サンプル不足",
-
-                "comparison_sample_count":
-                    len(comparison_times),
-            })
             continue
-
-        median = statistics.median(
-            comparison_times
-        )
-
-        deviations = [
-            abs(value - median)
-            for value in comparison_times
-        ]
-
-        mad = statistics.median(
-            deviations
-        )
-
-        scaled_dispersion = max(
-            MAD_SCALE * mad,
-            MIN_SCALED_DISPERSION_SECONDS
-        )
-
-        delta = (
-            winner_time
-            - median
-        )
 
         robust_z = (
-            delta
-            / scaled_dispersion
+            calculation[
+                "robust_z"
+            ]
         )
 
-        environment = classify_environment(
-            robust_z
+        environment = (
+            classify_environment(
+                robust_z
+            )
         )
 
         fit = environment_fit(
             environment,
-            current_time_bias
+            current_time_bias,
         )
+
+        if (
+            baseline_level
+            == "EXACT"
+        ):
+            exact_baseline_count += 1
+
+        elif (
+            baseline_level
+            == "CLASS_MATCH"
+        ):
+            class_match_baseline_count += 1
+
+        elif (
+            baseline_level
+            == "CLASS_GROUP"
+        ):
+            class_group_baseline_count += 1
+
+        elif (
+            baseline_level
+            == "COURSE_DISTANCE"
+        ):
+            course_distance_baseline_count += 1
+
+        source_counts = {}
+
+        for row in baseline_rows:
+            source = (
+                row.get(
+                    "source"
+                )
+                or "unknown"
+            )
+
+            source_counts[
+                source
+            ] = (
+                source_counts.get(
+                    source,
+                    0,
+                )
+                + 1
+            )
 
         evaluated.append({
             "race_id":
@@ -972,41 +1516,57 @@ for horse in (
             "track_condition":
                 track_condition,
 
-            # 馬自身の走破時計ではなく、
-            # 当該レースの勝ち時計を使用
+            # 馬自身の走破時計ではなく
+            # レース全体の時計環境を見るため
+            # 勝ち時計を使用。
             "race_winner_time_seconds":
                 round(
                     winner_time,
-                    3
+                    3,
                 ),
 
+            "baseline_level":
+                baseline_level,
+
+            "baseline_description":
+                baseline_description,
+
             "baseline_sample_count":
-                len(
-                    comparison_times
-                ),
+                calculation[
+                    "sample_count"
+                ],
+
+            "baseline_source_counts":
+                source_counts,
 
             "baseline_median_seconds":
                 round(
-                    median,
-                    3
+                    calculation[
+                        "median"
+                    ],
+                    3,
                 ),
 
             "baseline_mad_seconds":
                 round(
-                    mad,
-                    3
+                    calculation[
+                        "mad"
+                    ],
+                    3,
                 ),
 
             "time_delta_seconds":
                 round(
-                    delta,
-                    3
+                    calculation[
+                        "delta"
+                    ],
+                    3,
                 ),
 
             "robust_z":
                 round(
                     robust_z,
-                    3
+                    3,
                 ),
 
             "historical_time_environment":
@@ -1019,7 +1579,7 @@ for horse in (
                 (
                     round(
                         fit,
-                        3
+                        3,
                     )
                     if fit is not None
                     else None
@@ -1029,14 +1589,18 @@ for horse in (
             # 時計環境判定には使用しない。
             "horse_rank":
                 clean(
-                    past.get("rank")
+                    past.get(
+                        "rank"
+                    )
                 ),
         })
 
         connected_past_race_count += 1
 
     fit_values = [
-        row["current_bias_fit"]
+        row[
+            "current_bias_fit"
+        ]
         for row in evaluated
         if row.get(
             "current_bias_fit"
@@ -1048,12 +1612,16 @@ for horse in (
         connected_horse_count += 1
 
     if fit_values:
-        median_fit = statistics.median(
-            fit_values
+        median_fit = (
+            statistics.median(
+                fit_values
+            )
         )
 
-        fit_label = classify_fit(
-            fit_values
+        fit_label = (
+            classify_fit(
+                fit_values
+            )
         )
 
         matching_count = sum(
@@ -1065,7 +1633,11 @@ for horse in (
         middle_count = sum(
             1
             for value in fit_values
-            if 0.3 <= value < 0.7
+            if (
+                0.3
+                <= value
+                < 0.7
+            )
         )
 
         mismatch_count = sum(
@@ -1096,7 +1668,9 @@ for horse in (
             current_time_bias,
 
         "evaluated_past_race_count":
-            len(evaluated),
+            len(
+                evaluated
+            ),
 
         "matching_count":
             matching_count,
@@ -1111,9 +1685,10 @@ for horse in (
             (
                 round(
                     median_fit,
-                    3
+                    3,
                 )
-                if median_fit is not None
+                if median_fit
+                is not None
                 else None
             ),
 
@@ -1126,6 +1701,7 @@ for horse in (
         "skipped_races":
             skipped,
 
+        # 未知数は減点しない
         "unknown":
             not bool(
                 fit_values
@@ -1133,23 +1709,40 @@ for horse in (
     })
 
 
+# =========================================================
+# Final leak check
+# =========================================================
+
 future_race_usage = False
 
 for horse in horses_output:
     for row in horse.get(
         "evaluated_races",
-        []
+        [],
     ):
         row_date = parse_date(
-            row.get("date")
+            row.get(
+                "date"
+            )
         )
 
         if (
             row_date is None
-            or row_date >= target_date
+            or row_date
+            >= target_date
         ):
             future_race_usage = True
 
+
+if future_race_usage:
+    raise SystemExit(
+        "ERROR: future race leakage detected"
+    )
+
+
+# =========================================================
+# Output
+# =========================================================
 
 output = {
     "updated_at":
@@ -1165,24 +1758,31 @@ output = {
         current_time_bias,
 
     "future_race_usage":
-        future_race_usage,
+        False,
 
     "leak_check_passed":
-        not future_race_usage,
+        True,
 
     "method":
         (
+            "中央競馬のみを対象。"
             "runner_historyの過去走race_idをrunner_race_dbの"
-            "同一レースへ接続し、馬自身の走破時計ではなく"
-            "当該レースの勝ち時計を使用。"
-            "基準時計はhistory_dbから作成し、"
-            "競馬場・芝ダート・距離・クラス・年齢条件が一致する"
-            "過去レース群の中央値/MADと比較して時計環境を判定。"
-            "対象レース当日以降は使用せず、未知数は減点しない。"
+            "同一レースへ接続し、馬自身の着順や走破時計ではなく"
+            "当該レースの勝ち時計から時計環境を診断する。"
+            "基準時計はhistory_dbとrunner_race_dbの対象日前レースを統合し、"
+            "同一レース自身を除外したうえで、"
+            "競馬場・芝ダート・距離・クラス・年齢の完全一致から開始。"
+            "サンプル不足時のみ年齢、クラス群の順に段階的に緩和し、"
+            "最終的に競馬場・芝ダート・距離一致まで使用する。"
+            "緩和レベルは各レースに明示する。"
+            "時計適性は診断補助のみで能力順位を直接作らず、"
+            "未知数は減点しない。対象レース当日以降は使用しない。"
         ),
 
     "target_horse_count":
-        len(horses_output),
+        len(
+            horses_output
+        ),
 
     "connected_horse_count":
         connected_horse_count,
@@ -1191,10 +1791,37 @@ output = {
         connected_past_race_count,
 
     "runner_race_db_race_count":
-        len(race_index),
+        len(
+            race_index
+        ),
 
+    "reference_race_count":
+        len(
+            reference_races
+        ),
+
+    # 旧キー互換
     "baseline_condition_count":
-        len(baselines),
+        (
+            exact_baseline_count
+            + class_match_baseline_count
+            + class_group_baseline_count
+            + course_distance_baseline_count
+        ),
+
+    "baseline_level_counts": {
+        "EXACT":
+            exact_baseline_count,
+
+        "CLASS_MATCH":
+            class_match_baseline_count,
+
+        "CLASS_GROUP":
+            class_group_baseline_count,
+
+        "COURSE_DISTANCE":
+            course_distance_baseline_count,
+    },
 
     "missing_race_id_count":
         missing_race_id_count,
@@ -1202,8 +1829,7 @@ output = {
     "race_not_in_runner_race_db_count":
         race_not_in_runner_race_db_count,
 
-    # 旧final_analysis.py等との互換用。
-    # 意味は「過去走の実レースDBに存在しなかった件数」。
+    # final_analysis等との互換
     "race_not_in_history_db_count":
         race_not_in_runner_race_db_count,
 
@@ -1215,17 +1841,15 @@ output = {
 }
 
 
-if future_race_usage:
-    raise SystemExit(
-        "ERROR: future race leakage detected"
-    )
-
-
 save_json(
     OUTPUT_FILE,
-    output
+    output,
 )
 
+
+# =========================================================
+# Log
+# =========================================================
 
 print("")
 print(
@@ -1234,60 +1858,88 @@ print(
 
 print(
     "target race:",
-    race_id
+    race_id,
 )
 
 print(
     "target date:",
-    target_date.isoformat()
+    target_date.isoformat(),
 )
 
 print(
     "current time bias:",
-    current_time_bias or "不明"
+    current_time_bias
+    or "不明",
 )
 
 print(
     "runner race db races:",
-    len(race_index)
+    len(
+        race_index
+    ),
 )
 
 print(
-    "baseline conditions:",
-    len(baselines)
+    "reference races:",
+    len(
+        reference_races
+    ),
 )
 
 print(
     "connected horses:",
-    f"{connected_horse_count}/{len(horses_output)}"
+    (
+        f"{connected_horse_count}"
+        f"/{len(horses_output)}"
+    ),
 )
 
 print(
     "connected past races:",
-    connected_past_race_count
+    connected_past_race_count,
 )
 
 print(
     "missing race ids:",
-    missing_race_id_count
+    missing_race_id_count,
 )
 
 print(
     "race not in runner race db:",
-    race_not_in_runner_race_db_count
+    race_not_in_runner_race_db_count,
 )
 
 print(
     "baseline missing:",
-    baseline_missing_count
+    baseline_missing_count,
+)
+
+print(
+    "baseline EXACT:",
+    exact_baseline_count,
+)
+
+print(
+    "baseline CLASS_MATCH:",
+    class_match_baseline_count,
+)
+
+print(
+    "baseline CLASS_GROUP:",
+    class_group_baseline_count,
+)
+
+print(
+    "baseline COURSE_DISTANCE:",
+    course_distance_baseline_count,
 )
 
 print(
     "future race usage:",
-    future_race_usage
+    False,
 )
 
 print(
     "leak check passed:",
-    not future_race_usage
+    True,
 )
