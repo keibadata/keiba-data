@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-23T21:52:03.626824+09:00",
+  "updated_at": "2026-10-24T00:46:45.861980+09:00",
   "target_race_id": "202608040708",
   "race_date": "2026-10-18",
   "racecourse": "京都",
@@ -12,8 +12,12 @@
   "venue_validation_by_race_id": true,
   "minimum_history_sample": 5,
   "search_stop_at_minimum": true,
+  "cache_only_mode": true,
+  "remote_history_search": false,
+  "neutral_when_cache_insufficient": true,
   "reference_race_count": 3,
   "baseline_connected_count": 1,
+  "insufficient_condition_count": 2,
   "excluded_current_meeting_count": 0,
   "excluded_nonpast_count": 0,
   "excluded_unknown_date_count": 0,
@@ -82,7 +86,7 @@
       "age_condition": "2歳",
       "minimum_required_sample": 5,
       "cache_sample_count": 3,
-      "remote_search_used": true,
+      "remote_search_used": false,
       "remote_match_count": 0,
       "source_counts": {
         "history_db": 0,
@@ -91,6 +95,8 @@
       },
       "sample_count": 3,
       "baseline_available": false,
+      "insufficient_cache": true,
+      "neutral_when_insufficient": true,
       "median_winner_time_seconds": null,
       "median_absolute_deviation_seconds": null,
       "races": [
@@ -146,6 +152,8 @@
       },
       "sample_count": 5,
       "baseline_available": true,
+      "insufficient_cache": false,
+      "neutral_when_insufficient": true,
       "median_winner_time_seconds": 121.9,
       "median_absolute_deviation_seconds": 0.4,
       "races": [
@@ -214,7 +222,7 @@
       "age_condition": "2歳",
       "minimum_required_sample": 5,
       "cache_sample_count": 3,
-      "remote_search_used": true,
+      "remote_search_used": false,
       "remote_match_count": 0,
       "source_counts": {
         "history_db": 0,
@@ -223,6 +231,8 @@
       },
       "sample_count": 3,
       "baseline_available": false,
+      "insufficient_cache": true,
+      "neutral_when_insufficient": true,
       "median_winner_time_seconds": null,
       "median_absolute_deviation_seconds": null,
       "races": [
