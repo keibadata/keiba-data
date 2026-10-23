@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import time
 from datetime import datetime, timezone, timedelta
@@ -46,36 +47,23 @@ def clean_text(value):
     ).strip()
 
 
-def get_html(url):
-    last_error = None
+def load_json(path, default=None):
+    if default is None:
+        default = {}
 
-    for attempt in range(MAX_RETRIES):
-        try:
-            response = requests.get(
-                url,
-                headers=HEADERS,
-                timeout=TIMEOUT
-            )
+    if not os.path.exists(path):
+        return default
 
-            if response.status_code == 200:
-                response.encoding = (
-                    response.apparent_encoding
-                )
-                return response.text
+    try:
+        with open(
+            path,
+            "r",
+            encoding="utf-8"
+        ) as f:
+            return json.load(f)
 
-            last_error = (
-                f"HTTP {response.status_code}"
-            )
-
-        except Exception as e:
-            last_error = str(e)
-
-        if attempt < MAX_RETRIES - 1:
-            time.sleep(2 + attempt)
-
-    raise RuntimeError(
-        last_error or "取得失敗"
-    )
+    except Exception:
+        return default
 
 
 def parse_date(value):
@@ -146,6 +134,41 @@ def extract_target_date(data):
                 return parsed
 
     return None
+
+
+def get_html(url):
+    last_error = None
+
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = requests.get(
+                url,
+                headers=HEADERS,
+                timeout=TIMEOUT
+            )
+
+            if response.status_code == 200:
+                response.encoding = (
+                    response.apparent_encoding
+                )
+
+                return response.text
+
+            last_error = (
+                f"HTTP {response.status_code}"
+            )
+
+        except Exception as e:
+            last_error = str(e)
+
+        if attempt < MAX_RETRIES - 1:
+            time.sleep(
+                2 + attempt
+            )
+
+    raise RuntimeError(
+        last_error or "取得失敗"
+    )
 
 
 def load_race_and_runners():
@@ -818,9 +841,6 @@ def collect_horse_history(
         soup
     )
 
-    # 競走歴0件は新馬なら正常。
-    # テーブルが存在しないこと自体は
-    # エラーにしない。
     filtered = filter_past_races(
         raw_results,
         target_date,
@@ -889,6 +909,284 @@ def collect_horse_history(
     }
 
 
+def build_same_day_cache(
+    old_data,
+    target_date
+):
+    cache = {}
+
+    if not isinstance(
+        old_data,
+        dict
+    ):
+        return cache
+
+    old_target_date = parse_date(
+        old_data.get(
+            "target_date"
+        )
+    )
+
+    # 別日のキャッシュは使用しない。
+    # 競走履歴が増えた馬を古い状態で固定しないため。
+    if old_target_date != target_date:
+        return cache
+
+    if not old_data.get(
+        "leak_check_passed"
+    ):
+        return cache
+
+    horses = old_data.get(
+        "horses",
+        []
+    )
+
+    if not isinstance(
+        horses,
+        list
+    ):
+        return cache
+
+    for horse in horses:
+        if not isinstance(
+            horse,
+            dict
+        ):
+            continue
+
+        horse_id = clean_text(
+            horse.get(
+                "horse_id"
+            )
+        )
+
+        if not horse_id:
+            continue
+
+        past_races = horse.get(
+            "past_races"
+        )
+
+        if not isinstance(
+            past_races,
+            list
+        ):
+            continue
+
+        # キャッシュ自体にも未来・同日データがないことを再確認
+        safe = True
+
+        for past in past_races:
+            if not isinstance(
+                past,
+                dict
+            ):
+                safe = False
+                break
+
+            past_date = parse_date(
+                past.get(
+                    "date"
+                )
+            )
+
+            if (
+                past_date is None
+                or past_date >= target_date
+            ):
+                safe = False
+                break
+
+        if safe:
+            cache[
+                horse_id
+            ] = horse
+
+    return cache
+
+
+def normalize_cached_horse(
+    cached,
+    horse,
+    target_date,
+    target_race_id
+):
+    raw_results = cached.get(
+        "past_races",
+        []
+    )
+
+    filtered = filter_past_races(
+        raw_results,
+        target_date,
+        target_race_id
+    )
+
+    results = filtered[
+        "valid"
+    ]
+
+    return {
+        "horse_id":
+            horse[
+                "horse_id"
+            ],
+
+        "horse_name":
+            horse[
+                "horse_name"
+            ],
+
+        "horse_number":
+            horse[
+                "horse_number"
+            ],
+
+        "source_url":
+            clean_text(
+                cached.get(
+                    "source_url"
+                )
+            )
+            or BASE_URL.format(
+                horse_id=horse[
+                    "horse_id"
+                ]
+            ),
+
+        "candidate_table_count":
+            int(
+                cached.get(
+                    "candidate_table_count",
+                    0
+                )
+                or 0
+            ),
+
+        "parsed_table_count":
+            int(
+                cached.get(
+                    "parsed_table_count",
+                    0
+                )
+                or 0
+            ),
+
+        "raw_race_count":
+            int(
+                cached.get(
+                    "raw_race_count",
+                    len(results)
+                )
+                or 0
+            ),
+
+        "past_race_count":
+            len(
+                results
+            ),
+
+        "excluded_target_race_count":
+            filtered[
+                "excluded_target_race"
+            ],
+
+        "excluded_same_day_count":
+            filtered[
+                "excluded_same_day"
+            ],
+
+        "excluded_future_count":
+            filtered[
+                "excluded_future"
+            ],
+
+        "excluded_unknown_date_count":
+            filtered[
+                "excluded_unknown_date"
+            ],
+
+        "past_races":
+            results,
+    }
+
+
+def add_horse_to_output(
+    output,
+    data
+):
+    output[
+        "horses"
+    ].append(
+        data
+    )
+
+    output[
+        "collected_horse_count"
+    ] += 1
+
+    output[
+        "total_candidate_table_count"
+    ] += data[
+        "candidate_table_count"
+    ]
+
+    output[
+        "total_parsed_table_count"
+    ] += data[
+        "parsed_table_count"
+    ]
+
+    output[
+        "total_raw_race_count"
+    ] += data[
+        "raw_race_count"
+    ]
+
+    output[
+        "total_past_race_count"
+    ] += data[
+        "past_race_count"
+    ]
+
+    output[
+        "excluded_target_race_count"
+    ] += data[
+        "excluded_target_race_count"
+    ]
+
+    output[
+        "excluded_same_day_count"
+    ] += data[
+        "excluded_same_day_count"
+    ]
+
+    output[
+        "excluded_future_count"
+    ] += data[
+        "excluded_future_count"
+    ]
+
+    output[
+        "excluded_unknown_date_count"
+    ] += data[
+        "excluded_unknown_date_count"
+    ]
+
+    if data[
+        "past_race_count"
+    ] > 0:
+        output[
+            "horses_with_past_races"
+        ] += 1
+
+    else:
+        output[
+            "horses_without_past_races"
+        ] += 1
+
+
 def main():
     (
         race_data,
@@ -900,6 +1198,16 @@ def main():
         race_data.get(
             "race_id"
         )
+    )
+
+    old_data = load_json(
+        OUTPUT_FILE,
+        {}
+    )
+
+    cache = build_same_day_cache(
+        old_data,
+        target_date
     )
 
     output = {
@@ -917,6 +1225,18 @@ def main():
 
         "target_date":
             target_date.isoformat(),
+
+        "cache_enabled":
+            True,
+
+        "cache_policy":
+            "same_target_date_only",
+
+        "cache_hit_count":
+            0,
+
+        "fetched_horse_count":
+            0,
 
         "future_race_usage":
             False,
@@ -990,6 +1310,11 @@ def main():
         len(runners)
     )
 
+    print(
+        "safe same-day cache:",
+        len(cache)
+    )
+
     print("")
 
     for index, horse in enumerate(
@@ -1002,86 +1327,58 @@ def main():
             f"({horse['horse_id']})"
         )
 
+        horse_id = horse[
+            "horse_id"
+        ]
+
+        fetched = False
+
         try:
-            data = (
-                collect_horse_history(
-                    horse,
-                    target_date,
-                    target_race_id
+            cached = cache.get(
+                horse_id
+            )
+
+            if cached is not None:
+                data = (
+                    normalize_cached_horse(
+                        cached,
+                        horse,
+                        target_date,
+                        target_race_id
+                    )
                 )
-            )
 
-            output[
-                "horses"
-            ].append(
-                data
-            )
-
-            output[
-                "collected_horse_count"
-            ] += 1
-
-            output[
-                "total_candidate_table_count"
-            ] += data[
-                "candidate_table_count"
-            ]
-
-            output[
-                "total_parsed_table_count"
-            ] += data[
-                "parsed_table_count"
-            ]
-
-            output[
-                "total_raw_race_count"
-            ] += data[
-                "raw_race_count"
-            ]
-
-            output[
-                "total_past_race_count"
-            ] += data[
-                "past_race_count"
-            ]
-
-            output[
-                "excluded_target_race_count"
-            ] += data[
-                "excluded_target_race_count"
-            ]
-
-            output[
-                "excluded_same_day_count"
-            ] += data[
-                "excluded_same_day_count"
-            ]
-
-            output[
-                "excluded_future_count"
-            ] += data[
-                "excluded_future_count"
-            ]
-
-            output[
-                "excluded_unknown_date_count"
-            ] += data[
-                "excluded_unknown_date_count"
-            ]
-
-            if (
-                data[
-                    "past_race_count"
-                ] > 0
-            ):
                 output[
-                    "horses_with_past_races"
+                    "cache_hit_count"
                 ] += 1
+
+                print(
+                    "  CACHE HIT"
+                )
 
             else:
+                data = (
+                    collect_horse_history(
+                        horse,
+                        target_date,
+                        target_race_id
+                    )
+                )
+
+                fetched = True
+
                 output[
-                    "horses_without_past_races"
+                    "fetched_horse_count"
                 ] += 1
+
+                print(
+                    "  FETCH"
+                )
+
+            add_horse_to_output(
+                output,
+                data
+            )
 
             print(
                 "  tables:",
@@ -1143,9 +1440,39 @@ def main():
                 message
             )
 
-        time.sleep(
-            REQUEST_INTERVAL
+        # ネット取得した馬だけ待機。
+        # キャッシュヒットでは待たない。
+        if fetched:
+            time.sleep(
+                REQUEST_INTERVAL
+            )
+
+    # race.jsonと同じ出走順を維持
+    horse_order = {
+        clean_text(
+            horse.get(
+                "horse_id"
+            )
+        ): index
+        for index, horse in enumerate(
+            runners
         )
+    }
+
+    output[
+        "horses"
+    ].sort(
+        key=lambda item: (
+            horse_order.get(
+                clean_text(
+                    item.get(
+                        "horse_id"
+                    )
+                ),
+                9999
+            )
+        )
+    )
 
     # ---------------------------------------------
     # 最終リーク検査
@@ -1203,6 +1530,18 @@ def main():
             "JSONは保存しません。"
         )
 
+    if (
+        output[
+            "collected_horse_count"
+        ]
+        != len(runners)
+    ):
+        raise RuntimeError(
+            "runner_historyが全頭分揃っていません: "
+            f"{output['collected_horse_count']}/"
+            f"{len(runners)}"
+        )
+
     with open(
         OUTPUT_FILE,
         "w",
@@ -1231,6 +1570,20 @@ def main():
         "collected horses:",
         output[
             "collected_horse_count"
+        ]
+    )
+
+    print(
+        "cache hit:",
+        output[
+            "cache_hit_count"
+        ]
+    )
+
+    print(
+        "new fetch:",
+        output[
+            "fetched_horse_count"
         ]
     )
 
