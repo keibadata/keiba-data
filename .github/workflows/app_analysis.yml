@@ -1,0 +1,155 @@
+name: App Race Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      race_date:
+        description: "Race date YYYY-MM-DD"
+        required: true
+        type: string
+
+      track:
+        description: "JRA track"
+        required: true
+        type: choice
+        options:
+          - 札幌
+          - 函館
+          - 福島
+          - 新潟
+          - 東京
+          - 中山
+          - 中京
+          - 京都
+          - 阪神
+          - 小倉
+
+      race_number:
+        description: "Race number"
+        required: true
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+          - "8"
+          - "9"
+          - "10"
+          - "11"
+          - "12"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: app-race-analysis
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      # ==================================================
+      # 日付・競馬場・R → Race ID
+      # ==================================================
+
+      - name: Resolve Race ID
+        run: |
+          python resolve_race_id.py \
+            --date "${{ inputs.race_date }}" \
+            --track "${{ inputs.track }}" \
+            --race-number "${{ inputs.race_number }}" \
+            --output resolved_race_id.txt
+
+      # ==================================================
+      # Race ID検証
+      # ==================================================
+
+      - name: Validate Race ID
+        run: |
+          RACE_ID="$(tr -d '[:space:]' < resolved_race_id.txt)"
+
+          if ! [[ "$RACE_ID" =~ ^[0-9]{12}$ ]]; then
+            echo "ERROR: invalid Race ID: $RACE_ID"
+            exit 1
+          fi
+
+          echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
+
+          echo "========================================"
+          echo "APP ANALYSIS TARGET"
+          echo "========================================"
+          echo "Date: ${{ inputs.race_date }}"
+          echo "Track: ${{ inputs.track }}"
+          echo "Race: ${{ inputs.race_number }}R"
+          echo "Race ID: $RACE_ID"
+          echo "========================================"
+
+      # ==================================================
+      # race_id.txt 更新
+      #
+      # 既存Race Full Analysisはこのファイルを読む。
+      # ==================================================
+
+      - name: Update race_id.txt
+        run: |
+          printf '%s\n' "$RACE_ID" > race_id.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add race_id.txt
+
+          if git diff --cached --quiet; then
+            echo "race_id.txt already contains $RACE_ID"
+          else
+            git commit -m "Set app race ID ${RACE_ID}"
+            git push
+          fi
+
+      # ==================================================
+      # Race Full Analysis 起動
+      # ==================================================
+
+      - name: Start Race Full Analysis
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Starting Race Full Analysis for $RACE_ID"
+
+          gh workflow run final_analysis.yml \
+            --ref main
+
+          echo "Race Full Analysis dispatch requested"
+
+      # ==================================================
+      # 起動確認
+      # ==================================================
+
+      - name: Complete
+        run: |
+          echo "========================================"
+          echo "APP ANALYSIS PREPARATION COMPLETE"
+          echo "========================================"
+          echo "Race ID: $RACE_ID"
+          echo "Race Full Analysis: DISPATCHED"
+          echo "========================================"
