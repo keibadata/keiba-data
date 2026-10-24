@@ -1,31 +1,38 @@
 {
-  "race_id": "202605040801",
+  "race_id": "202605040803",
   "race_date": "2026-10-24",
   "racecourse": "東京",
-  "surface": "ダート",
-  "distance": 1400,
-  "race_number": 1,
-  "eligible_previous_race_numbers": [],
+  "surface": "芝",
+  "distance": 1600,
+  "race_number": 3,
+  "eligible_previous_race_numbers": [
+    1,
+    2
+  ],
   "future_race_usage": false,
   "day_races_connected": true,
-  "status": "no_previous_races",
-  "reference_race_count": 0,
-  "reference_race_numbers": [],
+  "status": "analyzed",
+  "reference_race_count": 1,
+  "reference_race_numbers": [
+    2
+  ],
   "corner_connected_race_count": 0,
-  "corner_missing_race_numbers": [],
+  "corner_missing_race_numbers": [
+    2
+  ],
   "reference_corner_numbers": {},
   "time_bias": "",
   "time_bias_connected": false,
-  "time_bias_status": "not_run",
+  "time_bias_status": "no_valid_baseline",
   "time_bias_score": null,
   "time_bias_reference_count": 0,
   "time_bias_reference_scores": [],
   "time_bias_reference_details": [],
-  "time_bias_reason": "",
-  "inside_outside_bias": "",
+  "time_bias_reason": "有効な基準時計サンプルがないため時計バイアスを判定しない。",
+  "inside_outside_bias": "内寄り優勢",
   "running_style_bias": "",
-  "confidence": 0.0,
-  "reason": "対象が1Rのため、対象レース以前の同日実レースが存在しない。未来レースを使用しないため当日バイアス判定は行わない。",
+  "confidence": 0.2,
+  "reason": "対象レース以前の同日・同競馬場・同馬場の実レース1件を使用。対象レース以降のデータは使用していない。通過順位接続0/1件。時計基準は有効サンプル不足のため判定していない。",
   "style_counts": {
     "逃げ": 0,
     "先行": 0,
@@ -39,14 +46,14 @@
     "後方": 0
   },
   "top3_sample_count": 0,
-  "inside_top3": 0,
-  "middle_top3": 0,
+  "inside_top3": 2,
+  "middle_top3": 1,
   "outside_top3": 0,
   "average_top3_last3f": null,
   "average_winner_last3f": null,
   "track_condition_connected": true,
-  "moisture_finish": null,
-  "moisture_4corner": null,
-  "cushion_value": null,
-  "updated_at": "2026-10-24T09:04:59+09:00"
+  "moisture_finish": 12.7,
+  "moisture_4corner": 15.5,
+  "cushion_value": 9.5,
+  "updated_at": "2026-10-24T10:45:49+09:00"
 }
