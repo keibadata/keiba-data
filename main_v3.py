@@ -1,9 +1,10 @@
 import json
 import os
 import re
+from datetime import datetime, timezone, timedelta
+
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime, timezone, timedelta
 
 
 # =========================================================
@@ -14,28 +15,12 @@ DEFAULT_RACE_ID = "202605040502"
 
 
 def load_race_id():
-    """
-    Race ID の優先順位
-
-    1. 環境変数 RACE_ID
-    2. race_id.txt
-    3. DEFAULT_RACE_ID
-
-    day_bias 等で race_id.txt を一時変更した場合も
-    正しく対象レースを取得できるようにする。
-    """
-
-    # -----------------------------------------------------
-    # 1. 環境変数
-    # -----------------------------------------------------
-
     env_race_id = os.environ.get(
         "RACE_ID",
         ""
     ).strip()
 
     if env_race_id:
-
         if not re.fullmatch(
             r"\d{12}",
             env_race_id
@@ -51,27 +36,19 @@ def load_race_id():
 
         return env_race_id
 
-    # -----------------------------------------------------
-    # 2. race_id.txt
-    # -----------------------------------------------------
-
     if os.path.exists(
         "race_id.txt"
     ):
-
         with open(
             "race_id.txt",
             "r",
             encoding="utf-8"
         ) as f:
-
             file_race_id = (
-                f.read()
-                .strip()
+                f.read().strip()
             )
 
         if file_race_id:
-
             if not re.fullmatch(
                 r"\d{12}",
                 file_race_id
@@ -86,10 +63,6 @@ def load_race_id():
             )
 
             return file_race_id
-
-    # -----------------------------------------------------
-    # 3. デフォルト
-    # -----------------------------------------------------
 
     if not re.fullmatch(
         r"\d{12}",
@@ -108,7 +81,6 @@ def load_race_id():
 
 RACE_ID = load_race_id()
 
-
 URL = (
     "https://race.netkeiba.com/"
     f"race/shutuba.html?race_id={RACE_ID}"
@@ -122,27 +94,24 @@ HEADERS = {
         "(KHTML, like Gecko) "
         "Version/18.0 Mobile/15E148 Safari/604.1"
     ),
-    "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+    "Accept-Language":
+        "ja,en-US;q=0.9,en;q=0.8",
 }
 
 
 print(
     "========================================"
 )
-
 print(
     "RACE COLLECTOR"
 )
-
 print(
     "========================================"
 )
-
 print(
     "Target Race ID:",
     RACE_ID
 )
-
 print(
     "URL:",
     URL
@@ -156,13 +125,19 @@ response = requests.get(
 )
 
 response.raise_for_status()
-response.encoding = response.apparent_encoding
+response.encoding = (
+    response.apparent_encoding
+)
 
 soup = BeautifulSoup(
     response.text,
     "html.parser"
 )
 
+
+# =========================================================
+# 共通
+# =========================================================
 
 def clean_text(element):
     if element is None:
@@ -174,7 +149,10 @@ def clean_text(element):
     )
 
 
-def first_text(row, selectors):
+def first_text(
+    row,
+    selectors
+):
     for selector in selectors:
         element = row.select_one(
             selector
@@ -199,23 +177,6 @@ def extract_race_condition(
     soup,
     race_id
 ):
-    """
-    出馬表ページから以下を取得する。
-
-    ・開催日
-    ・競馬場
-    ・芝 / ダート / 障害
-    ・距離
-    ・馬場状態
-
-    競馬場は JRA race_id の場コードを使用する。
-    ページ全文には他競馬場名が含まれる可能性があるため、
-    HTML全文からの競馬場名による上書きは行わない。
-
-    開催日は未来データ混入防止に必須なので、
-    推測値では補完しない。
-    """
-
     page_text = clean_text(
         soup
     )
@@ -256,27 +217,30 @@ def extract_race_condition(
     )
 
     date_patterns = [
-        r"(20\d{2})年\s*"
-        r"(\d{1,2})月\s*"
-        r"(\d{1,2})日",
-
-        r"(20\d{2})/"
-        r"(\d{1,2})/"
-        r"(\d{1,2})",
-
-        r"(20\d{2})-"
-        r"(\d{1,2})-"
-        r"(\d{1,2})",
-
-        r"(20\d{2})\."
-        r"(\d{1,2})\."
-        r"(\d{1,2})",
+        (
+            r"(20\d{2})年\s*"
+            r"(\d{1,2})月\s*"
+            r"(\d{1,2})日"
+        ),
+        (
+            r"(20\d{2})/"
+            r"(\d{1,2})/"
+            r"(\d{1,2})"
+        ),
+        (
+            r"(20\d{2})-"
+            r"(\d{1,2})-"
+            r"(\d{1,2})"
+        ),
+        (
+            r"(20\d{2})\."
+            r"(\d{1,2})\."
+            r"(\d{1,2})"
+        ),
     ]
 
     for text in date_texts:
-
         for pattern in date_patterns:
-
             match = re.search(
                 pattern,
                 text
@@ -286,22 +250,10 @@ def extract_race_condition(
                 continue
 
             try:
-                year = int(
-                    match.group(1)
-                )
-
-                month = int(
-                    match.group(2)
-                )
-
-                day = int(
-                    match.group(3)
-                )
-
                 race_date = datetime(
-                    year,
-                    month,
-                    day
+                    int(match.group(1)),
+                    int(match.group(2)),
+                    int(match.group(3))
                 ).strftime(
                     "%Y-%m-%d"
                 )
@@ -320,18 +272,10 @@ def extract_race_condition(
 
     # -----------------------------------------------------
     # 競馬場
-    # -----------------------------------------------------
     #
-    # JRA race_id:
-    # YYYY + 場コード2桁 + 開催回2桁 + 開催日2桁 + R番号2桁
-    #
-    # 競馬場は race_id の場コードを正とする。
-    # page_text には出走馬の過去走などに由来する
-    # 他競馬場名が含まれる可能性があるため、
-    # page_text から競馬場を再判定して上書きしない。
+    # race_id の場コードを正とする。
+    # HTML全文から競馬場を上書きしない。
     # -----------------------------------------------------
-
-    track = ""
 
     jra_tracks = {
         "01": "札幌",
@@ -346,8 +290,9 @@ def extract_race_condition(
         "10": "小倉",
     }
 
-    if len(race_id) == 12:
+    track = ""
 
+    if len(race_id) == 12:
         track_code = race_id[
             4:6
         ]
@@ -356,6 +301,204 @@ def extract_race_condition(
             track_code,
             ""
         )
+
+    # -----------------------------------------------------
+    # レース名
+    # -----------------------------------------------------
+
+    race_name = first_text(
+        soup,
+        [
+            ".RaceName",
+            "h1.RaceName",
+            ".RaceName_main",
+        ]
+    )
+
+    race_name = re.sub(
+        r"\s+",
+        " ",
+        race_name
+    ).strip()
+
+    # -----------------------------------------------------
+    # レース条件専用テキスト
+    #
+    # page_text 全体は新馬判定には使わない。
+    # -----------------------------------------------------
+
+    race_header_texts = []
+
+    header_selectors = [
+        ".RaceName",
+        ".RaceData01",
+        ".RaceData02",
+        ".RaceData",
+    ]
+
+    for selector in header_selectors:
+        for element in soup.select(
+            selector
+        ):
+            text = clean_text(
+                element
+            )
+
+            if text:
+                race_header_texts.append(
+                    text
+                )
+
+    race_header_text = " ".join(
+        race_header_texts
+    )
+
+    race_header_text = re.sub(
+        r"\s+",
+        " ",
+        race_header_text
+    ).strip()
+
+    # -----------------------------------------------------
+    # クラス
+    # -----------------------------------------------------
+
+    race_class = ""
+
+    class_patterns = [
+        (
+            "新馬",
+            r"(?:新馬|メイクデビュー)"
+        ),
+        (
+            "未勝利",
+            r"未勝利"
+        ),
+        (
+            "1勝クラス",
+            r"(?:1勝クラス|500万下)"
+        ),
+        (
+            "2勝クラス",
+            r"(?:2勝クラス|1000万下)"
+        ),
+        (
+            "3勝クラス",
+            r"(?:3勝クラス|1600万下)"
+        ),
+        (
+            "オープン",
+            r"(?:オープン|OP)"
+        ),
+        (
+            "リステッド",
+            r"(?:リステッド|Listed|\(L\))"
+        ),
+        (
+            "G3",
+            r"(?:GIII|GⅢ|G3)"
+        ),
+        (
+            "G2",
+            r"(?:GII|GⅡ|G2)"
+        ),
+        (
+            "G1",
+            r"(?:GI|GⅠ|G1)"
+        ),
+    ]
+
+    class_source = (
+        race_name
+        + " "
+        + race_header_text
+    )
+
+    for label, pattern in class_patterns:
+        if re.search(
+            pattern,
+            class_source,
+            re.IGNORECASE
+        ):
+            race_class = label
+            break
+
+    # -----------------------------------------------------
+    # 年齢条件
+    # -----------------------------------------------------
+
+    age_condition = ""
+
+    age_patterns = [
+        (
+            "2歳",
+            r"2歳"
+        ),
+        (
+            "3歳",
+            r"3歳"
+        ),
+        (
+            "3歳以上",
+            r"3歳以上"
+        ),
+        (
+            "4歳以上",
+            r"4歳以上"
+        ),
+    ]
+
+    # 長い文字列を先に判定する
+    age_patterns = [
+        (
+            "3歳以上",
+            r"3歳以上"
+        ),
+        (
+            "4歳以上",
+            r"4歳以上"
+        ),
+        (
+            "2歳",
+            r"2歳"
+        ),
+        (
+            "3歳",
+            r"3歳"
+        ),
+    ]
+
+    for label, pattern in age_patterns:
+        if re.search(
+            pattern,
+            race_header_text
+        ):
+            age_condition = label
+            break
+
+    # -----------------------------------------------------
+    # 新馬戦判定
+    #
+    # 過去走0件では判定しない。
+    # ページ全文でも判定しない。
+    # レース名・レース条件欄に
+    # 新馬 / メイクデビュー が明示された場合のみ true。
+    # -----------------------------------------------------
+
+    debut_pattern = (
+        r"(?:新馬|メイクデビュー)"
+    )
+
+    is_debut = bool(
+        re.search(
+            debut_pattern,
+            class_source,
+            re.IGNORECASE
+        )
+    )
+
+    if is_debut:
+        race_class = "新馬"
 
     # -----------------------------------------------------
     # 芝 / ダート / 障害・距離
@@ -375,11 +518,9 @@ def extract_race_condition(
     ]
 
     for selector in selectors:
-
         for element in soup.select(
             selector
         ):
-
             text = clean_text(
                 element
             )
@@ -394,56 +535,55 @@ def extract_race_condition(
     )
 
     for text in race_data_texts:
-
         match = re.search(
-            r"芝\s*"
-            r"([0-9]{3,4})\s*"
-            r"[mｍ]?",
+            (
+                r"芝\s*"
+                r"([0-9]{3,4})\s*"
+                r"[mｍ]?"
+            ),
             text,
             re.IGNORECASE
         )
 
         if match:
             surface = "芝"
-
             distance = int(
                 match.group(1)
             )
-
             break
 
         match = re.search(
-            r"(?:ダート|ダ)\s*"
-            r"([0-9]{3,4})\s*"
-            r"[mｍ]?",
+            (
+                r"(?:ダート|ダ)\s*"
+                r"([0-9]{3,4})\s*"
+                r"[mｍ]?"
+            ),
             text,
             re.IGNORECASE
         )
 
         if match:
             surface = "ダート"
-
             distance = int(
                 match.group(1)
             )
-
             break
 
         match = re.search(
-            r"障(?:害)?\s*"
-            r"([0-9]{3,4})\s*"
-            r"[mｍ]?",
+            (
+                r"障(?:害)?\s*"
+                r"([0-9]{3,4})\s*"
+                r"[mｍ]?"
+            ),
             text,
             re.IGNORECASE
         )
 
         if match:
             surface = "障害"
-
             distance = int(
                 match.group(1)
             )
-
             break
 
     # -----------------------------------------------------
@@ -453,18 +593,21 @@ def extract_race_condition(
     track_condition = ""
 
     condition_patterns = [
-        r"馬場\s*[:：]\s*"
-        r"(良|稍重|重|不良)",
-
-        r"芝\s*[:：]\s*"
-        r"(良|稍重|重|不良)",
-
-        r"ダート?\s*[:：]\s*"
-        r"(良|稍重|重|不良)",
+        (
+            r"馬場\s*[:：]\s*"
+            r"(良|稍重|重|不良)"
+        ),
+        (
+            r"芝\s*[:：]\s*"
+            r"(良|稍重|重|不良)"
+        ),
+        (
+            r"ダート?\s*[:：]\s*"
+            r"(良|稍重|重|不良)"
+        ),
     ]
 
     for pattern in condition_patterns:
-
         match = re.search(
             pattern,
             page_text
@@ -474,7 +617,6 @@ def extract_race_condition(
             track_condition = (
                 match.group(1)
             )
-
             break
 
     return {
@@ -483,6 +625,18 @@ def extract_race_condition(
 
         "track":
             track,
+
+        "race_name":
+            race_name,
+
+        "race_class":
+            race_class,
+
+        "age_condition":
+            age_condition,
+
+        "is_debut":
+            is_debut,
 
         "surface":
             surface,
@@ -506,7 +660,6 @@ race_condition = extract_race_condition(
 # =========================================================
 
 def extract_horse_id(row):
-
     link = row.select_one(
         'a[href*="/horse/"]'
     )
@@ -525,7 +678,6 @@ def extract_horse_id(row):
     ]
 
     for pattern in patterns:
-
         match = re.search(
             pattern,
             href
@@ -538,7 +690,6 @@ def extract_horse_id(row):
 
 
 def extract_horse_name(row):
-
     name = first_text(
         row,
         [
@@ -556,7 +707,6 @@ def extract_horse_name(row):
 
 
 def extract_number(row):
-
     text = first_text(
         row,
         [
@@ -582,7 +732,6 @@ def extract_number(row):
     )
 
     for cell in cells[:6]:
-
         value = clean_text(
             cell
         )
@@ -591,7 +740,6 @@ def extract_number(row):
             r"\d{1,2}",
             value
         ):
-
             number = int(
                 value
             )
@@ -605,7 +753,6 @@ def extract_number(row):
 
 
 def extract_sex_age(row):
-
     text = first_text(
         row,
         [
@@ -621,14 +768,12 @@ def extract_sex_age(row):
     )
 
     if not match:
-
         match = re.search(
             r"[牡牝セ騸]\s*\d+",
             clean_text(row)
         )
 
     if match:
-
         return re.sub(
             r"\s+",
             "",
@@ -639,7 +784,6 @@ def extract_sex_age(row):
 
 
 def extract_jockey(row):
-
     text = first_text(
         row,
         [
@@ -659,7 +803,6 @@ def extract_jockey(row):
 
 
 def extract_carried_weight(row):
-
     selectors = [
         ".Weight",
         ".BurdenWeight",
@@ -669,24 +812,23 @@ def extract_carried_weight(row):
     ]
 
     for selector in selectors:
-
         for element in row.select(
             selector
         ):
-
             text = clean_text(
                 element
             )
 
             numbers = re.findall(
-                r"(?<!\d)"
-                r"(\d{2}(?:\.\d)?)"
-                r"(?!\d)",
+                (
+                    r"(?<!\d)"
+                    r"(\d{2}(?:\.\d)?)"
+                    r"(?!\d)"
+                ),
                 text
             )
 
             for value in numbers:
-
                 weight = float(
                     value
                 )
@@ -710,13 +852,11 @@ def extract_carried_weight(row):
     )
 
     if jockey_element:
-
         parent = (
             jockey_element.parent
         )
 
         for _ in range(3):
-
             if parent is None:
                 break
 
@@ -725,14 +865,15 @@ def extract_carried_weight(row):
             )
 
             numbers = re.findall(
-                r"(?<!\d)"
-                r"(\d{2}(?:\.\d)?)"
-                r"(?!\d)",
+                (
+                    r"(?<!\d)"
+                    r"(\d{2}(?:\.\d)?)"
+                    r"(?!\d)"
+                ),
                 text
             )
 
             for value in numbers:
-
                 weight = float(
                     value
                 )
@@ -755,14 +896,15 @@ def extract_carried_weight(row):
     )
 
     numbers = re.findall(
-        r"(?<!\d)"
-        r"(\d{2}(?:\.\d)?)"
-        r"(?!\d)",
+        (
+            r"(?<!\d)"
+            r"(\d{2}(?:\.\d)?)"
+            r"(?!\d)"
+        ),
         row_text
     )
 
     for value in numbers:
-
         weight = float(
             value
         )
@@ -780,14 +922,15 @@ def extract_carried_weight(row):
 
 
 def extract_body_weight(row):
-
     row_text = clean_text(
         row
     )
 
     match = re.search(
-        r"(\d{3})\s*"
-        r"\(([+\-−]?\d+)\)",
+        (
+            r"(\d{3})\s*"
+            r"\(([+\-−]?\d+)\)"
+        ),
         row_text
     )
 
@@ -810,7 +953,6 @@ def extract_body_weight(row):
             "-",
         )
     ):
-
         if change != "0":
             change = (
                 "+"
@@ -828,32 +970,23 @@ horses = []
 for row in soup.select(
     ".HorseList"
 ):
-
-    horse_name = (
-        extract_horse_name(
-            row
-        )
+    horse_name = extract_horse_name(
+        row
     )
 
     if not horse_name:
         continue
 
-    horse_number = (
-        extract_number(
-            row
-        )
+    horse_number = extract_number(
+        row
     )
 
-    horse_id = (
-        extract_horse_id(
-            row
-        )
+    horse_id = extract_horse_id(
+        row
     )
 
-    sex_age = (
-        extract_sex_age(
-            row
-        )
+    sex_age = extract_sex_age(
+        row
     )
 
     carried_weight = (
@@ -862,10 +995,8 @@ for row in soup.select(
         )
     )
 
-    jockey = (
-        extract_jockey(
-            row
-        )
+    jockey = extract_jockey(
+        row
     )
 
     (
@@ -912,7 +1043,6 @@ if not horses:
 
 
 def horse_sort_key(horse):
-
     number = horse[
         "horse_number"
     ]
@@ -937,7 +1067,6 @@ horses.sort(
 warnings = []
 
 for horse in horses:
-
     missing = []
 
     for key in [
@@ -948,14 +1077,12 @@ for horse in horses:
         "jockey",
         "body_weight",
     ]:
-
         if not horse[key]:
             missing.append(
                 key
             )
 
     if missing:
-
         warnings.append(
             {
                 "horse_number":
@@ -1051,6 +1178,26 @@ data = {
             "track"
         ],
 
+    "race_name":
+        race_condition[
+            "race_name"
+        ],
+
+    "race_class":
+        race_condition[
+            "race_class"
+        ],
+
+    "age_condition":
+        race_condition[
+            "age_condition"
+        ],
+
+    "is_debut":
+        race_condition[
+            "is_debut"
+        ],
+
     "surface":
         race_condition[
             "surface"
@@ -1094,7 +1241,6 @@ with open(
     "w",
     encoding="utf-8"
 ) as f:
-
     json.dump(
         data,
         f,
@@ -1126,37 +1272,47 @@ print(
 
 print(
     "race_date:",
-    data[
-        "race_date"
-    ]
+    data["race_date"]
 )
 
 print(
     "track:",
-    data[
-        "track"
-    ]
+    data["track"]
+)
+
+print(
+    "race_name:",
+    data["race_name"]
+)
+
+print(
+    "race_class:",
+    data["race_class"]
+)
+
+print(
+    "age_condition:",
+    data["age_condition"]
+)
+
+print(
+    "is_debut:",
+    data["is_debut"]
 )
 
 print(
     "surface:",
-    data[
-        "surface"
-    ]
+    data["surface"]
 )
 
 print(
     "distance:",
-    data[
-        "distance"
-    ]
+    data["distance"]
 )
 
 print(
     "track_condition:",
-    data[
-        "track_condition"
-    ]
+    data["track_condition"]
 )
 
 print(
@@ -1169,7 +1325,6 @@ print(
 )
 
 for horse in horses:
-
     print(
         horse[
             "horse_number"
@@ -1196,7 +1351,6 @@ for horse in horses:
 
 
 if warnings:
-
     print(
         "\n--- WARNINGS ---"
     )
