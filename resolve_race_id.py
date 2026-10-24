@@ -1,8 +1,9 @@
-import os
+import argparse
 import re
 import sys
+
 import requests
-from datetime import datetime
+from bs4 import BeautifulSoup
 
 
 TRACK_CODES = {
@@ -22,61 +23,67 @@ TRACK_CODES = {
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 "
-        "(iPhone; CPU iPhone OS 17_0 like Mac OS X) "
-        "AppleWebKit/605.1.15 "
+        "(Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 "
         "(KHTML, like Gecko) "
-        "Version/17.0 Mobile/15E148 Safari/604.1"
+        "Chrome/141.0 Safari/537.36"
     ),
-    "Accept-Language": "ja-JP,ja;q=0.9",
+    "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
 }
 
 
 def normalize_date(value):
-    value = str(value).strip()
+    value = str(value or "").strip()
 
-    for fmt in (
-        "%Y%m%d",
-        "%Y/%m/%d",
-        "%Y-%m-%d",
-    ):
-        try:
-            return datetime.strptime(
-                value,
-                fmt,
-            ).strftime("%Y%m%d")
-        except ValueError:
-            pass
-
-    raise ValueError(
-        f"開催日の形式が不正です: {value}"
-    )
-
-
-def normalize_race_no(value):
-    text = str(value).strip()
-    text = text.upper().replace("Ｒ", "R")
-
-    match = re.search(
-        r"(\d{1,2})",
-        text,
+    match = re.fullmatch(
+        r"(\d{4})[-/](\d{1,2})[-/](\d{1,2})",
+        value,
     )
 
     if not match:
         raise ValueError(
-            f"R番号を取得できません: {value}"
+            "date must be YYYY-MM-DD"
         )
 
-    race_no = int(match.group(1))
+    year = int(match.group(1))
+    month = int(match.group(2))
+    day = int(match.group(3))
 
-    if not 1 <= race_no <= 12:
+    return (
+        f"{year:04d}-"
+        f"{month:02d}-"
+        f"{day:02d}"
+    )
+
+
+def normalize_track(value):
+    value = str(value or "").strip()
+
+    if value not in TRACK_CODES:
         raise ValueError(
-            f"R番号は1〜12です: {race_no}"
+            f"unsupported track: {value}"
         )
 
-    return race_no
+    return value
 
 
-def fetch(url):
+def normalize_race_number(value):
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        raise ValueError(
+            "race number must be integer"
+        )
+
+    if not 1 <= number <= 12:
+        raise ValueError(
+            "race number must be 1-12"
+        )
+
+    return number
+
+
+def fetch_html(url):
     response = requests.get(
         url,
         headers=HEADERS,
@@ -85,202 +92,397 @@ def fetch(url):
 
     response.raise_for_status()
 
-    response.encoding = (
-        response.apparent_encoding
-        or "utf-8"
-    )
+    if not response.encoding:
+        response.encoding = (
+            response.apparent_encoding
+            or "utf-8"
+        )
 
     return response.text
 
 
-def extract_race_ids(html):
-    race_ids = re.findall(
-        r"race_id=(\d{12})",
-        html,
-    )
-
-    return list(
-        dict.fromkeys(race_ids)
-    )
-
-
-def verify_race_date(
-    race_id,
-    target_date,
-):
-    url = (
-        "https://race.netkeiba.com/"
-        "race/shutuba.html"
-        f"?race_id={race_id}"
-    )
-
-    try:
-        html = fetch(url)
-    except Exception as e:
-        print(
-            f"日付確認失敗 {race_id}: {e}"
-        )
-        return False
-
-    compact = re.sub(
-        r"\s+",
-        "",
-        html,
-    )
-
-    dt = datetime.strptime(
-        target_date,
-        "%Y%m%d",
-    )
+def collect_race_ids(html):
+    ids = set()
 
     patterns = [
-        dt.strftime("%Y年%m月%d日"),
-        (
-            f"{dt.year}年"
-            f"{dt.month}月"
-            f"{dt.day}日"
-        ),
-        dt.strftime("%Y/%m/%d"),
-        dt.strftime("%Y-%m-%d"),
-        target_date,
+        r"race_id=(\d{12})",
+        r"race_id%3D(\d{12})",
+        r"/race/(\d{12})",
+        r"race_id[\"']?\s*[:=]\s*[\"'](\d{12})",
     ]
 
     for pattern in patterns:
-        if pattern in compact:
-            return True
+        for match in re.findall(
+            pattern,
+            html,
+            flags=re.IGNORECASE,
+        ):
+            ids.add(str(match))
 
-    return False
+    soup = BeautifulSoup(
+        html,
+        "html.parser",
+    )
+
+    for element in soup.find_all(True):
+        for attr in (
+            "href",
+            "data-race-id",
+            "data-race_id",
+            "value",
+        ):
+            value = element.get(attr)
+
+            if not value:
+                continue
+
+            for match in re.findall(
+                r"\d{12}",
+                str(value),
+            ):
+                ids.add(match)
+
+    return sorted(ids)
+
+
+def filter_target(
+    race_ids,
+    date,
+    track,
+    race_number,
+):
+    year = date[:4]
+    track_code = TRACK_CODES[track]
+    race_suffix = f"{race_number:02d}"
+
+    prefix = year + track_code
+
+    candidates = [
+        race_id
+        for race_id in race_ids
+        if (
+            len(race_id) == 12
+            and race_id.startswith(prefix)
+            and race_id.endswith(race_suffix)
+        )
+    ]
+
+    return sorted(set(candidates))
+
+
+def verify_candidate(
+    race_id,
+    date,
+    track,
+    race_number,
+):
+    url = (
+        "https://race.netkeiba.com/"
+        "race/shutuba.html?"
+        f"race_id={race_id}"
+    )
+
+    try:
+        html = fetch_html(url)
+    except Exception:
+        return False
+
+    soup = BeautifulSoup(
+        html,
+        "html.parser",
+    )
+
+    text = soup.get_text(
+        " ",
+        strip=True,
+    )
+
+    # 競馬場
+    if track not in text:
+        title = (
+            soup.title.get_text(
+                " ",
+                strip=True,
+            )
+            if soup.title
+            else ""
+        )
+
+        if track not in title:
+            return False
+
+    # レース番号
+    race_patterns = [
+        rf"\b{race_number}R\b",
+        rf"{race_number}\s*R",
+    ]
+
+    race_number_found = any(
+        re.search(
+            pattern,
+            text,
+            flags=re.IGNORECASE,
+        )
+        for pattern in race_patterns
+    )
+
+    if not race_number_found:
+        # race_id末尾でも確認
+        if not race_id.endswith(
+            f"{race_number:02d}"
+        ):
+            return False
+
+    # 日付
+    y, m, d = date.split("-")
+
+    date_patterns = [
+        rf"{y}年\s*{int(m)}月\s*{int(d)}日",
+        rf"{y}/{int(m)}/{int(d)}",
+        rf"{y}-{m}-{d}",
+        rf"{y}\.{int(m)}\.{int(d)}",
+    ]
+
+    date_found = any(
+        re.search(
+            pattern,
+            text,
+        )
+        for pattern in date_patterns
+    )
+
+    if not date_found:
+        metadata = " ".join(
+            [
+                str(
+                    soup.title.get_text(
+                        " ",
+                        strip=True,
+                    )
+                    if soup.title
+                    else ""
+                ),
+                str(
+                    soup.find(
+                        "meta",
+                        attrs={
+                            "name": "description"
+                        },
+                    ).get("content", "")
+                    if soup.find(
+                        "meta",
+                        attrs={
+                            "name": "description"
+                        },
+                    )
+                    else ""
+                ),
+            ]
+        )
+
+        date_found = any(
+            re.search(
+                pattern,
+                metadata,
+            )
+            for pattern in date_patterns
+        )
+
+    return date_found
+
+
+def resolve_from_race_list(
+    date,
+    track,
+    race_number,
+):
+    ymd = date.replace("-", "")
+
+    urls = [
+        (
+            "https://race.netkeiba.com/"
+            "top/race_list.html?"
+            f"kaisai_date={ymd}"
+        ),
+        (
+            "https://race.netkeiba.com/"
+            "top/race_list_sub.html?"
+            f"kaisai_date={ymd}"
+        ),
+    ]
+
+    all_ids = set()
+
+    for url in urls:
+        print(
+            "checking race list:",
+            url,
+        )
+
+        try:
+            html = fetch_html(url)
+        except Exception as exc:
+            print(
+                "race list fetch failed:",
+                repr(exc),
+            )
+            continue
+
+        ids = collect_race_ids(html)
+
+        print(
+            "race ids found:",
+            len(ids),
+        )
+
+        all_ids.update(ids)
+
+    candidates = filter_target(
+        sorted(all_ids),
+        date,
+        track,
+        race_number,
+    )
+
+    print(
+        "filtered candidates:",
+        candidates,
+    )
+
+    verified = []
+
+    for race_id in candidates:
+        if verify_candidate(
+            race_id,
+            date,
+            track,
+            race_number,
+        ):
+            verified.append(race_id)
+
+    return verified
+
+
+def resolve_by_candidate_probe(
+    date,
+    track,
+    race_number,
+):
+    """
+    race_listから取れない場合の安全なフォールバック。
+
+    JRA race_id:
+      YYYY + 場コード + 開催回2桁
+      + 開催日目2桁 + R2桁
+
+    開催回 01-12
+    開催日目 01-12 を候補生成し、
+    実ページの日付・競馬場を照合する。
+    """
+
+    year = date[:4]
+    track_code = TRACK_CODES[track]
+
+    verified = []
+
+    for meeting in range(1, 13):
+        for day_no in range(1, 13):
+            race_id = (
+                year
+                + track_code
+                + f"{meeting:02d}"
+                + f"{day_no:02d}"
+                + f"{race_number:02d}"
+            )
+
+            if verify_candidate(
+                race_id,
+                date,
+                track,
+                race_number,
+            ):
+                verified.append(
+                    race_id
+                )
+
+                print(
+                    "verified candidate:",
+                    race_id,
+                )
+
+    return sorted(
+        set(verified)
+    )
 
 
 def resolve_race_id(
     date,
     track,
-    race_no,
+    race_number,
 ):
     date = normalize_date(date)
-    track = str(track).strip()
-    race_no = normalize_race_no(race_no)
+    track = normalize_track(track)
+    race_number = normalize_race_number(
+        race_number
+    )
 
-    if track not in TRACK_CODES:
-        raise ValueError(
-            f"未対応の競馬場です: {track}"
-        )
+    print("========================================")
+    print("RACE ID RESOLVER")
+    print("========================================")
+    print("date:", date)
+    print("track:", track)
+    print("race_number:", race_number)
 
-    track_code = TRACK_CODES[track]
-
-    print(
-        "Race ID検索:",
+    candidates = resolve_from_race_list(
         date,
-        "/",
         track,
-        "/",
-        f"{race_no}R",
+        race_number,
     )
 
-    list_url = (
-        "https://race.netkeiba.com/"
-        "top/race_list.html"
-        f"?kaisai_date={date}"
-    )
+    if len(candidates) == 1:
+        return candidates[0]
 
-    html = fetch(list_url)
-
-    race_ids = extract_race_ids(html)
-
-    print(
-        "レース一覧から",
-        len(race_ids),
-        "件のRace IDを取得",
-    )
-
-    if not race_ids:
+    if len(candidates) > 1:
         raise RuntimeError(
-            "レース一覧から"
-            "Race IDを取得できません"
+            "multiple verified Race IDs: "
+            + ", ".join(candidates)
         )
 
-    candidates = []
-
-    for race_id in race_ids:
-        if not re.fullmatch(
-            r"\d{12}",
-            race_id,
-        ):
-            continue
-
-        if race_id[4:6] != track_code:
-            continue
-
-        if int(race_id[10:12]) != race_no:
-            continue
-
-        candidates.append(race_id)
-
-    candidates = list(
-        dict.fromkeys(candidates)
-    )
-
+    print()
     print(
-        "一次候補:",
-        candidates,
+        "race list did not resolve uniquely."
     )
+    print(
+        "starting verified candidate probe..."
+    )
+
+    candidates = resolve_by_candidate_probe(
+        date,
+        track,
+        race_number,
+    )
+
+    if len(candidates) == 1:
+        return candidates[0]
 
     if not candidates:
         raise RuntimeError(
-            "競馬場・R番号に一致する"
-            "Race IDがありません"
+            f"Race ID not found: "
+            f"{date} {track} {race_number}R"
         )
 
-    verified = []
-
-    for race_id in candidates:
-        print(
-            "開催日確認:",
-            race_id,
-        )
-
-        if verify_race_date(
-            race_id,
-            date,
-        ):
-            verified.append(race_id)
-
-            print(
-                "開催日一致:",
-                race_id,
-            )
-        else:
-            print(
-                "開催日不一致:",
-                race_id,
-            )
-
-    if not verified:
-        raise RuntimeError(
-            "指定開催日に一致する"
-            "Race IDが見つかりません"
-        )
-
-    if len(verified) > 1:
-        raise RuntimeError(
-            "開催日確認後も"
-            "Race ID候補が複数あります: "
-            + ", ".join(verified)
-        )
-
-    race_id = verified[0]
-
-    print(
-        "Race ID確定:",
-        race_id,
+    raise RuntimeError(
+        "multiple verified Race IDs: "
+        + ", ".join(candidates)
     )
 
-    return race_id
 
-
-def write_race_id(race_id):
+def save_race_id(
+    race_id,
+    path,
+):
     with open(
-        "race_id.txt",
+        path,
         "w",
         encoding="utf-8",
     ) as f:
@@ -288,95 +490,67 @@ def write_race_id(race_id):
             race_id + "\n"
         )
 
-    print(
-        "race_id.txt 更新完了"
-    )
-
-
-def write_github_output(race_id):
-    output_path = os.environ.get(
-        "GITHUB_OUTPUT"
-    )
-
-    if not output_path:
-        return
-
-    with open(
-        output_path,
-        "a",
-        encoding="utf-8",
-    ) as f:
-        f.write(
-            f"race_id={race_id}\n"
-        )
-
 
 def main():
-    date = os.environ.get(
-        "RACE_DATE",
-        "",
-    ).strip()
+    parser = argparse.ArgumentParser()
 
-    track = os.environ.get(
-        "RACE_TRACK",
-        "",
-    ).strip()
+    parser.add_argument(
+        "--date",
+        required=True,
+    )
 
-    race_no = os.environ.get(
-        "RACE_NO",
-        "",
-    ).strip()
+    parser.add_argument(
+        "--track",
+        required=True,
+    )
 
-    if not date:
-        raise ValueError(
-            "RACE_DATE がありません"
-        )
+    parser.add_argument(
+        "--race-number",
+        required=True,
+        type=int,
+    )
 
-    if not track:
-        raise ValueError(
-            "RACE_TRACK がありません"
-        )
+    parser.add_argument(
+        "--output",
+        default="race_id.txt",
+    )
 
-    if not race_no:
-        raise ValueError(
-            "RACE_NO がありません"
-        )
+    args = parser.parse_args()
 
     race_id = resolve_race_id(
-        date,
-        track,
-        race_no,
+        args.date,
+        args.track,
+        args.race_number,
     )
 
-    write_race_id(
-        race_id
-    )
-
-    write_github_output(
-        race_id
-    )
-
-    print(
-        "Race ID自動取得完了:",
-        date,
-        "/",
-        track,
-        "/",
-        race_no + "R",
-        "->",
+    if not re.fullmatch(
+        r"\d{12}",
         race_id,
+    ):
+        raise RuntimeError(
+            "resolved Race ID is invalid"
+        )
+
+    save_race_id(
+        race_id,
+        args.output,
     )
+
+    print()
+    print("========================================")
+    print("RACE ID RESOLVED")
+    print("========================================")
+    print("Race ID:", race_id)
+    print("output:", args.output)
 
 
 if __name__ == "__main__":
     try:
         main()
-
-    except Exception as e:
+    except Exception as exc:
         print(
-            "Race ID自動取得エラー:",
-            e,
+            "ERROR:",
+            exc,
             file=sys.stderr,
         )
-
-        sys.exit(1)
+        raise
