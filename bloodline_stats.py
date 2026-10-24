@@ -3,14 +3,18 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 
-# 今回条件で選別済みの過去レース
+# ============================================================
+# Files
+# ============================================================
+
 HISTORY_FILE = "condition_history.json"
-
-# 過去出走馬の5代血統DB
 PEDIGREE_FILE = "history_pedigree.json"
-
 OUTPUT_FILE = "bloodline_stats.json"
 
+
+# ============================================================
+# Basic helpers
+# ============================================================
 
 def load_json(path):
     with open(
@@ -19,6 +23,20 @@ def load_json(path):
         encoding="utf-8"
     ) as f:
         return json.load(f)
+
+
+def save_json(path, data):
+    with open(
+        path,
+        "w",
+        encoding="utf-8"
+    ) as f:
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
 
 
 def clean_name(name):
@@ -42,6 +60,10 @@ def parse_rank(value):
     ):
         return None
 
+
+# ============================================================
+# Pedigree helpers
+# ============================================================
 
 def make_ancestor_key(ancestor):
     ancestor_id = str(
@@ -70,9 +92,7 @@ def make_ancestor_key(ancestor):
     )
 
 
-def build_pedigree_map(
-    pedigree_db
-):
+def build_pedigree_map(pedigree_db):
     pedigree_map = {}
 
     for horse in pedigree_db.get(
@@ -96,6 +116,10 @@ def build_pedigree_map(
     return pedigree_map
 
 
+# ============================================================
+# Condition helpers
+# ============================================================
+
 def normalize_surface(value):
     value = str(
         value or ""
@@ -110,9 +134,7 @@ def normalize_surface(value):
     return value
 
 
-def normalize_condition(
-    condition
-):
+def normalize_condition(condition):
     try:
         distance = int(
             condition.get(
@@ -136,22 +158,18 @@ def normalize_condition(
             )
         ).strip(),
 
-        "surface":
-            normalize_surface(
-                condition.get(
-                    "surface",
-                    ""
-                )
-            ),
+        "surface": normalize_surface(
+            condition.get(
+                "surface",
+                ""
+            )
+        ),
 
-        "distance":
-            distance,
+        "distance": distance,
     }
 
 
-def get_race_condition(
-    race
-):
+def get_race_condition(race):
     race_info = race.get(
         "race_info",
         {}
@@ -233,21 +251,16 @@ def get_race_condition(
     )
 
 
+# ============================================================
+# Selected history validation
+# ============================================================
+
 def validate_one_race(
     race_condition,
     target,
     selection_mode,
     selection_rule
 ):
-    """
-    condition_history.py が選択したレースが
-    selection_mode / selection_rule に本当に
-    合っているか再検証する。
-
-    通常戦の exact は従来どおり完全一致。
-    新馬戦のフォールバックだけ条件を広げる。
-    """
-
     track = race_condition[
         "track"
     ]
@@ -263,10 +276,8 @@ def validate_one_race(
     if selection_mode == "exact":
         return (
             track == target["track"]
-            and surface
-            == target["surface"]
-            and distance
-            == target["distance"]
+            and surface == target["surface"]
+            and distance == target["distance"]
         )
 
     if (
@@ -291,14 +302,12 @@ def validate_one_race(
 
         return (
             track == target["track"]
-            and surface
-            == target["surface"]
+            and surface == target["surface"]
             and distance > 0
             and abs(
                 distance
                 - target["distance"]
-            )
-            <= tolerance
+            ) <= tolerance
         )
 
     if (
@@ -307,8 +316,7 @@ def validate_one_race(
     ):
         return (
             track == target["track"]
-            and surface
-            == target["surface"]
+            and surface == target["surface"]
         )
 
     if (
@@ -332,14 +340,12 @@ def validate_one_race(
             tolerance = 200
 
         return (
-            surface
-            == target["surface"]
+            surface == target["surface"]
             and distance > 0
             and abs(
                 distance
                 - target["distance"]
-            )
-            <= tolerance
+            ) <= tolerance
         )
 
     if (
@@ -347,27 +353,23 @@ def validate_one_race(
         == "debut_same_surface_any_distance"
     ):
         return (
-            surface
-            == target["surface"]
+            surface == target["surface"]
         )
 
     return False
 
 
-def validate_selected_history(
-    history_db
-):
+def validate_selected_history(history_db):
     """
-    condition_history.py が選別した条件を検査。
-
     通常戦:
-        完全一致のみ許可。
+        exactのみ。
+        過去レース0件は正常。
+        血統補正なしで解析を続行する。
 
     新馬戦:
-        condition_history.py が記録した
-        selection_mode の範囲だけ許可。
-
-    条件外レースが混入した場合は停止する。
+        血統のみで最終評価するため、
+        使用可能な過去レース0件はエラー。
+        新馬専用フォールバックを許可する。
     """
 
     target = normalize_condition(
@@ -381,6 +383,12 @@ def validate_selected_history(
         "matched_history",
         []
     )
+
+    if not isinstance(
+        races,
+        list
+    ):
+        races = []
 
     is_debut = bool(
         history_db.get(
@@ -396,11 +404,9 @@ def validate_selected_history(
         )
     ).strip()
 
-    selection_rule = (
-        history_db.get(
-            "selection_rule",
-            {}
-        )
+    selection_rule = history_db.get(
+        "selection_rule",
+        {}
     )
 
     if not isinstance(
@@ -424,18 +430,13 @@ def validate_selected_history(
             "target_condition.distance が不正です"
         )
 
-    if not races:
-        raise RuntimeError(
-            "血統評価に使用できる"
-            "過去レースが0件です。"
-        )
+    # --------------------------------------------------------
+    # 通常戦は exact のみ
+    # --------------------------------------------------------
 
-    # 通常戦が新馬専用モードを
-    # 使用していないかチェック。
     if (
         not is_debut
-        and selection_mode
-        != "exact"
+        and selection_mode != "exact"
     ):
         raise RuntimeError(
             "通常戦で新馬用の"
@@ -443,30 +444,16 @@ def validate_selected_history(
             + selection_mode
         )
 
+    # --------------------------------------------------------
+    # 新馬戦で使用可能な選択モード
+    # --------------------------------------------------------
+
     allowed_debut_modes = {
         "exact",
-        (
-            "debut_"
-            "same_track_"
-            "surface_"
-            "near_distance"
-        ),
-        (
-            "debut_"
-            "same_track_"
-            "surface_"
-            "any_distance"
-        ),
-        (
-            "debut_"
-            "same_surface_"
-            "near_distance"
-        ),
-        (
-            "debut_"
-            "same_surface_"
-            "any_distance"
-        ),
+        "debut_same_track_surface_near_distance",
+        "debut_same_track_surface_any_distance",
+        "debut_same_surface_near_distance",
+        "debut_same_surface_any_distance",
     }
 
     if (
@@ -480,8 +467,41 @@ def validate_selected_history(
             + selection_mode
         )
 
-    for race in races:
+    # --------------------------------------------------------
+    # 重要:
+    # 新馬は血統データ必須。
+    # 通常戦は0件でも正常続行。
+    # --------------------------------------------------------
 
+    if not races:
+        if is_debut:
+            raise RuntimeError(
+                "新馬戦ですが、"
+                "血統評価に使用できる"
+                "過去レースが0件です。"
+            )
+
+        print(
+            "通常戦の血統条件一致レースは0件です。"
+        )
+        print(
+            "血統評価をニュートラルとして"
+            "解析を続行します。"
+        )
+
+        return (
+            target,
+            [],
+            is_debut,
+            selection_mode,
+            selection_rule,
+        )
+
+    # --------------------------------------------------------
+    # 選択済み過去レースを再検証
+    # --------------------------------------------------------
+
+    for race in races:
         race_condition = (
             get_race_condition(
                 race
@@ -521,464 +541,30 @@ def validate_selected_history(
     )
 
 
-def main():
-    history_db = load_json(
-        HISTORY_FILE
-    )
-
-    pedigree_db = load_json(
-        PEDIGREE_FILE
-    )
-
-    (
-        target_condition,
-        races,
-        is_debut,
-        selection_mode,
-        selection_rule,
-    ) = validate_selected_history(
-        history_db
-    )
-
-    pedigree_map = (
-        build_pedigree_map(
-            pedigree_db
-        )
-    )
-
-    stats = defaultdict(
-        lambda: {
-            "ancestor_id": "",
-            "ancestor_name": "",
-            "starts": 0,
-            "wins": 0,
-            "top3": 0,
-            "occurrences": 0,
-            "cross_runner_count": 0,
-            "generation_counts":
-                defaultdict(int),
-        }
-    )
-
-    total_starts = 0
-    total_wins = 0
-    total_top3 = 0
-
-    matched_starts = 0
-
-    unmatched_starts = []
-
-    race_count = 0
-
-    for race in races:
-
-        race_count += 1
-
-        race_id = str(
-            race.get(
-                "race_id",
-                ""
-            )
-        )
-
-        for result in race.get(
-            "results",
-            []
-        ):
-
-            total_starts += 1
-
-            horse_id = str(
-                result.get(
-                    "horse_id",
-                    ""
-                )
-            ).strip()
-
-            horse_name = str(
-                result.get(
-                    "horse_name",
-                    ""
-                )
-            ).strip()
-
-            rank = parse_rank(
-                result.get(
-                    "rank"
-                )
-            )
-
-            if rank == 1:
-                total_wins += 1
-
-            if (
-                rank is not None
-                and rank <= 3
-            ):
-                total_top3 += 1
-
-            pedigree = (
-                pedigree_map.get(
-                    horse_id
-                )
-            )
-
-            if pedigree is None:
-
-                unmatched_starts.append(
-                    {
-                        "race_id":
-                            race_id,
-
-                        "horse_id":
-                            horse_id,
-
-                        "horse_name":
-                            horse_name,
-                    }
-                )
-
-                continue
-
-            matched_starts += 1
-
-            # 同一出走内で同じ祖先が
-            # 複数回出てもstartsは1回。
-            runner_ancestors = {}
-
-            for ancestor in (
-                pedigree.get(
-                    "ancestors",
-                    []
-                )
-            ):
-
-                key = make_ancestor_key(
-                    ancestor
-                )
-
-                ancestor_name = (
-                    clean_name(
-                        ancestor.get(
-                            "ancestor_name",
-                            ""
-                        )
-                    )
-                )
-
-                if not ancestor_name:
-                    continue
-
-                generation = (
-                    ancestor.get(
-                        "generation"
-                    )
-                )
-
-                ancestor_id = str(
-                    ancestor.get(
-                        "ancestor_id",
-                        ""
-                    )
-                ).strip()
-
-                if (
-                    key
-                    not in runner_ancestors
-                ):
-
-                    runner_ancestors[
-                        key
-                    ] = {
-                        "ancestor_id":
-                            ancestor_id,
-
-                        "ancestor_name":
-                            ancestor_name,
-
-                        "occurrences":
-                            0,
-
-                        "generation_counts":
-                            defaultdict(
-                                int
-                            ),
-                    }
-
-                item = (
-                    runner_ancestors[
-                        key
-                    ]
-                )
-
-                item[
-                    "occurrences"
-                ] += 1
-
-                try:
-                    generation_int = int(
-                        generation
-                    )
-
-                    item[
-                        "generation_counts"
-                    ][
-                        generation_int
-                    ] += 1
-
-                except (
-                    TypeError,
-                    ValueError
-                ):
-                    pass
-
-            for (
-                key,
-                ancestor_data
-            ) in runner_ancestors.items():
-
-                s = stats[key]
-
-                if not s[
-                    "ancestor_id"
-                ]:
-                    s[
-                        "ancestor_id"
-                    ] = ancestor_data[
-                        "ancestor_id"
-                    ]
-
-                if not s[
-                    "ancestor_name"
-                ]:
-                    s[
-                        "ancestor_name"
-                    ] = ancestor_data[
-                        "ancestor_name"
-                    ]
-
-                s[
-                    "starts"
-                ] += 1
-
-                if rank == 1:
-                    s[
-                        "wins"
-                    ] += 1
-
-                if (
-                    rank is not None
-                    and rank <= 3
-                ):
-                    s[
-                        "top3"
-                    ] += 1
-
-                occurrence_count = (
-                    ancestor_data[
-                        "occurrences"
-                    ]
-                )
-
-                s[
-                    "occurrences"
-                ] += (
-                    occurrence_count
-                )
-
-                if (
-                    occurrence_count
-                    >= 2
-                ):
-                    s[
-                        "cross_runner_count"
-                    ] += 1
-
-                for (
-                    generation,
-                    count
-                ) in ancestor_data[
-                    "generation_counts"
-                ].items():
-
-                    s[
-                        "generation_counts"
-                    ][
-                        generation
-                    ] += count
-
-    output_stats = []
-
-    for key, s in stats.items():
-
-        starts = s[
-            "starts"
-        ]
-
-        wins = s[
-            "wins"
-        ]
-
-        top3 = s[
-            "top3"
-        ]
-
-        win_rate = (
-            wins / starts
-            if starts
-            else 0
-        )
-
-        top3_rate = (
-            top3 / starts
-            if starts
-            else 0
-        )
-
-        all_runner_prevalence = (
-            starts
-            / matched_starts
-            if matched_starts
-            else 0
-        )
-
-        winner_prevalence = (
-            wins
-            / total_wins
-            if total_wins
-            else 0
-        )
-
-        top3_prevalence = (
-            top3
-            / total_top3
-            if total_top3
-            else 0
-        )
-
-        win_overperformance = (
-            winner_prevalence
-            / all_runner_prevalence
-            if all_runner_prevalence
-            else 0
-        )
-
-        top3_overperformance = (
-            top3_prevalence
-            / all_runner_prevalence
-            if all_runner_prevalence
-            else 0
-        )
-
-        generation_counts = {
-            str(g):
-                s[
-                    "generation_counts"
-                ].get(
-                    g,
-                    0
-                )
-            for g in range(
-                1,
-                6
-            )
-        }
-
-        output_stats.append(
-            {
-                "ancestor_key":
-                    key,
-
-                "ancestor_id":
-                    s[
-                        "ancestor_id"
-                    ],
-
-                "ancestor_name":
-                    s[
-                        "ancestor_name"
-                    ],
-
-                "starts":
-                    starts,
-
-                "wins":
-                    wins,
-
-                "top3":
-                    top3,
-
-                "win_rate":
-                    round(
-                        win_rate,
-                        6
-                    ),
-
-                "top3_rate":
-                    round(
-                        top3_rate,
-                        6
-                    ),
-
-                "all_runner_prevalence":
-                    round(
-                        all_runner_prevalence,
-                        6
-                    ),
-
-                "winner_prevalence":
-                    round(
-                        winner_prevalence,
-                        6
-                    ),
-
-                "top3_prevalence":
-                    round(
-                        top3_prevalence,
-                        6
-                    ),
-
-                "win_overperformance":
-                    round(
-                        win_overperformance,
-                        4
-                    ),
-
-                "top3_overperformance":
-                    round(
-                        top3_overperformance,
-                        4
-                    ),
-
-                "pedigree_occurrences":
-                    s[
-                        "occurrences"
-                    ],
-
-                "cross_runner_count":
-                    s[
-                        "cross_runner_count"
-                    ],
-
-                "generation_counts":
-                    generation_counts,
-            }
-        )
-
-    output_stats.sort(
-        key=lambda x: (
-            x["starts"],
-            x["top3_rate"],
-            x["win_rate"],
-        ),
-        reverse=True,
-    )
-
-    output = {
-        "updated_at":
-            datetime.now(
-                timezone.utc
-            ).isoformat(),
+# ============================================================
+# Empty / neutral output
+# ============================================================
+
+def build_output(
+    target_condition,
+    is_debut,
+    selection_mode,
+    selection_rule,
+    pedigree_map,
+    race_count,
+    total_starts,
+    matched_starts,
+    total_wins,
+    total_top3,
+    unmatched_starts,
+    output_stats,
+    bloodline_available,
+    neutral_reason
+):
+    return {
+        "updated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
 
         "source_history":
             HISTORY_FILE,
@@ -986,12 +572,9 @@ def main():
         "source_pedigree":
             PEDIGREE_FILE,
 
-        # 今回の本来の条件。
         "condition":
             target_condition,
 
-        # 新馬専用フォールバックを
-        # 使用したか確認できるよう保存。
         "is_debut":
             is_debut,
 
@@ -1000,6 +583,13 @@ def main():
 
         "selection_rule":
             selection_rule,
+
+        # 下流処理・デバッグ用
+        "bloodline_available":
+            bloodline_available,
+
+        "neutral_reason":
+            neutral_reason,
 
         "summary": {
             "race_count":
@@ -1108,18 +698,684 @@ def main():
             output_stats,
     }
 
-    with open(
-        OUTPUT_FILE,
-        "w",
-        encoding="utf-8"
-    ) as f:
 
-        json.dump(
-            output,
-            f,
-            ensure_ascii=False,
-            indent=2,
+# ============================================================
+# Main
+# ============================================================
+
+def main():
+    history_db = load_json(
+        HISTORY_FILE
+    )
+
+    pedigree_db = load_json(
+        PEDIGREE_FILE
+    )
+
+    (
+        target_condition,
+        races,
+        is_debut,
+        selection_mode,
+        selection_rule,
+    ) = validate_selected_history(
+        history_db
+    )
+
+    pedigree_map = build_pedigree_map(
+        pedigree_db
+    )
+
+    # --------------------------------------------------------
+    # 通常戦で過去条件一致レース0件
+    # --------------------------------------------------------
+
+    if (
+        not is_debut
+        and not races
+    ):
+        output = build_output(
+            target_condition=
+                target_condition,
+
+            is_debut=
+                is_debut,
+
+            selection_mode=
+                selection_mode,
+
+            selection_rule=
+                selection_rule,
+
+            pedigree_map=
+                pedigree_map,
+
+            race_count=0,
+            total_starts=0,
+            matched_starts=0,
+            total_wins=0,
+            total_top3=0,
+            unmatched_starts=[],
+            output_stats=[],
+
+            bloodline_available=False,
+
+            neutral_reason=(
+                "通常戦の今回条件に一致する"
+                "血統統計用過去レースが0件のため、"
+                "血統評価をニュートラル0として扱う。"
+            ),
         )
+
+        save_json(
+            OUTPUT_FILE,
+            output
+        )
+
+        print(
+            "===== BLOODLINE STATS ====="
+        )
+        print(
+            "condition:",
+            target_condition["track"],
+            target_condition["surface"],
+            target_condition["distance"]
+        )
+        print(
+            "is_debut:",
+            is_debut
+        )
+        print(
+            "selection_mode:",
+            selection_mode
+        )
+        print(
+            "race_count: 0"
+        )
+        print(
+            "ancestor_count: 0"
+        )
+        print(
+            "bloodline_available: False"
+        )
+        print(
+            "NORMAL RACE: "
+            "bloodline neutral fallback"
+        )
+        print(
+            "bloodline stats saved:",
+            OUTPUT_FILE
+        )
+
+        return
+
+    # --------------------------------------------------------
+    # Statistics
+    # --------------------------------------------------------
+
+    stats = defaultdict(
+        lambda: {
+            "ancestor_id": "",
+            "ancestor_name": "",
+            "starts": 0,
+            "wins": 0,
+            "top3": 0,
+            "occurrences": 0,
+            "cross_runner_count": 0,
+            "generation_counts":
+                defaultdict(int),
+        }
+    )
+
+    total_starts = 0
+    total_wins = 0
+    total_top3 = 0
+
+    matched_starts = 0
+    unmatched_starts = []
+
+    race_count = 0
+
+    for race in races:
+        race_count += 1
+
+        race_id = str(
+            race.get(
+                "race_id",
+                ""
+            )
+        )
+
+        for result in race.get(
+            "results",
+            []
+        ):
+            total_starts += 1
+
+            horse_id = str(
+                result.get(
+                    "horse_id",
+                    ""
+                )
+            ).strip()
+
+            horse_name = str(
+                result.get(
+                    "horse_name",
+                    ""
+                )
+            ).strip()
+
+            rank = parse_rank(
+                result.get(
+                    "rank"
+                )
+            )
+
+            if rank == 1:
+                total_wins += 1
+
+            if (
+                rank is not None
+                and rank <= 3
+            ):
+                total_top3 += 1
+
+            pedigree = pedigree_map.get(
+                horse_id
+            )
+
+            if pedigree is None:
+                unmatched_starts.append(
+                    {
+                        "race_id":
+                            race_id,
+
+                        "horse_id":
+                            horse_id,
+
+                        "horse_name":
+                            horse_name,
+                    }
+                )
+                continue
+
+            matched_starts += 1
+
+            # 同一出走内で同じ祖先が複数回出ても
+            # startsは1回だけ数える。
+            runner_ancestors = {}
+
+            for ancestor in pedigree.get(
+                "ancestors",
+                []
+            ):
+                key = make_ancestor_key(
+                    ancestor
+                )
+
+                ancestor_name = clean_name(
+                    ancestor.get(
+                        "ancestor_name",
+                        ""
+                    )
+                )
+
+                if not ancestor_name:
+                    continue
+
+                generation = ancestor.get(
+                    "generation"
+                )
+
+                ancestor_id = str(
+                    ancestor.get(
+                        "ancestor_id",
+                        ""
+                    )
+                ).strip()
+
+                if (
+                    key
+                    not in runner_ancestors
+                ):
+                    runner_ancestors[
+                        key
+                    ] = {
+                        "ancestor_id":
+                            ancestor_id,
+
+                        "ancestor_name":
+                            ancestor_name,
+
+                        "occurrences":
+                            0,
+
+                        "generation_counts":
+                            defaultdict(int),
+                    }
+
+                item = runner_ancestors[
+                    key
+                ]
+
+                item[
+                    "occurrences"
+                ] += 1
+
+                try:
+                    generation_int = int(
+                        generation
+                    )
+
+                    item[
+                        "generation_counts"
+                    ][
+                        generation_int
+                    ] += 1
+
+                except (
+                    TypeError,
+                    ValueError
+                ):
+                    pass
+
+            for (
+                key,
+                ancestor_data
+            ) in runner_ancestors.items():
+                s = stats[key]
+
+                if not s[
+                    "ancestor_id"
+                ]:
+                    s[
+                        "ancestor_id"
+                    ] = ancestor_data[
+                        "ancestor_id"
+                    ]
+
+                if not s[
+                    "ancestor_name"
+                ]:
+                    s[
+                        "ancestor_name"
+                    ] = ancestor_data[
+                        "ancestor_name"
+                    ]
+
+                s[
+                    "starts"
+                ] += 1
+
+                if rank == 1:
+                    s[
+                        "wins"
+                    ] += 1
+
+                if (
+                    rank is not None
+                    and rank <= 3
+                ):
+                    s[
+                        "top3"
+                    ] += 1
+
+                occurrence_count = (
+                    ancestor_data[
+                        "occurrences"
+                    ]
+                )
+
+                s[
+                    "occurrences"
+                ] += occurrence_count
+
+                if (
+                    occurrence_count
+                    >= 2
+                ):
+                    s[
+                        "cross_runner_count"
+                    ] += 1
+
+                for (
+                    generation,
+                    count
+                ) in ancestor_data[
+                    "generation_counts"
+                ].items():
+                    s[
+                        "generation_counts"
+                    ][
+                        generation
+                    ] += count
+
+    # --------------------------------------------------------
+    # 新馬戦では血統照合0件を許可しない
+    # 通常戦ではニュートラル継続
+    # --------------------------------------------------------
+
+    if matched_starts == 0:
+        if is_debut:
+            raise RuntimeError(
+                "新馬戦ですが、"
+                "過去レース出走馬と"
+                "history_pedigree.jsonを"
+                "照合できた馬が0件です。"
+            )
+
+        output = build_output(
+            target_condition=
+                target_condition,
+
+            is_debut=
+                is_debut,
+
+            selection_mode=
+                selection_mode,
+
+            selection_rule=
+                selection_rule,
+
+            pedigree_map=
+                pedigree_map,
+
+            race_count=
+                race_count,
+
+            total_starts=
+                total_starts,
+
+            matched_starts=0,
+
+            total_wins=
+                total_wins,
+
+            total_top3=
+                total_top3,
+
+            unmatched_starts=
+                unmatched_starts,
+
+            output_stats=[],
+
+            bloodline_available=False,
+
+            neutral_reason=(
+                "通常戦の過去レースは存在するが、"
+                "血統DBと照合できた出走馬が0件のため、"
+                "血統評価をニュートラル0として扱う。"
+            ),
+        )
+
+        save_json(
+            OUTPUT_FILE,
+            output
+        )
+
+        print(
+            "===== BLOODLINE STATS ====="
+        )
+        print(
+            "matched_start_records: 0"
+        )
+        print(
+            "NORMAL RACE: "
+            "bloodline neutral fallback"
+        )
+        print(
+            "bloodline stats saved:",
+            OUTPUT_FILE
+        )
+
+        return
+
+    # --------------------------------------------------------
+    # Ancestor statistics
+    # --------------------------------------------------------
+
+    output_stats = []
+
+    for key, s in stats.items():
+        starts = s[
+            "starts"
+        ]
+
+        wins = s[
+            "wins"
+        ]
+
+        top3 = s[
+            "top3"
+        ]
+
+        win_rate = (
+            wins / starts
+            if starts
+            else 0
+        )
+
+        top3_rate = (
+            top3 / starts
+            if starts
+            else 0
+        )
+
+        all_runner_prevalence = (
+            starts / matched_starts
+            if matched_starts
+            else 0
+        )
+
+        winner_prevalence = (
+            wins / total_wins
+            if total_wins
+            else 0
+        )
+
+        top3_prevalence = (
+            top3 / total_top3
+            if total_top3
+            else 0
+        )
+
+        win_overperformance = (
+            winner_prevalence
+            / all_runner_prevalence
+            if all_runner_prevalence
+            else 0
+        )
+
+        top3_overperformance = (
+            top3_prevalence
+            / all_runner_prevalence
+            if all_runner_prevalence
+            else 0
+        )
+
+        generation_counts = {
+            str(g): s[
+                "generation_counts"
+            ].get(
+                g,
+                0
+            )
+            for g in range(
+                1,
+                6
+            )
+        }
+
+        output_stats.append(
+            {
+                "ancestor_key":
+                    key,
+
+                "ancestor_id":
+                    s[
+                        "ancestor_id"
+                    ],
+
+                "ancestor_name":
+                    s[
+                        "ancestor_name"
+                    ],
+
+                "starts":
+                    starts,
+
+                "wins":
+                    wins,
+
+                "top3":
+                    top3,
+
+                "win_rate":
+                    round(
+                        win_rate,
+                        6
+                    ),
+
+                "top3_rate":
+                    round(
+                        top3_rate,
+                        6
+                    ),
+
+                "all_runner_prevalence":
+                    round(
+                        all_runner_prevalence,
+                        6
+                    ),
+
+                "winner_prevalence":
+                    round(
+                        winner_prevalence,
+                        6
+                    ),
+
+                "top3_prevalence":
+                    round(
+                        top3_prevalence,
+                        6
+                    ),
+
+                "win_overperformance":
+                    round(
+                        win_overperformance,
+                        4
+                    ),
+
+                "top3_overperformance":
+                    round(
+                        top3_overperformance,
+                        4
+                    ),
+
+                "pedigree_occurrences":
+                    s[
+                        "occurrences"
+                    ],
+
+                "cross_runner_count":
+                    s[
+                        "cross_runner_count"
+                    ],
+
+                "generation_counts":
+                    generation_counts,
+            }
+        )
+
+    output_stats.sort(
+        key=lambda x: (
+            x["starts"],
+            x["top3_rate"],
+            x["win_rate"],
+        ),
+        reverse=True,
+    )
+
+    # --------------------------------------------------------
+    # 血統統計が生成できない場合
+    # --------------------------------------------------------
+
+    if not output_stats:
+        if is_debut:
+            raise RuntimeError(
+                "新馬戦ですが、"
+                "血統統計を1件も"
+                "生成できませんでした。"
+            )
+
+        bloodline_available = False
+
+        neutral_reason = (
+            "通常戦で血統統計を生成できなかったため、"
+            "血統評価をニュートラル0として扱う。"
+        )
+
+    else:
+        bloodline_available = True
+        neutral_reason = ""
+
+    # --------------------------------------------------------
+    # Output
+    # --------------------------------------------------------
+
+    output = build_output(
+        target_condition=
+            target_condition,
+
+        is_debut=
+            is_debut,
+
+        selection_mode=
+            selection_mode,
+
+        selection_rule=
+            selection_rule,
+
+        pedigree_map=
+            pedigree_map,
+
+        race_count=
+            race_count,
+
+        total_starts=
+            total_starts,
+
+        matched_starts=
+            matched_starts,
+
+        total_wins=
+            total_wins,
+
+        total_top3=
+            total_top3,
+
+        unmatched_starts=
+            unmatched_starts,
+
+        output_stats=
+            output_stats,
+
+        bloodline_available=
+            bloodline_available,
+
+        neutral_reason=
+            neutral_reason,
+    )
+
+    save_json(
+        OUTPUT_FILE,
+        output
+    )
+
+    # --------------------------------------------------------
+    # Log
+    # --------------------------------------------------------
 
     print(
         "===== BLOODLINE STATS ====="
@@ -1127,15 +1383,9 @@ def main():
 
     print(
         "condition:",
-        target_condition[
-            "track"
-        ],
-        target_condition[
-            "surface"
-        ],
-        target_condition[
-            "distance"
-        ]
+        target_condition["track"],
+        target_condition["surface"],
+        target_condition["distance"]
     )
 
     print(
@@ -1177,17 +1427,15 @@ def main():
         )
     )
 
-    if matched_starts == 0:
-        raise RuntimeError(
-            "過去レースはありますが、"
-            "history_pedigree.jsonと"
-            "照合できた出走馬が0件です。"
-        )
+    print(
+        "bloodline_available:",
+        bloodline_available
+    )
 
-    if not output_stats:
-        raise RuntimeError(
-            "血統統計を1件も"
-            "生成できませんでした。"
+    if not bloodline_available:
+        print(
+            "NORMAL RACE: "
+            "bloodline neutral fallback"
         )
 
     print(
