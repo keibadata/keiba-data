@@ -109,18 +109,8 @@ def clean_text(element):
 
 def normalize_text(value):
     value = str(value or "")
-
-    value = value.replace(
-        "\u3000",
-        " "
-    )
-
-    value = re.sub(
-        r"\s+",
-        " ",
-        value
-    )
-
+    value = value.replace("\u3000", " ")
+    value = re.sub(r"\s+", " ", value)
     return value.strip()
 
 
@@ -154,10 +144,7 @@ def meta_content(soup, selector):
 # レース条件
 # =========================================================
 
-def extract_race_condition(
-    soup,
-    race_id
-):
+def extract_race_condition(soup, race_id):
     page_text = normalize_text(
         clean_text(soup)
     )
@@ -167,7 +154,6 @@ def extract_race_condition(
     # -----------------------------------------------------
 
     race_date = ""
-
     date_texts = []
 
     date_selectors = [
@@ -262,14 +248,9 @@ def extract_race_condition(
                     int(match.group(1)),
                     int(match.group(2)),
                     int(match.group(3))
-                ).strftime(
-                    "%Y-%m-%d"
-                )
+                ).strftime("%Y-%m-%d")
 
-            except (
-                TypeError,
-                ValueError
-            ):
+            except (TypeError, ValueError):
                 race_date = ""
 
             if race_date:
@@ -280,7 +261,6 @@ def extract_race_condition(
 
     # -----------------------------------------------------
     # 競馬場
-    #
     # race_id の場コードを正とする。
     # -----------------------------------------------------
 
@@ -301,7 +281,6 @@ def extract_race_condition(
 
     if len(race_id) == 12:
         track_code = race_id[4:6]
-
         track = jra_tracks.get(
             track_code,
             ""
@@ -354,9 +333,7 @@ def extract_race_condition(
             text
             and text not in race_info_candidates
         ):
-            race_info_candidates.append(
-                text
-            )
+            race_info_candidates.append(text)
 
     race_info_text = normalize_text(
         " ".join(
@@ -506,7 +483,6 @@ def extract_race_condition(
 
     # -----------------------------------------------------
     # 新馬戦判定
-    #
     # 過去走0件は判定材料にしない。
     # -----------------------------------------------------
 
@@ -531,7 +507,6 @@ def extract_race_condition(
 
     surface = ""
     distance = 0
-
     race_data_texts = []
 
     selectors = [
@@ -550,9 +525,7 @@ def extract_race_condition(
             )
 
             if text:
-                race_data_texts.append(
-                    text
-                )
+                race_data_texts.append(text)
 
     race_data_texts.extend(
         metadata_texts
@@ -654,7 +627,8 @@ race_condition = extract_race_condition(
 
 def extract_horse_link(row):
     """
-    馬IDを持つリンクを優先して取得する。
+    馬IDを持つリンクを取得。
+    馬IDが存在しないHorseList行は実出走馬として扱わない。
     """
     links = row.select(
         'a[href*="/horse/"]'
@@ -685,9 +659,11 @@ def extract_horse_id(row):
     if not link:
         return ""
 
-    href = link.get(
-        "href",
-        ""
+    href = str(
+        link.get(
+            "href",
+            ""
+        )
     )
 
     patterns = [
@@ -708,12 +684,6 @@ def extract_horse_id(row):
 
 
 def normalize_horse_name(value):
-    """
-    netkeibaのアクセシビリティ用表示などで
-    「馬名のデータベース」
-    「馬名 データベース」
-    となるケースを除去する。
-    """
     value = normalize_text(
         value
     )
@@ -738,7 +708,6 @@ def normalize_horse_name(value):
 
 
 def extract_horse_name(row):
-    # HorseNameクラスを最優先
     selectors = [
         ".HorseName a",
         ".HorseName",
@@ -761,7 +730,6 @@ def extract_horse_name(row):
         if name:
             return name
 
-    # 馬IDリンクをフォールバック
     link = extract_horse_link(
         row
     )
@@ -774,7 +742,6 @@ def extract_horse_name(row):
         if name:
             return name
 
-        # title / aria-labelも確認
         for attr in (
             "title",
             "aria-label",
@@ -795,8 +762,9 @@ def extract_horse_name(row):
 def valid_horse_number(value):
     try:
         number = int(
-            str(value)
+            str(value).strip()
         )
+
     except (
         TypeError,
         ValueError
@@ -811,12 +779,62 @@ def valid_horse_number(value):
 
 def extract_horse_number(row):
     """
-    netkeibaの
-    Umaban / Umaban1 / Umaban12 等をすべて拾う。
+    実HTML確認済み:
+    馬番はHorseList行のWaku1～Waku8系セル内に存在する。
+
+    枠番そのものと混同しないため、
+    Wakuクラスを持つセルの「表示テキスト」を馬番として使用する。
     """
 
     # -----------------------------------------------------
-    # 1. data属性
+    # 1. Waku系セル
+    # -----------------------------------------------------
+
+    for element in row.find_all(
+        ["td", "div", "span"]
+    ):
+        classes = [
+            str(x)
+            for x in element.get(
+                "class",
+                []
+            )
+        ]
+
+        if not classes:
+            continue
+
+        has_waku_class = any(
+            re.fullmatch(
+                r"Waku\d+",
+                class_name,
+                re.IGNORECASE
+            )
+            for class_name in classes
+        )
+
+        if not has_waku_class:
+            continue
+
+        text = normalize_text(
+            clean_text(element)
+        )
+
+        match = re.search(
+            r"\b(\d{1,2})\b",
+            text
+        )
+
+        if match:
+            number = valid_horse_number(
+                match.group(1)
+            )
+
+            if number:
+                return number
+
+    # -----------------------------------------------------
+    # 2. data属性フォールバック
     # -----------------------------------------------------
 
     data_attributes = [
@@ -852,7 +870,7 @@ def extract_horse_number(row):
                 return number
 
     # -----------------------------------------------------
-    # 2. 一般的な馬番class
+    # 3. 従来classフォールバック
     # -----------------------------------------------------
 
     selectors = [
@@ -867,11 +885,9 @@ def extract_horse_number(row):
     ]
 
     for selector in selectors:
-        elements = row.select(
+        for element in row.select(
             selector
-        )
-
-        for element in elements:
+        ):
             text = normalize_text(
                 clean_text(element)
             )
@@ -888,89 +904,6 @@ def extract_horse_number(row):
 
                 if number:
                     return number
-
-    # -----------------------------------------------------
-    # 3. class名そのもの
-    #
-    # 例:
-    # Umaban1
-    # Umaban12
-    # -----------------------------------------------------
-
-    for element in row.find_all(
-        True
-    ):
-        classes = element.get(
-            "class",
-            []
-        )
-
-        for class_name in classes:
-            class_name = str(
-                class_name
-            )
-
-            patterns = [
-                r"^Umaban[_\-]?(\d{1,2})$",
-                r"^HorseNumber[_\-]?(\d{1,2})$",
-                r"^Horse_Num[_\-]?(\d{1,2})$",
-            ]
-
-            for pattern in patterns:
-                match = re.fullmatch(
-                    pattern,
-                    class_name,
-                    re.IGNORECASE
-                )
-
-                if not match:
-                    continue
-
-                number = valid_horse_number(
-                    match.group(1)
-                )
-
-                if number:
-                    return number
-
-    # -----------------------------------------------------
-    # 4. HorseList内の馬番セルを探す
-    # -----------------------------------------------------
-
-    for element in row.find_all(
-        ["td", "div", "span"]
-    ):
-        classes = " ".join(
-            str(x)
-            for x in element.get(
-                "class",
-                []
-            )
-        )
-
-        if not re.search(
-            r"(?:Uma\s*ban|Umaban|Horse.?Num)",
-            classes,
-            re.IGNORECASE
-        ):
-            continue
-
-        text = normalize_text(
-            clean_text(element)
-        )
-
-        match = re.search(
-            r"\b(\d{1,2})\b",
-            text
-        )
-
-        if match:
-            number = valid_horse_number(
-                match.group(1)
-            )
-
-            if number:
-                return number
 
     return ""
 
@@ -1017,44 +950,112 @@ def extract_sex_age(row):
     return ""
 
 
-def extract_carried_weight(row):
-    text = first_text(
-        row,
-        [
-            ".Weight",
-            ".Jockey .Weight",
-            ".HorseInfo .Weight",
-            "td.Weight",
-        ]
+def extract_jockey_and_weight(row):
+    """
+    実HTML確認済み:
+    騎手リンクの表示が
+        ルメール 55.0
+        幸 56.0
+    のように騎手名＋斤量になっている。
+
+    末尾の2桁重量を斤量として分離する。
+    """
+
+    jockey_element = None
+
+    selectors = [
+        ".Jockey a",
+        'a[href*="/jockey/"]',
+        ".Jockey",
+    ]
+
+    for selector in selectors:
+        element = row.select_one(
+            selector
+        )
+
+        if element:
+            text = normalize_text(
+                clean_text(element)
+            )
+
+            if text:
+                jockey_element = element
+                break
+
+    if jockey_element is None:
+        return "", ""
+
+    text = normalize_text(
+        clean_text(jockey_element)
     )
 
+    # 末尾重量
     match = re.search(
-        r"\d{2}(?:\.\d)?",
+        r"\s+(\d{2}(?:\.\d)?)\s*$",
         text
     )
 
     if match:
-        return match.group(0)
+        carried_weight = (
+            match.group(1)
+        )
 
-    return ""
+        jockey = normalize_text(
+            text[:match.start()]
+        )
 
+        return (
+            jockey,
+            carried_weight
+        )
 
-def extract_jockey(row):
-    jockey = first_text(
-        row,
-        [
-            ".Jockey a",
-            ".Jockey",
-            'a[href*="/jockey/"]',
-        ]
-    )
+    # 斤量がリンク外にあるケースへのフォールバック
+    carried_weight = ""
 
-    return normalize_text(
-        jockey
+    weight_candidates = [
+        ".Jockey .Weight",
+        ".Weight",
+        "td.Weight",
+    ]
+
+    for selector in weight_candidates:
+        element = row.select_one(
+            selector
+        )
+
+        if not element:
+            continue
+
+        candidate = normalize_text(
+            clean_text(element)
+        )
+
+        match = re.fullmatch(
+            r"\d{2}(?:\.\d)?",
+            candidate
+        )
+
+        if match:
+            carried_weight = (
+                match.group(0)
+            )
+            break
+
+    return (
+        text,
+        carried_weight
     )
 
 
 def extract_body_weight(row):
+    """
+    馬体重のみ取得。
+
+    斤量55.0/56.0を馬体重として誤認しないよう、
+    3桁kg表記だけを対象とする。
+    """
+
     selectors = [
         ".Weight",
         ".HorseWeight",
@@ -1074,9 +1075,7 @@ def extract_body_weight(row):
             )
 
             if text:
-                candidates.append(
-                    text
-                )
+                candidates.append(text)
 
     candidates.append(
         normalize_text(
@@ -1145,16 +1144,24 @@ horses = []
 warnings = []
 
 for row in rows:
+
+    # -----------------------------------------------------
+    # 実出走馬判定
+    #
+    # HorseListには出走馬以外の行が含まれる場合がある。
+    # 馬IDリンクを持つ行だけ採用する。
+    # -----------------------------------------------------
+
     horse_id = extract_horse_id(
         row
     )
 
+    if not horse_id:
+        continue
+
     horse_name = extract_horse_name(
         row
     )
-
-    if not horse_id and not horse_name:
-        continue
 
     horse_number = extract_horse_number(
         row
@@ -1164,11 +1171,10 @@ for row in rows:
         row
     )
 
-    carried_weight = extract_carried_weight(
-        row
-    )
-
-    jockey = extract_jockey(
+    (
+        jockey,
+        carried_weight
+    ) = extract_jockey_and_weight(
         row
     )
 
@@ -1226,10 +1232,8 @@ for row in rows:
             "jockey"
         )
 
-    if not body_weight:
-        missing.append(
-            "body_weight"
-        )
+    # レース前の馬体重未発表は正常なので、
+    # body_weightはwarning対象にしない。
 
     if missing:
         warnings.append(
