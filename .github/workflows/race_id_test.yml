@@ -1,0 +1,43 @@
+name: Race ID Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      race_date:
+        description: "Race date YYYY-MM-DD"
+        required: true
+        default: "2026-10-25"
+      track:
+        description: "Racecourse"
+        required: true
+        default: "京都"
+      race_number:
+        description: "Race number"
+        required: true
+        default: "5"
+
+permissions:
+  contents: read
+
+jobs:
+  test-race-id:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      - name: Resolve Race ID
+        run: |
+          python resolve_race_id.py \
+            --date "${{ inputs.race_date }}" \
+            --track "${{ inputs.track }}" \
+            --race-number "${{ inputs.race_number }}"
