@@ -35,6 +35,7 @@ def parse_rank(value):
         return int(
             str(value).strip()
         )
+
     except (
         ValueError,
         TypeError
@@ -58,9 +59,15 @@ def make_ancestor_key(ancestor):
     )
 
     if ancestor_id:
-        return "id:" + ancestor_id
+        return (
+            "id:"
+            + ancestor_id
+        )
 
-    return "name:" + ancestor_name
+    return (
+        "name:"
+        + ancestor_name
+    )
 
 
 def build_pedigree_map(
@@ -89,9 +96,38 @@ def build_pedigree_map(
     return pedigree_map
 
 
+def normalize_surface(value):
+    value = str(
+        value or ""
+    ).strip()
+
+    if "芝" in value:
+        return "芝"
+
+    if "ダ" in value:
+        return "ダート"
+
+    return value
+
+
 def normalize_condition(
     condition
 ):
+    try:
+        distance = int(
+            condition.get(
+                "distance",
+                0
+            )
+            or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+        distance = 0
+
     return {
         "track": str(
             condition.get(
@@ -100,20 +136,222 @@ def normalize_condition(
             )
         ).strip(),
 
-        "surface": str(
-            condition.get(
-                "surface",
-                ""
-            )
-        ).strip(),
+        "surface":
+            normalize_surface(
+                condition.get(
+                    "surface",
+                    ""
+                )
+            ),
 
-        "distance": int(
-            condition.get(
-                "distance",
-                0
-            ) or 0
-        ),
+        "distance":
+            distance,
     }
+
+
+def get_race_condition(
+    race
+):
+    race_info = race.get(
+        "race_info",
+        {}
+    )
+
+    track = (
+        race.get("racecourse")
+        or race.get("track")
+        or race.get("venue")
+        or race.get("place")
+        or ""
+    )
+
+    surface = (
+        race.get("surface")
+        or race.get("track_type")
+        or race.get("course_type")
+        or ""
+    )
+
+    distance = (
+        race.get("distance")
+        or race.get("distance_m")
+        or 0
+    )
+
+    if isinstance(
+        race_info,
+        dict
+    ):
+        if not track:
+            track = (
+                race_info.get(
+                    "racecourse"
+                )
+                or race_info.get(
+                    "track"
+                )
+                or race_info.get(
+                    "venue"
+                )
+                or race_info.get(
+                    "place"
+                )
+                or ""
+            )
+
+        if not surface:
+            surface = (
+                race_info.get(
+                    "surface"
+                )
+                or race_info.get(
+                    "track_type"
+                )
+                or race_info.get(
+                    "course_type"
+                )
+                or ""
+            )
+
+        if not distance:
+            distance = (
+                race_info.get(
+                    "distance"
+                )
+                or race_info.get(
+                    "distance_m"
+                )
+                or 0
+            )
+
+    return normalize_condition(
+        {
+            "track": track,
+            "surface": surface,
+            "distance": distance,
+        }
+    )
+
+
+def validate_one_race(
+    race_condition,
+    target,
+    selection_mode,
+    selection_rule
+):
+    """
+    condition_history.py が選択したレースが
+    selection_mode / selection_rule に本当に
+    合っているか再検証する。
+
+    通常戦の exact は従来どおり完全一致。
+    新馬戦のフォールバックだけ条件を広げる。
+    """
+
+    track = race_condition[
+        "track"
+    ]
+
+    surface = race_condition[
+        "surface"
+    ]
+
+    distance = race_condition[
+        "distance"
+    ]
+
+    if selection_mode == "exact":
+        return (
+            track == target["track"]
+            and surface
+            == target["surface"]
+            and distance
+            == target["distance"]
+        )
+
+    if (
+        selection_mode
+        == "debut_same_track_surface_near_distance"
+    ):
+        tolerance = selection_rule.get(
+            "distance_tolerance",
+            200
+        )
+
+        try:
+            tolerance = int(
+                tolerance
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+            tolerance = 200
+
+        return (
+            track == target["track"]
+            and surface
+            == target["surface"]
+            and distance > 0
+            and abs(
+                distance
+                - target["distance"]
+            )
+            <= tolerance
+        )
+
+    if (
+        selection_mode
+        == "debut_same_track_surface_any_distance"
+    ):
+        return (
+            track == target["track"]
+            and surface
+            == target["surface"]
+        )
+
+    if (
+        selection_mode
+        == "debut_same_surface_near_distance"
+    ):
+        tolerance = selection_rule.get(
+            "distance_tolerance",
+            200
+        )
+
+        try:
+            tolerance = int(
+                tolerance
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+            tolerance = 200
+
+        return (
+            surface
+            == target["surface"]
+            and distance > 0
+            and abs(
+                distance
+                - target["distance"]
+            )
+            <= tolerance
+        )
+
+    if (
+        selection_mode
+        == "debut_same_surface_any_distance"
+    ):
+        return (
+            surface
+            == target["surface"]
+        )
+
+    return False
 
 
 def validate_selected_history(
@@ -121,7 +359,15 @@ def validate_selected_history(
 ):
     """
     condition_history.py が選別した条件を検査。
-    別条件のレースが混ざっていたら停止する。
+
+    通常戦:
+        完全一致のみ許可。
+
+    新馬戦:
+        condition_history.py が記録した
+        selection_mode の範囲だけ許可。
+
+    条件外レースが混入した場合は停止する。
     """
 
     target = normalize_condition(
@@ -135,6 +381,33 @@ def validate_selected_history(
         "matched_history",
         []
     )
+
+    is_debut = bool(
+        history_db.get(
+            "is_debut",
+            False
+        )
+    )
+
+    selection_mode = str(
+        history_db.get(
+            "selection_mode",
+            "exact"
+        )
+    ).strip()
+
+    selection_rule = (
+        history_db.get(
+            "selection_rule",
+            {}
+        )
+    )
+
+    if not isinstance(
+        selection_rule,
+        dict
+    ):
+        selection_rule = {}
 
     if not target["track"]:
         raise RuntimeError(
@@ -153,50 +426,76 @@ def validate_selected_history(
 
     if not races:
         raise RuntimeError(
-            "今回条件に一致する過去レースが0件です。"
-            "血統評価を続行しません。"
+            "血統評価に使用できる"
+            "過去レースが0件です。"
+        )
+
+    # 通常戦が新馬専用モードを
+    # 使用していないかチェック。
+    if (
+        not is_debut
+        and selection_mode
+        != "exact"
+    ):
+        raise RuntimeError(
+            "通常戦で新馬用の"
+            "血統条件拡張が使用されています: "
+            + selection_mode
+        )
+
+    allowed_debut_modes = {
+        "exact",
+        (
+            "debut_"
+            "same_track_"
+            "surface_"
+            "near_distance"
+        ),
+        (
+            "debut_"
+            "same_track_"
+            "surface_"
+            "any_distance"
+        ),
+        (
+            "debut_"
+            "same_surface_"
+            "near_distance"
+        ),
+        (
+            "debut_"
+            "same_surface_"
+            "any_distance"
+        ),
+    }
+
+    if (
+        is_debut
+        and selection_mode
+        not in allowed_debut_modes
+    ):
+        raise RuntimeError(
+            "不明な新馬用"
+            "selection_modeです: "
+            + selection_mode
         )
 
     for race in races:
 
-        race_track = str(
-            race.get(
-                "racecourse",
-                race.get(
-                    "track",
-                    ""
-                )
+        race_condition = (
+            get_race_condition(
+                race
             )
-        ).strip()
+        )
 
-        race_surface = str(
-            race.get(
-                "surface",
-                ""
-            )
-        ).strip()
+        valid = validate_one_race(
+            race_condition,
+            target,
+            selection_mode,
+            selection_rule
+        )
 
-        try:
-            race_distance = int(
-                race.get(
-                    "distance",
-                    0
-                ) or 0
-            )
-        except (
-            TypeError,
-            ValueError
-        ):
-            race_distance = 0
-
-        if (
-            race_track
-            != target["track"]
-            or race_surface
-            != target["surface"]
-            or race_distance
-            != target["distance"]
-        ):
+        if not valid:
             raise RuntimeError(
                 "条件不一致レース混入: "
                 + str(
@@ -205,9 +504,21 @@ def validate_selected_history(
                         ""
                     )
                 )
+                + " / mode="
+                + selection_mode
+                + " / "
+                + str(
+                    race_condition
+                )
             )
 
-    return target, races
+    return (
+        target,
+        races,
+        is_debut,
+        selection_mode,
+        selection_rule,
+    )
 
 
 def main():
@@ -219,10 +530,14 @@ def main():
         PEDIGREE_FILE
     )
 
-    target_condition, races = (
-        validate_selected_history(
-            history_db
-        )
+    (
+        target_condition,
+        races,
+        is_debut,
+        selection_mode,
+        selection_rule,
+    ) = validate_selected_history(
+        history_db
     )
 
     pedigree_map = (
@@ -442,16 +757,22 @@ def main():
                         "ancestor_name"
                     ]
 
-                s["starts"] += 1
+                s[
+                    "starts"
+                ] += 1
 
                 if rank == 1:
-                    s["wins"] += 1
+                    s[
+                        "wins"
+                    ] += 1
 
                 if (
                     rank is not None
                     and rank <= 3
                 ):
-                    s["top3"] += 1
+                    s[
+                        "top3"
+                    ] += 1
 
                 occurrence_count = (
                     ancestor_data[
@@ -461,7 +782,9 @@ def main():
 
                 s[
                     "occurrences"
-                ] += occurrence_count
+                ] += (
+                    occurrence_count
+                )
 
                 if (
                     occurrence_count
@@ -480,15 +803,25 @@ def main():
 
                     s[
                         "generation_counts"
-                    ][generation] += count
+                    ][
+                        generation
+                    ] += count
 
     output_stats = []
 
     for key, s in stats.items():
 
-        starts = s["starts"]
-        wins = s["wins"]
-        top3 = s["top3"]
+        starts = s[
+            "starts"
+        ]
+
+        wins = s[
+            "wins"
+        ]
+
+        top3 = s[
+            "top3"
+        ]
 
         win_rate = (
             wins / starts
@@ -653,10 +986,20 @@ def main():
         "source_pedigree":
             PEDIGREE_FILE,
 
-        # race.jsonから選ばれた
-        # 今回の実条件
+        # 今回の本来の条件。
         "condition":
             target_condition,
+
+        # 新馬専用フォールバックを
+        # 使用したか確認できるよう保存。
+        "is_debut":
+            is_debut,
+
+        "selection_mode":
+            selection_mode,
+
+        "selection_rule":
+            selection_rule,
 
         "summary": {
             "race_count":
@@ -692,34 +1035,70 @@ def main():
 
         "definitions": {
             "starts":
-                "この祖先を5代内に持つ馬の出走レコード数。同一馬内のクロスは1回として数える。",
+                (
+                    "この祖先を5代内に持つ馬の"
+                    "出走レコード数。"
+                    "同一馬内のクロスは"
+                    "1回として数える。"
+                ),
 
             "wins":
-                "startsのうち1着になった回数。",
+                (
+                    "startsのうち"
+                    "1着になった回数。"
+                ),
 
             "top3":
-                "startsのうち3着以内になった回数。",
+                (
+                    "startsのうち"
+                    "3着以内になった回数。"
+                ),
 
             "all_runner_prevalence":
-                "全血統照合済み出走レコードに対する、この祖先を持つ馬の割合。",
+                (
+                    "全血統照合済み出走レコード"
+                    "に対する、この祖先を持つ馬の割合。"
+                ),
 
             "winner_prevalence":
-                "全勝ち馬に対する、この祖先を持つ勝ち馬の割合。",
+                (
+                    "全勝ち馬に対する、"
+                    "この祖先を持つ勝ち馬の割合。"
+                ),
 
             "top3_prevalence":
-                "全3着以内馬に対する、この祖先を持つ好走馬の割合。",
+                (
+                    "全3着以内馬に対する、"
+                    "この祖先を持つ好走馬の割合。"
+                ),
 
             "win_overperformance":
-                "winner_prevalence ÷ all_runner_prevalence。1超で勝ち馬に過剰出現。",
+                (
+                    "winner_prevalence ÷ "
+                    "all_runner_prevalence。"
+                    "1超で勝ち馬に過剰出現。"
+                ),
 
             "top3_overperformance":
-                "top3_prevalence ÷ all_runner_prevalence。1超で3着以内馬に過剰出現。",
+                (
+                    "top3_prevalence ÷ "
+                    "all_runner_prevalence。"
+                    "1超で3着以内馬に過剰出現。"
+                ),
 
             "pedigree_occurrences":
-                "クロスを含めた5代血統表内での祖先総出現回数。",
+                (
+                    "クロスを含めた"
+                    "5代血統表内での"
+                    "祖先総出現回数。"
+                ),
 
             "cross_runner_count":
-                "同じ祖先が同一馬の5代内に2回以上出現した出走レコード数。"
+                (
+                    "同じ祖先が同一馬の"
+                    "5代内に2回以上出現した"
+                    "出走レコード数。"
+                ),
         },
 
         "unmatched_starts":
@@ -760,6 +1139,16 @@ def main():
     )
 
     print(
+        "is_debut:",
+        is_debut
+    )
+
+    print(
+        "selection_mode:",
+        selection_mode
+    )
+
+    print(
         "race_count:",
         race_count
     )
@@ -788,9 +1177,22 @@ def main():
         )
     )
 
+    if matched_starts == 0:
+        raise RuntimeError(
+            "過去レースはありますが、"
+            "history_pedigree.jsonと"
+            "照合できた出走馬が0件です。"
+        )
+
+    if not output_stats:
+        raise RuntimeError(
+            "血統統計を1件も"
+            "生成できませんでした。"
+        )
+
     print(
-        OUTPUT_FILE,
-        "作成完了"
+        "bloodline stats saved:",
+        OUTPUT_FILE
     )
 
 
