@@ -1,0 +1,42 @@
+name: Debug Shutuba HTML
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: debug-shutuba-html
+  cancel-in-progress: false
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      - name: Load race ID
+        run: |
+          RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
+
+          if ! [[ "$RACE_ID" =~ ^[0-9]{12}$ ]]; then
+            echo "ERROR: race_id.txt must contain exactly 12 digits"
+            exit 1
+          fi
+
+          echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
+          echo "Target race: $RACE_ID"
+
+      - name: Debug shutuba HTML structure
+        run: python debug_shutuba_html.py
