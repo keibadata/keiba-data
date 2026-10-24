@@ -1,0 +1,98 @@
+name: Race ID Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      race_date:
+        description: "Race date YYYY-MM-DD"
+        required: true
+        type: string
+
+      track:
+        description: "JRA track name"
+        required: true
+        type: choice
+        options:
+          - 札幌
+          - 函館
+          - 福島
+          - 新潟
+          - 東京
+          - 中山
+          - 中京
+          - 京都
+          - 阪神
+          - 小倉
+
+      race_number:
+        description: "Race number"
+        required: true
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+          - "8"
+          - "9"
+          - "10"
+          - "11"
+          - "12"
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      - name: Resolve Race ID
+        run: |
+          python resolve_race_id.py \
+            --date "${{ inputs.race_date }}" \
+            --track "${{ inputs.track }}" \
+            --race-number "${{ inputs.race_number }}" \
+            --output resolved_race_id.txt
+
+      - name: Validate Race ID
+        run: |
+          RACE_ID="$(tr -d '[:space:]' < resolved_race_id.txt)"
+
+          if ! [[ "$RACE_ID" =~ ^[0-9]{12}$ ]]; then
+            echo "ERROR: invalid Race ID: $RACE_ID"
+            exit 1
+          fi
+
+          echo "========================================"
+          echo "RESOLVED RACE ID: $RACE_ID"
+          echo "========================================"
+
+          if [[ \
+            "${{ inputs.race_date }}" == "2026-10-25" && \
+            "${{ inputs.track }}" == "京都" && \
+            "${{ inputs.race_number }}" == "5" \
+          ]]; then
+
+            if [[ "$RACE_ID" != "202608040905" ]]; then
+              echo "ERROR: expected 202608040905"
+              echo "actual: $RACE_ID"
+              exit 1
+            fi
+
+            echo "KYOTO 5R REFERENCE TEST OK"
+          fi
