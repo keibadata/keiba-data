@@ -15,67 +15,40 @@ DEFAULT_RACE_ID = "202605040502"
 
 
 def load_race_id():
-    env_race_id = os.environ.get(
-        "RACE_ID",
-        ""
-    ).strip()
+    env_race_id = os.environ.get("RACE_ID", "").strip()
 
     if env_race_id:
-        if not re.fullmatch(
-            r"\d{12}",
-            env_race_id
-        ):
+        if not re.fullmatch(r"\d{12}", env_race_id):
             raise ValueError(
-                "環境変数 RACE_ID は"
-                "12桁の数字で指定してください。"
+                "環境変数 RACE_ID は12桁の数字で指定してください。"
             )
 
-        print(
-            "race id source: environment"
-        )
-
+        print("race id source: environment")
         return env_race_id
 
-    if os.path.exists(
-        "race_id.txt"
-    ):
+    if os.path.exists("race_id.txt"):
         with open(
             "race_id.txt",
             "r",
             encoding="utf-8"
         ) as f:
-            file_race_id = (
-                f.read().strip()
-            )
+            file_race_id = f.read().strip()
 
         if file_race_id:
-            if not re.fullmatch(
-                r"\d{12}",
-                file_race_id
-            ):
+            if not re.fullmatch(r"\d{12}", file_race_id):
                 raise ValueError(
-                    "race_id.txt は"
-                    "12桁の数字で指定してください。"
+                    "race_id.txt は12桁の数字で指定してください。"
                 )
 
-            print(
-                "race id source: race_id.txt"
-            )
-
+            print("race id source: race_id.txt")
             return file_race_id
 
-    if not re.fullmatch(
-        r"\d{12}",
-        DEFAULT_RACE_ID
-    ):
+    if not re.fullmatch(r"\d{12}", DEFAULT_RACE_ID):
         raise ValueError(
             "DEFAULT_RACE_ID が不正です。"
         )
 
-    print(
-        "race id source: default"
-    )
-
+    print("race id source: default")
     return DEFAULT_RACE_ID
 
 
@@ -94,28 +67,15 @@ HEADERS = {
         "(KHTML, like Gecko) "
         "Version/18.0 Mobile/15E148 Safari/604.1"
     ),
-    "Accept-Language":
-        "ja,en-US;q=0.9,en;q=0.8",
+    "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
 }
 
 
-print(
-    "========================================"
-)
-print(
-    "RACE COLLECTOR"
-)
-print(
-    "========================================"
-)
-print(
-    "Target Race ID:",
-    RACE_ID
-)
-print(
-    "URL:",
-    URL
-)
+print("========================================")
+print("RACE COLLECTOR")
+print("========================================")
+print("Target Race ID:", RACE_ID)
+print("URL:", URL)
 
 
 response = requests.get(
@@ -125,9 +85,7 @@ response = requests.get(
 )
 
 response.raise_for_status()
-response.encoding = (
-    response.apparent_encoding
-)
+response.encoding = response.apparent_encoding
 
 soup = BeautifulSoup(
     response.text,
@@ -149,24 +107,47 @@ def clean_text(element):
     )
 
 
-def first_text(
-    row,
-    selectors
-):
+def normalize_text(value):
+    value = str(value or "")
+
+    value = value.replace(
+        "\u3000",
+        " "
+    )
+
+    value = re.sub(
+        r"\s+",
+        " ",
+        value
+    )
+
+    return value.strip()
+
+
+def first_text(row, selectors):
     for selector in selectors:
-        element = row.select_one(
-            selector
-        )
+        element = row.select_one(selector)
 
         if element:
-            text = clean_text(
-                element
+            text = normalize_text(
+                clean_text(element)
             )
 
             if text:
                 return text
 
     return ""
+
+
+def meta_content(soup, selector):
+    element = soup.select_one(selector)
+
+    if element is None:
+        return ""
+
+    return normalize_text(
+        element.get("content", "")
+    )
 
 
 # =========================================================
@@ -177,8 +158,8 @@ def extract_race_condition(
     soup,
     race_id
 ):
-    page_text = clean_text(
-        soup
+    page_text = normalize_text(
+        clean_text(soup)
     )
 
     # -----------------------------------------------------
@@ -197,23 +178,47 @@ def extract_race_condition(
         ".RaceList_Data",
         ".RaceList_Item01",
         ".RaceList_Item02",
+        ".RaceList_NameBox",
     ]
 
     for selector in date_selectors:
-        for element in soup.select(
-            selector
-        ):
-            text = clean_text(
-                element
+        for element in soup.select(selector):
+            text = normalize_text(
+                clean_text(element)
             )
 
             if text:
-                date_texts.append(
-                    text
-                )
+                date_texts.append(text)
 
-    date_texts.append(
-        page_text
+    title_text = normalize_text(
+        clean_text(
+            soup.select_one("title")
+        )
+    )
+
+    og_title = meta_content(
+        soup,
+        'meta[property="og:title"]'
+    )
+
+    description = meta_content(
+        soup,
+        'meta[name="description"]'
+    )
+
+    og_description = meta_content(
+        soup,
+        'meta[property="og:description"]'
+    )
+
+    date_texts.extend(
+        [
+            title_text,
+            og_title,
+            description,
+            og_description,
+            page_text,
+        ]
     )
 
     date_patterns = [
@@ -240,6 +245,9 @@ def extract_race_condition(
     ]
 
     for text in date_texts:
+        if not text:
+            continue
+
         for pattern in date_patterns:
             match = re.search(
                 pattern,
@@ -293,14 +301,72 @@ def extract_race_condition(
     track = ""
 
     if len(race_id) == 12:
-        track_code = race_id[
-            4:6
-        ]
+        track_code = race_id[4:6]
 
         track = jra_tracks.get(
             track_code,
             ""
         )
+
+    # -----------------------------------------------------
+    # レース情報候補
+    #
+    # netkeibaはページによってRaceName系classが
+    # 空になることがあるため、title / metaも確認する。
+    # -----------------------------------------------------
+
+    header_texts = []
+
+    header_selectors = [
+        ".RaceName",
+        "h1.RaceName",
+        ".RaceName_main",
+        ".RaceList_NameBox",
+        ".RaceList_Name",
+        ".RaceList_ItemTitle",
+        ".RaceData01",
+        ".RaceData02",
+        ".RaceData",
+        "h1",
+    ]
+
+    for selector in header_selectors:
+        for element in soup.select(selector):
+            text = normalize_text(
+                clean_text(element)
+            )
+
+            if text:
+                header_texts.append(text)
+
+    metadata_texts = [
+        title_text,
+        og_title,
+        description,
+        og_description,
+    ]
+
+    race_info_candidates = []
+
+    for text in (
+        header_texts
+        + metadata_texts
+    ):
+        text = normalize_text(text)
+
+        if (
+            text
+            and text not in race_info_candidates
+        ):
+            race_info_candidates.append(
+                text
+            )
+
+    race_info_text = normalize_text(
+        " ".join(
+            race_info_candidates
+        )
+    )
 
     # -----------------------------------------------------
     # レース名
@@ -312,52 +378,38 @@ def extract_race_condition(
             ".RaceName",
             "h1.RaceName",
             ".RaceName_main",
+            ".RaceList_Name",
+            ".RaceList_ItemTitle",
         ]
     )
 
-    race_name = re.sub(
-        r"\s+",
-        " ",
-        race_name
-    ).strip()
+    if not race_name:
+        race_name_patterns = [
+            r"(メイクデビュー[^|｜\-–—]*)",
+            r"((?:2歳|3歳|4歳以上|3歳以上)?\s*新馬)",
+            r"((?:2歳|3歳|4歳以上|3歳以上)?\s*未勝利)",
+            r"([^|｜]+(?:ステークス|カップ|賞|記念))",
+        ]
 
-    # -----------------------------------------------------
-    # レース条件専用テキスト
-    #
-    # page_text 全体は新馬判定には使わない。
-    # -----------------------------------------------------
+        for source in metadata_texts:
+            if not source:
+                continue
 
-    race_header_texts = []
-
-    header_selectors = [
-        ".RaceName",
-        ".RaceData01",
-        ".RaceData02",
-        ".RaceData",
-    ]
-
-    for selector in header_selectors:
-        for element in soup.select(
-            selector
-        ):
-            text = clean_text(
-                element
-            )
-
-            if text:
-                race_header_texts.append(
-                    text
+            for pattern in race_name_patterns:
+                match = re.search(
+                    pattern,
+                    source,
+                    re.IGNORECASE
                 )
 
-    race_header_text = " ".join(
-        race_header_texts
-    )
+                if match:
+                    race_name = normalize_text(
+                        match.group(1)
+                    )
+                    break
 
-    race_header_text = re.sub(
-        r"\s+",
-        " ",
-        race_header_text
-    ).strip()
+            if race_name:
+                break
 
     # -----------------------------------------------------
     # クラス
@@ -387,31 +439,31 @@ def extract_race_condition(
             r"(?:3勝クラス|1600万下)"
         ),
         (
-            "オープン",
-            r"(?:オープン|OP)"
+            "G1",
+            r"(?:G1|GI|GⅠ)"
+        ),
+        (
+            "G2",
+            r"(?:G2|GII|GⅡ)"
+        ),
+        (
+            "G3",
+            r"(?:G3|GIII|GⅢ)"
         ),
         (
             "リステッド",
             r"(?:リステッド|Listed|\(L\))"
         ),
         (
-            "G3",
-            r"(?:GIII|GⅢ|G3)"
-        ),
-        (
-            "G2",
-            r"(?:GII|GⅡ|G2)"
-        ),
-        (
-            "G1",
-            r"(?:GI|GⅠ|G1)"
+            "オープン",
+            r"(?:オープン|\bOP\b)"
         ),
     ]
 
-    class_source = (
+    class_source = normalize_text(
         race_name
         + " "
-        + race_header_text
+        + race_info_text
     )
 
     for label, pattern in class_patterns:
@@ -429,26 +481,6 @@ def extract_race_condition(
 
     age_condition = ""
 
-    age_patterns = [
-        (
-            "2歳",
-            r"2歳"
-        ),
-        (
-            "3歳",
-            r"3歳"
-        ),
-        (
-            "3歳以上",
-            r"3歳以上"
-        ),
-        (
-            "4歳以上",
-            r"4歳以上"
-        ),
-    ]
-
-    # 長い文字列を先に判定する
     age_patterns = [
         (
             "3歳以上",
@@ -471,7 +503,7 @@ def extract_race_condition(
     for label, pattern in age_patterns:
         if re.search(
             pattern,
-            race_header_text
+            race_info_text
         ):
             age_condition = label
             break
@@ -479,10 +511,11 @@ def extract_race_condition(
     # -----------------------------------------------------
     # 新馬戦判定
     #
-    # 過去走0件では判定しない。
-    # ページ全文でも判定しない。
-    # レース名・レース条件欄に
-    # 新馬 / メイクデビュー が明示された場合のみ true。
+    # 過去走0件は判定材料にしない。
+    #
+    # RaceName / RaceData / title / og:title /
+    # description等のレース情報に
+    # 「新馬」「メイクデビュー」が明示された場合のみtrue。
     # -----------------------------------------------------
 
     debut_pattern = (
@@ -515,14 +548,13 @@ def extract_race_condition(
         ".RaceData",
         ".RaceName",
         ".RaceList_Item02",
+        ".RaceList_NameBox",
     ]
 
     for selector in selectors:
-        for element in soup.select(
-            selector
-        ):
-            text = clean_text(
-                element
+        for element in soup.select(selector):
+            text = normalize_text(
+                clean_text(element)
             )
 
             if text:
@@ -530,17 +562,20 @@ def extract_race_condition(
                     text
                 )
 
+    race_data_texts.extend(
+        metadata_texts
+    )
+
     race_data_texts.append(
         page_text
     )
 
     for text in race_data_texts:
+        if not text:
+            continue
+
         match = re.search(
-            (
-                r"芝\s*"
-                r"([0-9]{3,4})\s*"
-                r"[mｍ]?"
-            ),
+            r"芝\s*([0-9]{3,4})\s*[mｍ]?",
             text,
             re.IGNORECASE
         )
@@ -553,11 +588,7 @@ def extract_race_condition(
             break
 
         match = re.search(
-            (
-                r"(?:ダート|ダ)\s*"
-                r"([0-9]{3,4})\s*"
-                r"[mｍ]?"
-            ),
+            r"(?:ダート|ダ)\s*([0-9]{3,4})\s*[mｍ]?",
             text,
             re.IGNORECASE
         )
@@ -570,11 +601,7 @@ def extract_race_condition(
             break
 
         match = re.search(
-            (
-                r"障(?:害)?\s*"
-                r"([0-9]{3,4})\s*"
-                r"[mｍ]?"
-            ),
+            r"障(?:害)?\s*([0-9]{3,4})\s*[mｍ]?",
             text,
             re.IGNORECASE
         )
@@ -593,18 +620,9 @@ def extract_race_condition(
     track_condition = ""
 
     condition_patterns = [
-        (
-            r"馬場\s*[:：]\s*"
-            r"(良|稍重|重|不良)"
-        ),
-        (
-            r"芝\s*[:：]\s*"
-            r"(良|稍重|重|不良)"
-        ),
-        (
-            r"ダート?\s*[:：]\s*"
-            r"(良|稍重|重|不良)"
-        ),
+        r"馬場\s*[:：]\s*(良|稍重|重|不良)",
+        r"芝\s*[:：]\s*(良|稍重|重|不良)",
+        r"ダート?\s*[:：]\s*(良|稍重|重|不良)",
     ]
 
     for pattern in condition_patterns:
@@ -620,32 +638,15 @@ def extract_race_condition(
             break
 
     return {
-        "race_date":
-            race_date,
-
-        "track":
-            track,
-
-        "race_name":
-            race_name,
-
-        "race_class":
-            race_class,
-
-        "age_condition":
-            age_condition,
-
-        "is_debut":
-            is_debut,
-
-        "surface":
-            surface,
-
-        "distance":
-            distance,
-
-        "track_condition":
-            track_condition,
+        "race_date": race_date,
+        "track": track,
+        "race_name": race_name,
+        "race_class": race_class,
+        "age_condition": age_condition,
+        "is_debut": is_debut,
+        "surface": surface,
+        "distance": distance,
+        "track_condition": track_condition,
     }
 
 
@@ -696,24 +697,23 @@ def extract_horse_name(row):
             ".HorseName a",
             ".HorseInfo .HorseName a",
             'a[href*="/horse/"]',
-        ],
+        ]
     )
 
-    return re.sub(
-        r"のデータベース$",
-        "",
-        name
-    ).strip()
+    return normalize_text(name)
 
 
-def extract_number(row):
+def extract_horse_number(row):
+    selectors = [
+        ".Umaban",
+        ".Horse_Num",
+        ".HorseNumber",
+        "td.Umaban",
+    ]
+
     text = first_text(
         row,
-        [
-            ".Umaban",
-            ".Horse_Num",
-            "td.Umaban",
-        ],
+        selectors
     )
 
     match = re.search(
@@ -722,32 +722,20 @@ def extract_number(row):
     )
 
     if match:
-        return match.group()
+        return match.group(0)
 
-    cells = row.find_all(
-        [
-            "td",
-            "div",
-        ]
+    number_element = row.select_one(
+        "[data-horse-number]"
     )
 
-    for cell in cells[:6]:
-        value = clean_text(
-            cell
+    if number_element:
+        value = number_element.get(
+            "data-horse-number",
+            ""
         )
 
-        if re.fullmatch(
-            r"\d{1,2}",
-            value
-        ):
-            number = int(
-                value
-            )
-
-            if 1 <= number <= 18:
-                return str(
-                    number
-                )
+        if value:
+            return str(value)
 
     return ""
 
@@ -758,230 +746,170 @@ def extract_sex_age(row):
         [
             ".Barei",
             ".HorseInfo .Barei",
-            ".SexAge",
-        ],
+            ".Horse_Info .Barei",
+            "td.Barei",
+        ]
     )
 
     match = re.search(
-        r"[牡牝セ騸]\s*\d+",
+        r"[牡牝セ騙]\s*\d+",
         text
     )
-
-    if not match:
-        match = re.search(
-            r"[牡牝セ騸]\s*\d+",
-            clean_text(row)
-        )
 
     if match:
         return re.sub(
             r"\s+",
             "",
-            match.group()
+            match.group(0)
         )
+
+    row_text = normalize_text(
+        clean_text(row)
+    )
+
+    match = re.search(
+        r"[牡牝セ騙]\s*\d+",
+        row_text
+    )
+
+    if match:
+        return re.sub(
+            r"\s+",
+            "",
+            match.group(0)
+        )
+
+    return ""
+
+
+def extract_carried_weight(row):
+    text = first_text(
+        row,
+        [
+            ".Weight",
+            ".Jockey .Weight",
+            ".HorseInfo .Weight",
+            "td.Weight",
+        ]
+    )
+
+    match = re.search(
+        r"\d{2}(?:\.\d)?",
+        text
+    )
+
+    if match:
+        return match.group(0)
 
     return ""
 
 
 def extract_jockey(row):
-    text = first_text(
+    jockey = first_text(
         row,
         [
             ".Jockey a",
-            'a[href*="/jockey/"]',
             ".Jockey",
-        ],
+            'a[href*="/jockey/"]',
+        ]
     )
 
-    text = re.sub(
-        r"\s+\d{2}(?:\.\d)?\s*$",
-        "",
-        text
-    )
-
-    return text.strip()
-
-
-def extract_carried_weight(row):
-    selectors = [
-        ".Weight",
-        ".BurdenWeight",
-        ".Kinryo",
-        ".JockeyWeight",
-        "td.Weight",
-    ]
-
-    for selector in selectors:
-        for element in row.select(
-            selector
-        ):
-            text = clean_text(
-                element
-            )
-
-            numbers = re.findall(
-                (
-                    r"(?<!\d)"
-                    r"(\d{2}(?:\.\d)?)"
-                    r"(?!\d)"
-                ),
-                text
-            )
-
-            for value in numbers:
-                weight = float(
-                    value
-                )
-
-                if (
-                    40.0
-                    <= weight
-                    <= 65.0
-                ):
-                    return (
-                        f"{weight:.1f}"
-                    )
-
-    jockey_element = (
-        row.select_one(
-            ".Jockey"
-        )
-        or row.select_one(
-            'a[href*="/jockey/"]'
-        )
-    )
-
-    if jockey_element:
-        parent = (
-            jockey_element.parent
-        )
-
-        for _ in range(3):
-            if parent is None:
-                break
-
-            text = clean_text(
-                parent
-            )
-
-            numbers = re.findall(
-                (
-                    r"(?<!\d)"
-                    r"(\d{2}(?:\.\d)?)"
-                    r"(?!\d)"
-                ),
-                text
-            )
-
-            for value in numbers:
-                weight = float(
-                    value
-                )
-
-                if (
-                    40.0
-                    <= weight
-                    <= 65.0
-                ):
-                    return (
-                        f"{weight:.1f}"
-                    )
-
-            parent = (
-                parent.parent
-            )
-
-    row_text = clean_text(
-        row
-    )
-
-    numbers = re.findall(
-        (
-            r"(?<!\d)"
-            r"(\d{2}(?:\.\d)?)"
-            r"(?!\d)"
-        ),
-        row_text
-    )
-
-    for value in numbers:
-        weight = float(
-            value
-        )
-
-        if (
-            40.0
-            <= weight
-            <= 65.0
-        ):
-            return (
-                f"{weight:.1f}"
-            )
-
-    return ""
+    return normalize_text(jockey)
 
 
 def extract_body_weight(row):
-    row_text = clean_text(
-        row
-    )
+    selectors = [
+        ".Weight",
+        ".HorseWeight",
+        ".BodyWeight",
+        ".Weight_Body",
+        "td.Weight",
+    ]
 
-    match = re.search(
-        (
-            r"(\d{3})\s*"
-            r"\(([+\-−]?\d+)\)"
-        ),
-        row_text
-    )
+    candidates = []
 
-    if not match:
-        return "", ""
-
-    weight = match.group(1)
-
-    change = (
-        match.group(2)
-        .replace(
-            "−",
-            "-"
-        )
-    )
-
-    if not change.startswith(
-        (
-            "+",
-            "-",
-        )
-    ):
-        if change != "0":
-            change = (
-                "+"
-                + change
+    for selector in selectors:
+        for element in row.select(selector):
+            text = normalize_text(
+                clean_text(element)
             )
 
-    return (
-        weight,
-        change
+            if text:
+                candidates.append(text)
+
+    candidates.append(
+        normalize_text(
+            clean_text(row)
+        )
+    )
+
+    patterns = [
+        r"(\d{3})\s*kg\s*\(([+\-−]?\d+)\)",
+        r"(\d{3})\s*\(([+\-−]?\d+)\)",
+        r"(\d{3})\s*kg",
+    ]
+
+    for text in candidates:
+        for pattern in patterns:
+            match = re.search(
+                pattern,
+                text,
+                re.IGNORECASE
+            )
+
+            if not match:
+                continue
+
+            body_weight = (
+                match.group(1)
+            )
+
+            body_weight_change = ""
+
+            if match.lastindex and match.lastindex >= 2:
+                body_weight_change = (
+                    match.group(2)
+                    .replace("−", "-")
+                )
+
+            return (
+                body_weight,
+                body_weight_change
+            )
+
+    return "", ""
+
+
+# =========================================================
+# 馬行取得
+# =========================================================
+
+rows = soup.select(
+    "tr.HorseList"
+)
+
+if not rows:
+    rows = soup.select(
+        ".HorseList"
     )
 
 
 horses = []
+warnings = []
 
-for row in soup.select(
-    ".HorseList"
-):
+for row in rows:
+    horse_id = extract_horse_id(
+        row
+    )
+
     horse_name = extract_horse_name(
         row
     )
 
-    if not horse_name:
+    if not horse_id and not horse_name:
         continue
 
-    horse_number = extract_number(
-        row
-    )
-
-    horse_id = extract_horse_id(
+    horse_number = extract_horse_number(
         row
     )
 
@@ -989,10 +917,8 @@ for row in soup.select(
         row
     )
 
-    carried_weight = (
-        extract_carried_weight(
-            row
-        )
+    carried_weight = extract_carried_weight(
+        row
     )
 
     jockey = extract_jockey(
@@ -1006,234 +932,160 @@ for row in soup.select(
         row
     )
 
+    horse = {
+        "horse_number": horse_number,
+        "horse_id": horse_id,
+        "horse_name": horse_name,
+        "sex_age": sex_age,
+        "carried_weight": carried_weight,
+        "jockey": jockey,
+        "body_weight": body_weight,
+        "body_weight_change": body_weight_change,
+    }
+
     horses.append(
-        {
-            "horse_number":
-                horse_number,
-
-            "horse_id":
-                horse_id,
-
-            "horse_name":
-                horse_name,
-
-            "sex_age":
-                sex_age,
-
-            "carried_weight":
-                carried_weight,
-
-            "jockey":
-                jockey,
-
-            "body_weight":
-                body_weight,
-
-            "body_weight_change":
-                body_weight_change,
-        }
+        horse
     )
 
-
-if not horses:
-    raise RuntimeError(
-        "出走馬を取得できませんでした。"
-        "HTML構造またはレースIDを確認してください。"
-    )
-
-
-def horse_sort_key(horse):
-    number = horse[
-        "horse_number"
-    ]
-
-    if number.isdigit():
-        return int(
-            number
-        )
-
-    return 999
-
-
-horses.sort(
-    key=horse_sort_key
-)
-
-
-# =========================================================
-# 検査
-# =========================================================
-
-warnings = []
-
-for horse in horses:
     missing = []
 
-    for key in [
-        "horse_number",
-        "horse_name",
-        "sex_age",
-        "carried_weight",
-        "jockey",
-        "body_weight",
-    ]:
-        if not horse[key]:
-            missing.append(
-                key
-            )
+    if not horse_number:
+        missing.append(
+            "horse_number"
+        )
+
+    if not horse_id:
+        missing.append(
+            "horse_id"
+        )
+
+    if not horse_name:
+        missing.append(
+            "horse_name"
+        )
+
+    if not sex_age:
+        missing.append(
+            "sex_age"
+        )
+
+    if not carried_weight:
+        missing.append(
+            "carried_weight"
+        )
+
+    if not jockey:
+        missing.append(
+            "jockey"
+        )
+
+    if not body_weight:
+        missing.append(
+            "body_weight"
+        )
 
     if missing:
         warnings.append(
             {
-                "horse_number":
-                    horse[
-                        "horse_number"
-                    ],
-
-                "horse_name":
-                    horse[
-                        "horse_name"
-                    ],
-
-                "missing":
-                    missing,
+                "horse_number": horse_number,
+                "horse_name": horse_name,
+                "missing": missing,
             }
         )
 
 
 # =========================================================
-# 必須レース情報の安全確認
+# 馬番順
 # =========================================================
 
-if not race_condition[
-    "race_date"
-]:
-    raise RuntimeError(
-        "開催日を取得できませんでした。"
+def horse_number_sort_key(horse):
+    value = str(
+        horse.get(
+            "horse_number",
+            ""
+        )
     )
 
-if not race_condition[
-    "track"
-]:
-    raise RuntimeError(
-        "競馬場を取得できませんでした。"
-    )
+    if value.isdigit():
+        return (
+            0,
+            int(value)
+        )
 
-if not race_condition[
-    "surface"
-]:
-    raise RuntimeError(
-        "芝・ダートを取得できませんでした。"
-    )
-
-if (
-    race_condition[
-        "distance"
-    ]
-    <= 0
-):
-    raise RuntimeError(
-        "距離を取得できませんでした。"
+    return (
+        1,
+        999
     )
 
 
-JST = timezone(
-    timedelta(
-        hours=9
-    )
+horses.sort(
+    key=horse_number_sort_key
 )
 
 
 # =========================================================
-# race.json
+# 出力
 # =========================================================
 
-data = {
-    "race_id":
-        RACE_ID,
+JST = timezone(
+    timedelta(hours=9)
+)
 
-    "race_date":
-        race_condition[
-            "race_date"
-        ],
-
-    "updated_at":
-        datetime.now(
-            JST
-        ).isoformat(),
-
-    "source":
-        "netkeiba",
-
-    "source_url":
-        URL,
-
-    "track":
-        race_condition[
-            "track"
-        ],
-
-    "racecourse":
-        race_condition[
-            "track"
-        ],
-
-    "race_name":
-        race_condition[
-            "race_name"
-        ],
-
-    "race_class":
-        race_condition[
-            "race_class"
-        ],
-
-    "age_condition":
-        race_condition[
-            "age_condition"
-        ],
-
-    "is_debut":
-        race_condition[
-            "is_debut"
-        ],
-
-    "surface":
-        race_condition[
-            "surface"
-        ],
-
-    "distance":
-        race_condition[
-            "distance"
-        ],
-
-    "track_condition":
-        race_condition[
-            "track_condition"
-        ],
-
-    "horse_count":
-        len(horses),
-
-    "warnings":
-        warnings,
-
-    "horses":
-        horses,
+output = {
+    "race_id": RACE_ID,
+    "race_date": race_condition.get(
+        "race_date",
+        ""
+    ),
+    "updated_at": datetime.now(
+        JST
+    ).isoformat(),
+    "source": "netkeiba",
+    "source_url": URL,
+    "track": race_condition.get(
+        "track",
+        ""
+    ),
+    "racecourse": race_condition.get(
+        "track",
+        ""
+    ),
+    "race_name": race_condition.get(
+        "race_name",
+        ""
+    ),
+    "race_class": race_condition.get(
+        "race_class",
+        ""
+    ),
+    "age_condition": race_condition.get(
+        "age_condition",
+        ""
+    ),
+    "is_debut": bool(
+        race_condition.get(
+            "is_debut",
+            False
+        )
+    ),
+    "surface": race_condition.get(
+        "surface",
+        ""
+    ),
+    "distance": race_condition.get(
+        "distance",
+        0
+    ),
+    "track_condition": race_condition.get(
+        "track_condition",
+        ""
+    ),
+    "horse_count": len(
+        horses
+    ),
+    "warnings": warnings,
+    "horses": horses,
 }
-
-
-# =========================================================
-# 最終 Race ID 整合性確認
-# =========================================================
-
-if data["race_id"] != RACE_ID:
-    raise RuntimeError(
-        "内部Race ID不整合: "
-        f"requested={RACE_ID} "
-        f"collected={data['race_id']}"
-    )
 
 
 with open(
@@ -1242,83 +1094,66 @@ with open(
     encoding="utf-8"
 ) as f:
     json.dump(
-        data,
+        output,
         f,
         ensure_ascii=False,
         indent=2
     )
 
 
-# =========================================================
-# ログ
-# =========================================================
-
 print(
     json.dumps(
-        data,
+        output,
         ensure_ascii=False,
         indent=2
     )
 )
 
-print(
-    "\n--- RACE CONDITION ---"
-)
-
+print()
+print("--- RACE CONDITION ---")
 print(
     "race_id:",
-    RACE_ID
+    output["race_id"]
 )
-
 print(
     "race_date:",
-    data["race_date"]
+    output["race_date"]
 )
-
 print(
     "track:",
-    data["track"]
+    output["track"]
 )
-
 print(
     "race_name:",
-    data["race_name"]
+    output["race_name"]
 )
-
 print(
     "race_class:",
-    data["race_class"]
+    output["race_class"]
 )
-
 print(
     "age_condition:",
-    data["age_condition"]
+    output["age_condition"]
 )
-
 print(
     "is_debut:",
-    data["is_debut"]
+    output["is_debut"]
 )
-
 print(
     "surface:",
-    data["surface"]
+    output["surface"]
 )
-
 print(
     "distance:",
-    data["distance"]
+    output["distance"]
 )
-
 print(
     "track_condition:",
-    data["track_condition"]
+    output["track_condition"]
 )
 
-print(
-    "\n--- HORSES ---"
-)
-
+print()
+print("--- HORSES ---")
 print(
     "horse_count:",
     len(horses)
@@ -1326,34 +1161,40 @@ print(
 
 for horse in horses:
     print(
-        horse[
-            "horse_number"
-        ],
-        horse[
-            "horse_name"
-        ],
-        horse[
-            "sex_age"
-        ],
-        horse[
-            "carried_weight"
-        ],
-        horse[
-            "jockey"
-        ],
-        horse[
-            "body_weight"
-        ],
-        horse[
-            "body_weight_change"
-        ],
+        horse.get(
+            "horse_number",
+            ""
+        ),
+        horse.get(
+            "horse_name",
+            ""
+        ),
+        horse.get(
+            "sex_age",
+            ""
+        ),
+        horse.get(
+            "carried_weight",
+            ""
+        ),
+        horse.get(
+            "jockey",
+            ""
+        ),
+        horse.get(
+            "body_weight",
+            ""
+        ),
+        horse.get(
+            "body_weight_change",
+            ""
+        ),
     )
 
 
 if warnings:
-    print(
-        "\n--- WARNINGS ---"
-    )
+    print()
+    print("--- WARNINGS ---")
 
     for warning in warnings:
         print(
@@ -1361,14 +1202,13 @@ if warnings:
         )
 
 
+print()
 print(
-    "\n========================================"
+    "========================================"
 )
-
 print(
     "RACE COLLECTION FINISHED"
 )
-
 print(
     "========================================"
 )
