@@ -910,9 +910,12 @@ def main():
         f"{len(excluded_local_ids)}"
     )
 
+    # 新馬戦など、全馬に過去走がないケースは正常。
+    # 0件でも空DBを生成し、後続工程へ進める。
     if not requested_ids:
-        raise RuntimeError(
-            "中央の必要過去レース数が0件です。"
+        print(
+            "中央の必要過去レース数は0件です。"
+            "新馬戦等として正常に続行します。"
         )
 
     past_date_index = (
