@@ -1,185 +1,131 @@
 import json
 import os
 import re
-import time
-from datetime import datetime, timezone, timedelta
-
-import requests
-from bs4 import BeautifulSoup
+import subprocess
+import sys
+from datetime import datetime, timedelta, timezone
 
 
-# =========================================================
+# ============================================================
 # 設定
-# =========================================================
+# ============================================================
 
 RACE_FILE = "race.json"
 OUTPUT_FILE = "day_races.json"
-
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 "
-        "(iPhone; CPU iPhone OS 18_0 like Mac OS X) "
-        "AppleWebKit/605.1.15 "
-        "(KHTML, like Gecko) "
-        "Version/18.0 Mobile/15E148 Safari/604.1"
-    ),
-    "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
-}
+COLLECTOR_FILE = "day_race_collector.py"
 
 JST = timezone(
     timedelta(hours=9)
 )
 
 
-# =========================================================
-# 共通
-# =========================================================
+# ============================================================
+# 基本
+# ============================================================
+
+def now_jst():
+    return datetime.now(
+        JST
+    ).isoformat(
+        timespec="seconds"
+    )
+
 
 def load_json(path):
+    if not os.path.exists(path):
+        return {}
 
-    with open(
-        path,
-        "r",
-        encoding="utf-8"
-    ) as f:
+    try:
+        with open(
+            path,
+            "r",
+            encoding="utf-8",
+        ) as f:
+            return json.load(f)
 
-        return json.load(f)
+    except Exception as exc:
+        raise RuntimeError(
+            f"{path} の読み込みに失敗しました: {exc}"
+        )
 
 
 def save_json(path, data):
-
     with open(
         path,
         "w",
-        encoding="utf-8"
+        encoding="utf-8",
     ) as f:
-
         json.dump(
             data,
             f,
             ensure_ascii=False,
-            indent=2
+            indent=2,
         )
 
 
-def clean_text(element):
-
-    if element is None:
-        return ""
-
+def clean_text(value):
     return re.sub(
         r"\s+",
         " ",
-        element.get_text(
-            " ",
-            strip=True
-        )
+        str(value or ""),
     ).strip()
+
+
+def safe_int(value):
+    try:
+        return int(value)
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return None
 
 
 def normalize_surface(value):
+    text = clean_text(
+        value
+    )
 
-    value = str(
-        value or ""
-    ).strip()
-
-    if value.startswith("芝"):
+    if text.startswith("芝"):
         return "芝"
 
     if (
-        value.startswith("ダ")
-        or "ダート" in value
+        text.startswith("ダ")
+        or "ダート" in text
     ):
         return "ダート"
 
-    if value.startswith("障"):
+    if text.startswith("障"):
         return "障害"
 
-    return value
+    return text
 
 
-# =========================================================
+# ============================================================
 # race.json
-# =========================================================
-
-if not os.path.exists(
-    RACE_FILE
-):
-
-    raise RuntimeError(
-        "race.json がありません。"
-    )
-
+# ============================================================
 
 race = load_json(
     RACE_FILE
 )
 
-race_id = str(
-    race.get(
-        "race_id",
-        ""
+if not race:
+    raise RuntimeError(
+        "race.json がありません。"
     )
-).strip()
 
-race_date = str(
-    race.get(
-        "race_date",
-        ""
-    )
-).strip()
 
-racecourse = str(
-    race.get(
-        "racecourse",
-        race.get(
-            "track",
-            ""
-        )
-    )
-).strip()
-
-target_surface = normalize_surface(
-    race.get(
-        "surface",
-        ""
-    )
+race_id = clean_text(
+    race.get("race_id")
 )
-
-target_distance = int(
-    race.get(
-        "distance",
-        0
-    )
-    or 0
-)
-
-
-# =========================================================
-# race_id検査
-# =========================================================
 
 if not re.fullmatch(
     r"\d{12}",
-    race_id
+    race_id,
 ):
-
     raise RuntimeError(
         "race.json の race_id が不正です。"
-    )
-
-
-if not race_date:
-
-    raise RuntimeError(
-        "race.json に race_date がありません。"
-    )
-
-
-if not racecourse:
-
-    raise RuntimeError(
-        "race.json に競馬場がありません。"
     )
 
 
@@ -187,662 +133,253 @@ target_race_number = int(
     race_id[-2:]
 )
 
-
 if not (
     1
     <= target_race_number
     <= 12
 ):
-
     raise RuntimeError(
-        f"対象R番号が不正です: {target_race_number}"
+        "対象R番号が不正です。"
     )
 
 
-# =========================================================
-# 対象レースより前だけ
-# =========================================================
+race_date = clean_text(
+    race.get("race_date")
+    or race.get("date")
+)
 
-eligible_race_numbers = list(
-    range(
-        1,
-        target_race_number
-    )
+racecourse = clean_text(
+    race.get("racecourse")
+    or race.get("track")
+)
+
+target_surface = normalize_surface(
+    race.get("surface")
+)
+
+target_distance = safe_int(
+    race.get("distance")
 )
 
 
+print()
 print(
-    "===== DAY RACES ====="
+    "===== DAY RACES PRODUCTION BRIDGE ====="
 )
 
 print(
     "target race id:",
-    race_id
+    race_id,
 )
 
 print(
     "date:",
-    race_date
+    race_date,
 )
 
 print(
     "racecourse:",
-    racecourse
+    racecourse,
 )
 
 print(
     "surface:",
-    target_surface
+    target_surface,
 )
 
 print(
     "distance:",
-    target_distance
+    target_distance,
 )
 
 print(
     "target race number:",
-    target_race_number
+    target_race_number,
 )
+
+print()
+
+
+# ============================================================
+# collector存在確認
+# ============================================================
+
+if not os.path.exists(
+    COLLECTOR_FILE
+):
+    raise RuntimeError(
+        f"{COLLECTOR_FILE} がありません。"
+    )
+
+
+# ============================================================
+# 新しい取得エンジン実行
+#
+# 重要:
+# --include-target は絶対に付けない。
+#
+# 予想時は対象Rより前の確定レースだけ取得する。
+# ============================================================
+
+command = [
+    sys.executable,
+    COLLECTOR_FILE,
+    "--output",
+    OUTPUT_FILE,
+]
+
 
 print(
-    "eligible previous races:",
-    eligible_race_numbers
+    "run collector:",
+    " ".join(command),
+)
+
+print()
+
+
+completed = subprocess.run(
+    command,
+    check=False,
 )
 
 
-# =========================================================
-# 1R
-# =========================================================
-
-if not eligible_race_numbers:
-
-    output = {
-        "race_id":
-            race_id,
-
-        "race_date":
-            race_date,
-
-        "racecourse":
-            racecourse,
-
-        "surface":
-            target_surface,
-
-        "distance":
-            target_distance,
-
-        "target_race_number":
-            target_race_number,
-
-        "future_race_usage":
-            False,
-
-        "status":
-            "no_previous_races",
-
-        "eligible_race_numbers":
-            [],
-
-        "same_surface_race_numbers":
-            [],
-
-        "collected_race_count":
-            0,
-
-        "same_surface_race_count":
-            0,
-
-        "collected_races":
-            [],
-
-        "updated_at":
-            datetime.now(
-                JST
-            ).isoformat(),
-    }
-
-    save_json(
-        OUTPUT_FILE,
-        output
+if completed.returncode != 0:
+    raise RuntimeError(
+        "day_race_collector.py が異常終了しました。"
     )
 
-    print(
-        "対象が1Rのため前レースなし"
+
+# ============================================================
+# collector出力確認
+# ============================================================
+
+collector_data = load_json(
+    OUTPUT_FILE
+)
+
+if not collector_data:
+    raise RuntimeError(
+        "day_race_collector.py の出力がありません。"
     )
 
-    print(
-        "saved:",
-        OUTPUT_FILE
+
+collector_target_race_id = clean_text(
+    collector_data.get(
+        "target_race_id"
     )
-
-    raise SystemExit(0)
-
-
-# =========================================================
-# race_id生成
-# =========================================================
-
-race_id_prefix = race_id[:-2]
+)
 
 
-def build_race_id(
-    race_number
+if (
+    collector_target_race_id
+    != race_id
 ):
-
-    return (
-        race_id_prefix
-        + f"{race_number:02d}"
+    raise RuntimeError(
+        "day_race_collector.py の"
+        "target_race_id が一致しません。"
     )
 
 
-# =========================================================
-# レース条件取得
-# =========================================================
+# ============================================================
+# 未来情報リーク防止
+# ============================================================
 
-def parse_race_condition(
-    soup
+mode = clean_text(
+    collector_data.get(
+        "mode"
+    )
+)
+
+
+if mode != "prediction":
+    raise RuntimeError(
+        "day_race_collector.py が"
+        "prediction モードではありません。"
+    )
+
+
+if (
+    collector_data.get(
+        "include_target"
+    )
+    is True
 ):
-
-    surface = ""
-    distance = 0
-    track_condition = ""
-
-    candidates = []
-
-    for selector in [
-        ".RaceData01",
-        ".RaceData02",
-        ".RaceData",
-    ]:
-
-        for element in soup.select(
-            selector
-        ):
-
-            text = clean_text(
-                element
-            )
-
-            if text:
-
-                candidates.append(
-                    text
-                )
-
-
-    candidates.append(
-        clean_text(
-            soup
-        )
+    raise RuntimeError(
+        "予想モードで対象レース結果が"
+        "取得されています。"
     )
 
 
-    for text in candidates:
-
-        match = re.search(
-            r"芝\s*(\d{3,4})\s*[mｍ]?",
-            text
-        )
-
-        if match:
-
-            surface = "芝"
-
-            distance = int(
-                match.group(1)
-            )
-
-            break
-
-
-        match = re.search(
-            r"(?:ダート|ダ)\s*(\d{3,4})\s*[mｍ]?",
-            text
-        )
-
-        if match:
-
-            surface = "ダート"
-
-            distance = int(
-                match.group(1)
-            )
-
-            break
-
-
-        match = re.search(
-            r"障(?:害)?\s*(\d{3,4})\s*[mｍ]?",
-            text
-        )
-
-        if match:
-
-            surface = "障害"
-
-            distance = int(
-                match.group(1)
-            )
-
-            break
-
-
-    for text in candidates:
-
-        if surface == "芝":
-
-            patterns = [
-                r"芝\s*[:：]\s*(良|稍重|重|不良)",
-                r"馬場\s*[:：]\s*(良|稍重|重|不良)",
-            ]
-
-        elif surface == "ダート":
-
-            patterns = [
-                r"(?:ダート|ダ)\s*[:：]\s*(良|稍重|重|不良)",
-                r"馬場\s*[:：]\s*(良|稍重|重|不良)",
-            ]
-
-        else:
-
-            patterns = [
-                r"馬場\s*[:：]\s*(良|稍重|重|不良)"
-            ]
-
-
-        for pattern in patterns:
-
-            match = re.search(
-                pattern,
-                text
-            )
-
-            if match:
-
-                track_condition = (
-                    match.group(1)
-                )
-
-                break
-
-
-        if track_condition:
-            break
-
-
-    return (
-        surface,
-        distance,
-        track_condition
+if (
+    collector_data.get(
+        "target_race_included"
     )
-
-
-# =========================================================
-# 着順
-# =========================================================
-
-def parse_results(
-    soup
+    is True
 ):
-
-    results = []
-
-    seen_rows = set()
-
-
-    for rank_element in soup.select(
-        ".Result_Num"
-    ):
-
-        rank_text = clean_text(
-            rank_element
-        )
-
-        rank_match = re.fullmatch(
-            r"(\d+)\s*着",
-            rank_text
-        )
-
-        if not rank_match:
-            continue
-
-
-        finish = int(
-            rank_match.group(1)
-        )
-
-
-        row = rank_element.find_parent(
-            "tr"
-        )
-
-        if row is None:
-            continue
-
-
-        row_key = id(
-            row
-        )
-
-        if row_key in seen_rows:
-            continue
-
-        seen_rows.add(
-            row_key
-        )
-
-
-        # -------------------------------------------------
-        # 馬名・horse_id
-        # -------------------------------------------------
-
-        horse_link = (
-            row.select_one(
-                ".Horse_Info a"
-            )
-            or row.select_one(
-                'a[href*="/horse/"]'
-            )
-        )
-
-
-        if horse_link is None:
-            continue
-
-
-        horse_name = clean_text(
-            horse_link
-        )
-
-
-        horse_id = ""
-
-        href = str(
-            horse_link.get(
-                "href",
-                ""
-            )
-        )
-
-
-        horse_id_match = re.search(
-            r"/horse/(\d+)",
-            href
-        )
-
-
-        if horse_id_match:
-
-            horse_id = (
-                horse_id_match.group(1)
-            )
-
-
-        # -------------------------------------------------
-        # 馬番
-        # -------------------------------------------------
-
-        horse_number = None
-
-
-        number_element = (
-            row.select_one(
-                ".Umaban"
-            )
-            or row.select_one(
-                ".Horse_Num"
-            )
-        )
-
-
-        if number_element:
-
-            number_match = re.search(
-                r"\d+",
-                clean_text(
-                    number_element
-                )
-            )
-
-            if number_match:
-
-                horse_number = int(
-                    number_match.group()
-                )
-
-
-        if horse_number is None:
-
-            cells = row.find_all(
-                "td",
-                recursive=False
-            )
-
-            rank_cell_index = None
-
-
-            for index, cell in enumerate(
-                cells
-            ):
-
-                if (
-                    rank_element is cell
-                    or rank_element in cell.find_all(
-                        True
-                    )
-                ):
-
-                    rank_cell_index = index
-                    break
-
-
-            if rank_cell_index is not None:
-
-                candidate_indexes = [
-                    rank_cell_index + 2,
-                    rank_cell_index + 1,
-                ]
-
-
-                for candidate_index in (
-                    candidate_indexes
-                ):
-
-                    if not (
-                        0
-                        <= candidate_index
-                        < len(cells)
-                    ):
-
-                        continue
-
-
-                    candidate_text = clean_text(
-                        cells[
-                            candidate_index
-                        ]
-                    )
-
-
-                    if not re.fullmatch(
-                        r"\d{1,2}",
-                        candidate_text
-                    ):
-
-                        continue
-
-
-                    value = int(
-                        candidate_text
-                    )
-
-
-                    if (
-                        1
-                        <= value
-                        <= 18
-                    ):
-
-                        horse_number = value
-                        break
-
-
-        # -------------------------------------------------
-        # 上がり3F
-        # -------------------------------------------------
-
-        last3f = None
-
-
-        for selector in [
-            ".Last3F",
-            ".Last3f",
-            ".Agari",
-        ]:
-
-            element = row.select_one(
-                selector
-            )
-
-            if element is None:
-                continue
-
-
-            match = re.search(
-                r"(\d{2}\.\d)",
-                clean_text(
-                    element
-                )
-            )
-
-
-            if match:
-
-                last3f = float(
-                    match.group(1)
-                )
-
-                break
-
-
-        if last3f is None:
-
-            row_text = clean_text(
-                row
-            )
-
-            matches = re.findall(
-                r"\((\d{2}\.\d)\)",
-                row_text
-            )
-
-
-            if matches:
-
-                last3f = float(
-                    matches[-1]
-                )
-
-
-        # -------------------------------------------------
-        # 走破時計
-        # -------------------------------------------------
-
-        race_time = ""
-
-
-        for selector in [
-            ".Time",
-            ".RaceTime",
-        ]:
-
-            element = row.select_one(
-                selector
-            )
-
-            if element is None:
-                continue
-
-
-            match = re.search(
-                r"\d+:\d{2}\.\d",
-                clean_text(
-                    element
-                )
-            )
-
-
-            if match:
-
-                race_time = (
-                    match.group()
-                )
-
-                break
-
-
-        if not race_time:
-
-            match = re.search(
-                r"\d+:\d{2}\.\d",
-                clean_text(
-                    row
-                )
-            )
-
-
-            if match:
-
-                race_time = (
-                    match.group()
-                )
-
-
-        results.append(
-            {
-                "finish":
-                    finish,
-
-                "horse_number":
-                    horse_number,
-
-                "horse_id":
-                    horse_id,
-
-                "horse_name":
-                    horse_name,
-
-                "last3f":
-                    last3f,
-
-                "race_time":
-                    race_time,
-            }
-        )
-
-
-    results.sort(
-        key=lambda item:
-            item.get(
-                "finish",
-                999
-            )
+    raise RuntimeError(
+        "対象レース自身が"
+        "day_races.json に混入しています。"
     )
 
 
-    return results
-
-
-# =========================================================
-# コーナー通過順位
-# =========================================================
-
-def parse_corner_positions(
-    soup
+if (
+    collector_data.get(
+        "future_race_usage"
+    )
+    is True
 ):
+    raise RuntimeError(
+        "未来レース使用フラグが"
+        "検出されました。"
+    )
 
+
+# ============================================================
+# 新形式取得
+# ============================================================
+
+new_races = (
+    collector_data.get(
+        "races",
+        []
+    )
+    or []
+)
+
+
+if not isinstance(
+    new_races,
+    list,
+):
+    raise RuntimeError(
+        "day_race_collector.py の"
+        "races が配列ではありません。"
+    )
+
+
+# ============================================================
+# corner_orders
+#   ↓
+# corner_positions
+#
+# 新形式:
+# {
+#   "3_corner": "...",
+#   "4_corner": "..."
+# }
+#
+# 既存day_bias:
+# {
+#   "1": "",
+#   "2": "",
+#   "3": "...",
+#   "4": "..."
+# }
+# ============================================================
+
+def convert_corner_positions(
+    corner_orders
+):
     output = {
         "1": "",
         "2": "",
@@ -850,690 +387,628 @@ def parse_corner_positions(
         "4": "",
     }
 
-
-    table = soup.select_one(
-        "table.Corner_Num"
-    )
-
-
-    if table is None:
-
-        for candidate in soup.find_all(
-            "table"
-        ):
-
-            summary = str(
-                candidate.get(
-                    "summary",
-                    ""
-                )
-            )
-
-
-            if "コーナー通過順位" in summary:
-
-                table = candidate
-                break
-
-
-    if table is None:
-
+    if not isinstance(
+        corner_orders,
+        dict,
+    ):
         return output
 
-
-    for row in table.find_all(
-        "tr"
-    ):
-
-        heading = row.find(
-            "th"
+    for number in [
+        1,
+        2,
+        3,
+        4,
+    ]:
+        value = clean_text(
+            corner_orders.get(
+                f"{number}_corner"
+            )
+            or corner_orders.get(
+                str(number)
+            )
         )
-
-        value_cell = row.find(
-            "td"
-        )
-
-
-        if (
-            heading is None
-            or value_cell is None
-        ):
-
-            continue
-
-
-        heading_text = clean_text(
-            heading
-        )
-
-        match = re.search(
-            r"([1-4])\s*コーナー",
-            heading_text
-        )
-
-
-        if not match:
-            continue
-
-
-        corner_number = (
-            match.group(1)
-        )
-
 
         output[
-            corner_number
-        ] = clean_text(
-            value_cell
-        )
-
+            str(number)
+        ] = value
 
     return output
 
 
-# =========================================================
-# ラップ取得
-#
-# ProbeでHTML構造を確認済み。
-#
-# table.Race_HaronTime
-#   tr.Header
-#   tr.HaronTime
-#   tr.Header
-#   tr.HaronTime
-#
-# HaronTimeの各td:
-#
-#   <td>12.7<br/>12.7</td>
-#
-# 上段 = 累計時計
-# 下段 = 区間ラップ
-#
-# よって各tdの最後の値だけを採用する。
-# =========================================================
+# ============================================================
+# 1レースを既存形式へ接続
+# ============================================================
 
-def parse_race_laps(
-    soup,
-    distance
+def convert_race(
+    item
 ):
-
-    if not distance:
-
-        return []
-
-
-    expected_count = (
-        distance // 200
-    )
-
-
-    table = soup.select_one(
-        "table.Race_HaronTime"
-    )
-
-
-    if table is None:
-
-        print(
-            "Race_HaronTime table not found"
-        )
-
-        return []
-
-
-    laps = []
-
-
-    for row in table.select(
-        "tr.HaronTime"
+    if not isinstance(
+        item,
+        dict,
     ):
+        return None
 
-        cells = row.find_all(
-            "td",
-            recursive=False
+    converted = dict(
+        item
+    )
+
+    race_number = safe_int(
+        item.get(
+            "race_number"
         )
+    )
 
+    current_race_id = clean_text(
+        item.get(
+            "race_id"
+        )
+    )
 
-        for cell in cells:
+    surface = normalize_surface(
+        item.get(
+            "surface"
+        )
+    )
 
-            # ---------------------------------------------
-            # get_text(separator) を使って
-            # <br> の上下を分離
-            # ---------------------------------------------
+    distance = safe_int(
+        item.get(
+            "distance"
+        )
+    )
 
-            raw_parts = cell.get_text(
-                "\n",
-                strip=True
-            ).splitlines()
+    track_condition = clean_text(
+        item.get(
+            "track_condition"
+        )
+    )
 
+    finished = bool(
+        item.get(
+            "finished"
+        )
+    )
 
-            parts = [
-                part.strip()
-                for part in raw_parts
-                if part.strip()
-            ]
+    finishers = (
+        item.get(
+            "finishers",
+            []
+        )
+        or []
+    )
 
-
-            # ---------------------------------------------
-            # Probe確認:
-            #
-            # <td>12.7<br/>12.7</td>
-            #
-            # 最後の値が区間ラップ
-            # ---------------------------------------------
-
-            if not parts:
-                continue
-
-
-            lap_text = parts[-1]
-
-
-            if not re.fullmatch(
-                r"\d{1,2}\.\d",
-                lap_text
-            ):
-
-                print(
-                    "invalid lap cell:",
-                    parts
-                )
-
-                continue
-
-
-            lap = float(
-                lap_text
-            )
-
-
-            # 200m区間ラップとして
-            # 明らかな異常値だけ除外
-            if not (
-                8.0
-                <= lap
-                <= 20.0
-            ):
-
-                print(
-                    "invalid lap value:",
-                    lap
-                )
-
-                continue
-
-
-            laps.append(
-                lap
-            )
-
-
-    # =====================================================
-    # 区間数の厳密チェック
-    # =====================================================
-
-    if (
-        len(laps)
-        != expected_count
+    if not isinstance(
+        finishers,
+        list,
     ):
+        finishers = []
 
-        print(
-            "lap count mismatch:",
-            f"distance={distance}",
-            f"expected={expected_count}",
-            f"actual={len(laps)}",
-            f"values={laps}"
+    laps = (
+        item.get(
+            "laps",
+            []
         )
-
-        return []
-
-
-    print(
-        "race laps parsed:",
-        laps
+        or []
     )
 
-
-    return laps
-
-
-# =========================================================
-# 1レース取得
-# =========================================================
-
-def fetch_race_result(
-    previous_race_id,
-    race_number
-):
-
-    url = (
-        "https://race.netkeiba.com/"
-        "race/result.html"
-        f"?race_id={previous_race_id}"
-    )
-
-
-    try:
-
-        response = requests.get(
-            url,
-            headers=HEADERS,
-            timeout=30
-        )
-
-        response.raise_for_status()
-
-        response.encoding = (
-            response.apparent_encoding
-        )
-
-    except Exception as exc:
-
-        return {
-            "race_id":
-                previous_race_id,
-
-            "race_number":
-                race_number,
-
-            "status":
-                "fetch_error",
-
-            "error":
-                str(exc),
-
-            "source_url":
-                url,
-        }
-
-
-    soup = BeautifulSoup(
-        response.text,
-        "html.parser"
-    )
-
-
-    (
-        surface,
-        distance,
-        track_condition
-    ) = parse_race_condition(
-        soup
-    )
-
-
-    results = parse_results(
-        soup
-    )
-
+    if not isinstance(
+        laps,
+        list,
+    ):
+        laps = []
 
     corner_positions = (
-        parse_corner_positions(
-            soup
+        convert_corner_positions(
+            item.get(
+                "corner_orders",
+                {}
+            )
         )
     )
 
 
-    race_laps = parse_race_laps(
-        soup,
-        distance
-    )
-
-
-    # =====================================================
-    # 状態判定
-    # =====================================================
+    # ========================================================
+    # 解析状態
+    # ========================================================
 
     problems = []
 
 
     if not surface:
-
         problems.append(
             "surface"
         )
 
 
     if not distance:
-
         problems.append(
             "distance"
         )
 
 
-    if not results:
-
+    if (
+        finished
+        and not finishers
+    ):
         problems.append(
             "results"
         )
 
 
     if (
-        distance
-        and not race_laps
+        finished
+        and distance
+        and not laps
     ):
-
         problems.append(
             "race_laps"
         )
 
 
-    if not problems:
+    if not finished:
+        status = "not_finished"
 
-        status = "ok"
+    elif problems:
+        status = "parse_incomplete"
 
-    else:
-
+    elif not track_condition:
+        # 馬場状態だけ取れない場合は
+        # レース結果自体は使用可能。
         status = (
-            "parse_incomplete"
+            "condition_parse_incomplete"
         )
 
-
-    return {
-        "race_id":
-            previous_race_id,
-
-        "race_number":
-            race_number,
-
-        "source_url":
-            url,
-
-        "surface":
-            surface,
-
-        "distance":
-            distance,
-
-        "track_condition":
-            track_condition,
-
-        "race_laps":
-            race_laps,
-
-        "corner_positions":
-            corner_positions,
-
-        "result_count":
-            len(
-                results
-            ),
-
-        "results":
-            results,
-
-        "parse_problems":
-            problems,
-
-        "status":
-            status,
-    }
+    else:
+        status = "ok"
 
 
-# =========================================================
-# 前レース収集
-# =========================================================
+    # ========================================================
+    # 旧形式互換フィールド
+    # ========================================================
+
+    converted[
+        "race_id"
+    ] = current_race_id
+
+    converted[
+        "race_number"
+    ] = race_number
+
+    converted[
+        "surface"
+    ] = surface
+
+    converted[
+        "distance"
+    ] = distance
+
+    converted[
+        "track_condition"
+    ] = track_condition
+
+    converted[
+        "finished"
+    ] = finished
+
+    converted[
+        "race_laps"
+    ] = laps
+
+    converted[
+        "corner_positions"
+    ] = corner_positions
+
+    converted[
+        "result_count"
+    ] = len(
+        finishers
+    )
+
+    converted[
+        "results"
+    ] = finishers
+
+    converted[
+        "parse_problems"
+    ] = problems
+
+    converted[
+        "status"
+    ] = status
+
+
+    return converted
+
+
+# ============================================================
+# 全レース変換
+# ============================================================
 
 collected_races = []
 
 
-for race_number in (
-    eligible_race_numbers
-):
+for item in new_races:
+    converted = convert_race(
+        item
+    )
 
-    previous_race_id = (
-        build_race_id(
-            race_number
+    if converted is None:
+        continue
+
+    race_number = safe_int(
+        converted.get(
+            "race_number"
         )
     )
 
 
-    # =====================================================
-    # 未来レース防止
-    # =====================================================
+    # ========================================================
+    # 最重要:
+    # 対象R以上は絶対に許可しない
+    # ========================================================
 
-    if (
-        int(
-            previous_race_id[-2:]
-        )
-        >= target_race_number
-    ):
-
+    if race_number is None:
         raise RuntimeError(
-            "未来レース混入防止チェックに失敗しました。"
+            "取得レースのR番号が不明です。"
         )
 
 
-    print()
-    print(
-        "collect:",
-        previous_race_id
-    )
-
-
-    result = fetch_race_result(
-        previous_race_id,
+    if (
         race_number
-    )
-
-
-    collected_races.append(
-        result
-    )
-
-
-    print(
-        "status:",
-        result.get(
-            "status"
-        )
-    )
-
-    print(
-        "surface:",
-        result.get(
-            "surface"
-        )
-    )
-
-    print(
-        "distance:",
-        result.get(
-            "distance"
-        )
-    )
-
-    print(
-        "race laps:",
-        result.get(
-            "race_laps",
-            []
-        )
-    )
-
-    print(
-        "corner positions:",
-        result.get(
-            "corner_positions",
-            {}
-        )
-    )
-
-    print(
-        "results:",
-        result.get(
-            "result_count",
-            0
-        )
-    )
-
-    print(
-        "parse problems:",
-        result.get(
-            "parse_problems",
-            []
-        )
-    )
-
-
-    time.sleep(
-        0.4
-    )
-
-
-# =========================================================
-# 同馬場抽出
-# =========================================================
-
-same_surface_races = []
-
-
-for item in collected_races:
-
-    if (
-        normalize_surface(
-            item.get(
-                "surface"
-            )
-        )
-        == target_surface
-    ):
-
-        same_surface_races.append(
-            item.get(
-                "race_number"
-            )
-        )
-
-
-# =========================================================
-# 最終安全確認
-# =========================================================
-
-for item in collected_races:
-
-    item_race_number = int(
-        item.get(
-            "race_number",
-            0
-        )
-        or 0
-    )
-
-
-    if (
-        item_race_number
         >= target_race_number
     ):
-
         raise RuntimeError(
             "対象レース以降のデータが"
             "day_races.json に混入しています。"
         )
 
 
-# =========================================================
-# 保存
-# =========================================================
-
-output = {
-    "race_id":
-        race_id,
-
-    "race_date":
-        race_date,
-
-    "racecourse":
-        racecourse,
-
-    "surface":
-        target_surface,
-
-    "distance":
-        target_distance,
-
-    "target_race_number":
-        target_race_number,
-
-    "future_race_usage":
-        False,
-
-    "status":
-        (
-            "collected"
-            if collected_races
-            else "no_previous_races"
-        ),
-
-    "eligible_race_numbers":
-        eligible_race_numbers,
-
-    "same_surface_race_numbers":
-        same_surface_races,
-
-    "collected_race_count":
-        len(
-            collected_races
-        ),
-
-    "same_surface_race_count":
-        len(
-            same_surface_races
-        ),
-
-    "collected_races":
-        collected_races,
-
-    "updated_at":
-        datetime.now(
-            JST
-        ).isoformat(),
-}
+    collected_races.append(
+        converted
+    )
 
 
-save_json(
-    OUTPUT_FILE,
-    output
+# ============================================================
+# R番号順
+# ============================================================
+
+collected_races.sort(
+    key=lambda item:
+        safe_int(
+            item.get(
+                "race_number"
+            )
+        )
+        or 999
 )
 
 
-# =========================================================
+# ============================================================
+# 同一馬場
+# ============================================================
+
+same_surface_race_numbers = []
+
+
+for item in collected_races:
+    if (
+        normalize_surface(
+            item.get(
+                "surface"
+            )
+        )
+        != target_surface
+    ):
+        continue
+
+    if (
+        item.get(
+            "finished"
+        )
+        is not True
+    ):
+        continue
+
+    same_surface_race_numbers.append(
+        item.get(
+            "race_number"
+        )
+    )
+
+
+# ============================================================
+# 取得エラー
+# ============================================================
+
+collector_errors = (
+    collector_data.get(
+        "errors",
+        []
+    )
+    or []
+)
+
+if not isinstance(
+    collector_errors,
+    list,
+):
+    collector_errors = []
+
+
+# ============================================================
+# 状態
+# ============================================================
+
+if target_race_number == 1:
+    overall_status = (
+        "no_previous_races"
+    )
+
+elif collector_errors:
+    overall_status = (
+        "collected_with_errors"
+    )
+
+elif collected_races:
+    overall_status = (
+        "collected"
+    )
+
+else:
+    overall_status = (
+        "no_previous_races"
+    )
+
+
+# ============================================================
+# 新形式を残したまま
+# 既存形式を追加
+#
+# これにより:
+#
+# 新:
+#   races
+#   finishers
+#   laps
+#   corner_orders
+#
+# 旧:
+#   collected_races
+#   results
+#   race_laps
+#   corner_positions
+#
+# の両方がday_races.jsonに残る。
+# ============================================================
+
+output = dict(
+    collector_data
+)
+
+
+output[
+    "race_id"
+] = race_id
+
+output[
+    "race_date"
+] = race_date
+
+output[
+    "racecourse"
+] = racecourse
+
+output[
+    "surface"
+] = target_surface
+
+output[
+    "distance"
+] = target_distance
+
+output[
+    "target_race_number"
+] = target_race_number
+
+output[
+    "future_race_usage"
+] = False
+
+output[
+    "status"
+] = overall_status
+
+output[
+    "same_surface_race_numbers"
+] = (
+    same_surface_race_numbers
+)
+
+output[
+    "same_surface_race_count"
+] = len(
+    same_surface_race_numbers
+)
+
+output[
+    "collected_race_count"
+] = len(
+    collected_races
+)
+
+output[
+    "collected_races"
+] = collected_races
+
+output[
+    "collector_error_count"
+] = len(
+    collector_errors
+)
+
+output[
+    "compatibility_schema"
+] = True
+
+output[
+    "compatibility_updated_at"
+] = now_jst()
+
+
+# ============================================================
+# 最終安全確認
+# ============================================================
+
+for item in output[
+    "collected_races"
+]:
+    race_number = safe_int(
+        item.get(
+            "race_number"
+        )
+    )
+
+    if (
+        race_number is None
+        or race_number
+        >= target_race_number
+    ):
+        raise RuntimeError(
+            "最終未来レースチェックに"
+            "失敗しました。"
+        )
+
+
+if (
+    output.get(
+        "target_race_included"
+    )
+    is True
+):
+    raise RuntimeError(
+        "最終チェックで対象レース混入を"
+        "検出しました。"
+    )
+
+
+# ============================================================
+# 保存
+# ============================================================
+
+save_json(
+    OUTPUT_FILE,
+    output,
+)
+
+
+# ============================================================
 # ログ
-# =========================================================
+# ============================================================
 
 print()
 print(
-    "===== DAY RACES RESULT ====="
+    "===== DAY RACES BRIDGE RESULT ====="
+)
+
+print(
+    "collector:",
+    COLLECTOR_FILE,
+)
+
+print(
+    "mode:",
+    output.get(
+        "mode"
+    ),
 )
 
 print(
     "target race:",
-    target_race_number
-)
-
-print(
-    "eligible:",
-    eligible_race_numbers
+    target_race_number,
 )
 
 print(
     "collected:",
     len(
         collected_races
-    )
+    ),
 )
 
 print(
     "same surface:",
-    same_surface_races
+    same_surface_race_numbers,
+)
+
+print(
+    "collector errors:",
+    len(
+        collector_errors
+    ),
 )
 
 print(
     "future race usage:",
-    False
+    output.get(
+        "future_race_usage"
+    ),
 )
 
 print(
+    "target included:",
+    output.get(
+        "target_race_included"
+    ),
+)
+
+print(
+    "compatibility schema:",
+    output.get(
+        "compatibility_schema"
+    ),
+)
+
+print()
+
+
+for item in collected_races:
+    print(
+        f"{item.get('race_number')}R",
+        item.get(
+            "race_id"
+        ),
+        item.get(
+            "surface"
+        ),
+        item.get(
+            "distance"
+        ),
+        item.get(
+            "track_condition"
+        ),
+        "status=",
+        item.get(
+            "status"
+        ),
+        "results=",
+        item.get(
+            "result_count"
+        ),
+        "laps=",
+        len(
+            item.get(
+                "race_laps",
+                []
+            )
+            or []
+        ),
+    )
+
+
+print()
+print(
     "saved:",
-    OUTPUT_FILE
+    OUTPUT_FILE,
+)
+
+print(
+    "==================================="
 )
