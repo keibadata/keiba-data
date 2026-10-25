@@ -1,0 +1,343 @@
+name: Day Result Collector Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      race_id:
+        description: "12-digit Race ID"
+        required: true
+        default: "202608040912"
+
+permissions:
+  contents: read
+
+jobs:
+  test-day-result:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Validate Race ID
+        shell: bash
+        run: |
+          RACE_ID="${{ github.event.inputs.race_id }}"
+
+          if [[ ! "$RACE_ID" =~ ^[0-9]{12}$ ]]; then
+            echo "ERROR: Race ID must be exactly 12 digits."
+            exit 1
+          fi
+
+          echo "Race ID: $RACE_ID"
+
+      - name: Prepare test race.json
+        shell: bash
+        run: |
+          RACE_ID="${{ github.event.inputs.race_id }}"
+
+          python - "$RACE_ID" <<'PY'
+          import json
+          import sys
+
+          race_id = sys.argv[1]
+
+          track_codes = {
+              "01": "札幌",
+              "02": "函館",
+              "03": "福島",
+              "04": "新潟",
+              "05": "東京",
+              "06": "中山",
+              "07": "中京",
+              "08": "京都",
+              "09": "阪神",
+              "10": "小倉",
+          }
+
+          track_code = race_id[4:6]
+          race_number = int(race_id[10:12])
+
+          data = {
+              "race_id": race_id,
+              "racecourse": track_codes.get(
+                  track_code,
+                  ""
+              ),
+              "track": track_codes.get(
+                  track_code,
+                  ""
+              ),
+              "race_number": race_number,
+          }
+
+          with open(
+              "race.json",
+              "w",
+              encoding="utf-8"
+          ) as f:
+              json.dump(
+                  data,
+                  f,
+                  ensure_ascii=False,
+                  indent=2
+              )
+
+          print(
+              json.dumps(
+                  data,
+                  ensure_ascii=False,
+                  indent=2
+              )
+          )
+          PY
+
+      - name: Collect target race result
+        run: |
+          python day_race_collector.py \
+            --include-target \
+            --output day_result_test.json
+
+      - name: Validate target result
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open(
+              "day_result_test.json",
+              "r",
+              encoding="utf-8"
+          ) as f:
+              data = json.load(f)
+
+          target_id = str(
+              data.get(
+                  "target_race_id",
+                  ""
+              )
+          )
+
+          races = data.get(
+              "races",
+              []
+          )
+
+          target = None
+
+          for race in races:
+              if str(
+                  race.get(
+                      "race_id",
+                      ""
+                  )
+              ) == target_id:
+                  target = race
+                  break
+
+          if target is None:
+              print(
+                  "ERROR: target race not found"
+              )
+              sys.exit(1)
+
+          if not target.get(
+              "finished"
+          ):
+              print(
+                  "ERROR: target race was not detected as finished"
+              )
+              sys.exit(1)
+
+          finishers = target.get(
+              "finishers",
+              []
+          )
+
+          if not finishers:
+              print(
+                  "ERROR: no finishers were collected"
+              )
+              sys.exit(1)
+
+          print()
+          print(
+              "===== TARGET RESULT ====="
+          )
+
+          print(
+              "Race ID:",
+              target.get(
+                  "race_id"
+              )
+          )
+
+          print(
+              "Race:",
+              target.get(
+                  "race_number"
+              )
+          )
+
+          print(
+              "Name:",
+              target.get(
+                  "race_name"
+              )
+          )
+
+          print(
+              "Surface:",
+              target.get(
+                  "surface"
+              )
+          )
+
+          print(
+              "Distance:",
+              target.get(
+                  "distance"
+              )
+          )
+
+          print(
+              "Track condition:",
+              target.get(
+                  "track_condition"
+              )
+          )
+
+          print(
+              "Pace:",
+              target.get(
+                  "pace"
+              )
+          )
+
+          print(
+              "Laps:",
+              target.get(
+                  "laps"
+              )
+          )
+
+          print()
+          print(
+              "===== FINISHERS ====="
+          )
+
+          for horse in finishers:
+              print(
+                  horse.get(
+                      "finish"
+                  ),
+                  "着",
+                  "馬番",
+                  horse.get(
+                      "horse_number"
+                  ),
+                  horse.get(
+                      "horse_name"
+                  ),
+                  "TIME",
+                  horse.get(
+                      "race_time"
+                  ),
+                  "CORNER",
+                  horse.get(
+                      "corner_order"
+                  ),
+                  "LAST3F",
+                  horse.get(
+                      "last3f"
+                  ),
+                  "人気",
+                  horse.get(
+                      "popularity"
+                  ),
+              )
+
+          print()
+          print(
+              "Finisher count:",
+              len(finishers)
+          )
+
+          print(
+              "===== VALIDATION ====="
+          )
+
+          required_fields = [
+              "finish",
+              "horse_number",
+              "horse_name",
+          ]
+
+          missing = []
+
+          for index, horse in enumerate(
+              finishers,
+              start=1
+          ):
+              for field in required_fields:
+                  value = horse.get(
+                      field
+                  )
+
+                  if value in [
+                      None,
+                      "",
+                  ]:
+                      missing.append(
+                          {
+                              "row": index,
+                              "field": field,
+                          }
+                      )
+
+          if missing:
+              print(
+                  "ERROR: required fields missing"
+              )
+
+              for item in missing:
+                  print(
+                      item
+                  )
+
+              sys.exit(1)
+
+          print(
+              "TARGET RESULT VALIDATION OK"
+          )
+          PY
+
+      - name: Show JSON
+        if: always()
+        run: |
+          echo "===== day_result_test.json ====="
+
+          if [ -f day_result_test.json ]; then
+            cat day_result_test.json
+          else
+            echo "day_result_test.json was not created"
+          fi
+
+      - name: Upload test result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: day-result-test
+          path: day_result_test.json
+          if-no-files-found: warn
