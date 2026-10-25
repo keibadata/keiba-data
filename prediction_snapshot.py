@@ -1,8 +1,11 @@
+import html
 import json
 import os
 import re
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+
+import requests
 
 
 RACE_FILE = "race.json"
@@ -10,6 +13,9 @@ FINAL_ANALYSIS_FILE = "final_analysis.json"
 OUTPUT_ROOT = Path("prediction_snapshots")
 
 JST = timezone(timedelta(hours=9))
+TIMEOUT = 20
+
+SCHEMA_VERSION = 2
 
 
 def load_json(path):
@@ -52,13 +58,27 @@ def save_json(path, data):
 def normalize_text(value):
     value = str(
         value or ""
-    ).strip()
+    )
+
+    translation = str.maketrans(
+        "０１２３４５６７８９：．－＋",
+        "0123456789:.-+",
+    )
+
+    value = value.translate(
+        translation
+    )
+
+    value = value.replace(
+        "\u3000",
+        " "
+    )
 
     return re.sub(
         r"\s+",
         " ",
         value
-    )
+    ).strip()
 
 
 def normalize_race_id(value):
@@ -123,6 +143,75 @@ def parse_race_date(value):
         return None
 
 
+def normalize_start_time(value):
+    text = normalize_text(
+        value
+    )
+
+    match = re.fullmatch(
+        r"(\d{1,2}):(\d{2})",
+        text
+    )
+
+    if not match:
+        return ""
+
+    hour = int(
+        match.group(1)
+    )
+
+    minute = int(
+        match.group(2)
+    )
+
+    if not (
+        0 <= hour <= 23
+        and 0 <= minute <= 59
+    ):
+        return ""
+
+    return (
+        f"{hour:02d}:"
+        f"{minute:02d}"
+    )
+
+
+def build_race_start_at(
+    race_date_value,
+    race_start_time
+):
+    race_day = parse_race_date(
+        race_date_value
+    )
+
+    start_time = normalize_start_time(
+        race_start_time
+    )
+
+    if (
+        race_day is None
+        or not start_time
+    ):
+        return None
+
+    hour, minute = [
+        int(value)
+        for value
+        in start_time.split(":")
+    ]
+
+    return datetime(
+        year=race_day.year,
+        month=race_day.month,
+        day=race_day.day,
+        hour=hour,
+        minute=minute,
+        second=0,
+        microsecond=0,
+        tzinfo=JST,
+    )
+
+
 def safe_timestamp(
     value,
     fallback
@@ -139,51 +228,382 @@ def safe_timestamp(
     )
 
 
+def build_headers():
+    return {
+        "User-Agent": (
+            "Mozilla/5.0 "
+            "(iPhone; CPU iPhone OS 18_0 like Mac OS X) "
+            "AppleWebKit/605.1.15 "
+            "(KHTML, like Gecko) "
+            "Version/18.0 "
+            "Mobile/15E148 Safari/604.1"
+        ),
+        "Accept": (
+            "text/html,"
+            "application/xhtml+xml,"
+            "application/xml;q=0.9,"
+            "*/*;q=0.8"
+        ),
+        "Accept-Language": (
+            "ja,en-US;q=0.8,en;q=0.6"
+        ),
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    }
+
+
+def fetch_html(url):
+    response = requests.get(
+        url,
+        headers=build_headers(),
+        timeout=TIMEOUT,
+        allow_redirects=True,
+    )
+
+    response.raise_for_status()
+
+    if (
+        not response.encoding
+        or response.encoding.lower()
+        in [
+            "iso-8859-1",
+            "ascii",
+        ]
+    ):
+        response.encoding = (
+            response.apparent_encoding
+        )
+
+    return (
+        response.text,
+        response.url,
+    )
+
+
+def html_to_text(raw_html):
+    text = re.sub(
+        r"(?is)<script.*?>.*?</script>",
+        " ",
+        raw_html,
+    )
+
+    text = re.sub(
+        r"(?is)<style.*?>.*?</style>",
+        " ",
+        text,
+    )
+
+    text = re.sub(
+        r"(?is)<[^>]+>",
+        " ",
+        text,
+    )
+
+    text = html.unescape(
+        text
+    )
+
+    return normalize_text(
+        text
+    )
+
+
+def extract_start_time_from_text(text):
+    text = normalize_text(
+        text
+    )
+
+    if not text:
+        return ""
+
+    patterns = [
+        (
+            r"発走(?:時刻)?"
+            r"\s*[:：]?\s*"
+            r"(\d{1,2})"
+            r"\s*[:時]\s*"
+            r"(\d{2})"
+        ),
+        (
+            r"(\d{1,2})"
+            r"\s*[:時]\s*"
+            r"(\d{2})"
+            r"\s*分?"
+            r"\s*発走"
+        ),
+        (
+            r"(\d{1,2})"
+            r":"
+            r"(\d{2})"
+            r"\s+"
+            r"(?:芝|ダ(?:ート)?)"
+            r"\s*"
+            r"\d{3,4}"
+            r"\s*m"
+        ),
+    ]
+
+    for pattern in patterns:
+        match = re.search(
+            pattern,
+            text,
+            re.IGNORECASE,
+        )
+
+        if not match:
+            continue
+
+        try:
+            hour = int(
+                match.group(1)
+            )
+
+            minute = int(
+                match.group(2)
+            )
+
+        except Exception:
+            continue
+
+        if (
+            7 <= hour <= 20
+            and 0 <= minute <= 59
+        ):
+            return (
+                f"{hour:02d}:"
+                f"{minute:02d}"
+            )
+
+    return ""
+
+
+def build_source_urls(
+    race_id,
+    race
+):
+    urls = []
+
+    source_url = normalize_text(
+        race.get(
+            "source_url"
+        )
+    )
+
+    if source_url:
+        urls.append(
+            source_url
+        )
+
+    shutuba_url = (
+        "https://race.netkeiba.com/"
+        "race/shutuba.html"
+        f"?race_id={race_id}"
+    )
+
+    result_url = (
+        "https://race.netkeiba.com/"
+        "race/result.html"
+        f"?race_id={race_id}"
+    )
+
+    for url in [
+        shutuba_url,
+        result_url,
+    ]:
+        if url not in urls:
+            urls.append(
+                url
+            )
+
+    return urls
+
+
+def fetch_race_start_time(
+    race_id,
+    race
+):
+    errors = []
+
+    for url in build_source_urls(
+        race_id,
+        race
+    ):
+        try:
+            raw_html, final_url = (
+                fetch_html(
+                    url
+                )
+            )
+
+            visible_text = html_to_text(
+                raw_html
+            )
+
+            start_time = (
+                extract_start_time_from_text(
+                    visible_text
+                )
+            )
+
+            if start_time:
+                return {
+                    "start_time": start_time,
+                    "source": "netkeiba",
+                    "requested_url": url,
+                    "final_url": final_url,
+                    "error": "",
+                }
+
+            errors.append(
+                (
+                    f"start time not found: "
+                    f"{final_url}"
+                )
+            )
+
+        except Exception as exc:
+            errors.append(
+                (
+                    f"{url}: "
+                    f"{type(exc).__name__}: "
+                    f"{exc}"
+                )
+            )
+
+    return {
+        "start_time": "",
+        "source": "",
+        "requested_url": "",
+        "final_url": "",
+        "error": " | ".join(
+            errors
+        ),
+    }
+
+
 def build_timing(
     race_date_value,
+    race_start_time,
     saved_at
 ):
     race_day = parse_race_date(
         race_date_value
     )
 
-    saved_day = saved_at.date()
-
     if race_day is None:
         return {
-            "status": "race_date_unknown",
+            "status": (
+                "race_date_unknown"
+            ),
             "evaluation_eligible": None,
             "reason": (
                 "race_dateを確認できないため"
                 "発走前予想か判定できない"
             ),
+            "race_start_at": "",
         }
 
+    saved_at = saved_at.astimezone(
+        JST
+    )
+
+    saved_day = saved_at.date()
+
     if saved_day < race_day:
+        race_start_at = (
+            build_race_start_at(
+                race_date_value,
+                race_start_time,
+            )
+        )
+
         return {
-            "status": "before_race_date",
+            "status": (
+                "before_race_date"
+            ),
             "evaluation_eligible": True,
             "reason": (
                 "レース日前に保存された予想"
             ),
+            "race_start_at": (
+                race_start_at.isoformat()
+                if race_start_at
+                else ""
+            ),
         }
 
     if saved_day > race_day:
+        race_start_at = (
+            build_race_start_at(
+                race_date_value,
+                race_start_time,
+            )
+        )
+
         return {
-            "status": "after_race_date",
+            "status": (
+                "after_race_date"
+            ),
             "evaluation_eligible": False,
             "reason": (
                 "レース日後に保存されたため"
                 "事前予想検証には使用しない"
             ),
+            "race_start_at": (
+                race_start_at.isoformat()
+                if race_start_at
+                else ""
+            ),
+        }
+
+    race_start_at = (
+        build_race_start_at(
+            race_date_value,
+            race_start_time,
+        )
+    )
+
+    if race_start_at is None:
+        return {
+            "status": (
+                "same_day_start_time_unknown"
+            ),
+            "evaluation_eligible": None,
+            "reason": (
+                "同日保存だが発走時刻を"
+                "取得できないため"
+                "事前予想判定を保留"
+            ),
+            "race_start_at": "",
+        }
+
+    if saved_at < race_start_at:
+        return {
+            "status": (
+                "same_day_before_start"
+            ),
+            "evaluation_eligible": True,
+            "reason": (
+                "同日かつ予定発走時刻より"
+                "前に保存された予想"
+            ),
+            "race_start_at": (
+                race_start_at.isoformat()
+            ),
         }
 
     return {
-        "status": "same_day_unverified",
-        "evaluation_eligible": None,
+        "status": (
+            "same_day_at_or_after_start"
+        ),
+        "evaluation_eligible": False,
         "reason": (
-            "同日保存のため発走時刻取得後に"
-            "事前予想か判定する"
+            "同日だが予定発走時刻以降に"
+            "保存されたため"
+            "事前予想検証には使用しない"
+        ),
+        "race_start_at": (
+            race_start_at.isoformat()
         ),
     }
 
@@ -208,7 +628,8 @@ def validate_inputs(
         raise ValueError(
             "race_id mismatch: "
             f"race.json={race_id} "
-            f"final_analysis.json={final_race_id}"
+            f"final_analysis.json="
+            f"{final_race_id}"
         )
 
     ranking = final_analysis.get(
@@ -223,7 +644,8 @@ def validate_inputs(
         or not ranking
     ):
         raise ValueError(
-            "final_analysis.json has no ranking"
+            "final_analysis.json "
+            "has no ranking"
         )
 
     summary = final_analysis.get(
@@ -235,7 +657,8 @@ def validate_inputs(
         dict
     ):
         raise ValueError(
-            "final_analysis.json summary is missing"
+            "final_analysis.json "
+            "summary is missing"
         )
 
     runner_count = int(
@@ -248,7 +671,8 @@ def validate_inputs(
 
     if runner_count <= 0:
         raise ValueError(
-            "final_analysis runner_count is invalid"
+            "final_analysis "
+            "runner_count is invalid"
         )
 
     if len(ranking) != runner_count:
@@ -273,8 +697,10 @@ def validate_inputs(
     ):
         raise ValueError(
             "race horse_count mismatch: "
-            f"race.json={race_horse_count} "
-            f"final_analysis={runner_count}"
+            f"race.json="
+            f"{race_horse_count} "
+            f"final_analysis="
+            f"{runner_count}"
         )
 
     return race_id
@@ -296,11 +722,26 @@ def build_snapshot(
         )
     )
 
+    start_time_info = (
+        fetch_race_start_time(
+            race_id,
+            race,
+        )
+    )
+
+    race_start_time = (
+        start_time_info.get(
+            "start_time",
+            ""
+        )
+    )
+
     timing = build_timing(
         race.get(
             "race_date"
         ),
-        saved_at
+        race_start_time,
+        saved_at,
     )
 
     snapshot_id = (
@@ -310,6 +751,7 @@ def build_snapshot(
             source_updated_at,
             saved_at
         )
+        + "_v2"
     )
 
     race_context = {
@@ -379,10 +821,16 @@ def build_snapshot(
             )
             or 0
         ),
+
+        "scheduled_start_time": (
+            race_start_time
+        ),
     }
 
     return {
-        "schema_version": 1,
+        "schema_version": (
+            SCHEMA_VERSION
+        ),
 
         "snapshot_id": snapshot_id,
 
@@ -394,36 +842,73 @@ def build_snapshot(
             source_updated_at
         ),
 
-        "source_race_updated_at": normalize_text(
-            race.get(
-                "updated_at"
+        "source_race_updated_at": (
+            normalize_text(
+                race.get(
+                    "updated_at"
+                )
             )
         ),
 
         "snapshot_kind": "prediction",
 
         "provenance": {
-            "github_run_id": normalize_text(
-                os.environ.get(
-                    "GITHUB_RUN_ID"
+            "github_run_id": (
+                normalize_text(
+                    os.environ.get(
+                        "GITHUB_RUN_ID"
+                    )
                 )
             ),
 
-            "github_run_number": normalize_text(
-                os.environ.get(
-                    "GITHUB_RUN_NUMBER"
+            "github_run_number": (
+                normalize_text(
+                    os.environ.get(
+                        "GITHUB_RUN_NUMBER"
+                    )
                 )
             ),
 
-            "github_workflow": normalize_text(
-                os.environ.get(
-                    "GITHUB_WORKFLOW"
+            "github_workflow": (
+                normalize_text(
+                    os.environ.get(
+                        "GITHUB_WORKFLOW"
+                    )
                 )
             ),
 
-            "github_sha": normalize_text(
-                os.environ.get(
-                    "GITHUB_SHA"
+            "github_sha": (
+                normalize_text(
+                    os.environ.get(
+                        "GITHUB_SHA"
+                    )
+                )
+            ),
+        },
+
+        "start_time_source": {
+            "source": (
+                start_time_info.get(
+                    "source",
+                    ""
+                )
+            ),
+            "requested_url": (
+                start_time_info.get(
+                    "requested_url",
+                    ""
+                )
+            ),
+            "final_url": (
+                start_time_info.get(
+                    "final_url",
+                    ""
+                )
+            ),
+            "error": (
+                start_time_info.get(
+                    "error",
+                    ""
                 )
             ),
         },
@@ -432,11 +917,13 @@ def build_snapshot(
 
         "race": race_context,
 
-        "analysis_mode": normalize_text(
-            final_analysis.get(
-                "analysis_mode"
+        "analysis_mode": (
+            normalize_text(
+                final_analysis.get(
+                    "analysis_mode"
+                )
+                or "normal"
             )
-            or "normal"
         ),
 
         "analysis": final_analysis,
@@ -512,27 +999,122 @@ def validate_existing_snapshot(
         )
     ):
         raise ValueError(
-            "existing snapshot race_id mismatch: "
+            "existing snapshot "
+            "race_id mismatch: "
             f"{path}"
         )
 
-    existing_analysis = existing.get(
-        "analysis"
-    )
-
-    current_analysis = snapshot.get(
-        "analysis"
-    )
-
     if (
-        existing_analysis
-        != current_analysis
+        existing.get(
+            "analysis"
+        )
+        != snapshot.get(
+            "analysis"
+        )
     ):
         raise ValueError(
             "snapshot path already exists "
             "but analysis content differs: "
             f"{path}"
         )
+
+
+def run_timing_self_test(
+    race_date_value,
+    race_start_time
+):
+    race_start_at = (
+        build_race_start_at(
+            race_date_value,
+            race_start_time,
+        )
+    )
+
+    if race_start_at is None:
+        raise ValueError(
+            "TIMING SELF TEST FAILED: "
+            "race start datetime unavailable"
+        )
+
+    before_time = (
+        race_start_at
+        - timedelta(
+            minutes=1
+        )
+    )
+
+    after_time = (
+        race_start_at
+        + timedelta(
+            minutes=1
+        )
+    )
+
+    before_result = build_timing(
+        race_date_value,
+        race_start_time,
+        before_time,
+    )
+
+    after_result = build_timing(
+        race_date_value,
+        race_start_time,
+        after_time,
+    )
+
+    if (
+        before_result.get(
+            "status"
+        )
+        != "same_day_before_start"
+        or before_result.get(
+            "evaluation_eligible"
+        )
+        is not True
+    ):
+        raise ValueError(
+            "TIMING SELF TEST FAILED: "
+            "before-start判定が不正"
+        )
+
+    if (
+        after_result.get(
+            "status"
+        )
+        != "same_day_at_or_after_start"
+        or after_result.get(
+            "evaluation_eligible"
+        )
+        is not False
+    ):
+        raise ValueError(
+            "TIMING SELF TEST FAILED: "
+            "after-start判定が不正"
+        )
+
+    print(
+        "TIMING SELF TEST OK"
+    )
+
+    print(
+        "before:",
+        before_result[
+            "status"
+        ],
+        before_result[
+            "evaluation_eligible"
+        ],
+    )
+
+    print(
+        "after:",
+        after_result[
+            "status"
+        ],
+        after_result[
+            "evaluation_eligible"
+        ],
+    )
 
 
 def main():
@@ -554,6 +1136,26 @@ def main():
         saved_at=saved_at,
     )
 
+    race_start_time = (
+        snapshot.get(
+            "race",
+            {}
+        ).get(
+            "scheduled_start_time",
+            ""
+        )
+    )
+
+    if race_start_time:
+        run_timing_self_test(
+            snapshot[
+                "race"
+            ][
+                "race_date"
+            ],
+            race_start_time,
+        )
+
     output_path = snapshot_path(
         snapshot
     )
@@ -565,7 +1167,8 @@ def main():
         )
 
         print(
-            "PREDICTION SNAPSHOT ALREADY EXISTS"
+            "PREDICTION SNAPSHOT "
+            "ALREADY EXISTS"
         )
 
     else:
@@ -613,6 +1216,15 @@ def main():
     )
 
     print(
+        "scheduled_start_time:",
+        snapshot[
+            "race"
+        ][
+            "scheduled_start_time"
+        ]
+    )
+
+    print(
         "analysis_mode:",
         snapshot[
             "analysis_mode"
@@ -643,6 +1255,15 @@ def main():
             "timing"
         ][
             "evaluation_eligible"
+        ]
+    )
+
+    print(
+        "race_start_at:",
+        snapshot[
+            "timing"
+        ][
+            "race_start_at"
         ]
     )
 
