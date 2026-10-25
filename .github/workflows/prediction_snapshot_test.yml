@@ -1,0 +1,295 @@
+name: Prediction Snapshot Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prediction-snapshot-test
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate source files
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          import sys
+
+          with open("race.json", encoding="utf-8") as f:
+              race = json.load(f)
+
+          with open("final_analysis.json", encoding="utf-8") as f:
+              final_analysis = json.load(f)
+
+          race_id = str(
+              race.get("race_id", "")
+          ).strip()
+
+          final_race_id = str(
+              final_analysis.get("race_id", "")
+          ).strip()
+
+          if not re.fullmatch(
+              r"\d{12}",
+              race_id
+          ):
+              sys.exit(
+                  "ERROR: race.json race_id is invalid"
+              )
+
+          if race_id != final_race_id:
+              sys.exit(
+                  "ERROR: race_id mismatch: "
+                  f"race.json={race_id} "
+                  f"final_analysis.json={final_race_id}"
+              )
+
+          ranking = final_analysis.get(
+              "ranking",
+              []
+          )
+
+          runner_count = int(
+              final_analysis
+              .get("summary", {})
+              .get("runner_count", 0)
+              or 0
+          )
+
+          if runner_count <= 0:
+              sys.exit(
+                  "ERROR: runner_count is invalid"
+              )
+
+          if len(ranking) != runner_count:
+              sys.exit(
+                  "ERROR: ranking count mismatch: "
+                  f"{len(ranking)}/{runner_count}"
+              )
+
+          print(
+              "SOURCE VALIDATION OK"
+          )
+
+          print(
+              "race_id:",
+              race_id
+          )
+
+          print(
+              "runner_count:",
+              runner_count
+          )
+          PY
+
+      - name: Save prediction snapshot
+        run: python prediction_snapshot.py
+
+      - name: Validate prediction snapshot
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          with open("race.json", encoding="utf-8") as f:
+              race = json.load(f)
+
+          with open("final_analysis.json", encoding="utf-8") as f:
+              final_analysis = json.load(f)
+
+          race_id = str(
+              race.get("race_id", "")
+          ).strip()
+
+          race_date = (
+              str(
+                  race.get(
+                      "race_date",
+                      ""
+                  )
+              ).strip()
+              or "date_unknown"
+          )
+
+          snapshot_dir = (
+              Path("prediction_snapshots")
+              / race_date
+              / race_id
+          )
+
+          if not snapshot_dir.exists():
+              sys.exit(
+                  "ERROR: snapshot directory "
+                  "was not created: "
+                  + snapshot_dir.as_posix()
+              )
+
+          snapshots = sorted(
+              snapshot_dir.glob(
+                  "*.json"
+              )
+          )
+
+          if not snapshots:
+              sys.exit(
+                  "ERROR: prediction snapshot "
+                  "was not created"
+              )
+
+          source_updated_at = str(
+              final_analysis.get(
+                  "updated_at",
+                  ""
+              )
+          ).strip()
+
+          matched = []
+
+          for path in snapshots:
+              with open(
+                  path,
+                  encoding="utf-8"
+              ) as f:
+                  data = json.load(
+                      f
+                  )
+
+              if (
+                  str(
+                      data
+                      .get("race", {})
+                      .get("race_id", "")
+                  ).strip()
+                  == race_id
+                  and str(
+                      data.get(
+                          "source_final_analysis_updated_at",
+                          ""
+                      )
+                  ).strip()
+                  == source_updated_at
+              ):
+                  matched.append(
+                      (
+                          path,
+                          data
+                      )
+                  )
+
+          if len(matched) != 1:
+              sys.exit(
+                  "ERROR: expected exactly one "
+                  "matching snapshot, found "
+                  + str(
+                      len(matched)
+                  )
+              )
+
+          path, snapshot = matched[0]
+
+          if (
+              snapshot.get(
+                  "snapshot_kind"
+              )
+              != "prediction"
+          ):
+              sys.exit(
+                  "ERROR: snapshot_kind "
+                  "must be prediction"
+              )
+
+          if (
+              snapshot.get(
+                  "analysis"
+              )
+              != final_analysis
+          ):
+              sys.exit(
+                  "ERROR: saved analysis differs "
+                  "from final_analysis.json"
+              )
+
+          timing = snapshot.get(
+              "timing",
+              {}
+          )
+
+          timing_status = str(
+              timing.get(
+                  "status",
+                  ""
+              )
+          ).strip()
+
+          if not timing_status:
+              sys.exit(
+                  "ERROR: timing status is missing"
+              )
+
+          print(
+              "PREDICTION SNAPSHOT VALIDATION OK"
+          )
+
+          print(
+              "snapshot:",
+              path.as_posix()
+          )
+
+          print(
+              "timing_status:",
+              timing_status
+          )
+
+          print(
+              "evaluation_eligible:",
+              timing.get(
+                  "evaluation_eligible"
+              )
+          )
+          PY
+
+      - name: Commit prediction snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -- prediction_snapshots
+
+          if git diff --cached --quiet; then
+            echo "No prediction snapshot changes"
+            exit 0
+          fi
+
+          RACE_ID="$(python - <<'PY'
+          import json
+
+          with open("race.json", encoding="utf-8") as f:
+              print(
+                  json.load(f).get(
+                      "race_id",
+                      ""
+                  )
+              )
+          PY
+          )"
+
+          git commit -m "Save prediction snapshot ${RACE_ID}"
+          git push
