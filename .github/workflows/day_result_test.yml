@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  inspect-netkeiba-html:
+  test-day-result-collector:
     runs-on: ubuntu-latest
 
     steps:
@@ -41,484 +41,637 @@ jobs:
 
           echo "Race ID: $RACE_ID"
 
-      - name: Fetch and inspect netkeiba HTML
+      - name: Create test race.json
         shell: bash
         run: |
-          RACE_ID="${{ github.event.inputs.race_id }}"
-
-          python - "$RACE_ID" <<'PY'
+          python - <<'PY'
           import json
-          import re
-          import sys
+          import os
 
-          import requests
-          from bs4 import BeautifulSoup
+          race_id = "${{ github.event.inputs.race_id }}"
 
-
-          race_id = sys.argv[1]
-
-          url = (
-              "https://race.netkeiba.com/"
-              "race/result.html"
-              f"?race_id={race_id}"
-          )
-
-          headers = {
-              "User-Agent": (
-                  "Mozilla/5.0 "
-                  "(iPhone; CPU iPhone OS 18_0 like Mac OS X) "
-                  "AppleWebKit/605.1.15 "
-                  "(KHTML, like Gecko) "
-                  "Version/18.0 "
-                  "Mobile/15E148 Safari/604.1"
-              ),
-              "Accept": (
-                  "text/html,"
-                  "application/xhtml+xml,"
-                  "application/xml;q=0.9,"
-                  "*/*;q=0.8"
-              ),
-              "Accept-Language": "ja,en-US;q=0.8,en;q=0.6",
-              "Cache-Control": "no-cache",
-              "Pragma": "no-cache",
+          track_codes = {
+              "01": "札幌",
+              "02": "函館",
+              "03": "福島",
+              "04": "新潟",
+              "05": "東京",
+              "06": "中山",
+              "07": "中京",
+              "08": "京都",
+              "09": "阪神",
+              "10": "小倉",
           }
 
-          response = requests.get(
-              url,
-              headers=headers,
-              timeout=30,
-              allow_redirects=True,
-          )
+          track_code = race_id[4:6]
+          race_number = int(race_id[10:12])
 
-          print()
-          print("===== HTTP =====")
-          print("requested:", url)
-          print("status:", response.status_code)
-          print("final_url:", response.url)
-          print("content_type:", response.headers.get("content-type"))
-          print("content_length:", len(response.content))
-
-          response.raise_for_status()
-
-          if (
-              not response.encoding
-              or response.encoding.lower()
-              in ["iso-8859-1", "ascii"]
-          ):
-              response.encoding = response.apparent_encoding
-
-          html = response.text
-
-          with open(
-              "netkeiba_result_raw.html",
-              "w",
-              encoding="utf-8",
-          ) as f:
-              f.write(html)
-
-          soup = BeautifulSoup(
-              html,
-              "html.parser",
-          )
-
-          title = ""
-
-          if soup.title:
-              title = soup.title.get_text(
-                  " ",
-                  strip=True,
-              )
-
-          body_text = soup.get_text(
-              " ",
-              strip=True,
-          )
-
-          print()
-          print("===== PAGE =====")
-          print("title:", title)
-          print("html_chars:", len(html))
-          print("text_chars:", len(body_text))
-
-          keywords = [
-              "着順",
-              "馬名",
-              "タイム",
-              "上り",
-              "ハロンタイム",
-              "コーナー通過順位",
-              "払戻",
-              "オッズ",
-              "netkeiba",
-          ]
-
-          print()
-          print("===== KEYWORDS =====")
-
-          keyword_result = {}
-
-          for keyword in keywords:
-              exists = keyword in body_text
-              keyword_result[keyword] = exists
-              print(
-                  keyword,
-                  ":",
-                  exists,
-              )
-
-          print()
-          print("===== TABLES =====")
-
-          tables = soup.find_all("table")
-
-          print(
-              "table_count:",
-              len(tables),
-          )
-
-          table_info = []
-
-          for index, table in enumerate(
-              tables,
-              start=1,
-          ):
-              classes = table.get(
-                  "class",
-                  [],
-              )
-
-              table_text = re.sub(
-                  r"\s+",
-                  " ",
-                  table.get_text(
-                      " ",
-                      strip=True,
-                  ),
-              )
-
-              rows = table.find_all("tr")
-
-              info = {
-                  "index": index,
-                  "classes": classes,
-                  "row_count": len(rows),
-                  "text_preview": table_text[:500],
-              }
-
-              table_info.append(info)
-
-              print()
-              print(
-                  f"TABLE {index}"
-              )
-              print(
-                  "classes:",
-                  classes,
-              )
-              print(
-                  "rows:",
-                  len(rows),
-              )
-              print(
-                  "preview:",
-                  table_text[:500],
-              )
-
-          print()
-          print("===== TR ANALYSIS =====")
-
-          all_rows = soup.find_all("tr")
-
-          print(
-              "all_tr_count:",
-              len(all_rows),
-          )
-
-          row_info = []
-
-          for index, row in enumerate(
-              all_rows,
-              start=1,
-          ):
-              cells = row.find_all(
-                  ["th", "td"]
-              )
-
-              if not cells:
-                  continue
-
-              row_text = re.sub(
-                  r"\s+",
-                  " ",
-                  row.get_text(
-                      " ",
-                      strip=True,
-                  ),
-              )
-
-              cell_info = []
-
-              for cell_index, cell in enumerate(
-                  cells,
-                  start=1,
-              ):
-                  cell_text = re.sub(
-                      r"\s+",
-                      " ",
-                      cell.get_text(
-                          " ",
-                          strip=True,
-                      ),
-                  )
-
-                  cell_info.append(
-                      {
-                          "index": cell_index,
-                          "tag": cell.name,
-                          "classes": cell.get(
-                              "class",
-                              [],
-                          ),
-                          "text": cell_text[:200],
-                      }
-                  )
-
-              row_data = {
-                  "index": index,
-                  "classes": row.get(
-                      "class",
-                      [],
-                  ),
-                  "cell_count": len(cells),
-                  "text": row_text[:1000],
-                  "cells": cell_info,
-              }
-
-              row_info.append(
-                  row_data
-              )
-
-              if index <= 40:
-                  print()
-                  print(
-                      f"ROW {index}"
-                  )
-                  print(
-                      "classes:",
-                      row.get(
-                          "class",
-                          [],
-                      ),
-                  )
-                  print(
-                      "cells:",
-                      len(cells),
-                  )
-                  print(
-                      "text:",
-                      row_text[:1000],
-                  )
-
-                  for cell in cell_info:
-                      print(
-                          "  CELL",
-                          cell["index"],
-                          "tag=",
-                          cell["tag"],
-                          "class=",
-                          cell["classes"],
-                          "text=",
-                          cell["text"],
-                      )
-
-          print()
-          print("===== HORSE LINKS =====")
-
-          horse_links = []
-
-          for link in soup.find_all(
-              "a",
-              href=True,
-          ):
-              href = link.get(
-                  "href",
-                  "",
-              )
-
-              if (
-                  "/horse/" in href
-                  or "horse.netkeiba.com" in href
-              ):
-                  name = re.sub(
-                      r"\s+",
-                      " ",
-                      link.get_text(
-                          " ",
-                          strip=True,
-                      ),
-                  )
-
-                  horse_links.append(
-                      {
-                          "text": name,
-                          "href": href,
-                      }
-                  )
-
-          print(
-              "horse_link_count:",
-              len(horse_links),
-          )
-
-          for item in horse_links[:30]:
-              print(
-                  item["text"],
-                  "=>",
-                  item["href"],
-              )
-
-          print()
-          print("===== CLASS NAMES =====")
-
-          class_names = set()
-
-          for element in soup.find_all(
-              class_=True
-          ):
-              for class_name in element.get(
-                  "class",
-                  [],
-              ):
-                  class_names.add(
-                      str(class_name)
-                  )
-
-          interesting_classes = sorted(
-              class_name
-              for class_name in class_names
-              if any(
-                  keyword.lower()
-                  in class_name.lower()
-                  for keyword in [
-                      "race",
-                      "result",
-                      "horse",
-                      "rank",
-                      "order",
-                      "time",
-                      "agari",
-                      "corner",
-                      "odds",
-                      "pop",
-                      "num",
-                  ]
-              )
-          )
-
-          for class_name in interesting_classes:
-              print(class_name)
-
-          diagnosis = {
+          race = {
               "race_id": race_id,
-              "requested_url": url,
-              "final_url": response.url,
-              "status_code": response.status_code,
-              "content_type": response.headers.get(
-                  "content-type"
-              ),
-              "content_length": len(
-                  response.content
-              ),
-              "html_chars": len(html),
-              "title": title,
-              "keywords": keyword_result,
-              "table_count": len(
-                  tables
-              ),
-              "all_tr_count": len(
-                  all_rows
-              ),
-              "horse_link_count": len(
-                  horse_links
-              ),
-              "tables": table_info,
-              "rows": row_info,
-              "horse_links": horse_links,
-              "interesting_classes": (
-                  interesting_classes
-              ),
+              "race_date": "2026-10-25",
+              "racecourse": track_codes.get(track_code, ""),
+              "track": track_codes.get(track_code, ""),
+              "surface": "芝",
+              "distance": 1400,
+              "race_number": race_number,
           }
 
           with open(
-              "netkeiba_html_diagnosis.json",
+              "race.json",
               "w",
               encoding="utf-8",
           ) as f:
               json.dump(
-                  diagnosis,
+                  race,
                   f,
                   ensure_ascii=False,
                   indent=2,
               )
 
-          print()
-          print("===== DIAGNOSIS SUMMARY =====")
+          print("Created race.json")
           print(
-              "status:",
-              response.status_code,
-          )
-          print(
-              "title:",
-              title,
-          )
-          print(
-              "tables:",
-              len(tables),
-          )
-          print(
-              "rows:",
-              len(all_rows),
-          )
-          print(
-              "horse links:",
-              len(horse_links),
-          )
-
-          if len(html) < 1000:
-              print(
-                  "WARNING: HTML is unusually small."
+              json.dumps(
+                  race,
+                  ensure_ascii=False,
+                  indent=2,
               )
-
-          if not horse_links:
-              print(
-                  "WARNING: No horse links detected."
-              )
-
-          if not tables:
-              print(
-                  "WARNING: No HTML tables detected."
-              )
-
-          print(
-              "HTML INSPECTION COMPLETE"
           )
           PY
 
-      - name: Show diagnosis JSON
-        if: always()
+      - name: Run day race collector
         run: |
-          if [ -f netkeiba_html_diagnosis.json ]; then
-            cat netkeiba_html_diagnosis.json
-          else
-            echo "diagnosis JSON was not created"
-          fi
+          python day_race_collector.py \
+            --include-target \
+            --output day_result_test.json
 
-      - name: Upload HTML diagnosis
+      - name: Show collected target result
+        run: |
+          python - <<'PY'
+          import json
+
+          with open(
+              "day_result_test.json",
+              "r",
+              encoding="utf-8",
+          ) as f:
+              data = json.load(f)
+
+          target_number = data.get(
+              "target_race_number"
+          )
+
+          target = None
+
+          for race in data.get(
+              "races",
+              []
+          ):
+              if (
+                  race.get("race_number")
+                  == target_number
+              ):
+                  target = race
+                  break
+
+          if target is None:
+              raise SystemExit(
+                  "ERROR: target race was not collected"
+              )
+
+          print()
+          print(
+              "===== TARGET RACE ====="
+          )
+
+          print(
+              "race_id:",
+              target.get("race_id")
+          )
+
+          print(
+              "race_number:",
+              target.get(
+                  "race_number"
+              )
+          )
+
+          print(
+              "race_name:",
+              target.get(
+                  "race_name"
+              )
+          )
+
+          print(
+              "surface:",
+              target.get(
+                  "surface"
+              )
+          )
+
+          print(
+              "distance:",
+              target.get(
+                  "distance"
+              )
+          )
+
+          print(
+              "track_condition:",
+              target.get(
+                  "track_condition"
+              )
+          )
+
+          print(
+              "finished:",
+              target.get(
+                  "finished"
+              )
+          )
+
+          print(
+              "finisher_count:",
+              target.get(
+                  "finisher_count"
+              )
+          )
+
+          print(
+              "winner_time:",
+              target.get(
+                  "winner_time"
+              )
+          )
+
+          print(
+              "winner_last3f:",
+              target.get(
+                  "winner_last3f"
+              )
+          )
+
+          print(
+              "laps:",
+              target.get(
+                  "laps"
+              )
+          )
+
+          print(
+              "pace:",
+              target.get(
+                  "pace"
+              )
+          )
+
+          print()
+          print(
+              "===== FINISHERS ====="
+          )
+
+          for horse in target.get(
+              "finishers",
+              []
+          ):
+              print(
+                  horse.get("finish"),
+                  horse.get(
+                      "horse_number"
+                  ),
+                  horse.get(
+                      "horse_name"
+                  ),
+                  horse.get(
+                      "race_time"
+                  ),
+                  "last3f=",
+                  horse.get(
+                      "last3f"
+                  ),
+                  "pop=",
+                  horse.get(
+                      "popularity"
+                  ),
+                  "odds=",
+                  horse.get(
+                      "odds"
+                  ),
+                  "body=",
+                  horse.get(
+                      "body_weight"
+                  ),
+                  horse.get(
+                      "body_weight_change"
+                  ),
+                  "jockey=",
+                  horse.get(
+                      "jockey"
+                  ),
+                  "weight=",
+                  horse.get(
+                      "carried_weight"
+                  ),
+              )
+
+          print(
+              "======================="
+          )
+          PY
+
+      - name: Validate collector safety
+        run: |
+          python - <<'PY'
+          import json
+
+          with open(
+              "day_result_test.json",
+              "r",
+              encoding="utf-8",
+          ) as f:
+              data = json.load(f)
+
+          if (
+              data.get("mode")
+              != "result_verification"
+          ):
+              raise SystemExit(
+                  "ERROR: wrong mode"
+              )
+
+          if not data.get(
+              "include_target"
+          ):
+              raise SystemExit(
+                  "ERROR: include_target is false"
+              )
+
+          if data.get(
+              "future_race_usage"
+          ):
+              raise SystemExit(
+                  "ERROR: future race data detected"
+              )
+
+          if not data.get(
+              "target_race_included"
+          ):
+              raise SystemExit(
+                  "ERROR: target race missing"
+              )
+
+          target_number = data.get(
+              "target_race_number"
+          )
+
+          for race in data.get(
+              "races",
+              []
+          ):
+              number = race.get(
+                  "race_number"
+              )
+
+              if (
+                  number is not None
+                  and number
+                  > target_number
+              ):
+                  raise SystemExit(
+                      "ERROR: future race included"
+                  )
+
+          print(
+              "COLLECTOR SAFETY OK"
+          )
+          PY
+
+      - name: Validate target race result
+        run: |
+          python - <<'PY'
+          import json
+
+          with open(
+              "day_result_test.json",
+              "r",
+              encoding="utf-8",
+          ) as f:
+              data = json.load(f)
+
+          target_number = data.get(
+              "target_race_number"
+          )
+
+          target = next(
+              (
+                  race
+                  for race in data.get(
+                      "races",
+                      []
+                  )
+                  if race.get(
+                      "race_number"
+                  )
+                  == target_number
+              ),
+              None,
+          )
+
+          if target is None:
+              raise SystemExit(
+                  "ERROR: target race not found"
+              )
+
+          if not target.get(
+              "finished"
+          ):
+              raise SystemExit(
+                  "ERROR: target race not recognized as finished"
+              )
+
+          finishers = target.get(
+              "finishers",
+              []
+          )
+
+          if len(finishers) < 3:
+              raise SystemExit(
+                  "ERROR: fewer than 3 finishers"
+              )
+
+          for index, horse in enumerate(
+              finishers,
+              start=1,
+          ):
+              if (
+                  horse.get("finish")
+                  != index
+              ):
+                  raise SystemExit(
+                      "ERROR: finish order is broken"
+                  )
+
+          print(
+              "TARGET RESULT BASIC VALIDATION OK"
+          )
+          PY
+
+      - name: Validate Kyoto 12R known top 3
+        if: ${{ github.event.inputs.race_id == '202608040912' }}
+        run: |
+          python - <<'PY'
+          import json
+
+          with open(
+              "day_result_test.json",
+              "r",
+              encoding="utf-8",
+          ) as f:
+              data = json.load(f)
+
+          target = next(
+              race
+              for race in data["races"]
+              if race.get(
+                  "race_number"
+              ) == 12
+          )
+
+          finishers = target.get(
+              "finishers",
+              []
+          )
+
+          expected = [
+              {
+                  "finish": 1,
+                  "horse_number": 5,
+                  "horse_name":
+                      "アンビシャスヨシノ",
+              },
+              {
+                  "finish": 2,
+                  "horse_number": 12,
+                  "horse_name":
+                      "ポッドドンナー",
+              },
+              {
+                  "finish": 3,
+                  "horse_number": 7,
+                  "horse_name":
+                      "ジーベック",
+              },
+          ]
+
+          for expected_horse in expected:
+
+              finish = expected_horse[
+                  "finish"
+              ]
+
+              actual = next(
+                  (
+                      horse
+                      for horse
+                      in finishers
+                      if horse.get(
+                          "finish"
+                      ) == finish
+                  ),
+                  None,
+              )
+
+              if actual is None:
+                  raise SystemExit(
+                      f"ERROR: finish {finish} missing"
+                  )
+
+              if (
+                  actual.get(
+                      "horse_number"
+                  )
+                  != expected_horse[
+                      "horse_number"
+                  ]
+              ):
+                  raise SystemExit(
+                      "ERROR: "
+                      f"{finish}着馬番不一致 "
+                      f"expected="
+                      f"{expected_horse['horse_number']} "
+                      f"actual="
+                      f"{actual.get('horse_number')}"
+                  )
+
+              if (
+                  actual.get(
+                      "horse_name"
+                  )
+                  != expected_horse[
+                      "horse_name"
+                  ]
+              ):
+                  raise SystemExit(
+                      "ERROR: "
+                      f"{finish}着馬名不一致 "
+                      f"expected="
+                      f"{expected_horse['horse_name']} "
+                      f"actual="
+                      f"{actual.get('horse_name')}"
+                  )
+
+          print(
+              "KYOTO 12R TOP3 VALIDATION OK"
+          )
+          PY
+
+      - name: Validate important analysis fields
+        run: |
+          python - <<'PY'
+          import json
+
+          with open(
+              "day_result_test.json",
+              "r",
+              encoding="utf-8",
+          ) as f:
+              data = json.load(f)
+
+          target_number = data.get(
+              "target_race_number"
+          )
+
+          target = next(
+              race
+              for race in data["races"]
+              if race.get(
+                  "race_number"
+              ) == target_number
+          )
+
+          finishers = target.get(
+              "finishers",
+              []
+          )
+
+          winner = finishers[0]
+
+          checks = {
+              "winner horse number":
+                  winner.get(
+                      "horse_number"
+                  ),
+              "winner horse name":
+                  winner.get(
+                      "horse_name"
+                  ),
+              "winner time":
+                  winner.get(
+                      "race_time"
+                  ),
+              "winner last3f":
+                  winner.get(
+                      "last3f"
+                  ),
+              "winner popularity":
+                  winner.get(
+                      "popularity"
+                  ),
+              "laps":
+                  target.get(
+                      "laps"
+                  ),
+          }
+
+          print()
+          print(
+              "===== FIELD CHECK ====="
+          )
+
+          for name, value in (
+              checks.items()
+          ):
+              print(
+                  name,
+                  "=",
+                  value,
+              )
+
+          print(
+              "======================="
+          )
+
+          required = [
+              (
+                  "horse_number",
+                  winner.get(
+                      "horse_number"
+                  ),
+              ),
+              (
+                  "horse_name",
+                  winner.get(
+                      "horse_name"
+                  ),
+              ),
+              (
+                  "race_time",
+                  winner.get(
+                      "race_time"
+                  ),
+              ),
+              (
+                  "last3f",
+                  winner.get(
+                      "last3f"
+                  ),
+              ),
+              (
+                  "popularity",
+                  winner.get(
+                      "popularity"
+                  ),
+              ),
+          ]
+
+          missing = [
+              name
+              for name, value
+              in required
+              if value in (
+                  None,
+                  "",
+              )
+          ]
+
+          if missing:
+              raise SystemExit(
+                  "ERROR: missing fields: "
+                  + ", ".join(
+                      missing
+                  )
+              )
+
+          laps = target.get(
+              "laps",
+              []
+          )
+
+          if len(laps) < 6:
+              raise SystemExit(
+                  "ERROR: lap data missing"
+              )
+
+          print(
+              "IMPORTANT FIELD VALIDATION OK"
+          )
+          PY
+
+      - name: Upload collector result
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: netkeiba-html-diagnosis
-          path: |
-            netkeiba_result_raw.html
-            netkeiba_html_diagnosis.json
-          if-no-files-found: error
+          name: day-result-collector-test
+          path: day_result_test.json
+          if-no-files-found: warn
+          retention-days: 7
