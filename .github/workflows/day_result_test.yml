@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  test-day-result:
+  inspect-netkeiba-html:
     runs-on: ubuntu-latest
 
     steps:
@@ -41,303 +41,484 @@ jobs:
 
           echo "Race ID: $RACE_ID"
 
-      - name: Prepare test race.json
+      - name: Fetch and inspect netkeiba HTML
         shell: bash
         run: |
           RACE_ID="${{ github.event.inputs.race_id }}"
 
           python - "$RACE_ID" <<'PY'
           import json
+          import re
           import sys
+
+          import requests
+          from bs4 import BeautifulSoup
+
 
           race_id = sys.argv[1]
 
-          track_codes = {
-              "01": "札幌",
-              "02": "函館",
-              "03": "福島",
-              "04": "新潟",
-              "05": "東京",
-              "06": "中山",
-              "07": "中京",
-              "08": "京都",
-              "09": "阪神",
-              "10": "小倉",
+          url = (
+              "https://race.netkeiba.com/"
+              "race/result.html"
+              f"?race_id={race_id}"
+          )
+
+          headers = {
+              "User-Agent": (
+                  "Mozilla/5.0 "
+                  "(iPhone; CPU iPhone OS 18_0 like Mac OS X) "
+                  "AppleWebKit/605.1.15 "
+                  "(KHTML, like Gecko) "
+                  "Version/18.0 "
+                  "Mobile/15E148 Safari/604.1"
+              ),
+              "Accept": (
+                  "text/html,"
+                  "application/xhtml+xml,"
+                  "application/xml;q=0.9,"
+                  "*/*;q=0.8"
+              ),
+              "Accept-Language": "ja,en-US;q=0.8,en;q=0.6",
+              "Cache-Control": "no-cache",
+              "Pragma": "no-cache",
           }
 
-          track_code = race_id[4:6]
-          race_number = int(race_id[10:12])
-
-          data = {
-              "race_id": race_id,
-              "racecourse": track_codes.get(
-                  track_code,
-                  ""
-              ),
-              "track": track_codes.get(
-                  track_code,
-                  ""
-              ),
-              "race_number": race_number,
-          }
-
-          with open(
-              "race.json",
-              "w",
-              encoding="utf-8"
-          ) as f:
-              json.dump(
-                  data,
-                  f,
-                  ensure_ascii=False,
-                  indent=2
-              )
-
-          print(
-              json.dumps(
-                  data,
-                  ensure_ascii=False,
-                  indent=2
-              )
-          )
-          PY
-
-      - name: Collect target race result
-        run: |
-          python day_race_collector.py \
-            --include-target \
-            --output day_result_test.json
-
-      - name: Validate target result
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json
-          import sys
-
-          with open(
-              "day_result_test.json",
-              "r",
-              encoding="utf-8"
-          ) as f:
-              data = json.load(f)
-
-          target_id = str(
-              data.get(
-                  "target_race_id",
-                  ""
-              )
+          response = requests.get(
+              url,
+              headers=headers,
+              timeout=30,
+              allow_redirects=True,
           )
 
-          races = data.get(
-              "races",
-              []
-          )
+          print()
+          print("===== HTTP =====")
+          print("requested:", url)
+          print("status:", response.status_code)
+          print("final_url:", response.url)
+          print("content_type:", response.headers.get("content-type"))
+          print("content_length:", len(response.content))
 
-          target = None
+          response.raise_for_status()
 
-          for race in races:
-              if str(
-                  race.get(
-                      "race_id",
-                      ""
-                  )
-              ) == target_id:
-                  target = race
-                  break
-
-          if target is None:
-              print(
-                  "ERROR: target race not found"
-              )
-              sys.exit(1)
-
-          if not target.get(
-              "finished"
+          if (
+              not response.encoding
+              or response.encoding.lower()
+              in ["iso-8859-1", "ascii"]
           ):
-              print(
-                  "ERROR: target race was not detected as finished"
-              )
-              sys.exit(1)
+              response.encoding = response.apparent_encoding
 
-          finishers = target.get(
-              "finishers",
-              []
+          html = response.text
+
+          with open(
+              "netkeiba_result_raw.html",
+              "w",
+              encoding="utf-8",
+          ) as f:
+              f.write(html)
+
+          soup = BeautifulSoup(
+              html,
+              "html.parser",
           )
 
-          if not finishers:
-              print(
-                  "ERROR: no finishers were collected"
-              )
-              sys.exit(1)
+          title = ""
 
-          print()
-          print(
-              "===== TARGET RESULT ====="
-          )
-
-          print(
-              "Race ID:",
-              target.get(
-                  "race_id"
+          if soup.title:
+              title = soup.title.get_text(
+                  " ",
+                  strip=True,
               )
-          )
 
-          print(
-              "Race:",
-              target.get(
-                  "race_number"
-              )
-          )
-
-          print(
-              "Name:",
-              target.get(
-                  "race_name"
-              )
-          )
-
-          print(
-              "Surface:",
-              target.get(
-                  "surface"
-              )
-          )
-
-          print(
-              "Distance:",
-              target.get(
-                  "distance"
-              )
-          )
-
-          print(
-              "Track condition:",
-              target.get(
-                  "track_condition"
-              )
-          )
-
-          print(
-              "Pace:",
-              target.get(
-                  "pace"
-              )
-          )
-
-          print(
-              "Laps:",
-              target.get(
-                  "laps"
-              )
+          body_text = soup.get_text(
+              " ",
+              strip=True,
           )
 
           print()
-          print(
-              "===== FINISHERS ====="
-          )
+          print("===== PAGE =====")
+          print("title:", title)
+          print("html_chars:", len(html))
+          print("text_chars:", len(body_text))
 
-          for horse in finishers:
-              print(
-                  horse.get(
-                      "finish"
-                  ),
-                  "着",
-                  "馬番",
-                  horse.get(
-                      "horse_number"
-                  ),
-                  horse.get(
-                      "horse_name"
-                  ),
-                  "TIME",
-                  horse.get(
-                      "race_time"
-                  ),
-                  "CORNER",
-                  horse.get(
-                      "corner_order"
-                  ),
-                  "LAST3F",
-                  horse.get(
-                      "last3f"
-                  ),
-                  "人気",
-                  horse.get(
-                      "popularity"
-                  ),
-              )
-
-          print()
-          print(
-              "Finisher count:",
-              len(finishers)
-          )
-
-          print(
-              "===== VALIDATION ====="
-          )
-
-          required_fields = [
-              "finish",
-              "horse_number",
-              "horse_name",
+          keywords = [
+              "着順",
+              "馬名",
+              "タイム",
+              "上り",
+              "ハロンタイム",
+              "コーナー通過順位",
+              "払戻",
+              "オッズ",
+              "netkeiba",
           ]
 
-          missing = []
+          print()
+          print("===== KEYWORDS =====")
 
-          for index, horse in enumerate(
-              finishers,
-              start=1
-          ):
-              for field in required_fields:
-                  value = horse.get(
-                      field
-                  )
+          keyword_result = {}
 
-                  if value in [
-                      None,
-                      "",
-                  ]:
-                      missing.append(
-                          {
-                              "row": index,
-                              "field": field,
-                          }
-                      )
-
-          if missing:
+          for keyword in keywords:
+              exists = keyword in body_text
+              keyword_result[keyword] = exists
               print(
-                  "ERROR: required fields missing"
+                  keyword,
+                  ":",
+                  exists,
               )
 
-              for item in missing:
-                  print(
-                      item
-                  )
+          print()
+          print("===== TABLES =====")
 
-              sys.exit(1)
+          tables = soup.find_all("table")
 
           print(
-              "TARGET RESULT VALIDATION OK"
+              "table_count:",
+              len(tables),
+          )
+
+          table_info = []
+
+          for index, table in enumerate(
+              tables,
+              start=1,
+          ):
+              classes = table.get(
+                  "class",
+                  [],
+              )
+
+              table_text = re.sub(
+                  r"\s+",
+                  " ",
+                  table.get_text(
+                      " ",
+                      strip=True,
+                  ),
+              )
+
+              rows = table.find_all("tr")
+
+              info = {
+                  "index": index,
+                  "classes": classes,
+                  "row_count": len(rows),
+                  "text_preview": table_text[:500],
+              }
+
+              table_info.append(info)
+
+              print()
+              print(
+                  f"TABLE {index}"
+              )
+              print(
+                  "classes:",
+                  classes,
+              )
+              print(
+                  "rows:",
+                  len(rows),
+              )
+              print(
+                  "preview:",
+                  table_text[:500],
+              )
+
+          print()
+          print("===== TR ANALYSIS =====")
+
+          all_rows = soup.find_all("tr")
+
+          print(
+              "all_tr_count:",
+              len(all_rows),
+          )
+
+          row_info = []
+
+          for index, row in enumerate(
+              all_rows,
+              start=1,
+          ):
+              cells = row.find_all(
+                  ["th", "td"]
+              )
+
+              if not cells:
+                  continue
+
+              row_text = re.sub(
+                  r"\s+",
+                  " ",
+                  row.get_text(
+                      " ",
+                      strip=True,
+                  ),
+              )
+
+              cell_info = []
+
+              for cell_index, cell in enumerate(
+                  cells,
+                  start=1,
+              ):
+                  cell_text = re.sub(
+                      r"\s+",
+                      " ",
+                      cell.get_text(
+                          " ",
+                          strip=True,
+                      ),
+                  )
+
+                  cell_info.append(
+                      {
+                          "index": cell_index,
+                          "tag": cell.name,
+                          "classes": cell.get(
+                              "class",
+                              [],
+                          ),
+                          "text": cell_text[:200],
+                      }
+                  )
+
+              row_data = {
+                  "index": index,
+                  "classes": row.get(
+                      "class",
+                      [],
+                  ),
+                  "cell_count": len(cells),
+                  "text": row_text[:1000],
+                  "cells": cell_info,
+              }
+
+              row_info.append(
+                  row_data
+              )
+
+              if index <= 40:
+                  print()
+                  print(
+                      f"ROW {index}"
+                  )
+                  print(
+                      "classes:",
+                      row.get(
+                          "class",
+                          [],
+                      ),
+                  )
+                  print(
+                      "cells:",
+                      len(cells),
+                  )
+                  print(
+                      "text:",
+                      row_text[:1000],
+                  )
+
+                  for cell in cell_info:
+                      print(
+                          "  CELL",
+                          cell["index"],
+                          "tag=",
+                          cell["tag"],
+                          "class=",
+                          cell["classes"],
+                          "text=",
+                          cell["text"],
+                      )
+
+          print()
+          print("===== HORSE LINKS =====")
+
+          horse_links = []
+
+          for link in soup.find_all(
+              "a",
+              href=True,
+          ):
+              href = link.get(
+                  "href",
+                  "",
+              )
+
+              if (
+                  "/horse/" in href
+                  or "horse.netkeiba.com" in href
+              ):
+                  name = re.sub(
+                      r"\s+",
+                      " ",
+                      link.get_text(
+                          " ",
+                          strip=True,
+                      ),
+                  )
+
+                  horse_links.append(
+                      {
+                          "text": name,
+                          "href": href,
+                      }
+                  )
+
+          print(
+              "horse_link_count:",
+              len(horse_links),
+          )
+
+          for item in horse_links[:30]:
+              print(
+                  item["text"],
+                  "=>",
+                  item["href"],
+              )
+
+          print()
+          print("===== CLASS NAMES =====")
+
+          class_names = set()
+
+          for element in soup.find_all(
+              class_=True
+          ):
+              for class_name in element.get(
+                  "class",
+                  [],
+              ):
+                  class_names.add(
+                      str(class_name)
+                  )
+
+          interesting_classes = sorted(
+              class_name
+              for class_name in class_names
+              if any(
+                  keyword.lower()
+                  in class_name.lower()
+                  for keyword in [
+                      "race",
+                      "result",
+                      "horse",
+                      "rank",
+                      "order",
+                      "time",
+                      "agari",
+                      "corner",
+                      "odds",
+                      "pop",
+                      "num",
+                  ]
+              )
+          )
+
+          for class_name in interesting_classes:
+              print(class_name)
+
+          diagnosis = {
+              "race_id": race_id,
+              "requested_url": url,
+              "final_url": response.url,
+              "status_code": response.status_code,
+              "content_type": response.headers.get(
+                  "content-type"
+              ),
+              "content_length": len(
+                  response.content
+              ),
+              "html_chars": len(html),
+              "title": title,
+              "keywords": keyword_result,
+              "table_count": len(
+                  tables
+              ),
+              "all_tr_count": len(
+                  all_rows
+              ),
+              "horse_link_count": len(
+                  horse_links
+              ),
+              "tables": table_info,
+              "rows": row_info,
+              "horse_links": horse_links,
+              "interesting_classes": (
+                  interesting_classes
+              ),
+          }
+
+          with open(
+              "netkeiba_html_diagnosis.json",
+              "w",
+              encoding="utf-8",
+          ) as f:
+              json.dump(
+                  diagnosis,
+                  f,
+                  ensure_ascii=False,
+                  indent=2,
+              )
+
+          print()
+          print("===== DIAGNOSIS SUMMARY =====")
+          print(
+              "status:",
+              response.status_code,
+          )
+          print(
+              "title:",
+              title,
+          )
+          print(
+              "tables:",
+              len(tables),
+          )
+          print(
+              "rows:",
+              len(all_rows),
+          )
+          print(
+              "horse links:",
+              len(horse_links),
+          )
+
+          if len(html) < 1000:
+              print(
+                  "WARNING: HTML is unusually small."
+              )
+
+          if not horse_links:
+              print(
+                  "WARNING: No horse links detected."
+              )
+
+          if not tables:
+              print(
+                  "WARNING: No HTML tables detected."
+              )
+
+          print(
+              "HTML INSPECTION COMPLETE"
           )
           PY
 
-      - name: Show JSON
+      - name: Show diagnosis JSON
         if: always()
         run: |
-          echo "===== day_result_test.json ====="
-
-          if [ -f day_result_test.json ]; then
-            cat day_result_test.json
+          if [ -f netkeiba_html_diagnosis.json ]; then
+            cat netkeiba_html_diagnosis.json
           else
-            echo "day_result_test.json was not created"
+            echo "diagnosis JSON was not created"
           fi
 
-      - name: Upload test result
+      - name: Upload HTML diagnosis
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: day-result-test
-          path: day_result_test.json
-          if-no-files-found: warn
+          name: netkeiba-html-diagnosis
+          path: |
+            netkeiba_result_raw.html
+            netkeiba_html_diagnosis.json
+          if-no-files-found: error
