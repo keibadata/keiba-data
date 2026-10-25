@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T10:14:49.190911+09:00",
+  "updated_at": "2026-10-25T10:26:18.354990+09:00",
   "source": "runner_history.json",
   "rules": {
     "multiple_races_used": true,
@@ -15,11 +15,16 @@
     "usable_horse_count": 8
   },
   "race_scenario": {
-    "base_pace": "ミドル",
-    "reason": "逃げ・先行構成に極端な偏りなし",
-    "leader_candidate_count": 0,
-    "front_candidate_count": 0,
-    "leader_candidates": [],
+    "base_pace": "スロー〜ミドル",
+    "reason": "逃げ候補1頭で単騎逃げの可能性",
+    "leader_candidate_count": 1,
+    "front_candidate_count": 3,
+    "leader_candidates": [
+      {
+        "horse_number": "6",
+        "horse_name": "デュアルサイン"
+      }
+    ],
     "scenario_slow": "逃げ馬が主張せず隊列が早期に決まる",
     "scenario_middle": "標準的な先行争い",
     "scenario_high": "複数馬がハナ・好位を主張し前半加速",
@@ -27,122 +32,266 @@
   },
   "horses": [
     {
-      "horse_id": "2024107172",
+      "horse_id": "2024104709",
       "horse_number": "1",
-      "horse_name": "ナオミガサイキョウ",
-      "usable_race_count": 2,
-      "running_style": "中団前",
-      "average_final_position": 5.0,
+      "horse_name": "コルサロ",
+      "usable_race_count": 3,
+      "running_style": "後方",
+      "average_final_position": 9.0,
       "escape_count": 0,
       "escape_rate": 0.0,
+      "front_count": 0,
+      "front_rate": 0.0,
+      "back_count": 2,
+      "back_rate": 0.667,
+      "likely_leader": false,
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/03",
+          "race_name": "2歳未勝利",
+          "passing": "8-9",
+          "first_position": 8,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/25",
+          "race_name": "2歳未勝利",
+          "passing": "10-10",
+          "first_position": 10,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/04",
+          "race_name": "2歳新馬",
+          "passing": "9-8-8-8",
+          "first_position": 9,
+          "final_position": 8,
+          "style": "中団"
+        }
+      ]
+    },
+    {
+      "horse_id": "2024106396",
+      "horse_number": "2",
+      "horse_name": "ドンクラッシュ",
+      "usable_race_count": 1,
+      "running_style": "先行",
+      "average_final_position": 4.0,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 1,
+      "front_rate": 1.0,
+      "back_count": 0,
+      "back_rate": 0.0,
+      "likely_leader": false,
+      "pace_dependency": "前目の位置を取れるかが重要",
+      "slow_pace": "プラス",
+      "middle_pace": "プラス",
+      "high_pace": "標準",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/10",
+          "race_name": "2歳新馬",
+          "passing": "3-4",
+          "first_position": 3,
+          "final_position": 4,
+          "style": "先行"
+        }
+      ]
+    },
+    {
+      "horse_id": "2024106879",
+      "horse_number": "3",
+      "horse_name": "エモティコン",
+      "usable_race_count": 1,
+      "running_style": "先行",
+      "average_final_position": 2.0,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 1,
+      "front_rate": 1.0,
+      "back_count": 0,
+      "back_rate": 0.0,
+      "likely_leader": false,
+      "pace_dependency": "前目の位置を取れるかが重要",
+      "slow_pace": "プラス",
+      "middle_pace": "プラス",
+      "high_pace": "標準",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/09/06",
+          "race_name": "2歳新馬",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        }
+      ]
+    },
+    {
+      "horse_id": "2024102372",
+      "horse_number": "4",
+      "horse_name": "レイディアントサン",
+      "usable_race_count": 2,
+      "running_style": "後方",
+      "average_final_position": 10.0,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 0,
+      "front_rate": 0.0,
+      "back_count": 2,
+      "back_rate": 1.0,
+      "likely_leader": false,
+      "pace_dependency": "前崩れ依存度高め",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/03",
+          "race_name": "2歳未勝利",
+          "passing": "10-10",
+          "first_position": 10,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2026/09/06",
+          "race_name": "2歳新馬",
+          "passing": "10-10",
+          "first_position": 10,
+          "final_position": 10,
+          "style": "後方"
+        }
+      ]
+    },
+    {
+      "horse_id": "2024107058",
+      "horse_number": "6",
+      "horse_name": "デュアルサイン",
+      "usable_race_count": 2,
+      "running_style": "逃げ",
+      "average_final_position": 3.5,
+      "escape_count": 1,
+      "escape_rate": 0.5,
       "front_count": 1,
       "front_rate": 0.5,
       "back_count": 0,
       "back_rate": 0.0,
-      "likely_leader": false,
+      "likely_leader": true,
       "pace_dependency": "位置取りの自由度あり",
-      "slow_pace": "標準",
-      "middle_pace": "プラス",
-      "high_pace": "プラス",
+      "slow_pace": "プラス",
+      "middle_pace": "標準",
+      "high_pace": "注意",
       "noise_flag": "",
       "race_details": [
         {
           "date": "2026/09/27",
           "race_name": "2歳未勝利",
-          "passing": "5-5-5-4",
-          "first_position": 5,
-          "final_position": 4,
-          "style": "先行"
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
         },
         {
-          "date": "2026/06/13",
+          "date": "2026/08/16",
           "race_name": "2歳新馬",
-          "passing": "6-6",
-          "first_position": 6,
+          "passing": "7-6-6",
+          "first_position": 7,
           "final_position": 6,
           "style": "中団"
         }
       ]
     },
     {
-      "horse_id": "2024104786",
-      "horse_number": "2",
-      "horse_name": "キミチャン",
-      "usable_race_count": 1,
-      "running_style": "後方",
-      "average_final_position": 11.0,
-      "escape_count": 0,
-      "escape_rate": 0.0,
-      "front_count": 0,
-      "front_rate": 0.0,
-      "back_count": 1,
-      "back_rate": 1.0,
-      "likely_leader": false,
-      "pace_dependency": "前崩れ依存度高め",
-      "slow_pace": "注意",
-      "middle_pace": "標準",
-      "high_pace": "プラス",
-      "noise_flag": "",
-      "race_details": [
-        {
-          "date": "2026/09/21",
-          "race_name": "2歳新馬",
-          "passing": "9-11",
-          "first_position": 9,
-          "final_position": 11,
-          "style": "後方"
-        }
-      ]
-    },
-    {
-      "horse_id": "2024106232",
-      "horse_number": "3",
-      "horse_name": "マリナーヴァレイ",
+      "horse_id": "2024103913",
+      "horse_number": "7",
+      "horse_name": "ヒルノアラゴン",
       "usable_race_count": 2,
-      "running_style": "中団前",
-      "average_final_position": 5.0,
-      "escape_count": 0,
-      "escape_rate": 0.0,
-      "front_count": 1,
-      "front_rate": 0.5,
-      "back_count": 0,
-      "back_rate": 0.0,
-      "likely_leader": false,
-      "pace_dependency": "位置取りの自由度あり",
-      "slow_pace": "標準",
-      "middle_pace": "プラス",
-      "high_pace": "プラス",
-      "noise_flag": "",
-      "race_details": [
-        {
-          "date": "2026/10/10",
-          "race_name": "2歳未勝利",
-          "passing": "7-7",
-          "first_position": 7,
-          "final_position": 7,
-          "style": "中団"
-        },
-        {
-          "date": "2026/07/18",
-          "race_name": "2歳新馬",
-          "passing": "3-3-2-3",
-          "first_position": 3,
-          "final_position": 3,
-          "style": "先行"
-        }
-      ]
-    },
-    {
-      "horse_id": "2024102645",
-      "horse_number": "4",
-      "horse_name": "ミール",
-      "usable_race_count": 1,
-      "running_style": "中団後",
+      "running_style": "後方",
       "average_final_position": 7.0,
       "escape_count": 0,
       "escape_rate": 0.0,
       "front_count": 0,
       "front_rate": 0.0,
+      "back_count": 1,
+      "back_rate": 0.5,
+      "likely_leader": false,
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/03",
+          "race_name": "2歳未勝利",
+          "passing": "8-9",
+          "first_position": 8,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2026/06/28",
+          "race_name": "2歳新馬",
+          "passing": "4-5",
+          "first_position": 4,
+          "final_position": 5,
+          "style": "中団"
+        }
+      ]
+    },
+    {
+      "horse_id": "2024102207",
+      "horse_number": "8",
+      "horse_name": "メイショウソレイユ",
+      "usable_race_count": 1,
+      "running_style": "後方",
+      "average_final_position": 12.0,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 0,
+      "front_rate": 0.0,
+      "back_count": 1,
+      "back_rate": 1.0,
+      "likely_leader": false,
+      "pace_dependency": "前崩れ依存度高め",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/03",
+          "race_name": "2歳新馬",
+          "passing": "11-12",
+          "first_position": 11,
+          "final_position": 12,
+          "style": "後方"
+        }
+      ]
+    },
+    {
+      "horse_id": "2024106050",
+      "horse_number": "9",
+      "horse_name": "マルカクラック",
+      "usable_race_count": 1,
+      "running_style": "中団後",
+      "average_final_position": 8.0,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 0,
+      "front_rate": 0.0,
       "back_count": 0,
       "back_rate": 0.0,
       "likely_leader": false,
@@ -153,132 +302,12 @@
       "noise_flag": "",
       "race_details": [
         {
-          "date": "2026/08/01",
+          "date": "2026/10/03",
           "race_name": "2歳新馬",
-          "passing": "7-7",
-          "first_position": 7,
-          "final_position": 7,
+          "passing": "8-8",
+          "first_position": 8,
+          "final_position": 8,
           "style": "中団"
-        }
-      ]
-    },
-    {
-      "horse_id": "2024107251",
-      "horse_number": "5",
-      "horse_name": "アップルペアー",
-      "usable_race_count": 1,
-      "running_style": "後方",
-      "average_final_position": 14.0,
-      "escape_count": 0,
-      "escape_rate": 0.0,
-      "front_count": 0,
-      "front_rate": 0.0,
-      "back_count": 1,
-      "back_rate": 1.0,
-      "likely_leader": false,
-      "pace_dependency": "前崩れ依存度高め",
-      "slow_pace": "注意",
-      "middle_pace": "標準",
-      "high_pace": "プラス",
-      "noise_flag": "",
-      "race_details": [
-        {
-          "date": "2026/10/04",
-          "race_name": "2歳新馬",
-          "passing": "14-14",
-          "first_position": 14,
-          "final_position": 14,
-          "style": "後方"
-        }
-      ]
-    },
-    {
-      "horse_id": "2024103078",
-      "horse_number": "6",
-      "horse_name": "ウインブリーズ",
-      "usable_race_count": 1,
-      "running_style": "後方",
-      "average_final_position": 11.0,
-      "escape_count": 0,
-      "escape_rate": 0.0,
-      "front_count": 0,
-      "front_rate": 0.0,
-      "back_count": 1,
-      "back_rate": 1.0,
-      "likely_leader": false,
-      "pace_dependency": "前崩れ依存度高め",
-      "slow_pace": "注意",
-      "middle_pace": "標準",
-      "high_pace": "プラス",
-      "noise_flag": "",
-      "race_details": [
-        {
-          "date": "2026/10/11",
-          "race_name": "2歳新馬",
-          "passing": "11-11",
-          "first_position": 11,
-          "final_position": 11,
-          "style": "後方"
-        }
-      ]
-    },
-    {
-      "horse_id": "2024101134",
-      "horse_number": "7",
-      "horse_name": "オージーブラック",
-      "usable_race_count": 1,
-      "running_style": "後方",
-      "average_final_position": 15.0,
-      "escape_count": 0,
-      "escape_rate": 0.0,
-      "front_count": 0,
-      "front_rate": 0.0,
-      "back_count": 1,
-      "back_rate": 1.0,
-      "likely_leader": false,
-      "pace_dependency": "前崩れ依存度高め",
-      "slow_pace": "注意",
-      "middle_pace": "標準",
-      "high_pace": "プラス",
-      "noise_flag": "",
-      "race_details": [
-        {
-          "date": "2026/10/04",
-          "race_name": "2歳新馬",
-          "passing": "15-15",
-          "first_position": 15,
-          "final_position": 15,
-          "style": "後方"
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104231",
-      "horse_number": "8",
-      "horse_name": "マリアーナ",
-      "usable_race_count": 1,
-      "running_style": "後方",
-      "average_final_position": 14.0,
-      "escape_count": 0,
-      "escape_rate": 0.0,
-      "front_count": 0,
-      "front_rate": 0.0,
-      "back_count": 1,
-      "back_rate": 1.0,
-      "likely_leader": false,
-      "pace_dependency": "前崩れ依存度高め",
-      "slow_pace": "注意",
-      "middle_pace": "標準",
-      "high_pace": "プラス",
-      "noise_flag": "",
-      "race_details": [
-        {
-          "date": "2026/10/10",
-          "race_name": "2歳新馬",
-          "passing": "14-14",
-          "first_position": 14,
-          "final_position": 14,
-          "style": "後方"
         }
       ]
     }
