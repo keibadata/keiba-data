@@ -25,6 +25,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
       - name: Validate source files
         run: |
           python - <<'PY'
@@ -43,7 +48,10 @@ jobs:
           ).strip()
 
           final_race_id = str(
-              final_analysis.get("race_id", "")
+              final_analysis.get(
+                  "race_id",
+                  ""
+              )
           ).strip()
 
           if not re.fullmatch(
@@ -51,14 +59,16 @@ jobs:
               race_id
           ):
               sys.exit(
-                  "ERROR: race.json race_id is invalid"
+                  "ERROR: race.json "
+                  "race_id is invalid"
               )
 
           if race_id != final_race_id:
               sys.exit(
                   "ERROR: race_id mismatch: "
                   f"race.json={race_id} "
-                  f"final_analysis.json={final_race_id}"
+                  f"final_analysis.json="
+                  f"{final_race_id}"
               )
 
           ranking = final_analysis.get(
@@ -75,13 +85,16 @@ jobs:
 
           if runner_count <= 0:
               sys.exit(
-                  "ERROR: runner_count is invalid"
+                  "ERROR: runner_count "
+                  "is invalid"
               )
 
           if len(ranking) != runner_count:
               sys.exit(
-                  "ERROR: ranking count mismatch: "
-                  f"{len(ranking)}/{runner_count}"
+                  "ERROR: ranking count "
+                  "mismatch: "
+                  f"{len(ranking)}/"
+                  f"{runner_count}"
               )
 
           print(
@@ -106,17 +119,33 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import re
           import sys
+          from datetime import timedelta
           from pathlib import Path
 
-          with open("race.json", encoding="utf-8") as f:
+          from prediction_snapshot import (
+              build_race_start_at,
+              build_timing,
+          )
+
+          with open(
+              "race.json",
+              encoding="utf-8"
+          ) as f:
               race = json.load(f)
 
-          with open("final_analysis.json", encoding="utf-8") as f:
+          with open(
+              "final_analysis.json",
+              encoding="utf-8"
+          ) as f:
               final_analysis = json.load(f)
 
           race_id = str(
-              race.get("race_id", "")
+              race.get(
+                  "race_id",
+                  ""
+              )
           ).strip()
 
           race_date = (
@@ -130,7 +159,9 @@ jobs:
           )
 
           snapshot_dir = (
-              Path("prediction_snapshots")
+              Path(
+                  "prediction_snapshots"
+              )
               / race_date
               / race_id
           )
@@ -168,15 +199,20 @@ jobs:
                   path,
                   encoding="utf-8"
               ) as f:
-                  data = json.load(
-                      f
-                  )
+                  data = json.load(f)
 
               if (
-                  str(
+                  data.get(
+                      "schema_version"
+                  )
+                  == 2
+                  and str(
                       data
                       .get("race", {})
-                      .get("race_id", "")
+                      .get(
+                          "race_id",
+                          ""
+                      )
                   ).strip()
                   == race_id
                   and str(
@@ -196,8 +232,9 @@ jobs:
 
           if len(matched) != 1:
               sys.exit(
-                  "ERROR: expected exactly one "
-                  "matching snapshot, found "
+                  "ERROR: expected exactly "
+                  "one schema v2 snapshot, "
+                  "found "
                   + str(
                       len(matched)
                   )
@@ -223,8 +260,117 @@ jobs:
               != final_analysis
           ):
               sys.exit(
-                  "ERROR: saved analysis differs "
-                  "from final_analysis.json"
+                  "ERROR: saved analysis "
+                  "differs from "
+                  "final_analysis.json"
+              )
+
+          race_context = snapshot.get(
+              "race",
+              {}
+          )
+
+          start_time = str(
+              race_context.get(
+                  "scheduled_start_time",
+                  ""
+              )
+          ).strip()
+
+          if not re.fullmatch(
+              r"\d{2}:\d{2}",
+              start_time
+          ):
+              sys.exit(
+                  "ERROR: scheduled start "
+                  "time was not acquired: "
+                  + repr(start_time)
+              )
+
+          if (
+              race_id
+              == "202608040912"
+              and start_time
+              != "16:30"
+          ):
+              sys.exit(
+                  "ERROR: Kyoto 12R "
+                  "start time mismatch: "
+                  f"{start_time} "
+                  "expected=16:30"
+              )
+
+          start_at = (
+              build_race_start_at(
+                  race_date,
+                  start_time,
+              )
+          )
+
+          if start_at is None:
+              sys.exit(
+                  "ERROR: race_start_at "
+                  "could not be built"
+              )
+
+          before_saved_at = (
+              start_at
+              - timedelta(
+                  minutes=1
+              )
+          )
+
+          after_saved_at = (
+              start_at
+              + timedelta(
+                  minutes=1
+              )
+          )
+
+          before_result = (
+              build_timing(
+                  race_date,
+                  start_time,
+                  before_saved_at,
+              )
+          )
+
+          after_result = (
+              build_timing(
+                  race_date,
+                  start_time,
+                  after_saved_at,
+              )
+          )
+
+          if (
+              before_result.get(
+                  "status"
+              )
+              != "same_day_before_start"
+              or before_result.get(
+                  "evaluation_eligible"
+              )
+              is not True
+          ):
+              sys.exit(
+                  "ERROR: same-day "
+                  "before-start test failed"
+              )
+
+          if (
+              after_result.get(
+                  "status"
+              )
+              != "same_day_at_or_after_start"
+              or after_result.get(
+                  "evaluation_eligible"
+              )
+              is not False
+          ):
+              sys.exit(
+                  "ERROR: same-day "
+                  "after-start test failed"
               )
 
           timing = snapshot.get(
@@ -241,11 +387,13 @@ jobs:
 
           if not timing_status:
               sys.exit(
-                  "ERROR: timing status is missing"
+                  "ERROR: timing status "
+                  "is missing"
               )
 
           print(
-              "PREDICTION SNAPSHOT VALIDATION OK"
+              "PREDICTION SNAPSHOT "
+              "VALIDATION OK"
           )
 
           print(
@@ -254,15 +402,43 @@ jobs:
           )
 
           print(
-              "timing_status:",
+              "scheduled_start_time:",
+              start_time
+          )
+
+          print(
+              "race_start_at:",
+              start_at.isoformat()
+          )
+
+          print(
+              "same_day_before_start:",
+              before_result[
+                  "evaluation_eligible"
+              ]
+          )
+
+          print(
+              "same_day_after_start:",
+              after_result[
+                  "evaluation_eligible"
+              ]
+          )
+
+          print(
+              "actual_snapshot_status:",
               timing_status
           )
 
           print(
-              "evaluation_eligible:",
+              "actual_evaluation_eligible:",
               timing.get(
                   "evaluation_eligible"
               )
+          )
+
+          print(
+              "START TIME VALIDATION OK"
           )
           PY
 
@@ -281,7 +457,10 @@ jobs:
           RACE_ID="$(python - <<'PY'
           import json
 
-          with open("race.json", encoding="utf-8") as f:
+          with open(
+              "race.json",
+              encoding="utf-8"
+          ) as f:
               print(
                   json.load(f).get(
                       "race_id",
@@ -291,5 +470,5 @@ jobs:
           PY
           )"
 
-          git commit -m "Save prediction snapshot ${RACE_ID}"
+          git commit -m "Save prediction snapshot v2 ${RACE_ID}"
           git push
