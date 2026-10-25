@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-10-25T11:06:52+09:00",
-  "target_race_id": "202608040904",
+  "updated_at": "2026-10-25T11:38:35+09:00",
+  "target_race_id": "202605040905",
   "target_date": "2026-10-25",
   "current_time_bias": "",
   "future_race_usage": false,
   "leak_check_passed": true,
   "method": "中央競馬のみを対象。runner_historyの過去走race_idをrunner_race_dbの同一レースへ接続し、馬自身の着順や走破時計ではなく当該レースの勝ち時計から時計環境を診断する。基準時計はhistory_dbとrunner_race_dbの対象日前レースを統合し、同一レース自身を除外したうえで、競馬場・芝ダート・距離・クラス・年齢の完全一致から開始。サンプル不足時のみ年齢、クラス群の順に段階的に緩和し、最終的に競馬場・芝ダート・距離一致まで使用する。緩和レベルは各レースに明示する。時計適性は診断補助のみで能力順位を直接作らず、未知数は減点しない。対象レース当日以降は使用しない。",
-  "target_horse_count": 16,
+  "target_horse_count": 13,
   "connected_horse_count": 0,
   "connected_past_race_count": 0,
   "runner_race_db_race_count": 0,
@@ -24,8 +24,8 @@
   "baseline_missing_count": 0,
   "horses": [
     {
-      "horse_id": "2024104436",
-      "horse_name": "ブルーエノワール",
+      "horse_id": "2024105721",
+      "horse_name": "ロカルゼ",
       "horse_number": "1",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -39,8 +39,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024104246",
-      "horse_name": "サイボーグ",
+      "horse_id": "2024106047",
+      "horse_name": "テンダネス",
       "horse_number": "2",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -54,8 +54,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024102478",
-      "horse_name": "リワナグ",
+      "horse_id": "2024106557",
+      "horse_name": "ノヴァルクス",
       "horse_number": "3",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -69,8 +69,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024100459",
-      "horse_name": "マーゴットヴィム",
+      "horse_id": "2024102065",
+      "horse_name": "キタノクラウド",
       "horse_number": "4",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -84,8 +84,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024102229",
-      "horse_name": "ヤソタケル",
+      "horse_id": "2024102176",
+      "horse_name": "シーバップ",
       "horse_number": "5",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -99,8 +99,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024104625",
-      "horse_name": "アスレイ",
+      "horse_id": "2024106026",
+      "horse_name": "ブレッシングロード",
       "horse_number": "6",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -114,8 +114,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024100411",
-      "horse_name": "スナークゴーギャン",
+      "horse_id": "2024101362",
+      "horse_name": "ヴィラン",
       "horse_number": "7",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -129,8 +129,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024104396",
-      "horse_name": "スマートサロン",
+      "horse_id": "2024106582",
+      "horse_name": "エバースカイ",
       "horse_number": "8",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -144,8 +144,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024101109",
-      "horse_name": "クーアイエルフ",
+      "horse_id": "2024104505",
+      "horse_name": "グラスリズム",
       "horse_number": "9",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -159,8 +159,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024107134",
-      "horse_name": "メイショウアンブル",
+      "horse_id": "2024102920",
+      "horse_name": "ブロナバラッド",
       "horse_number": "10",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -174,8 +174,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024105631",
-      "horse_name": "パッションシーザー",
+      "horse_id": "2024103529",
+      "horse_name": "レナセール",
       "horse_number": "11",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -189,8 +189,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024108008",
-      "horse_name": "アランチャ",
+      "horse_id": "2024101111",
+      "horse_name": "テーオーフォアマン",
       "horse_number": "12",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -204,54 +204,9 @@
       "unknown": true
     },
     {
-      "horse_id": "2024104045",
-      "horse_name": "フィアローゼン",
+      "horse_id": "2024102428",
+      "horse_name": "アンベリール",
       "horse_number": "13",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024104444",
-      "horse_name": "オウゴンノヤ",
-      "horse_number": "14",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024102481",
-      "horse_name": "ザラフェット",
-      "horse_number": "15",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024104378",
-      "horse_name": "テムルヴァン",
-      "horse_number": "16",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
       "matching_count": 0,
