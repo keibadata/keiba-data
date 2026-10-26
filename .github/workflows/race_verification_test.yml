@@ -1,0 +1,391 @@
+name: Race Verification Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: race-verification-test
+  cancel-in-progress: false
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Validate source files
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          required = [
+              Path("race.json"),
+              Path("day_race_collector.py"),
+              Path("race_verification.py"),
+              Path("prediction_snapshots"),
+          ]
+
+          for path in required:
+              if not path.exists():
+                  sys.exit(
+                      "ERROR: missing required path: "
+                      + path.as_posix()
+                  )
+
+          with open(
+              "race.json",
+              encoding="utf-8"
+          ) as f:
+              race = json.load(f)
+
+          race_id = str(
+              race.get(
+                  "race_id",
+                  ""
+              )
+          ).strip()
+
+          race_date = str(
+              race.get(
+                  "race_date",
+                  ""
+              )
+          ).strip()
+
+          if not re.fullmatch(
+              r"\d{12}",
+              race_id
+          ):
+              sys.exit(
+                  "ERROR: invalid race_id: "
+                  + repr(race_id)
+              )
+
+          if not race_date:
+              sys.exit(
+                  "ERROR: race_date is missing"
+              )
+
+          snapshot_dir = (
+              Path("prediction_snapshots")
+              / race_date
+              / race_id
+          )
+
+          if not snapshot_dir.exists():
+              sys.exit(
+                  "ERROR: snapshot directory "
+                  "does not exist: "
+                  + snapshot_dir.as_posix()
+              )
+
+          snapshots = list(
+              snapshot_dir.glob("*.json")
+          )
+
+          if not snapshots:
+              sys.exit(
+                  "ERROR: no prediction snapshots"
+              )
+
+          print("SOURCE VALIDATION OK")
+          print("race_id:", race_id)
+          print("race_date:", race_date)
+          print(
+              "snapshot_count:",
+              len(snapshots)
+          )
+          PY
+
+      - name: Run race verification
+        run: python race_verification.py
+
+      - name: Validate verification
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          with open(
+              "race.json",
+              encoding="utf-8"
+          ) as f:
+              race = json.load(f)
+
+          race_id = str(
+              race.get(
+                  "race_id",
+                  ""
+              )
+          ).strip()
+
+          race_date = str(
+              race.get(
+                  "race_date",
+                  ""
+              )
+          ).strip()
+
+          directory = (
+              Path("race_verifications")
+              / race_date
+              / race_id
+          )
+
+          if not directory.exists():
+              sys.exit(
+                  "ERROR: verification "
+                  "directory missing"
+              )
+
+          files = sorted(
+              directory.glob(
+                  "verification_*.json"
+              ),
+              key=lambda p:
+                  p.stat().st_mtime
+          )
+
+          if not files:
+              sys.exit(
+                  "ERROR: verification "
+                  "JSON was not created"
+              )
+
+          path = files[-1]
+
+          with open(
+              path,
+              encoding="utf-8"
+          ) as f:
+              data = json.load(f)
+
+          if (
+              data.get(
+                  "schema_version"
+              )
+              != 1
+          ):
+              sys.exit(
+                  "ERROR: schema_version "
+                  "mismatch"
+              )
+
+          if (
+              data.get(
+                  "verification_kind"
+              )
+              != "prediction_vs_result"
+          ):
+              sys.exit(
+                  "ERROR: verification_kind "
+                  "mismatch"
+              )
+
+          if (
+              str(
+                  data.get(
+                      "race_id",
+                      ""
+                  )
+              ).strip()
+              != race_id
+          ):
+              sys.exit(
+                  "ERROR: race_id mismatch"
+              )
+
+          summary = data.get(
+              "summary",
+              {}
+          )
+
+          matched = int(
+              summary.get(
+                  "matched_horse_count",
+                  0
+              )
+              or 0
+          )
+
+          if matched <= 0:
+              sys.exit(
+                  "ERROR: no matched horses"
+              )
+
+          winner = summary.get(
+              "winner",
+              {}
+          )
+
+          if not winner.get(
+              "horse_number"
+          ):
+              sys.exit(
+                  "ERROR: winner missing"
+              )
+
+          horses = data.get(
+              "horses",
+              []
+          )
+
+          if len(horses) != matched:
+              sys.exit(
+                  "ERROR: horse count mismatch"
+              )
+
+          actual_pace = str(
+              data.get(
+                  "actual_pace",
+                  ""
+              )
+          ).strip()
+
+          if not actual_pace:
+              sys.exit(
+                  "ERROR: actual pace missing"
+              )
+
+          if race_id == "202608040912":
+              if (
+                  winner.get(
+                      "horse_number"
+                  )
+                  != 5
+              ):
+                  sys.exit(
+                      "ERROR: Kyoto 12R "
+                      "winner mismatch"
+                  )
+
+              if (
+                  actual_pace
+                  != "ハイ"
+              ):
+                  sys.exit(
+                      "ERROR: Kyoto 12R "
+                      "pace mismatch"
+                  )
+
+          print(
+              "RACE VERIFICATION "
+              "VALIDATION OK"
+          )
+
+          print(
+              "file:",
+              path.as_posix()
+          )
+
+          print(
+              "evaluation_status:",
+              data.get(
+                  "evaluation_status"
+              )
+          )
+
+          print(
+              "aggregate_eligible:",
+              data.get(
+                  "aggregate_eligible"
+              )
+          )
+
+          print(
+              "winner:",
+              winner
+          )
+
+          print(
+              "predicted_first:",
+              summary.get(
+                  "predicted_first"
+              )
+          )
+
+          print(
+              "top3 coverage @3:",
+              summary.get(
+                  "top3_coverage_at_3"
+              )
+          )
+
+          print(
+              "top3 coverage @5:",
+              summary.get(
+                  "top3_coverage_at_5"
+              )
+          )
+
+          print(
+              "MAE:",
+              summary.get(
+                  "mean_absolute_rank_error"
+              )
+          )
+
+          print(
+              "major misses:",
+              summary.get(
+                  "major_miss_count"
+              )
+          )
+
+          print(
+              "actual pace:",
+              actual_pace
+          )
+          PY
+
+      - name: Commit verification
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -- race_verifications
+
+          if git diff --cached --quiet; then
+            echo "No race verification changes"
+            exit 0
+          fi
+
+          RACE_ID="$(python - <<'PY'
+          import json
+
+          with open(
+              "race.json",
+              encoding="utf-8"
+          ) as f:
+              print(
+                  json.load(f).get(
+                      "race_id",
+                      ""
+                  )
+              )
+          PY
+          )"
+
+          git commit -m "Save race verification ${RACE_ID}"
+          git push
