@@ -1,0 +1,118 @@
+name: Auto Race Verification
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 18:30 JST
+    # JRA終了後に1日1回自動検証
+    # GitHub Actions cronはUTC
+    - cron: "30 9 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-race-verification
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate source files
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+
+          required = [
+              Path(
+                  "auto_race_verification.py"
+              ),
+              Path(
+                  "race_verification.py"
+              ),
+              Path(
+                  "verification_aggregate.py"
+              ),
+              Path(
+                  "day_race_collector.py"
+              ),
+              Path(
+                  "prediction_snapshots"
+              ),
+          ]
+
+          missing = [
+              path.as_posix()
+              for path in required
+              if not path.exists()
+          ]
+
+          if missing:
+              sys.exit(
+                  "ERROR: missing required paths: "
+                  + ", ".join(missing)
+              )
+
+          print(
+              "AUTO VERIFICATION "
+              "SOURCE VALIDATION OK"
+          )
+          PY
+
+      - name: Run automatic race verification
+        run: |
+          python auto_race_verification.py \
+            --grace-minutes 15 \
+            --max-age-days 7
+
+      - name: Confirm race.json was restored
+        run: |
+          if ! git diff --quiet -- race.json; then
+            echo "ERROR: race.json changed during automatic verification"
+            git diff -- race.json
+            exit 1
+          fi
+
+          echo "race.json restore check OK"
+
+      - name: Commit verification updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [ -d "race_verifications" ]; then
+            git add -- race_verifications
+          fi
+
+          if [ -f "verification_database.json" ]; then
+            git add -- verification_database.json
+          fi
+
+          if git diff --cached --quiet; then
+            echo "No automatic verification changes"
+            exit 0
+          fi
+
+          git commit -m "Update automatic race verification"
+
+          git pull --rebase origin main
+          git push origin main
