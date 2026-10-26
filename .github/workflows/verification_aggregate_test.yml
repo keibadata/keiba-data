@@ -1,0 +1,370 @@
+name: Verification Aggregate Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verification-aggregate-test
+  cancel-in-progress: false
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate source files
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+
+          required = [
+              Path("verification_aggregate.py"),
+              Path("race_verifications"),
+          ]
+
+          for path in required:
+              if not path.exists():
+                  sys.exit(
+                      "ERROR: missing required path: "
+                      + path.as_posix()
+                  )
+
+          verification_files = list(
+              Path("race_verifications").rglob(
+                  "verification_*.json"
+              )
+          )
+
+          if not verification_files:
+              sys.exit(
+                  "ERROR: no race verification files"
+              )
+
+          print("SOURCE VALIDATION OK")
+          print(
+              "verification files:",
+              len(verification_files),
+          )
+          PY
+
+      - name: Build verification database
+        shell: bash
+        run: |
+          python verification_aggregate.py
+
+      - name: Validate verification database
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          path = Path(
+              "verification_database.json"
+          )
+
+          if not path.exists():
+              sys.exit(
+                  "ERROR: verification_database.json "
+                  "was not created"
+              )
+
+          with open(
+              path,
+              "r",
+              encoding="utf-8",
+          ) as f:
+              data = json.load(f)
+
+          if data.get("schema_version") != 1:
+              sys.exit(
+                  "ERROR: schema_version mismatch"
+              )
+
+          if (
+              data.get("database_kind")
+              != "race_verification_aggregate"
+          ):
+              sys.exit(
+                  "ERROR: database_kind mismatch"
+              )
+
+          source = data.get(
+              "source",
+              {},
+          )
+
+          formal = data.get(
+              "formal_summary",
+              {},
+          )
+
+          diagnostic = data.get(
+              "diagnostic_summary",
+              {},
+          )
+
+          formal_records = data.get(
+              "formal_records",
+              [],
+          )
+
+          diagnostic_records = data.get(
+              "diagnostic_records",
+              [],
+          )
+
+          source_count = int(
+              source.get(
+                  "source_file_count",
+                  0,
+              )
+              or 0
+          )
+
+          if source_count <= 0:
+              sys.exit(
+                  "ERROR: source_file_count is zero"
+              )
+
+          if (
+              int(
+                  diagnostic.get(
+                      "race_count",
+                      0,
+                  )
+                  or 0
+              )
+              <= 0
+          ):
+              sys.exit(
+                  "ERROR: diagnostic race_count "
+                  "is zero"
+              )
+
+          if (
+              int(
+                  formal.get(
+                      "race_count",
+                      0,
+                  )
+                  or 0
+              )
+              != len(formal_records)
+          ):
+              sys.exit(
+                  "ERROR: formal record count mismatch"
+              )
+
+          if (
+              int(
+                  diagnostic.get(
+                      "race_count",
+                      0,
+                  )
+                  or 0
+              )
+              != len(diagnostic_records)
+          ):
+              sys.exit(
+                  "ERROR: diagnostic record "
+                  "count mismatch"
+              )
+
+          formal_ids = [
+              str(
+                  record.get(
+                      "race_id",
+                      "",
+                  )
+              )
+              for record
+              in formal_records
+          ]
+
+          diagnostic_ids = [
+              str(
+                  record.get(
+                      "race_id",
+                      "",
+                  )
+              )
+              for record
+              in diagnostic_records
+          ]
+
+          if (
+              len(formormal := formal_ids)
+              != len(set(formormal))
+          ):
+              sys.exit(
+                  "ERROR: duplicate formal race_id"
+              )
+
+          if (
+              len(diagnostic_ids)
+              != len(set(diagnostic_ids))
+          ):
+              sys.exit(
+                  "ERROR: duplicate diagnostic race_id"
+              )
+
+          for record in formal_records:
+              if (
+                  record.get(
+                      "aggregate_eligible"
+                  )
+                  is not True
+              ):
+                  sys.exit(
+                      "ERROR: ineligible verification "
+                      "entered formal records"
+                  )
+
+          for record in diagnostic_records:
+              daypart = record.get(
+                  "daypart"
+              )
+
+              if daypart not in (
+                  "morning",
+                  "afternoon",
+                  "unknown",
+              ):
+                  sys.exit(
+                      "ERROR: invalid daypart: "
+                      + repr(daypart)
+                  )
+
+          known_test = [
+              record
+              for record
+              in diagnostic_records
+              if (
+                  record.get("race_id")
+                  == "202608040912"
+              )
+          ]
+
+          if known_test:
+              record = known_test[-1]
+
+              if (
+                  record.get(
+                      "scheduled_start_time"
+                  )
+                  != "16:30"
+              ):
+                  sys.exit(
+                      "ERROR: Kyoto 12R "
+                      "start time mismatch"
+                  )
+
+              if (
+                  record.get(
+                      "daypart"
+                  )
+                  != "afternoon"
+              ):
+                  sys.exit(
+                      "ERROR: Kyoto 12R "
+                      "daypart mismatch"
+                  )
+
+          print(
+              "VERIFICATION DATABASE "
+              "VALIDATION OK"
+          )
+          print(
+              "source files:",
+              source_count,
+          )
+          print(
+              "formal races:",
+              formal.get(
+                  "race_count"
+              ),
+          )
+          print(
+              "diagnostic races:",
+              diagnostic.get(
+                  "race_count"
+              ),
+          )
+          print(
+              "formal morning:",
+              formal.get(
+                  "by_daypart",
+                  {},
+              ).get(
+                  "morning",
+                  {},
+              ).get(
+                  "race_count",
+                  0,
+              ),
+          )
+          print(
+              "formal afternoon:",
+              formal.get(
+                  "by_daypart",
+                  {},
+              ).get(
+                  "afternoon",
+                  {},
+              ).get(
+                  "race_count",
+                  0,
+              ),
+          )
+          print(
+              "diagnostic top3 @3:",
+              diagnostic.get(
+                  "top3_coverage_at_3"
+              ),
+          )
+          print(
+              "diagnostic top3 @5:",
+              diagnostic.get(
+                  "top3_coverage_at_5"
+              ),
+          )
+          print(
+              "diagnostic MAE:",
+              diagnostic.get(
+                  "horse_weighted_mae"
+              ),
+          )
+          PY
+
+      - name: Commit verification database
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -- verification_database.json
+
+          if git diff --cached --quiet; then
+            echo "No verification database changes"
+            exit 0
+          fi
+
+          git commit -m "Update verification aggregate database"
+          git push
