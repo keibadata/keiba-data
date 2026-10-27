@@ -440,11 +440,23 @@ jobs:
         run: python production_snapshot_hook.py
 
       # ==================================================
+      # 保存済みsnapshotから履歴indexを生成
+      # ==================================================
+
+      - name: Build prediction history index
+        run: python build_prediction_history_index.py
+
+      # ==================================================
       # 結果保存
       # ==================================================
 
-      - name: Commit generated analysis files and prediction snapshot
+      - name: Commit analysis files, prediction snapshot and history index
         run: |
+          if [ ! -s "prediction_history_index.json" ]; then
+            echo "ERROR: prediction_history_index.json was not generated"
+            exit 1
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -467,6 +479,7 @@ jobs:
             "bloodline_stats.json"
             "race_bloodline_score.json"
             "final_analysis.json"
+            "prediction_history_index.json"
           )
 
           ADDED_COUNT=0
@@ -514,9 +527,35 @@ jobs:
             git fetch origin main
 
             if ! git rebase origin/main; then
-              git rebase --abort || true
-              echo "ERROR: generated analysis rebase failed"
-              exit 1
+              CONFLICT_FILES="$(git diff --name-only --diff-filter=U)"
+
+              # indexだけの競合は、両側のsnapshotから再生成する。
+              # 解析結果やPythonコードの競合は自動解決しない。
+              if [ "$CONFLICT_FILES" != "prediction_history_index.json" ]; then
+                git rebase --abort || true
+                echo "ERROR: generated analysis rebase failed"
+                exit 1
+              fi
+
+              echo "Rebuilding conflicted prediction history index"
+
+              git checkout --ours -- prediction_history_index.json
+              python build_prediction_history_index.py
+              git add -- prediction_history_index.json
+
+              if ! GIT_EDITOR=true git rebase --continue; then
+                git rebase --abort || true
+                echo "ERROR: history index rebase continuation failed"
+                exit 1
+              fi
+            fi
+
+            # 競合がなくても、main側に追加されたsnapshotを取り込む。
+            python build_prediction_history_index.py
+            git add -- prediction_history_index.json
+
+            if ! git diff --cached --quiet; then
+              git commit --amend --no-edit
             fi
           done
 
