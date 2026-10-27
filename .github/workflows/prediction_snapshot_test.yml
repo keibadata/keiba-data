@@ -20,6 +20,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Sync latest main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -442,15 +447,23 @@ jobs:
           )
           PY
 
-      - name: Commit prediction snapshot
+      - name: Build prediction history index
+        run: python build_prediction_history_index.py
+
+      - name: Commit prediction snapshot and history index
         run: |
+          if [ ! -s "prediction_history_index.json" ]; then
+            echo "ERROR: prediction_history_index.json was not generated"
+            exit 1
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -- prediction_snapshots
+          git add -- prediction_snapshots prediction_history_index.json
 
           if git diff --cached --quiet; then
-            echo "No prediction snapshot changes"
+            echo "No prediction snapshot or history index changes"
             exit 0
           fi
 
@@ -470,5 +483,59 @@ jobs:
           PY
           )"
 
-          git commit -m "Save prediction snapshot v2 ${RACE_ID}"
-          git push
+          git commit -m "Save prediction snapshot and history index ${RACE_ID}"
+
+          PUSH_OK=false
+
+          for ATTEMPT in 1 2 3; do
+            echo "Push attempt: $ATTEMPT"
+
+            if git push origin main; then
+              PUSH_OK=true
+              break
+            fi
+
+            echo "Remote main changed during snapshot save."
+            echo "Fetching and rebasing..."
+
+            git fetch origin main
+
+            if ! git rebase origin/main; then
+              CONFLICT_FILES="$(git diff --name-only --diff-filter=U)"
+
+              # indexだけの競合は、両側のsnapshotから再生成する。
+              # snapshotやコードの競合は自動解決しない。
+              if [ "$CONFLICT_FILES" != "prediction_history_index.json" ]; then
+                git rebase --abort || true
+                echo "ERROR: prediction snapshot rebase failed"
+                exit 1
+              fi
+
+              echo "Rebuilding conflicted prediction history index"
+
+              git checkout --ours -- prediction_history_index.json
+              python build_prediction_history_index.py
+              git add -- prediction_history_index.json
+
+              if ! GIT_EDITOR=true git rebase --continue; then
+                git rebase --abort || true
+                echo "ERROR: history index rebase continuation failed"
+                exit 1
+              fi
+            fi
+
+            # main側に追加されたsnapshotもindexへ反映する。
+            python build_prediction_history_index.py
+            git add -- prediction_history_index.json
+
+            if ! git diff --cached --quiet; then
+              git commit --amend --no-edit
+            fi
+          done
+
+          if [ "$PUSH_OK" != "true" ]; then
+            echo "ERROR: prediction snapshot push failed after retries"
+            exit 1
+          fi
+
+          echo "Prediction snapshot and history index pushed"
