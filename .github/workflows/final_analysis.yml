@@ -2,13 +2,25 @@ name: Race Full Analysis
 
 on:
   workflow_dispatch:
+    inputs:
+      race_id:
+        description: "12 digit Race ID"
+        required: false
+        type: string
 
 permissions:
   contents: write
 
+# ========================================================
+# Full Analysisは同時に1本だけ
+#
+# 新しい解析要求が来た場合、
+# 古い解析を残して二重実行しない。
+# ========================================================
+
 concurrency:
   group: race-full-analysis
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   analyze:
@@ -20,6 +32,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ==================================================
+      # queued中にmainが更新されていても
+      # 必ず最新mainから解析する
+      # ==================================================
+
+      - name: Sync latest main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -30,14 +52,26 @@ jobs:
 
       # ==================================================
       # 今回レース
+      #
+      # 優先順位
+      # 1. workflow input
+      # 2. race_id.txt
       # ==================================================
 
       - name: Load race ID
         run: |
-          RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
+          INPUT_RACE_ID="${{ inputs.race_id }}"
+
+          if [ -n "$INPUT_RACE_ID" ]; then
+            RACE_ID="$(printf '%s' "$INPUT_RACE_ID" | tr -d '[:space:]')"
+            echo "Race ID source: workflow input"
+          else
+            RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
+            echo "Race ID source: race_id.txt"
+          fi
 
           if ! [[ "$RACE_ID" =~ ^[0-9]{12}$ ]]; then
-            echo "ERROR: race_id.txt must contain exactly 12 digits"
+            echo "ERROR: Race ID must contain exactly 12 digits"
             exit 1
           fi
 
@@ -48,10 +82,220 @@ jobs:
         run: python main_v3.py
 
       # ==================================================
-      # 過去DB
+      # レースメタデータ補完
       #
-      # history_db.json は既存キャッシュを使用
-      # Full Analysisでは再収集しない
+      # main_v3.pyでage_conditionが取得できなかった場合、
+      # 出走馬sex_ageから安全に補完する。
+      #
+      # 例:
+      # 全馬 牡2 / 牝2 → 2歳
+      # 3歳と4歳以上が混在 → 3歳以上
+      #
+      # 判定できない場合は勝手に埋めない。
+      # ==================================================
+
+      - name: Normalize race metadata
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          import sys
+
+          PATH = "race.json"
+
+          with open(
+              PATH,
+              "r",
+              encoding="utf-8"
+          ) as f:
+              race = json.load(f)
+
+          current_age = str(
+              race.get(
+                  "age_condition",
+                  ""
+              )
+              or ""
+          ).strip()
+
+          horses = race.get(
+              "horses",
+              []
+          )
+
+          if not isinstance(
+              horses,
+              list
+          ):
+              horses = []
+
+          ages = []
+
+          for horse in horses:
+              if not isinstance(
+                  horse,
+                  dict
+              ):
+                  continue
+
+              sex_age = str(
+                  horse.get(
+                      "sex_age",
+                      ""
+                  )
+                  or ""
+              ).strip()
+
+              match = re.search(
+                  r"[牡牝セ騙]?\s*(\d+)",
+                  sex_age
+              )
+
+              if not match:
+                  continue
+
+              try:
+                  age = int(
+                      match.group(1)
+                  )
+              except ValueError:
+                  continue
+
+              if 2 <= age <= 15:
+                  ages.append(
+                      age
+                  )
+
+          unique_ages = sorted(
+              set(
+                  ages
+              )
+          )
+
+          inferred_age = ""
+
+          if current_age:
+              print(
+                  "age_condition already available:",
+                  current_age
+              )
+
+          else:
+              # ------------------------------------------
+              # 2歳馬しか存在しない場合
+              # JRAの2歳戦として安全に補完
+              # ------------------------------------------
+
+              if unique_ages == [2]:
+                  inferred_age = "2歳"
+
+              # ------------------------------------------
+              # 3歳と4歳以上が混在
+              # ------------------------------------------
+
+              elif (
+                  unique_ages
+                  and unique_ages[0] == 3
+                  and any(
+                      age >= 4
+                      for age in unique_ages
+                  )
+              ):
+                  inferred_age = "3歳以上"
+
+              # ------------------------------------------
+              # 4歳以上の複数年齢が混在
+              # ------------------------------------------
+
+              elif (
+                  unique_ages
+                  and unique_ages[0] >= 4
+                  and len(
+                      unique_ages
+                  ) >= 2
+              ):
+                  inferred_age = "4歳以上"
+
+              # ------------------------------------------
+              # 新馬戦は全馬同一年齢なら
+              # 年齢限定戦として補完可能
+              # ------------------------------------------
+
+              elif (
+                  bool(
+                      race.get(
+                          "is_debut",
+                          False
+                      )
+                  )
+                  and len(
+                      unique_ages
+                  ) == 1
+              ):
+                  inferred_age = (
+                      f"{unique_ages[0]}歳"
+                  )
+
+              if inferred_age:
+                  race[
+                      "age_condition"
+                  ] = inferred_age
+
+                  print(
+                      "age_condition inferred:",
+                      inferred_age
+                  )
+
+              else:
+                  print(
+                      "age_condition could not be "
+                      "safely inferred."
+                  )
+
+          print(
+              "runner ages:",
+              unique_ages
+          )
+
+          print(
+              "final age_condition:",
+              race.get(
+                  "age_condition",
+                  ""
+              )
+          )
+
+          with open(
+              PATH,
+              "w",
+              encoding="utf-8"
+          ) as f:
+              json.dump(
+                  race,
+                  f,
+                  ensure_ascii=False,
+                  indent=2
+              )
+
+          # 2歳馬のみなのに空欄なら異常
+          if (
+              unique_ages == [2]
+              and not str(
+                  race.get(
+                      "age_condition",
+                      ""
+                  )
+                  or ""
+              ).strip()
+          ):
+              sys.exit(
+                  "ERROR: failed to infer "
+                  "2-year-old race condition"
+              )
+          PY
+
+      # ==================================================
+      # 過去DB
       # ==================================================
 
       - name: Validate cached history database
@@ -64,10 +308,15 @@ jobs:
           path = "history_db.json"
 
           if not os.path.exists(path):
-              sys.exit("ERROR: history_db.json is missing")
+              sys.exit(
+                  "ERROR: history_db.json is missing"
+              )
 
           try:
-              with open(path, encoding="utf-8") as f:
+              with open(
+                  path,
+                  encoding="utf-8"
+              ) as f:
                   data = json.load(f)
           except Exception as exc:
               sys.exit(
@@ -76,14 +325,25 @@ jobs:
               )
 
           if isinstance(data, dict):
-              races = data.get("races", [])
+              races = data.get(
+                  "races",
+                  []
+              )
           elif isinstance(data, list):
               races = data
           else:
               races = []
 
-          if not isinstance(races, list) or not races:
-              sys.exit("ERROR: history_db.json has no race data")
+          if (
+              not isinstance(
+                  races,
+                  list
+              )
+              or not races
+          ):
+              sys.exit(
+                  "ERROR: history_db.json has no race data"
+              )
 
           print(
               "Cached history database OK:",
@@ -164,10 +424,6 @@ jobs:
 
       # ==================================================
       # 最終統合
-      #
-      # 1. 通常解析を実行
-      # 2. 新馬戦なら血統専用解析で上書き
-      #    通常戦では newcomer_final_analysis.py はSKIP
       # ==================================================
 
       - name: Run final analysis
@@ -178,17 +434,6 @@ jobs:
 
       # ==================================================
       # 最終安全チェック + 発走前予想保存
-      #
-      # production_snapshot_hook.py が以下を一括実行
-      #
-      # 1. 最終解析内容を検証
-      # 2. race_id / 頭数を検証
-      # 3. 通常戦ルールを検証
-      # 4. 新馬戦の血統専用ルールを検証
-      # 5. day_bias の未来情報リークを検証
-      # 6. runner_time_fit の未来情報リークを検証
-      # 7. prediction_snapshot.py を実行
-      # 8. 保存された snapshot を再検証
       # ==================================================
 
       - name: Validate final analysis and save prediction snapshot
@@ -252,4 +497,35 @@ jobs:
           fi
 
           git commit -m "Update full race analysis ${RACE_ID}"
-          git push
+
+          PUSH_OK=false
+
+          for ATTEMPT in 1 2 3; do
+            echo "Push attempt: $ATTEMPT"
+
+            if git push origin main; then
+              PUSH_OK=true
+              break
+            fi
+
+            echo "Remote main changed during analysis."
+            echo "Fetching and rebasing..."
+
+            git fetch origin main
+
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "ERROR: generated analysis rebase failed"
+              exit 1
+            fi
+          done
+
+          if [ "$PUSH_OK" != "true" ]; then
+            echo "ERROR: generated analysis push failed after retries"
+            exit 1
+          fi
+
+          echo "========================================"
+          echo "ANALYSIS FILES PUSHED"
+          echo "Race ID: $RACE_ID"
+          echo "========================================"
