@@ -79,193 +79,161 @@ jobs:
 
           target_date = os.environ["NAR_RACE_DATE"]
           target_number = int(os.environ["NAR_RACE_NUMBER"])
+          require(date.fromisoformat(target_date).isoformat() == target_date, "Invalid target date")
+          require(1 <= target_number <= 12, "Invalid race number")
+          data = json.loads(Path("nar/race.json").read_text(encoding="utf-8"))
+          expected_id = f"NAR_{target_date.replace('-', '')}_20_{target_number:02d}"
 
-          require(
-              date.fromisoformat(target_date).isoformat() == target_date,
-              "Invalid target date"
-          )
-          require(
-              1 <= target_number <= 12,
-              "Invalid race number"
-          )
-
-          output = Path("nar/race.json")
-
-          with output.open(encoding="utf-8") as handle:
-              data = json.load(handle)
-
-          expected_id = (
-              f"NAR_{target_date.replace('-', '')}"
-              f"_20_{target_number:02d}"
-          )
-
-          require(
-              data.get("schema_version") == 1,
-              "Unexpected schema"
-          )
-          require(
-              data.get("collection_only") is True,
-              "Not collection-only data"
-          )
-          require(
-              data.get("race_type") == "NAR",
-              "Not NAR data"
-          )
-          require(
-              data.get("source") == "NAR",
-              "Unexpected source"
-          )
-          require(
-              data.get("track") == "大井",
-              "Not Oi data"
-          )
-          require(
-              data.get("nar_baba_code") == "20",
-              "Track code mismatch"
-          )
-          require(
-              data.get("race_date") == target_date,
-              "Race date mismatch"
-          )
-          require(
-              data.get("race_number") == target_number,
-              "Race number mismatch"
-          )
-          require(
-              data.get("race_id") == expected_id,
-              "Race ID mismatch"
-          )
-          require(
-              bool(data.get("race_name")),
-              "Missing race name"
-          )
-          require(
-              data.get("surface") in {"ダート", "芝"},
-              "Unknown surface"
-          )
-          require(
-              isinstance(data.get("distance"), int)
-              and data["distance"] > 0,
-              "Invalid distance"
-          )
+          expected = {
+              "schema_version": 1,
+              "collection_only": True,
+              "race_type": "NAR",
+              "source": "NAR",
+              "track": "大井",
+              "nar_baba_code": "20",
+              "race_date": target_date,
+              "race_number": target_number,
+              "race_id": expected_id,
+          }
+          for key, value in expected.items():
+              require(data.get(key) == value, f"Race metadata mismatch: {key}")
+          require(data.get("collection_only") is True, "Not collection-only data")
+          require(bool(data.get("race_name")), "Missing race name")
+          require(data.get("surface") in {"ダート", "芝"}, "Unknown surface")
+          require(type(data.get("distance")) is int and data["distance"] > 0, "Invalid distance")
 
           horses = data.get("horses")
-
-          require(
-              isinstance(horses, list) and len(horses) > 0,
-              "No horses collected"
-          )
-          require(
-              data.get("horse_count") == len(horses),
-              "Horse count mismatch"
-          )
-
+          require(isinstance(horses, list) and bool(horses), "No horses collected")
+          require(data.get("horse_count") == len(horses), "Horse count mismatch")
           for horse in horses:
-              require(
-                  isinstance(horse, dict),
-                  "Invalid horse record"
-              )
-              require(
-                  bool(horse.get("horse_name")),
-                  "Missing horse name"
-              )
-              require(
-                  bool(horse.get("horse_id")),
-                  "Missing horse ID"
-              )
-              require(
-                  horse.get("horse_id_source")
-                  == "NAR_k_lineageLoginCode",
-                  "Unexpected horse ID source"
-              )
-              require(
-                  type(horse.get("horse_number")) is int
-                  and horse["horse_number"] > 0,
-                  "Invalid horse number"
-              )
-              require(
-                  isinstance(horse.get("previous_races"), list),
-                  "Invalid previous race records"
-              )
-              require(
-                  "ability_score" not in horse
-                  and "final_score" not in horse,
-                  "Scores must not be generated in this collection test"
-              )
-
-          require(
-              len({h["horse_number"] for h in horses}) == len(horses),
-              "Duplicate horse numbers"
-          )
-          require(
-              len({h["horse_id"] for h in horses}) == len(horses),
-              "Duplicate horse IDs"
-          )
+              require(isinstance(horse, dict), "Invalid horse record")
+              require(bool(horse.get("horse_name")), "Missing horse name")
+              require(bool(horse.get("horse_id")), "Missing horse ID")
+              require(horse.get("horse_id_source") == "NAR_k_lineageLoginCode", "Unexpected horse ID source")
+              require(type(horse.get("horse_number")) is int and horse["horse_number"] > 0, "Invalid horse number")
+              require(isinstance(horse.get("previous_races"), list), "Invalid previous races")
+              require("ability_score" not in horse and "final_score" not in horse, "Unexpected scores")
+          require(len({h["horse_number"] for h in horses}) == len(horses), "Duplicate horse numbers")
+          require(len({h["horse_id"] for h in horses}) == len(horses), "Duplicate horse IDs")
 
           print("NAR OI RACE VALIDATION OK")
           print("Race ID:", expected_id)
-          print(
-              "Race:",
-              target_date,
-              "大井",
-              f"{target_number}R",
-              data["race_name"]
-          )
+          print("Race:", target_date, "大井", f"{target_number}R", data["race_name"])
           print("Distance:", data["distance"])
           print("Horses:", len(horses))
-          print(
-              "Horses with previous races:",
-              sum(bool(h["previous_races"]) for h in horses)
-          )
-          print("Output:", output.as_posix())
           PY
 
-      - name: Commit collected NAR race only
-        run: |
-          # 取得処理が中央側などの追跡済みファイルを変更していたら停止。
-          CHANGED_FILES="$(git diff --name-only)"
+      - name: Normalize NAR previous races
+        run: python nar_normalize_history.py
 
+      - name: Validate normalized NAR history
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from datetime import date
+          from pathlib import Path
+
+          def require(condition, message):
+              if not condition:
+                  raise ValueError(message)
+
+          source_bytes = Path("nar/race.json").read_bytes()
+          race = json.loads(source_bytes)
+          history = json.loads(Path("nar/history.json").read_text(encoding="utf-8"))
+          require(history.get("schema_version") == 1, "Unexpected history schema")
+          require(history.get("normalizer_version") == "nar_history_v1", "Unexpected normalizer version")
+          require(history.get("collection_only") is True, "Not collection-only history")
+          require(history.get("race_type") == "NAR", "Not NAR history")
+          require(history.get("source_file") == "nar/race.json", "Unexpected source file")
+          require(history.get("source_sha256") == hashlib.sha256(source_bytes).hexdigest(), "History source hash mismatch")
+          require(history.get("source_updated_at") == race.get("updated_at"), "Source timestamp mismatch")
+          for key in ["race_id", "race_date", "track", "race_number"]:
+              require(history.get(key) == race.get(key), f"History metadata mismatch: {key}")
+
+          horses = history.get("horses")
+          require(isinstance(horses, list) and len(horses) == len(race["horses"]), "History horse count mismatch")
+          target_day = date.fromisoformat(race["race_date"])
+          all_runs = []
+          for source_horse, horse in zip(race["horses"], horses):
+              for key in ["horse_number", "horse_id", "horse_id_source", "horse_name"]:
+                  require(horse.get(key) == source_horse.get(key), f"Horse mismatch: {key}")
+              require("ability_score" not in horse and "final_score" not in horse, "Unexpected horse scores")
+              runs = horse.get("previous_races")
+              require(isinstance(runs, list) and len(runs) == len(source_horse["previous_races"]), "Past race count mismatch")
+              for index, (raw, run) in enumerate(zip(source_horse["previous_races"], runs), 1):
+                  require(run.get("history_index") == index, "History order mismatch")
+                  require(run.get("raw") == raw, "Original past race data changed")
+                  require(run.get("source_url") == raw.get("source_url"), "Past race source mismatch")
+                  flags = run.get("quality_flags")
+                  require(isinstance(flags, list) and all(isinstance(f, str) for f in flags), "Invalid quality flags")
+                  require(type(run.get("eligible_as_past_race")) is bool, "Invalid eligibility flag")
+                  require(run["eligible_as_past_race"] == (not flags), "Eligibility and quality flags disagree")
+                  require("ability_score" not in run and "final_score" not in run, "Unexpected past race scores")
+                  if run["eligible_as_past_race"]:
+                      require(date.fromisoformat(run["race_date"]) < target_day, "Same-day or future result included")
+                      require(run.get("finish_position") is not None, "Missing finish position")
+                      require(run.get("distance") is not None, "Missing distance")
+                      require(run.get("time_seconds") is not None, "Missing time")
+                      require(bool(run.get("corner_positions")), "Missing corner positions")
+                      require(run.get("last_3f_seconds") is not None, "Missing last 3F")
+                      require(run.get("margin_seconds") is not None, "Missing margin")
+                      reference = "runner_up" if run["finish_position"] == 1 else "winner"
+                      require(run.get("margin_reference") == reference, "Margin reference mismatch")
+                  if flags:
+                      print("QUALITY FLAGS:", horse["horse_number"], horse["horse_name"], index, flags)
+                  all_runs.append(run)
+
+          expected_summary = {
+              "horse_count": len(horses),
+              "past_race_count": len(all_runs),
+              "eligible_past_race_count": sum(r["eligible_as_past_race"] for r in all_runs),
+              "flagged_past_race_count": sum(bool(r["quality_flags"]) for r in all_runs),
+              "horses_without_history": sum(not h["previous_races"] for h in horses),
+          }
+          require(history.get("summary") == expected_summary, "History summary mismatch")
+          print("NAR HISTORY VALIDATION OK")
+          print("Race ID:", history["race_id"])
+          print(json.dumps(expected_summary, ensure_ascii=False))
+          PY
+
+      - name: Commit collected NAR files only
+        run: |
+          CHANGED_FILES="$(git diff --name-only)"
           while IFS= read -r path; do
-            if [ -n "$path" ] && [ "$path" != "nar/race.json" ]; then
-              echo "ERROR: unexpected tracked file change: $path"
-              exit 1
-            fi
+            case "$path" in
+              ""|nar/race.json|nar/history.json) ;;
+              *) echo "ERROR: unexpected tracked file change: $path"; exit 1 ;;
+            esac
           done <<< "$CHANGED_FILES"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add -- nar/race.json
+          git add -- nar/race.json nar/history.json
 
           if git diff --cached --quiet; then
-            echo "No NAR race changes"
+            echo "No NAR data changes"
             exit 0
           fi
 
-          git commit -m "Collect NAR Oi race ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
-
+          git commit -m "Collect NAR Oi race and history ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
           PUSH_OK=false
-
           for ATTEMPT in 1 2 3; do
             echo "Push attempt: $ATTEMPT"
-
             if git push origin main; then
               PUSH_OK=true
               break
             fi
-
             git fetch origin main
-
             if ! git rebase origin/main; then
               git rebase --abort || true
-              echo "ERROR: NAR race save conflicted with main"
+              echo "ERROR: NAR data save conflicted with main"
               exit 1
             fi
           done
 
           if [ "$PUSH_OK" != "true" ]; then
-            echo "ERROR: NAR race push failed after retries"
+            echo "ERROR: NAR data push failed after retries"
             exit 1
           fi
-
-          echo "NAR OI RACE SAVED"
+          echo "NAR OI RACE AND HISTORY SAVED"
