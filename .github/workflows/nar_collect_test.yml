@@ -1,0 +1,271 @@
+name: NAR Oi Race Collection Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      race_date:
+        description: "大井の開催日 YYYY-MM-DD"
+        required: true
+        default: "2026-10-28"
+        type: string
+      race_number:
+        description: "大井のR番号"
+        required: true
+        default: "1"
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+          - "8"
+          - "9"
+          - "10"
+          - "11"
+          - "12"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nar-oi-race-collection
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      NAR_RACE_DATE: ${{ inputs.race_date }}
+      NAR_RACE_NUMBER: ${{ inputs.race_number }}
+
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Collect Oi race from NAR
+        run: |
+          python nar_collect_race.py \
+            --date "$NAR_RACE_DATE" \
+            --race-number "$NAR_RACE_NUMBER"
+
+      - name: Validate collected Oi race
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import date
+          from pathlib import Path
+
+          def require(condition, message):
+              if not condition:
+                  raise ValueError(message)
+
+          target_date = os.environ["NAR_RACE_DATE"]
+          target_number = int(os.environ["NAR_RACE_NUMBER"])
+
+          require(
+              date.fromisoformat(target_date).isoformat() == target_date,
+              "Invalid target date"
+          )
+          require(
+              1 <= target_number <= 12,
+              "Invalid race number"
+          )
+
+          output = Path("nar/race.json")
+
+          with output.open(encoding="utf-8") as handle:
+              data = json.load(handle)
+
+          expected_id = (
+              f"NAR_{target_date.replace('-', '')}"
+              f"_20_{target_number:02d}"
+          )
+
+          require(
+              data.get("schema_version") == 1,
+              "Unexpected schema"
+          )
+          require(
+              data.get("collection_only") is True,
+              "Not collection-only data"
+          )
+          require(
+              data.get("race_type") == "NAR",
+              "Not NAR data"
+          )
+          require(
+              data.get("source") == "NAR",
+              "Unexpected source"
+          )
+          require(
+              data.get("track") == "大井",
+              "Not Oi data"
+          )
+          require(
+              data.get("nar_baba_code") == "20",
+              "Track code mismatch"
+          )
+          require(
+              data.get("race_date") == target_date,
+              "Race date mismatch"
+          )
+          require(
+              data.get("race_number") == target_number,
+              "Race number mismatch"
+          )
+          require(
+              data.get("race_id") == expected_id,
+              "Race ID mismatch"
+          )
+          require(
+              bool(data.get("race_name")),
+              "Missing race name"
+          )
+          require(
+              data.get("surface") in {"ダート", "芝"},
+              "Unknown surface"
+          )
+          require(
+              isinstance(data.get("distance"), int)
+              and data["distance"] > 0,
+              "Invalid distance"
+          )
+
+          horses = data.get("horses")
+
+          require(
+              isinstance(horses, list) and len(horses) > 0,
+              "No horses collected"
+          )
+          require(
+              data.get("horse_count") == len(horses),
+              "Horse count mismatch"
+          )
+
+          for horse in horses:
+              require(
+                  isinstance(horse, dict),
+                  "Invalid horse record"
+              )
+              require(
+                  bool(horse.get("horse_name")),
+                  "Missing horse name"
+              )
+              require(
+                  bool(horse.get("horse_id")),
+                  "Missing horse ID"
+              )
+              require(
+                  horse.get("horse_id_source")
+                  == "NAR_k_lineageLoginCode",
+                  "Unexpected horse ID source"
+              )
+              require(
+                  type(horse.get("horse_number")) is int
+                  and horse["horse_number"] > 0,
+                  "Invalid horse number"
+              )
+              require(
+                  isinstance(horse.get("previous_races"), list),
+                  "Invalid previous race records"
+              )
+              require(
+                  "ability_score" not in horse
+                  and "final_score" not in horse,
+                  "Scores must not be generated in this collection test"
+              )
+
+          require(
+              len({h["horse_number"] for h in horses}) == len(horses),
+              "Duplicate horse numbers"
+          )
+          require(
+              len({h["horse_id"] for h in horses}) == len(horses),
+              "Duplicate horse IDs"
+          )
+
+          print("NAR OI RACE VALIDATION OK")
+          print("Race ID:", expected_id)
+          print(
+              "Race:",
+              target_date,
+              "大井",
+              f"{target_number}R",
+              data["race_name"]
+          )
+          print("Distance:", data["distance"])
+          print("Horses:", len(horses))
+          print(
+              "Horses with previous races:",
+              sum(bool(h["previous_races"]) for h in horses)
+          )
+          print("Output:", output.as_posix())
+          PY
+
+      - name: Commit collected NAR race only
+        run: |
+          # 取得処理が中央側などの追跡済みファイルを変更していたら停止。
+          CHANGED_FILES="$(git diff --name-only)"
+
+          while IFS= read -r path; do
+            if [ -n "$path" ] && [ "$path" != "nar/race.json" ]; then
+              echo "ERROR: unexpected tracked file change: $path"
+              exit 1
+            fi
+          done <<< "$CHANGED_FILES"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -- nar/race.json
+
+          if git diff --cached --quiet; then
+            echo "No NAR race changes"
+            exit 0
+          fi
+
+          git commit -m "Collect NAR Oi race ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
+
+          PUSH_OK=false
+
+          for ATTEMPT in 1 2 3; do
+            echo "Push attempt: $ATTEMPT"
+
+            if git push origin main; then
+              PUSH_OK=true
+              break
+            fi
+
+            git fetch origin main
+
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "ERROR: NAR race save conflicted with main"
+              exit 1
+            fi
+          done
+
+          if [ "$PUSH_OK" != "true" ]; then
+            echo "ERROR: NAR race push failed after retries"
+            exit 1
+          fi
+
+          echo "NAR OI RACE SAVED"
