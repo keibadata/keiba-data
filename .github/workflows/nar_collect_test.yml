@@ -257,26 +257,93 @@ jobs:
           print(json.dumps(expected_summary, ensure_ascii=False))
           PY
 
+      - name: Collect and cross-check NAR past results
+        run: python nar_collect_past_results.py
+
+      - name: Validate saved NAR past results
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from datetime import date
+          from pathlib import Path
+
+          def require(condition, message):
+              if not condition:
+                  raise ValueError(message)
+
+          race_bytes = Path("nar/race.json").read_bytes()
+          history_bytes = Path("nar/history.json").read_bytes()
+          race = json.loads(race_bytes)
+          history = json.loads(history_bytes)
+          past = json.loads(Path("nar/past_results.json").read_text(encoding="utf-8"))
+          require(past.get("schema_version") == 1, "Unexpected past results schema")
+          require(past.get("collector_version") == "nar_past_results_v1", "Unexpected past results version")
+          require(past.get("collection_only") is True and past.get("race_type") == "NAR", "Not NAR collection data")
+          require(past.get("source_race_sha256") == hashlib.sha256(race_bytes).hexdigest(), "Past results race hash mismatch")
+          require(past.get("source_history_sha256") == hashlib.sha256(history_bytes).hexdigest(), "Past results history hash mismatch")
+          require(past.get("source_race_updated_at") == race.get("updated_at"), "Past results race timestamp mismatch")
+          require(past.get("source_history_updated_at") == history.get("updated_at"), "Past results history timestamp mismatch")
+          for key in ["race_id", "race_date", "track", "race_number"]:
+              require(past.get(key) == race.get(key), f"Past results metadata mismatch: {key}")
+
+          expected_refs = {
+              (run["race_id"], horse["horse_id"], run["history_index"])
+              for horse in history["horses"]
+              for run in horse["previous_races"]
+              if run["eligible_as_past_race"]
+          }
+          expected_ids = {ref[0] for ref in expected_refs}
+          races = past.get("races")
+          require(isinstance(races, list), "Past results must be a list")
+          require(len(races) == len(expected_ids) and {r["race_id"] for r in races} == expected_ids, "Missing or duplicate past races")
+          actual_refs = []
+          target_day = date.fromisoformat(race["race_date"])
+          for result in races:
+              require(date.fromisoformat(result["race_date"]) < target_day, "Same-day or future result included")
+              require(result["listed_horse_count"] == len(result["runners"]), "Listed runner count mismatch")
+              for ref in result["references"]:
+                  require(any(r["horse_id"] == ref["horse_id"] for r in result["runners"]), "Referenced horse missing from result")
+                  actual_refs.append((result["race_id"], ref["horse_id"], ref["history_index"]))
+              if result["timing"]["lap_splits"] is None:
+                  print("NO OFFICIAL LAP TABLE:", result["race_id"], result["track"])
+          require(len(actual_refs) == len(expected_refs) and set(actual_refs) == expected_refs, "Past race reference mismatch")
+          skipped_count = sum(not run["eligible_as_past_race"] for horse in history["horses"] for run in horse["previous_races"])
+          require(len(past.get("skipped_references", [])) == skipped_count, "Skipped reference count mismatch")
+          expected_summary = {
+              "horse_count": len(history["horses"]),
+              "requested_race_count": len(expected_ids),
+              "collected_race_count": len(races),
+              "matched_past_race_count": len(expected_refs),
+              "skipped_past_race_count": skipped_count,
+              "races_with_lap_table": sum(r["timing"]["lap_splits"] is not None for r in races),
+          }
+          require(past.get("summary") == expected_summary, "Past results summary mismatch")
+          print("NAR PAST RESULTS VALIDATION OK")
+          print("Race ID:", past["race_id"])
+          print(json.dumps(expected_summary, ensure_ascii=False))
+          PY
+
       - name: Commit collected NAR files only
         run: |
           CHANGED_FILES="$(git diff --name-only)"
           while IFS= read -r path; do
             case "$path" in
-              ""|nar/race.json|nar/history.json|nar/condition_evidence.json) ;;
+              ""|nar/race.json|nar/history.json|nar/condition_evidence.json|nar/past_results.json) ;;
               *) echo "ERROR: unexpected tracked file change: $path"; exit 1 ;;
             esac
           done <<< "$CHANGED_FILES"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- nar/race.json nar/history.json nar/condition_evidence.json
+          git add -- nar/race.json nar/history.json nar/condition_evidence.json nar/past_results.json
 
           if git diff --cached --quiet; then
             echo "No NAR data changes"
             exit 0
           fi
 
-          git commit -m "Collect NAR Oi race history and evidence ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
+          git commit -m "Collect NAR Oi inputs and past results ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
           PUSH_OK=false
           for ATTEMPT in 1 2 3; do
             echo "Push attempt: $ATTEMPT"
@@ -296,4 +363,4 @@ jobs:
             echo "ERROR: NAR data push failed after retries"
             exit 1
           fi
-          echo "NAR OI RACE HISTORY AND EVIDENCE SAVED"
+          echo "NAR OI INPUTS AND PAST RESULTS SAVED"
