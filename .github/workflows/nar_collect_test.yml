@@ -197,26 +197,86 @@ jobs:
           print(json.dumps(expected_summary, ensure_ascii=False))
           PY
 
+      - name: Build NAR condition evidence
+        run: python nar_build_condition_evidence.py
+
+      - name: Validate NAR condition evidence
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          def require(condition, message):
+              if not condition:
+                  raise ValueError(message)
+
+          race_bytes = Path("nar/race.json").read_bytes()
+          history_bytes = Path("nar/history.json").read_bytes()
+          race = json.loads(race_bytes)
+          history = json.loads(history_bytes)
+          evidence = json.loads(Path("nar/condition_evidence.json").read_text(encoding="utf-8"))
+          require(evidence.get("schema_version") == 1, "Unexpected evidence schema")
+          require(evidence.get("evidence_version") == "nar_condition_evidence_v1", "Unexpected evidence version")
+          require(evidence.get("collection_only") is True, "Not collection-only evidence")
+          require(evidence.get("race_type") == "NAR", "Not NAR evidence")
+          require(evidence.get("source_race_sha256") == hashlib.sha256(race_bytes).hexdigest(), "Evidence race hash mismatch")
+          require(evidence.get("source_history_sha256") == hashlib.sha256(history_bytes).hexdigest(), "Evidence history hash mismatch")
+          require(evidence.get("source_race_updated_at") == race.get("updated_at"), "Evidence race timestamp mismatch")
+          require(evidence.get("source_history_updated_at") == history.get("updated_at"), "Evidence history timestamp mismatch")
+          for key in ["race_id", "race_date", "track", "race_number"]:
+              require(evidence.get(key) == race.get(key), f"Evidence metadata mismatch: {key}")
+          conditions = evidence.get("target_conditions", {})
+          for key in ["surface", "distance", "track_condition", "course_layout_raw", "race_class"]:
+              require(conditions.get(key) == race.get(key), f"Target conditions mismatch: {key}")
+
+          horses = evidence.get("horses")
+          require(isinstance(horses, list) and len(horses) == len(history["horses"]), "Evidence horse count mismatch")
+          for source_horse, horse in zip(history["horses"], horses):
+              for key in ["horse_number", "horse_id", "horse_name"]:
+                  require(horse.get(key) == source_horse.get(key), f"Evidence horse mismatch: {key}")
+              comparisons = horse.get("comparisons")
+              require(isinstance(comparisons, list) and len(comparisons) == len(source_horse["previous_races"]), "Evidence past race count mismatch")
+              require(horse.get("previous_race") == (comparisons[0] if comparisons else None), "Previous race was replaced")
+              for run, comparison in zip(source_horse["previous_races"], comparisons):
+                  for key in ["history_index", "race_id", "race_date", "source_url", "quality_flags"]:
+                      require(comparison.get(key) == run.get(key), f"Comparison source mismatch: {key}")
+                  require(type(comparison.get("available_for_comparison")) is bool, "Invalid comparison availability")
+                  require(comparison["available_for_comparison"] == run["eligible_as_past_race"], "Comparison availability mismatch")
+                  facts = comparison.get("comparison", {})
+                  require(facts.get("same_surface") is None and facts.get("same_course_layout") is None, "Unknown surface or layout inferred")
+
+          expected_summary = {
+              "horse_count": len(horses),
+              "past_race_count": history["summary"]["past_race_count"],
+              "comparable_past_race_count": history["summary"]["eligible_past_race_count"],
+          }
+          require(evidence.get("summary") == expected_summary, "Evidence summary mismatch")
+          print("NAR CONDITION EVIDENCE VALIDATION OK")
+          print("Race ID:", evidence["race_id"])
+          print(json.dumps(expected_summary, ensure_ascii=False))
+          PY
+
       - name: Commit collected NAR files only
         run: |
           CHANGED_FILES="$(git diff --name-only)"
           while IFS= read -r path; do
             case "$path" in
-              ""|nar/race.json|nar/history.json) ;;
+              ""|nar/race.json|nar/history.json|nar/condition_evidence.json) ;;
               *) echo "ERROR: unexpected tracked file change: $path"; exit 1 ;;
             esac
           done <<< "$CHANGED_FILES"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- nar/race.json nar/history.json
+          git add -- nar/race.json nar/history.json nar/condition_evidence.json
 
           if git diff --cached --quiet; then
             echo "No NAR data changes"
             exit 0
           fi
 
-          git commit -m "Collect NAR Oi race and history ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
+          git commit -m "Collect NAR Oi race history and evidence ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
           PUSH_OK=false
           for ATTEMPT in 1 2 3; do
             echo "Push attempt: $ATTEMPT"
@@ -236,4 +296,4 @@ jobs:
             echo "ERROR: NAR data push failed after retries"
             exit 1
           fi
-          echo "NAR OI RACE AND HISTORY SAVED"
+          echo "NAR OI RACE HISTORY AND EVIDENCE SAVED"
