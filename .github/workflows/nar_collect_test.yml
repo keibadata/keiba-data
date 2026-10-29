@@ -324,26 +324,76 @@ jobs:
           print(json.dumps(expected_summary, ensure_ascii=False))
           PY
 
+      - name: Build and validate NAR run context
+        run: |
+          python nar_build_run_context.py
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          def require(condition, message):
+              if not condition:
+                  raise ValueError(message)
+
+          data = json.loads(Path("nar/run_context.json").read_text(encoding="utf-8"))
+          sources = {}
+          for name in ["race", "history", "past_results"]:
+              raw = Path(f"nar/{name}.json").read_bytes()
+              sources[name] = json.loads(raw)
+              require(data.get(f"source_{name}_sha256") == hashlib.sha256(raw).hexdigest(), f"Run context source hash mismatch: {name}")
+          require(data.get("schema_version") == 1 and data.get("context_version") == "nar_run_context_v1", "Unexpected run context format")
+          require(data.get("collection_only") is True and data.get("race_type") == "NAR", "Not NAR collection data")
+          for key in ["race_id", "race_date", "track", "race_number"]:
+              require(data.get(key) == sources["race"].get(key), f"Run context metadata mismatch: {key}")
+          horses = data.get("horses")
+          original = sources["history"]["horses"]
+          require(isinstance(horses, list) and len(horses) == len(original), "Run context horse count mismatch")
+          linked_count = 0
+          total_count = 0
+          for source_horse, horse in zip(original, horses):
+              for key in ["horse_id", "horse_number", "horse_name"]:
+                  require(horse.get(key) == source_horse.get(key), f"Run context horse mismatch: {key}")
+              runs = horse.get("runs")
+              require(isinstance(runs, list) and len(runs) == len(source_horse["previous_races"]), "Run context past race count mismatch")
+              require(horse.get("previous_race") == (runs[0] if runs else None), "Previous race was replaced")
+              for source_run, run in zip(source_horse["previous_races"], runs):
+                  total_count += 1
+                  for key in ["race_id", "race_date", "history_index", "source_url", "quality_flags"]:
+                      require(run.get(key) == source_run.get(key), f"Run context source mismatch: {key}")
+                  require(type(run.get("linked")) is bool and run["linked"] == source_run["eligible_as_past_race"], "Run context link status mismatch")
+                  if run["linked"]:
+                      linked_count += 1
+                      require(run["context"]["runner_result"]["horse_id"] == horse["horse_id"], "Linked runner ID mismatch")
+                  else:
+                      require(run.get("context") is None, "Unlinked run must retain unknown context")
+          expected = {"horse_count": len(horses), "past_race_count": total_count, "linked_past_race_count": linked_count, "unlinked_past_race_count": total_count - linked_count}
+          require(data.get("summary") == expected, "Run context summary mismatch")
+          print("NAR RUN CONTEXT VALIDATION OK")
+          print("Race ID:", data["race_id"])
+          print(json.dumps(expected, ensure_ascii=False))
+          PY
+
       - name: Commit collected NAR files only
         run: |
           CHANGED_FILES="$(git diff --name-only)"
           while IFS= read -r path; do
             case "$path" in
-              ""|nar/race.json|nar/history.json|nar/condition_evidence.json|nar/past_results.json) ;;
+              ""|nar/race.json|nar/history.json|nar/condition_evidence.json|nar/past_results.json|nar/run_context.json) ;;
               *) echo "ERROR: unexpected tracked file change: $path"; exit 1 ;;
             esac
           done <<< "$CHANGED_FILES"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- nar/race.json nar/history.json nar/condition_evidence.json nar/past_results.json
+          git add -- nar/race.json nar/history.json nar/condition_evidence.json nar/past_results.json nar/run_context.json
 
           if git diff --cached --quiet; then
             echo "No NAR data changes"
             exit 0
           fi
 
-          git commit -m "Collect NAR Oi inputs and past results ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
+          git commit -m "Collect NAR Oi inputs and run context ${NAR_RACE_DATE} ${NAR_RACE_NUMBER}R"
           PUSH_OK=false
           for ATTEMPT in 1 2 3; do
             echo "Push attempt: $ATTEMPT"
@@ -363,4 +413,4 @@ jobs:
             echo "ERROR: NAR data push failed after retries"
             exit 1
           fi
-          echo "NAR OI INPUTS AND PAST RESULTS SAVED"
+          echo "NAR OI INPUTS AND RUN CONTEXT SAVED"
