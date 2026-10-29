@@ -1,0 +1,2331 @@
+{
+  "schema_version": 1,
+  "evidence_version": "nar_previous_evidence_v1",
+  "collection_only": true,
+  "updated_at": "2026-10-29T21:07:15.786120+09:00",
+  "race_type": "NAR",
+  "race_id": "NAR_20261028_20_01",
+  "race_date": "2026-10-28",
+  "track": "大井",
+  "race_number": 1,
+  "source_race_sha256": "5a8dff525051ab7d288f2993a0712f6cae9c0be9f7c1b321d52cdf14e08c20ac",
+  "source_run_context_sha256": "821e766e0e1c8b5ef0c410f6b7bc3a3a367074064619f57c51b2f8eb6c090542",
+  "source_condition_evidence_sha256": "941a63a74d32795ef259aea23ec906de2017ab4b04ee091585bd8f1adfa9edf9",
+  "summary": {
+    "horse_count": 11,
+    "past_race_count": 22
+  },
+  "rules": [
+    "観測事実・課題候補・今回条件変更を分離し、自動加減点しない",
+    "同じレース内の複数観測は同一グループとし、独立上昇根拠の個数にしない",
+    "順位後退だけで距離不適・スタミナ不足・能力不足を確定しない",
+    "距離短縮等の変更だけで課題克服を確定しない",
+    "勝利していても課題の確認完了とはしない",
+    "未確認の課題・克服は0や空配列で確定扱いにしない"
+  ],
+  "horses": [
+    {
+      "horse_number": 1,
+      "horse_id": "30027400117",
+      "horse_name": "ナックブルーム",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20261005_20_03",
+        "race_date": "2026-10-05",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F05&k_raceNo=3&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_loss",
+            "text": "最終コーナーから着順後退",
+            "evidence_group_id": "NAR_20261005_20_03",
+            "values": {
+              "position_change": -1,
+              "finish_position": 3,
+              "corner_positions": [
+                2,
+                2,
+                2,
+                2
+              ]
+            }
+          }
+        ],
+        "strength_materials": [],
+        "issue_candidates": [
+          {
+            "code": "late_position_loss_review",
+            "text": "終盤の順位後退について原因確認が必要",
+            "observation_code": "late_position_loss",
+            "evidence_group_id": "NAR_20261005_20_03",
+            "confirmation_status": "unconfirmed",
+            "cause": null
+          }
+        ],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "distance_change_m",
+            "text": "距離変更",
+            "difference": -400,
+            "unit": "m"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20261005_20_03",
+          "race_date": "2026-10-05",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F05&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_loss",
+              "text": "最終コーナーから着順後退",
+              "evidence_group_id": "NAR_20261005_20_03",
+              "values": {
+                "position_change": -1,
+                "finish_position": 3,
+                "corner_positions": [
+                  2,
+                  2,
+                  2,
+                  2
+                ]
+              }
+            }
+          ],
+          "strength_materials": [],
+          "issue_candidates": [
+            {
+              "code": "late_position_loss_review",
+              "text": "終盤の順位後退について原因確認が必要",
+              "observation_code": "late_position_loss",
+              "evidence_group_id": "NAR_20261005_20_03",
+              "confirmation_status": "unconfirmed",
+              "cause": null
+            }
+          ],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": -400,
+              "unit": "m"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_loss": [
+          "NAR_20261005_20_03"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 2,
+      "horse_id": "30024403217",
+      "horse_name": "ムサシウォリアー",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20261007_20_03",
+        "race_date": "2026-10-07",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F07&k_raceNo=3&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "fastest_recorded_last3f",
+            "text": "記録のある完走馬内で上がり最速（同順位を含む）",
+            "evidence_group_id": "NAR_20261007_20_03",
+            "values": {
+              "last_3f_seconds": 39,
+              "recorded_count": 9,
+              "ranked_finisher_count": 9,
+              "equal_time_count": 1
+            }
+          },
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20261007_20_03",
+            "values": {
+              "position_change": 2,
+              "finish_position": 6,
+              "corner_positions": [
+                9,
+                9,
+                8
+              ]
+            }
+          }
+        ],
+        "strength_materials": [
+          {
+            "code": "fastest_recorded_last3f",
+            "text": "記録のある完走馬内で上がり最速（同順位を含む）",
+            "evidence_group_id": "NAR_20261007_20_03",
+            "values": {
+              "last_3f_seconds": 39,
+              "recorded_count": 9,
+              "ranked_finisher_count": 9,
+              "equal_time_count": 1
+            }
+          },
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20261007_20_03",
+            "values": {
+              "position_change": 2,
+              "finish_position": 6,
+              "corner_positions": [
+                9,
+                9,
+                8
+              ]
+            }
+          }
+        ],
+        "issue_candidates": [],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "body_weight_change_kg",
+            "text": "過去走からの馬体重変化",
+            "difference": 11,
+            "unit": "kg"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20261007_20_03",
+          "race_date": "2026-10-07",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F07&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "fastest_recorded_last3f",
+              "text": "記録のある完走馬内で上がり最速（同順位を含む）",
+              "evidence_group_id": "NAR_20261007_20_03",
+              "values": {
+                "last_3f_seconds": 39,
+                "recorded_count": 9,
+                "ranked_finisher_count": 9,
+                "equal_time_count": 1
+              }
+            },
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20261007_20_03",
+              "values": {
+                "position_change": 2,
+                "finish_position": 6,
+                "corner_positions": [
+                  9,
+                  9,
+                  8
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "fastest_recorded_last3f",
+              "text": "記録のある完走馬内で上がり最速（同順位を含む）",
+              "evidence_group_id": "NAR_20261007_20_03",
+              "values": {
+                "last_3f_seconds": 39,
+                "recorded_count": 9,
+                "ranked_finisher_count": 9,
+                "equal_time_count": 1
+              }
+            },
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20261007_20_03",
+              "values": {
+                "position_change": 2,
+                "finish_position": 6,
+                "corner_positions": [
+                  9,
+                  9,
+                  8
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 11,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 2,
+          "race_id": "NAR_20260903_20_03",
+          "race_date": "2026-09-03",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F09%2F03&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260903_20_03",
+              "values": {
+                "position_change": 1,
+                "finish_position": 8,
+                "corner_positions": [
+                  9,
+                  9,
+                  9
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260903_20_03",
+              "values": {
+                "position_change": 1,
+                "finish_position": 8,
+                "corner_positions": [
+                  9,
+                  9,
+                  9
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": 1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 15,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 3,
+          "race_id": "NAR_20260720_20_03",
+          "race_date": "2026-07-20",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F07%2F20&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260720_20_03",
+              "values": {
+                "position_change": 1,
+                "finish_position": 4,
+                "corner_positions": [
+                  5,
+                  5,
+                  5
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260720_20_03",
+              "values": {
+                "position_change": 1,
+                "finish_position": 4,
+                "corner_positions": [
+                  5,
+                  5,
+                  5
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": 1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 13,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "fastest_recorded_last3f": [
+          "NAR_20261007_20_03"
+        ],
+        "late_position_gain": [
+          "NAR_20260720_20_03",
+          "NAR_20260903_20_03",
+          "NAR_20261007_20_03"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 3,
+      "horse_id": "30096408417",
+      "horse_name": "アスタスティンガー",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20261006_20_02",
+        "race_date": "2026-10-06",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F06&k_raceNo=2&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_loss",
+            "text": "最終コーナーから着順後退",
+            "evidence_group_id": "NAR_20261006_20_02",
+            "values": {
+              "position_change": -2,
+              "finish_position": 3,
+              "corner_positions": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        ],
+        "strength_materials": [],
+        "issue_candidates": [
+          {
+            "code": "late_position_loss_review",
+            "text": "終盤の順位後退について原因確認が必要",
+            "observation_code": "late_position_loss",
+            "evidence_group_id": "NAR_20261006_20_02",
+            "confirmation_status": "unconfirmed",
+            "cause": null
+          }
+        ],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20261006_20_02",
+          "race_date": "2026-10-06",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F06&k_raceNo=2&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_loss",
+              "text": "最終コーナーから着順後退",
+              "evidence_group_id": "NAR_20261006_20_02",
+              "values": {
+                "position_change": -2,
+                "finish_position": 3,
+                "corner_positions": [
+                  1,
+                  1,
+                  1
+                ]
+              }
+            }
+          ],
+          "strength_materials": [],
+          "issue_candidates": [
+            {
+              "code": "late_position_loss_review",
+              "text": "終盤の順位後退について原因確認が必要",
+              "observation_code": "late_position_loss",
+              "evidence_group_id": "NAR_20261006_20_02",
+              "confirmation_status": "unconfirmed",
+              "cause": null
+            }
+          ],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 2,
+          "race_id": "NAR_20260918_20_05",
+          "race_date": "2026-09-18",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F09%2F18&k_raceNo=5&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [],
+          "strength_materials": [],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 200,
+              "unit": "m"
+            },
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": 4.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": -3,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_loss": [
+          "NAR_20261006_20_02"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 4,
+      "horse_id": "30082407117",
+      "horse_name": "ディアローラ",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20260910_36_02",
+        "race_date": "2026-09-10",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F09%2F10&k_raceNo=2&k_babaCode=36",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20260910_36_02",
+            "values": {
+              "position_change": 7,
+              "finish_position": 2,
+              "corner_positions": [
+                9,
+                9
+              ]
+            }
+          }
+        ],
+        "strength_materials": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20260910_36_02",
+            "values": {
+              "position_change": 7,
+              "finish_position": 2,
+              "corner_positions": [
+                9,
+                9
+              ]
+            }
+          }
+        ],
+        "issue_candidates": [],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "distance_change_m",
+            "text": "距離変更",
+            "difference": 300,
+            "unit": "m"
+          },
+          {
+            "field": "carried_weight_change_kg",
+            "text": "斤量変更",
+            "difference": -1.0,
+            "unit": "kg"
+          },
+          {
+            "field": "body_weight_change_kg",
+            "text": "過去走からの馬体重変化",
+            "difference": 7,
+            "unit": "kg"
+          },
+          {
+            "field": "same_track",
+            "text": "競馬場変更"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20260910_36_02",
+          "race_date": "2026-09-10",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F09%2F10&k_raceNo=2&k_babaCode=36",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260910_36_02",
+              "values": {
+                "position_change": 7,
+                "finish_position": 2,
+                "corner_positions": [
+                  9,
+                  9
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260910_36_02",
+              "values": {
+                "position_change": 7,
+                "finish_position": 2,
+                "corner_positions": [
+                  9,
+                  9
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 300,
+              "unit": "m"
+            },
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": -1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 7,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track",
+              "text": "競馬場変更"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 2,
+          "race_id": "NAR_20260827_36_02",
+          "race_date": "2026-08-27",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F08%2F27&k_raceNo=2&k_babaCode=36",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [],
+          "strength_materials": [],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 200,
+              "unit": "m"
+            },
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": -1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 11,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track",
+              "text": "競馬場変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 3,
+          "race_id": "NAR_20260812_36_03",
+          "race_date": "2026-08-12",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F08%2F12&k_raceNo=3&k_babaCode=36",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [],
+          "strength_materials": [],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 200,
+              "unit": "m"
+            },
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": -1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 7,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track",
+              "text": "競馬場変更"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 4,
+          "race_id": "NAR_20260730_36_01",
+          "race_date": "2026-07-30",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F07%2F30&k_raceNo=1&k_babaCode=36",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260730_36_01",
+              "values": {
+                "position_change": 2,
+                "finish_position": 2,
+                "corner_positions": [
+                  5,
+                  4
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260730_36_01",
+              "values": {
+                "position_change": 2,
+                "finish_position": 2,
+                "corner_positions": [
+                  5,
+                  4
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 300,
+              "unit": "m"
+            },
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": -1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 9,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track",
+              "text": "競馬場変更"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 5,
+          "race_id": "NAR_20260715_36_02",
+          "race_date": "2026-07-15",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F07%2F15&k_raceNo=2&k_babaCode=36",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260715_36_02",
+              "values": {
+                "position_change": 5,
+                "finish_position": 6,
+                "corner_positions": [
+                  11,
+                  11
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260715_36_02",
+              "values": {
+                "position_change": 5,
+                "finish_position": 6,
+                "corner_positions": [
+                  11,
+                  11
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 400,
+              "unit": "m"
+            },
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": -1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 5,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track",
+              "text": "競馬場変更"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_gain": [
+          "NAR_20260715_36_02",
+          "NAR_20260730_36_01",
+          "NAR_20260910_36_02"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 5,
+      "horse_id": "30064401417",
+      "horse_name": "ウィルアトレ",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20261005_20_03",
+        "race_date": "2026-10-05",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F05&k_raceNo=3&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20261005_20_03",
+            "values": {
+              "position_change": 3,
+              "finish_position": 4,
+              "corner_positions": [
+                6,
+                6,
+                7,
+                7
+              ]
+            }
+          }
+        ],
+        "strength_materials": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20261005_20_03",
+            "values": {
+              "position_change": 3,
+              "finish_position": 4,
+              "corner_positions": [
+                6,
+                6,
+                7,
+                7
+              ]
+            }
+          }
+        ],
+        "issue_candidates": [],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "distance_change_m",
+            "text": "距離変更",
+            "difference": -400,
+            "unit": "m"
+          },
+          {
+            "field": "body_weight_change_kg",
+            "text": "過去走からの馬体重変化",
+            "difference": -11,
+            "unit": "kg"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20261005_20_03",
+          "race_date": "2026-10-05",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F05&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20261005_20_03",
+              "values": {
+                "position_change": 3,
+                "finish_position": 4,
+                "corner_positions": [
+                  6,
+                  6,
+                  7,
+                  7
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20261005_20_03",
+              "values": {
+                "position_change": 3,
+                "finish_position": 4,
+                "corner_positions": [
+                  6,
+                  6,
+                  7,
+                  7
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": -400,
+              "unit": "m"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": -11,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_gain": [
+          "NAR_20261005_20_03"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 6,
+      "horse_id": "30066406817",
+      "horse_name": "ディオライズ",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20260629_20_03",
+        "race_date": "2026-06-29",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F29&k_raceNo=3&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20260629_20_03",
+            "values": {
+              "position_change": 2,
+              "finish_position": 4,
+              "corner_positions": [
+                5,
+                6,
+                6
+              ]
+            }
+          }
+        ],
+        "strength_materials": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20260629_20_03",
+            "values": {
+              "position_change": 2,
+              "finish_position": 4,
+              "corner_positions": [
+                5,
+                6,
+                6
+              ]
+            }
+          }
+        ],
+        "issue_candidates": [],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "carried_weight_change_kg",
+            "text": "斤量変更",
+            "difference": 1.0,
+            "unit": "kg"
+          },
+          {
+            "field": "body_weight_change_kg",
+            "text": "過去走からの馬体重変化",
+            "difference": 11,
+            "unit": "kg"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20260629_20_03",
+          "race_date": "2026-06-29",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F29&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260629_20_03",
+              "values": {
+                "position_change": 2,
+                "finish_position": 4,
+                "corner_positions": [
+                  5,
+                  6,
+                  6
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260629_20_03",
+              "values": {
+                "position_change": 2,
+                "finish_position": 4,
+                "corner_positions": [
+                  5,
+                  6,
+                  6
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": 1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 11,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_gain": [
+          "NAR_20260629_20_03"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 7,
+      "horse_id": "30034404417",
+      "horse_name": "イノセントワールド",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20260918_20_04",
+        "race_date": "2026-09-18",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F09%2F18&k_raceNo=4&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20260918_20_04",
+            "values": {
+              "position_change": 1,
+              "finish_position": 3,
+              "corner_positions": [
+                10,
+                9,
+                5,
+                4
+              ]
+            }
+          }
+        ],
+        "strength_materials": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20260918_20_04",
+            "values": {
+              "position_change": 1,
+              "finish_position": 3,
+              "corner_positions": [
+                10,
+                9,
+                5,
+                4
+              ]
+            }
+          }
+        ],
+        "issue_candidates": [],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "distance_change_m",
+            "text": "距離変更",
+            "difference": -200,
+            "unit": "m"
+          },
+          {
+            "field": "carried_weight_change_kg",
+            "text": "斤量変更",
+            "difference": 1.0,
+            "unit": "kg"
+          },
+          {
+            "field": "body_weight_change_kg",
+            "text": "過去走からの馬体重変化",
+            "difference": -11,
+            "unit": "kg"
+          },
+          {
+            "field": "same_layout_label",
+            "text": "内外回り等の表記変更"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20260918_20_04",
+          "race_date": "2026-09-18",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F09%2F18&k_raceNo=4&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260918_20_04",
+              "values": {
+                "position_change": 1,
+                "finish_position": 3,
+                "corner_positions": [
+                  10,
+                  9,
+                  5,
+                  4
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260918_20_04",
+              "values": {
+                "position_change": 1,
+                "finish_position": 3,
+                "corner_positions": [
+                  10,
+                  9,
+                  5,
+                  4
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": -200,
+              "unit": "m"
+            },
+            {
+              "field": "carried_weight_change_kg",
+              "text": "斤量変更",
+              "difference": 1.0,
+              "unit": "kg"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": -11,
+              "unit": "kg"
+            },
+            {
+              "field": "same_layout_label",
+              "text": "内外回り等の表記変更"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_gain": [
+          "NAR_20260918_20_04"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 8,
+      "horse_id": "30036401117",
+      "horse_name": "ユウユウミモザ",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20261004_20_03",
+        "race_date": "2026-10-04",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F04&k_raceNo=3&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20261004_20_03",
+            "values": {
+              "position_change": 1,
+              "finish_position": 3,
+              "corner_positions": [
+                4,
+                4
+              ]
+            }
+          }
+        ],
+        "strength_materials": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20261004_20_03",
+            "values": {
+              "position_change": 1,
+              "finish_position": 3,
+              "corner_positions": [
+                4,
+                4
+              ]
+            }
+          }
+        ],
+        "issue_candidates": [],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "distance_change_m",
+            "text": "距離変更",
+            "difference": 200,
+            "unit": "m"
+          },
+          {
+            "field": "body_weight_change_kg",
+            "text": "過去走からの馬体重変化",
+            "difference": -7,
+            "unit": "kg"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20261004_20_03",
+          "race_date": "2026-10-04",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F04&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20261004_20_03",
+              "values": {
+                "position_change": 1,
+                "finish_position": 3,
+                "corner_positions": [
+                  4,
+                  4
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20261004_20_03",
+              "values": {
+                "position_change": 1,
+                "finish_position": 3,
+                "corner_positions": [
+                  4,
+                  4
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 200,
+              "unit": "m"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": -7,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_gain": [
+          "NAR_20261004_20_03"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 9,
+      "horse_id": "30053403617",
+      "horse_name": "アヤサンミニサンタ",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20261006_20_03",
+        "race_date": "2026-10-06",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F06&k_raceNo=3&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20261006_20_03",
+            "values": {
+              "position_change": 2,
+              "finish_position": 3,
+              "corner_positions": [
+                5,
+                5
+              ]
+            }
+          }
+        ],
+        "strength_materials": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20261006_20_03",
+            "values": {
+              "position_change": 2,
+              "finish_position": 3,
+              "corner_positions": [
+                5,
+                5
+              ]
+            }
+          }
+        ],
+        "issue_candidates": [],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "distance_change_m",
+            "text": "距離変更",
+            "difference": 200,
+            "unit": "m"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20261006_20_03",
+          "race_date": "2026-10-06",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F06&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20261006_20_03",
+              "values": {
+                "position_change": 2,
+                "finish_position": 3,
+                "corner_positions": [
+                  5,
+                  5
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20261006_20_03",
+              "values": {
+                "position_change": 2,
+                "finish_position": 3,
+                "corner_positions": [
+                  5,
+                  5
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 200,
+              "unit": "m"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 2,
+          "race_id": "NAR_20260914_20_02",
+          "race_date": "2026-09-14",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F09%2F14&k_raceNo=2&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_loss",
+              "text": "最終コーナーから着順後退",
+              "evidence_group_id": "NAR_20260914_20_02",
+              "values": {
+                "position_change": -2,
+                "finish_position": 6,
+                "corner_positions": [
+                  4,
+                  4
+                ]
+              }
+            }
+          ],
+          "strength_materials": [],
+          "issue_candidates": [
+            {
+              "code": "late_position_loss_review",
+              "text": "終盤の順位後退について原因確認が必要",
+              "observation_code": "late_position_loss",
+              "evidence_group_id": "NAR_20260914_20_02",
+              "confirmation_status": "unconfirmed",
+              "cause": null
+            }
+          ],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 200,
+              "unit": "m"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 4,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 3,
+          "race_id": "NAR_20260629_20_03",
+          "race_date": "2026-06-29",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F29&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_loss",
+              "text": "最終コーナーから着順後退",
+              "evidence_group_id": "NAR_20260629_20_03",
+              "values": {
+                "position_change": -5,
+                "finish_position": 7,
+                "corner_positions": [
+                  2,
+                  2,
+                  2
+                ]
+              }
+            }
+          ],
+          "strength_materials": [],
+          "issue_candidates": [
+            {
+              "code": "late_position_loss_review",
+              "text": "終盤の順位後退について原因確認が必要",
+              "observation_code": "late_position_loss",
+              "evidence_group_id": "NAR_20260629_20_03",
+              "confirmation_status": "unconfirmed",
+              "cause": null
+            }
+          ],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": 4,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_gain": [
+          "NAR_20261006_20_03"
+        ],
+        "late_position_loss": [
+          "NAR_20260629_20_03",
+          "NAR_20260914_20_02"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 10,
+      "horse_id": "30069406017",
+      "horse_name": "ムーンショア",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20261007_20_03",
+        "race_date": "2026-10-07",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F07&k_raceNo=3&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_loss",
+            "text": "最終コーナーから着順後退",
+            "evidence_group_id": "NAR_20261007_20_03",
+            "values": {
+              "position_change": -1,
+              "finish_position": 8,
+              "corner_positions": [
+                6,
+                6,
+                7
+              ]
+            }
+          }
+        ],
+        "strength_materials": [],
+        "issue_candidates": [
+          {
+            "code": "late_position_loss_review",
+            "text": "終盤の順位後退について原因確認が必要",
+            "observation_code": "late_position_loss",
+            "evidence_group_id": "NAR_20261007_20_03",
+            "confirmation_status": "unconfirmed",
+            "cause": null
+          }
+        ],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "body_weight_change_kg",
+            "text": "過去走からの馬体重変化",
+            "difference": -8,
+            "unit": "kg"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20261007_20_03",
+          "race_date": "2026-10-07",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F10%2F07&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_loss",
+              "text": "最終コーナーから着順後退",
+              "evidence_group_id": "NAR_20261007_20_03",
+              "values": {
+                "position_change": -1,
+                "finish_position": 8,
+                "corner_positions": [
+                  6,
+                  6,
+                  7
+                ]
+              }
+            }
+          ],
+          "strength_materials": [],
+          "issue_candidates": [
+            {
+              "code": "late_position_loss_review",
+              "text": "終盤の順位後退について原因確認が必要",
+              "observation_code": "late_position_loss",
+              "evidence_group_id": "NAR_20261007_20_03",
+              "confirmation_status": "unconfirmed",
+              "cause": null
+            }
+          ],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": -8,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 2,
+          "race_id": "NAR_20260902_20_03",
+          "race_date": "2026-09-02",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F09%2F02&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [],
+          "strength_materials": [],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": -17,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        },
+        {
+          "history_index": 3,
+          "race_id": "NAR_20260813_20_02",
+          "race_date": "2026-08-13",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F08%2F13&k_raceNo=2&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260813_20_02",
+              "values": {
+                "position_change": 2,
+                "finish_position": 5,
+                "corner_positions": [
+                  9,
+                  8,
+                  7,
+                  7
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260813_20_02",
+              "values": {
+                "position_change": 2,
+                "finish_position": 5,
+                "corner_positions": [
+                  9,
+                  8,
+                  7,
+                  7
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": -200,
+              "unit": "m"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": -13,
+              "unit": "kg"
+            },
+            {
+              "field": "same_layout_label",
+              "text": "内外回り等の表記変更"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_loss": [
+          "NAR_20261007_20_03"
+        ],
+        "late_position_gain": [
+          "NAR_20260813_20_02"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    },
+    {
+      "horse_number": 11,
+      "horse_id": "40000405917",
+      "horse_name": "ソーラウィンド",
+      "previous_race": {
+        "history_index": 1,
+        "race_id": "NAR_20260608_20_03",
+        "race_date": "2026-06-08",
+        "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F08&k_raceNo=3&k_babaCode=20",
+        "data_available": true,
+        "quality_flags": [],
+        "observations": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20260608_20_03",
+            "values": {
+              "position_change": 1,
+              "finish_position": 3,
+              "corner_positions": [
+                4,
+                4
+              ]
+            }
+          }
+        ],
+        "strength_materials": [
+          {
+            "code": "late_position_gain",
+            "text": "最終コーナーから着順上昇",
+            "evidence_group_id": "NAR_20260608_20_03",
+            "values": {
+              "position_change": 1,
+              "finish_position": 3,
+              "corner_positions": [
+                4,
+                4
+              ]
+            }
+          }
+        ],
+        "issue_candidates": [],
+        "issue_review_complete": false,
+        "confirmed_issues": null,
+        "condition_changes_for_review": [
+          {
+            "field": "distance_change_m",
+            "text": "距離変更",
+            "difference": 200,
+            "unit": "m"
+          },
+          {
+            "field": "body_weight_change_kg",
+            "text": "過去走からの馬体重変化",
+            "difference": -2,
+            "unit": "kg"
+          },
+          {
+            "field": "same_track_condition",
+            "text": "馬場状態変更"
+          }
+        ],
+        "overcoming_assessment": {
+          "status": "unconfirmed",
+          "confirmed_connections": null,
+          "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+        }
+      },
+      "runs": [
+        {
+          "history_index": 1,
+          "race_id": "NAR_20260608_20_03",
+          "race_date": "2026-06-08",
+          "source_url": "https://www.keiba.go.jp/KeibaWeb/TodayRaceInfo/RaceMarkTable?k_raceDate=2026%2F06%2F08&k_raceNo=3&k_babaCode=20",
+          "data_available": true,
+          "quality_flags": [],
+          "observations": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260608_20_03",
+              "values": {
+                "position_change": 1,
+                "finish_position": 3,
+                "corner_positions": [
+                  4,
+                  4
+                ]
+              }
+            }
+          ],
+          "strength_materials": [
+            {
+              "code": "late_position_gain",
+              "text": "最終コーナーから着順上昇",
+              "evidence_group_id": "NAR_20260608_20_03",
+              "values": {
+                "position_change": 1,
+                "finish_position": 3,
+                "corner_positions": [
+                  4,
+                  4
+                ]
+              }
+            }
+          ],
+          "issue_candidates": [],
+          "issue_review_complete": false,
+          "confirmed_issues": null,
+          "condition_changes_for_review": [
+            {
+              "field": "distance_change_m",
+              "text": "距離変更",
+              "difference": 200,
+              "unit": "m"
+            },
+            {
+              "field": "body_weight_change_kg",
+              "text": "過去走からの馬体重変化",
+              "difference": -2,
+              "unit": "kg"
+            },
+            {
+              "field": "same_track_condition",
+              "text": "馬場状態変更"
+            }
+          ],
+          "overcoming_assessment": {
+            "status": "unconfirmed",
+            "confirmed_connections": null,
+            "reason": "条件変更だけでは前走敗因・課題克服を確定しない"
+          }
+        }
+      ],
+      "observation_race_ids_by_code": {
+        "late_position_gain": [
+          "NAR_20260608_20_03"
+        ]
+      },
+      "unassessed_items": [
+        "前走敗因",
+        "課題確定",
+        "課題克服度",
+        "クラス比較",
+        "不利の有無",
+        "ペース適否",
+        "能力",
+        "今回発揮率"
+      ]
+    }
+  ]
+}
