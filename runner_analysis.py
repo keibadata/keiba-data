@@ -2,8 +2,6 @@ import json
 import re
 from datetime import datetime, timezone, timedelta
 
-from analysis_evidence import EVIDENCE_VERSION, assessment_score
-
 
 INPUT_FILE = "runner_history.json"
 RACE_FILE = "race.json"
@@ -365,8 +363,7 @@ def analyze_race(race_row):
     )
 
     # ---------------------------------
-    # 今回条件の経験度。
-    # 適性・発揮率とは別の診断項目。
+    # 今回条件適性
     # ---------------------------------
 
     condition = 0.0
@@ -491,7 +488,7 @@ def analyze_race(race_row):
                 4
             ),
 
-        "condition_experience_score":
+        "condition_score":
             round(
                 condition,
                 4
@@ -638,7 +635,7 @@ def analyze_horse(horse):
 
     condition_values = [
         row[
-            "condition_experience_score"
+            "condition_score"
         ]
         for row in analyzed
     ]
@@ -668,9 +665,9 @@ def analyze_horse(horse):
         )
 
     if condition_raw is None:
-        condition_experience_score = None
+        condition_fit_score = None
     else:
-        condition_experience_score = round(
+        condition_fit_score = round(
             max(
                 0,
                 min(
@@ -681,27 +678,20 @@ def analyze_horse(horse):
             1
         )
 
-    # 経験したという事実だけで
-    # 適性・今回発揮率を作らない。
-    condition_assessment = horse.get(
-        "condition_assessment"
-    )
-
-    performance_assessment = horse.get(
-        "performance_assessment"
-    )
-
-    condition_fit_score = assessment_score(
-        condition_assessment,
-        TARGET_RACE_ID,
-        "condition_fit"
-    )
-
-    performance_rate = assessment_score(
-        performance_assessment,
-        TARGET_RACE_ID,
-        "performance_rate"
-    )
+    if condition_raw is None:
+        performance_rate = None
+    else:
+        performance_rate = round(
+            max(
+                35,
+                min(
+                    100,
+                    45
+                    + condition_raw * 55
+                )
+            ),
+            1
+        )
 
     noise_flags = []
 
@@ -823,32 +813,6 @@ def analyze_horse(horse):
 
         "condition_fit_score":
             condition_fit_score,
-
-        "condition_experience_score":
-            condition_experience_score,
-
-        "assessment_version":
-            EVIDENCE_VERSION,
-
-        "condition_assessment":
-            condition_assessment,
-
-        "performance_assessment":
-            performance_assessment,
-
-        "condition_fit_status":
-            (
-                "confirmed"
-                if condition_fit_score is not None
-                else "unknown"
-            ),
-
-        "performance_rate_status":
-            (
-                "confirmed"
-                if performance_rate is not None
-                else "unknown"
-            ),
 
         "performance_rate":
             performance_rate,
@@ -1015,18 +979,6 @@ def main():
         },
 
         "method": {
-            "assessment_version":
-                EVIDENCE_VERSION,
-
-            "condition_experience_is_diagnostic_only":
-                True,
-
-            "condition_fit_requires_confirmed_evidence":
-                True,
-
-            "performance_rate_requires_independent_evidence":
-                True,
-
             "target_condition_from_race_json":
                 True,
 
