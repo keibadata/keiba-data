@@ -2,6 +2,8 @@ import json
 import re
 from datetime import datetime, timezone, timedelta
 
+from analysis_evidence import EVIDENCE_VERSION, confirmed_evidence
+
 
 INPUT_FILE = "runner_history.json"
 RACE_FILE = "race.json"
@@ -247,6 +249,7 @@ def analyze_previous_race(race_row):
     issues = []
     positives = []
     unknowns = []
+    condition_changes = []
 
     # =====================================================
     # 今回条件との接続
@@ -268,7 +271,7 @@ def analyze_previous_race(race_row):
         )
 
     elif surface:
-        issues.append(
+        condition_changes.append(
             "前走は今回と異なる馬場種別"
         )
 
@@ -296,13 +299,13 @@ def analyze_previous_race(race_row):
 
         elif diff > 0:
             # 前走距離 > 今回距離
-            issues.append(
+            condition_changes.append(
                 "前走から距離短縮"
             )
 
         else:
             # 前走距離 < 今回距離
-            issues.append(
+            condition_changes.append(
                 "前走から距離延長"
             )
 
@@ -456,22 +459,22 @@ def analyze_previous_race(race_row):
     # ここでは確認材料として保持する。
     # =====================================================
 
-    overcoming = []
+    overcoming_checks = []
 
     if (
         "前走から距離短縮"
-        in issues
+        in condition_changes
     ):
-        overcoming.append(
-            "距離短縮による追走・折合い変化を確認"
+        overcoming_checks.append(
+            "要確認:距離短縮による追走・折合いの変化"
         )
 
     if (
         "前走から距離延長"
-        in issues
+        in condition_changes
     ):
-        overcoming.append(
-            "距離延長による追走負荷・持続力適性を確認"
+        overcoming_checks.append(
+            "要確認:距離延長時の追走負荷・持続力適性"
         )
 
     if (
@@ -481,17 +484,21 @@ def analyze_previous_race(race_row):
         "やや後方からの競馬"
         in issues
     ):
-        overcoming.append(
-            "今回の位置取り改善材料を確認"
+        overcoming_checks.append(
+            "要確認:今回の位置取り改善を裏付ける材料"
         )
 
     if (
         "前走は今回と異なる馬場種別"
-        in issues
+        in condition_changes
     ):
-        overcoming.append(
-            "馬場種別変更への適応材料を確認"
+        overcoming_checks.append(
+            "要確認:馬場種別変更への適応材料"
         )
+
+    # 自動抽出したチェック項目は、
+    # 確認済みの克服材料に数えない。
+    overcoming = []
 
     # =====================================================
     # サマリー
@@ -499,7 +506,7 @@ def analyze_previous_race(race_row):
 
     if not issues:
         issue_status = (
-            "明確な課題なし"
+            "数値データから課題未抽出・課題なしとは未確認"
         )
     else:
         issue_status = " / ".join(
@@ -603,6 +610,18 @@ def analyze_previous_race(race_row):
         "overcoming_materials":
             overcoming,
 
+        "overcoming_checks":
+            overcoming_checks,
+
+        "condition_changes":
+            condition_changes,
+
+        "verified_overcoming_evidence":
+            [],
+
+        "assessment_version":
+            EVIDENCE_VERSION,
+
         "positive_summary":
             positive_status,
 
@@ -681,6 +700,35 @@ def analyze_horse(horse):
     analysis = analyze_previous_race(
         previous
     )
+
+    verified = confirmed_evidence(
+        horse.get(
+            "verified_overcoming_evidence"
+        ),
+        TARGET_RACE_ID,
+        kind="issue_resolution",
+        issues=analysis["issues"],
+    )
+
+    analysis[
+        "verified_overcoming_evidence"
+    ] = verified
+
+    analysis[
+        "overcoming_materials"
+    ] = [
+        record["fact"]
+        for record in verified
+    ]
+
+    if verified:
+        analysis[
+            "overcoming_summary"
+        ] = " / ".join(
+            analysis[
+                "overcoming_materials"
+            ]
+        )
 
     summary_parts = []
 
