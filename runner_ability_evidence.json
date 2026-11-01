@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-11-01T08:50:31.953931+09:00",
-  "target_race_id": "202608041101",
+  "updated_at": "2026-11-01T09:29:12.999073+09:00",
+  "target_race_id": "202605041101",
   "version": "ability_evidence_v1",
   "comparison_schema_version": "field_comparison_v1",
   "database_connected": true,
@@ -8,15 +8,15 @@
   "future_race_usage": false,
   "leak_check_passed": true,
   "summary": {
-    "horse_count": 11,
-    "past_race_count": 19,
-    "field_matched_count": 19,
+    "horse_count": 15,
+    "past_race_count": 33,
+    "field_matched_count": 33,
     "field_conflict_count": 0,
-    "winner_time_gap_count": 19,
-    "direct_comparison_row_count": 0,
-    "comparable_direct_row_count": 0,
-    "unique_direct_meeting_count": 0,
-    "unique_comparable_meeting_count": 0,
+    "winner_time_gap_count": 32,
+    "direct_comparison_row_count": 8,
+    "comparable_direct_row_count": 8,
+    "unique_direct_meeting_count": 4,
+    "unique_comparable_meeting_count": 4,
     "pace_known_count": 0
   },
   "notes": [
@@ -28,34 +28,245 @@
   ],
   "horses": [
     {
-      "horse_id": "2024104575",
+      "horse_id": "2024107186",
       "horse_number": "1",
-      "horse_name": "ウメヒナタ",
+      "horse_name": "インサイドエッジ",
       "class_counts": {
-        "未勝利": 2,
+        "未勝利": 1,
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202604040101",
-          "date": "2026-10-17",
+          "race_id": "202604020801",
+          "date": "2026-08-16",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
           "surface": "芝",
           "distance": 1600.0,
-          "finish_raw": "8",
-          "finish": 8,
-          "last3f": 34.6,
-          "passing_raw": "3-3",
+          "finish_raw": "3",
+          "finish": 3,
+          "last3f": 33.9,
+          "passing_raw": "5-6",
+          "margin_raw": "0.2",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 1,
+            "winner_time_gap_seconds": 0.2,
+            "passing_4c": 8,
+            "current_opponents": [
+              {
+                "comparison_key": "202604020801|2024100076|2024107186",
+                "horse_id": "2024100076",
+                "horse_name": "シュネーバレン",
+                "current_horse_number": "2",
+                "past_horse_number": "9",
+                "finish_raw": "6",
+                "finish": 6,
+                "own_finish": 3,
+                "outcome": "先着",
+                "own_minus_opponent_seconds": -0.4
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202605030504",
+          "date": "2026-06-20",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "2",
+          "finish": 2,
+          "last3f": 33.6,
+          "passing_raw": "5-5",
+          "margin_raw": "0.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 1,
+            "winner_time_gap_seconds": 0.4,
+            "passing_4c": 5,
+            "current_opponents": [
+              {
+                "comparison_key": "202605030504|2024105183|2024107186",
+                "horse_id": "2024105183",
+                "horse_name": "ユリア",
+                "current_horse_number": "13",
+                "past_horse_number": "11",
+                "finish_raw": "3",
+                "finish": 3,
+                "own_finish": 2,
+                "outcome": "先着",
+                "own_minus_opponent_seconds": 0.0
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024100076",
+      "horse_number": "2",
+      "horse_name": "シュネーバレン",
+      "class_counts": {
+        "未勝利": 4,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605040703",
+          "date": "2026-10-18",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "6",
+          "finish": 6,
+          "last3f": 35.2,
+          "passing_raw": "7-7",
+          "margin_raw": "0.7",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 0.7,
+            "passing_4c": 7,
+            "current_opponents": [
+              {
+                "comparison_key": "202605040703|2024100076|2024107129",
+                "horse_id": "2024107129",
+                "horse_name": "ウインリスノアール",
+                "current_horse_number": "11",
+                "past_horse_number": "4",
+                "finish_raw": "7",
+                "finish": 7,
+                "own_finish": 6,
+                "outcome": "先着",
+                "own_minus_opponent_seconds": 0.0
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202604020801",
+          "date": "2026-08-16",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1600.0,
+          "finish_raw": "6",
+          "finish": 6,
+          "last3f": 34.1,
+          "passing_raw": "7-9",
           "margin_raw": "0.6",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 4,
+            "winner_time_gap_seconds": 0.6,
+            "passing_4c": 10,
+            "current_opponents": [
+              {
+                "comparison_key": "202604020801|2024100076|2024107186",
+                "horse_id": "2024107186",
+                "horse_name": "インサイドエッジ",
+                "current_horse_number": "1",
+                "past_horse_number": "8",
+                "finish_raw": "3",
+                "finish": 3,
+                "own_finish": 6,
+                "outcome": "後着",
+                "own_minus_opponent_seconds": 0.4
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202604020401",
+          "date": "2026-08-02",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1600.0,
+          "finish_raw": "5",
+          "finish": 5,
+          "last3f": 34.2,
+          "passing_raw": "4-4",
+          "margin_raw": "0.5",
           "field": {
             "matched": true,
             "classified_finish_count": 12,
             "last3f_observed_count": 12,
             "last3f_rank": 9,
-            "winner_time_gap_seconds": 0.6,
-            "passing_4c": 3,
+            "winner_time_gap_seconds": 0.5,
+            "passing_4c": 4,
             "current_opponents": [],
             "comparison_conflicts": [],
             "pace_label": null,
@@ -74,62 +285,75 @@
           "flags": []
         },
         {
-          "race_id": "202602010901",
-          "date": "2026-07-11",
+          "race_id": "202603020701",
+          "date": "2026-07-18",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1000.0,
-          "finish_raw": "7",
-          "finish": 7,
-          "last3f": 37.0,
-          "passing_raw": "6-6",
-          "margin_raw": "1.9",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 10,
-            "last3f_observed_count": 10,
-            "last3f_rank": 8,
-            "winner_time_gap_seconds": 1.9,
-            "passing_4c": 7,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202602010605",
-          "date": "2026-06-28",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
           "race_class_source": "race_name",
           "surface": "芝",
           "distance": 1200.0,
           "finish_raw": "3",
           "finish": 3,
-          "last3f": 35.6,
-          "passing_raw": "2-2",
-          "margin_raw": "1.4",
+          "last3f": 35.7,
+          "passing_raw": "4-5",
+          "margin_raw": "0.4",
           "field": {
             "matched": true,
-            "classified_finish_count": 6,
-            "last3f_observed_count": 6,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
             "last3f_rank": 5,
-            "winner_time_gap_seconds": 1.4,
-            "passing_4c": 2,
+            "winner_time_gap_seconds": 0.4,
+            "passing_4c": 5,
+            "current_opponents": [
+              {
+                "comparison_key": "202603020701|2024100076|2024107129",
+                "horse_id": "2024107129",
+                "horse_name": "ウインリスノアール",
+                "current_horse_number": "11",
+                "past_horse_number": "3",
+                "finish_raw": "4",
+                "finish": 4,
+                "own_finish": 3,
+                "outcome": "先着",
+                "own_minus_opponent_seconds": 0.0
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202603020406",
+          "date": "2026-07-05",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "2",
+          "finish": 2,
+          "last3f": 36.2,
+          "passing_raw": "4-3",
+          "margin_raw": "0.0",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 0.0,
+            "passing_4c": 4,
             "current_opponents": [],
             "comparison_conflicts": [],
             "pace_label": null,
@@ -150,34 +374,34 @@
       ]
     },
     {
-      "horse_id": "2024104655",
-      "horse_number": "2",
-      "horse_name": "ラッキーハナコ",
+      "horse_id": "2024106629",
+      "horse_number": "3",
+      "horse_name": "ミエルモーサ",
       "class_counts": {
-        "未勝利": 2,
+        "未勝利": 1,
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202608040602",
-          "date": "2026-10-17",
+          "race_id": "202610020501",
+          "date": "2026-07-11",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
           "surface": "芝",
           "distance": 1200.0,
-          "finish_raw": "6",
-          "finish": 6,
-          "last3f": 34.0,
-          "passing_raw": "9-7",
-          "margin_raw": "0.6",
+          "finish_raw": "11",
+          "finish": 11,
+          "last3f": 37.5,
+          "passing_raw": "2-2",
+          "margin_raw": "1.7",
           "field": {
             "matched": true,
-            "classified_finish_count": 11,
-            "last3f_observed_count": 11,
-            "last3f_rank": 2,
-            "winner_time_gap_seconds": 0.6,
-            "passing_4c": 7,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": 11,
+            "winner_time_gap_seconds": 1.7,
+            "passing_4c": 2,
             "current_opponents": [],
             "comparison_conflicts": [],
             "pace_label": null,
@@ -196,61 +420,24 @@
           "flags": []
         },
         {
-          "race_id": "202608040202",
-          "date": "2026-10-04",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1600.0,
-          "finish_raw": "6",
-          "finish": 6,
-          "last3f": 34.9,
-          "passing_raw": "7-7",
-          "margin_raw": "1.6",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 9,
-            "last3f_observed_count": 9,
-            "last3f_rank": 6,
-            "winner_time_gap_seconds": 1.6,
-            "passing_4c": 7,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202607020402",
-          "date": "2026-08-02",
+          "race_id": "202605030604",
+          "date": "2026-06-21",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1800.0,
-          "finish_raw": "7",
-          "finish": 7,
-          "last3f": 44.3,
-          "passing_raw": "1-1-2-2",
-          "margin_raw": "4.5",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "2",
+          "finish": 2,
+          "last3f": 33.7,
+          "passing_raw": "1-1",
+          "margin_raw": "0.1",
           "field": {
             "matched": true,
-            "classified_finish_count": 8,
-            "last3f_observed_count": 8,
-            "last3f_rank": 7,
-            "winner_time_gap_seconds": 4.5,
+            "classified_finish_count": 10,
+            "last3f_observed_count": 10,
+            "last3f_rank": 3,
+            "winner_time_gap_seconds": 0.1,
             "passing_4c": 1,
             "current_opponents": [],
             "comparison_conflicts": [],
@@ -272,33 +459,70 @@
       ]
     },
     {
-      "horse_id": "2024105938",
-      "horse_number": "3",
-      "horse_name": "ダヌラーサナ",
+      "horse_id": "2024101227",
+      "horse_number": "4",
+      "horse_name": "ナナレイ",
       "class_counts": {
-        "未勝利": 1,
+        "未勝利": 2,
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202607030302",
-          "date": "2026-08-29",
+          "race_id": "202604040201",
+          "date": "2026-10-18",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1800.0,
-          "finish_raw": "8",
-          "finish": 8,
-          "last3f": 42.1,
-          "passing_raw": "6-8-6-7",
-          "margin_raw": "4.6",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "9",
+          "finish": 9,
+          "last3f": 36.1,
+          "passing_raw": "4-4",
+          "margin_raw": "1.3",
           "field": {
             "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 10,
-            "winner_time_gap_seconds": 4.6,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 13,
+            "winner_time_gap_seconds": 1.3,
+            "passing_4c": 4,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202606040702",
+          "date": "2026-09-22",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "4",
+          "finish": 4,
+          "last3f": 35.9,
+          "passing_raw": "8-7",
+          "margin_raw": "0.9",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 14,
+            "last3f_observed_count": 14,
+            "last3f_rank": 2,
+            "winner_time_gap_seconds": 0.9,
             "passing_4c": 7,
             "current_opponents": [],
             "comparison_conflicts": [],
@@ -318,24 +542,149 @@
           "flags": []
         },
         {
-          "race_id": "202610020505",
-          "date": "2026-07-11",
+          "race_id": "202605030505",
+          "date": "2026-06-20",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1600.0,
+          "finish_raw": "9",
+          "finish": 9,
+          "last3f": 35.3,
+          "passing_raw": "8-8",
+          "margin_raw": "2.1",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 10,
+            "last3f_observed_count": 10,
+            "last3f_rank": 8,
+            "winner_time_gap_seconds": 2.1,
+            "passing_4c": 8,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024103646",
+      "horse_number": "5",
+      "horse_name": "オオルリ",
+      "class_counts": {
+        "未勝利": 2,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202604040203",
+          "date": "2026-10-18",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1800.0,
+          "finish_raw": "11",
+          "finish": 11,
+          "last3f": 36.1,
+          "passing_raw": "3-3",
+          "margin_raw": "1.7",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 10,
+            "winner_time_gap_seconds": 1.7,
+            "passing_4c": 4,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202606040603",
+          "date": "2026-09-20",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 2000.0,
+          "finish_raw": "中",
+          "finish": null,
+          "last3f": null,
+          "passing_raw": "13-13-13-13",
+          "margin_raw": "",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": null,
+            "winner_time_gap_seconds": null,
+            "passing_4c": 13,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": [
+            "着順不明・取消等を0点に置換しない",
+            "上がり不明を固定点に置換しない"
+          ]
+        },
+        {
+          "race_id": "202604030404",
+          "date": "2026-08-30",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
           "surface": "芝",
           "distance": 1800.0,
-          "finish_raw": "10",
-          "finish": 10,
-          "last3f": 37.0,
-          "passing_raw": "8-9-10-9",
-          "margin_raw": "1.2",
+          "finish_raw": "7",
+          "finish": 7,
+          "last3f": 35.3,
+          "passing_raw": "9-9",
+          "margin_raw": "2.7",
           "field": {
             "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 7,
-            "winner_time_gap_seconds": 1.2,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 2.7,
             "passing_4c": 10,
             "current_opponents": [],
             "comparison_conflicts": [],
@@ -357,435 +706,33 @@
       ]
     },
     {
-      "horse_id": "2024102757",
-      "horse_number": "4",
-      "horse_name": "エールヴェヌス",
-      "class_counts": {},
-      "past_races": []
-    },
-    {
-      "horse_id": "2024101545",
-      "horse_number": "5",
-      "horse_name": "バッテリー",
-      "class_counts": {
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202608040706",
-          "date": "2026-10-18",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1400.0,
-          "finish_raw": "13",
-          "finish": 13,
-          "last3f": 35.0,
-          "passing_raw": "12-11",
-          "margin_raw": "2.0",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 18,
-            "last3f_observed_count": 18,
-            "last3f_rank": 14,
-            "winner_time_gap_seconds": 2.0,
-            "passing_4c": 11,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024106051",
+      "horse_id": "2024106348",
       "horse_number": "6",
-      "horse_name": "ルージュミスティカ",
-      "class_counts": {
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202608040403",
-          "date": "2026-10-11",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1400.0,
-          "finish_raw": "3",
-          "finish": 3,
-          "last3f": 37.7,
-          "passing_raw": "9-8",
-          "margin_raw": "0.5",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 16,
-            "last3f_observed_count": 16,
-            "last3f_rank": 2,
-            "winner_time_gap_seconds": 0.5,
-            "passing_4c": 8,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104733",
-      "horse_number": "7",
-      "horse_name": "オンアロール",
+      "horse_name": "ステラガーネット",
       "class_counts": {
         "未勝利": 1,
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202608040501",
-          "date": "2026-10-12",
+          "race_id": "202605040401",
+          "date": "2026-10-11",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
           "surface": "ダート",
-          "distance": 1400.0,
-          "finish_raw": "9",
-          "finish": 9,
-          "last3f": 39.0,
-          "passing_raw": "7-5",
-          "margin_raw": "2.2",
+          "distance": 1600.0,
+          "finish_raw": "8",
+          "finish": 8,
+          "last3f": 38.1,
+          "passing_raw": "8-7",
+          "margin_raw": "2.3",
           "field": {
             "matched": true,
             "classified_finish_count": 15,
             "last3f_observed_count": 15,
-            "last3f_rank": 9,
-            "winner_time_gap_seconds": 2.2,
-            "passing_4c": 5,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202604020102",
-          "date": "2026-07-25",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1200.0,
-          "finish_raw": "11",
-          "finish": 11,
-          "last3f": 39.4,
-          "passing_raw": "7-5",
-          "margin_raw": "1.9",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 14,
-            "last3f_observed_count": 14,
-            "last3f_rank": 11,
-            "winner_time_gap_seconds": 1.9,
-            "passing_4c": 8,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024103241",
-      "horse_number": "8",
-      "horse_name": "ジョワイエトワール",
-      "class_counts": {
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202608040305",
-          "date": "2026-10-10",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1600.0,
-          "finish_raw": "5",
-          "finish": 5,
-          "last3f": 36.4,
-          "passing_raw": "1-1",
-          "margin_raw": "1.4",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 14,
-            "last3f_observed_count": 14,
-            "last3f_rank": 11,
-            "winner_time_gap_seconds": 1.4,
-            "passing_4c": 1,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104396",
-      "horse_number": "9",
-      "horse_name": "スマートサロン",
-      "class_counts": {
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202608040904",
-          "date": "2026-10-25",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1400.0,
-          "finish_raw": "14",
-          "finish": 14,
-          "last3f": 38.9,
-          "passing_raw": "7-7",
-          "margin_raw": "2.6",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 16,
-            "last3f_observed_count": 16,
-            "last3f_rank": 16,
-            "winner_time_gap_seconds": 2.6,
-            "passing_4c": 8,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024105638",
-      "horse_number": "10",
-      "horse_name": "アヴレディール",
-      "class_counts": {
-        "未勝利": 2,
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202608040302",
-          "date": "2026-10-10",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1600.0,
-          "finish_raw": "4",
-          "finish": 4,
-          "last3f": 34.8,
-          "passing_raw": "3-4",
-          "margin_raw": "0.6",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 9,
-            "last3f_observed_count": 9,
-            "last3f_rank": 4,
-            "winner_time_gap_seconds": 0.6,
-            "passing_4c": 4,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202601020302",
-          "date": "2026-08-29",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1500.0,
-          "finish_raw": "5",
-          "finish": 5,
-          "last3f": 37.0,
-          "passing_raw": "5-6-5",
-          "margin_raw": "1.2",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 13,
-            "last3f_observed_count": 13,
-            "last3f_rank": 5,
-            "winner_time_gap_seconds": 1.2,
-            "passing_4c": 6,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202601010605",
-          "date": "2026-08-09",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1500.0,
-          "finish_raw": "3",
-          "finish": 3,
-          "last3f": 35.5,
-          "passing_raw": "2-2-2",
-          "margin_raw": "0.4",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 13,
-            "last3f_observed_count": 13,
-            "last3f_rank": 3,
-            "winner_time_gap_seconds": 0.4,
-            "passing_4c": 2,
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024101002",
-      "horse_number": "11",
-      "horse_name": "ホットハニーラグ",
-      "class_counts": {
-        "未勝利": 1,
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202609040802",
-          "date": "2026-09-26",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1800.0,
-          "finish_raw": "7",
-          "finish": 7,
-          "last3f": 43.7,
-          "passing_raw": "2-2-6-7",
-          "margin_raw": "6.2",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 7,
-            "last3f_observed_count": 7,
-            "last3f_rank": 7,
-            "winner_time_gap_seconds": 6.2,
+            "last3f_rank": 8,
+            "winner_time_gap_seconds": 2.3,
             "passing_4c": 7,
             "current_opponents": [],
             "comparison_conflicts": [],
@@ -805,25 +752,749 @@
           "flags": []
         },
         {
-          "race_id": "202609040604",
-          "date": "2026-09-20",
+          "race_id": "202604020402",
+          "date": "2026-08-02",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
           "surface": "ダート",
-          "distance": 1200.0,
-          "finish_raw": "6",
-          "finish": 6,
-          "last3f": 37.5,
-          "passing_raw": "11-11",
+          "distance": 1800.0,
+          "finish_raw": "4",
+          "finish": 4,
+          "last3f": 40.9,
+          "passing_raw": "7-5-3-2",
           "margin_raw": "1.8",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 1.8,
+            "passing_4c": 3,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024103653",
+      "horse_number": "7",
+      "horse_name": "コスモオルト",
+      "class_counts": {
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605040505",
+          "date": "2026-10-12",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1600.0,
+          "finish_raw": "7",
+          "finish": 7,
+          "last3f": 35.1,
+          "passing_raw": "4-3",
+          "margin_raw": "1.1",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": 10,
+            "winner_time_gap_seconds": 1.1,
+            "passing_4c": 4,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024103545",
+      "horse_number": "8",
+      "horse_name": "レミニシング",
+      "class_counts": {
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605040604",
+          "date": "2026-10-17",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "13",
+          "finish": 13,
+          "last3f": 35.9,
+          "passing_raw": "13-11",
+          "margin_raw": "3.3",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 18,
+            "last3f_observed_count": 18,
+            "last3f_rank": 15,
+            "winner_time_gap_seconds": 3.3,
+            "passing_4c": 11,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024104155",
+      "horse_number": "9",
+      "horse_name": "アニーリング",
+      "class_counts": {
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202606040605",
+          "date": "2026-09-20",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1600.0,
+          "finish_raw": "3",
+          "finish": 3,
+          "last3f": 36.4,
+          "passing_raw": "8-5-3",
+          "margin_raw": "0.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 16,
+            "last3f_observed_count": 16,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 0.4,
+            "passing_4c": 4,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024102210",
+      "horse_number": "10",
+      "horse_name": "チャジャッタ",
+      "class_counts": {
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605040906",
+          "date": "2026-10-25",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "10",
+          "finish": 10,
+          "last3f": 34.0,
+          "passing_raw": "16-16",
+          "margin_raw": "1.6",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 16,
+            "last3f_observed_count": 16,
+            "last3f_rank": 4,
+            "winner_time_gap_seconds": 1.6,
+            "passing_4c": 16,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024107129",
+      "horse_number": "11",
+      "horse_name": "ウインリスノアール",
+      "class_counts": {
+        "未勝利": 3,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605040703",
+          "date": "2026-10-18",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "7",
+          "finish": 7,
+          "last3f": 35.4,
+          "passing_raw": "3-3",
+          "margin_raw": "0.7",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": 8,
+            "winner_time_gap_seconds": 0.7,
+            "passing_4c": 3,
+            "current_opponents": [
+              {
+                "comparison_key": "202605040703|2024100076|2024107129",
+                "horse_id": "2024100076",
+                "horse_name": "シュネーバレン",
+                "current_horse_number": "2",
+                "past_horse_number": "8",
+                "finish_raw": "6",
+                "finish": 6,
+                "own_finish": 7,
+                "outcome": "後着",
+                "own_minus_opponent_seconds": 0.0
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202604020501",
+          "date": "2026-08-08",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "7",
+          "finish": 7,
+          "last3f": 35.8,
+          "passing_raw": "5-5",
+          "margin_raw": "0.8",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 8,
+            "winner_time_gap_seconds": 0.8,
+            "passing_4c": 6,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202603020701",
+          "date": "2026-07-18",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "4",
+          "finish": 4,
+          "last3f": 35.2,
+          "passing_raw": "8-7",
+          "margin_raw": "0.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": 1,
+            "winner_time_gap_seconds": 0.4,
+            "passing_4c": 7,
+            "current_opponents": [
+              {
+                "comparison_key": "202603020701|2024100076|2024107129",
+                "horse_id": "2024100076",
+                "horse_name": "シュネーバレン",
+                "current_horse_number": "2",
+                "past_horse_number": "8",
+                "finish_raw": "3",
+                "finish": 3,
+                "own_finish": 4,
+                "outcome": "後着",
+                "own_minus_opponent_seconds": 0.0
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202603020204",
+          "date": "2026-06-28",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "7",
+          "finish": 7,
+          "last3f": 35.0,
+          "passing_raw": "8-8",
+          "margin_raw": "2.2",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 14,
+            "last3f_observed_count": 14,
+            "last3f_rank": 7,
+            "winner_time_gap_seconds": 2.2,
+            "passing_4c": 9,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024101760",
+      "horse_number": "12",
+      "horse_name": "ローズファミリー",
+      "class_counts": {
+        "未勝利": 1,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605040302",
+          "date": "2026-10-10",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1600.0,
+          "finish_raw": "5",
+          "finish": 5,
+          "last3f": 35.7,
+          "passing_raw": "1-1",
+          "margin_raw": "0.5",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 8,
+            "winner_time_gap_seconds": 0.5,
+            "passing_4c": 1,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202601020505",
+          "date": "2026-09-05",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1500.0,
+          "finish_raw": "3",
+          "finish": 3,
+          "last3f": 36.2,
+          "passing_raw": "3-4-5",
+          "margin_raw": "0.3",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 14,
+            "last3f_observed_count": 14,
+            "last3f_rank": 3,
+            "winner_time_gap_seconds": 0.3,
+            "passing_4c": 5,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024105183",
+      "horse_number": "13",
+      "horse_name": "ユリア",
+      "class_counts": {
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605030504",
+          "date": "2026-06-20",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "3",
+          "finish": 3,
+          "last3f": 34.2,
+          "passing_raw": "2-2",
+          "margin_raw": "0.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 4,
+            "winner_time_gap_seconds": 0.4,
+            "passing_4c": 2,
+            "current_opponents": [
+              {
+                "comparison_key": "202605030504|2024105183|2024107186",
+                "horse_id": "2024107186",
+                "horse_name": "インサイドエッジ",
+                "current_horse_number": "1",
+                "past_horse_number": "1",
+                "finish_raw": "2",
+                "finish": 2,
+                "own_finish": 3,
+                "outcome": "後着",
+                "own_minus_opponent_seconds": 0.0
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024106551",
+      "horse_number": "14",
+      "horse_name": "テリオスブギ",
+      "class_counts": {
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202604020702",
+          "date": "2026-08-15",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "9",
+          "finish": 9,
+          "last3f": 36.2,
+          "passing_raw": "7-9",
+          "margin_raw": "1.3",
           "field": {
             "matched": true,
             "classified_finish_count": 15,
             "last3f_observed_count": 15,
-            "last3f_rank": 2,
-            "winner_time_gap_seconds": 1.8,
-            "passing_4c": 11,
+            "last3f_rank": 13,
+            "winner_time_gap_seconds": 1.3,
+            "passing_4c": 9,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024108121",
+      "horse_number": "15",
+      "horse_name": "ココニイルヨ",
+      "class_counts": {
+        "未勝利": 3,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605040601",
+          "date": "2026-10-17",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1400.0,
+          "finish_raw": "9",
+          "finish": 9,
+          "last3f": 38.8,
+          "passing_raw": "9-9",
+          "margin_raw": "3.2",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": 8,
+            "winner_time_gap_seconds": 3.2,
+            "passing_4c": 9,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202603020801",
+          "date": "2026-07-19",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1150.0,
+          "finish_raw": "8",
+          "finish": 8,
+          "last3f": 39.5,
+          "passing_raw": "9-9",
+          "margin_raw": "3.1",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 10,
+            "last3f_observed_count": 10,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 3.1,
+            "passing_4c": 9,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202610020402",
+          "date": "2026-07-05",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "9",
+          "finish": 9,
+          "last3f": 36.7,
+          "passing_raw": "12-11",
+          "margin_raw": "1.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 16,
+            "last3f_observed_count": 16,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 1.4,
+            "passing_4c": 12,
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202605030306",
+          "date": "2026-06-13",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "6",
+          "finish": 6,
+          "last3f": 35.0,
+          "passing_raw": "5-4",
+          "margin_raw": "1.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 9,
+            "last3f_observed_count": 9,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 1.4,
+            "passing_4c": 4,
             "current_opponents": [],
             "comparison_conflicts": [],
             "pace_label": null,
