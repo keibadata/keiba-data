@@ -268,10 +268,10 @@ jobs:
         run: python runner_history.py
       - name: Collect runner race database
         run: python runner_race_db.py
-      - name: Build runner ability evidence
-        run: python runner_ability_evidence.py
       - name: Collect runner past race laps
         run: python runner_past_laps.py
+      - name: Build runner ability evidence
+        run: python runner_ability_evidence.py
       - name: Analyze runner time fit
         run: python runner_time_fit.py
       - name: Analyze runners
