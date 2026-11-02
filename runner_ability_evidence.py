@@ -459,14 +459,167 @@ def build(race, history, database):
     }
 
 
+def validate_race_laps(row, historical, target_date):
+    rid = text(historical.get("race_id"))
+    when = parse_date(historical.get("race_date") or historical.get("date"))
+    if (
+        row.get("status") != "ok" or row.get("version") != "past_laps_v1"
+        or text(row.get("race_id")) != rid
+        or not re.fullmatch(r"\d{12}", rid)
+        or rid[4:6] not in {f"{i:02d}" for i in range(1, 11)}
+        or when is None or when >= target_date
+        or parse_date(row.get("race_date")) != when
+        or row.get("surface") != historical.get("surface")
+        or row.get("surface") not in ("芝", "ダート")
+        or type(row.get("distance")) is not int
+        or row["distance"] != numeric(historical.get("distance"))
+        or row.get("source_url") != (
+            f"https://race.sp.netkeiba.com/?pid=race_result&race_id={rid}"
+        )
+        or not re.fullmatch(r"[0-9a-f]{64}", text(row.get("html_sha256")))
+        or row.get("source_pace_code") not in (None, "S", "M", "H")
+    ):
+        raise ValueError("ラップの識別情報・日付・条件が不一致")
+    winners = [v for r in historical.get("results", [])
+               if finish(r.get("rank")) == 1
+               and (v := clock_seconds(r.get("time"))) is not None]
+    winner = min(winners) if winners else None
+    saved_winner = numeric(row.get("winner_time_seconds"))
+    if winner is None or saved_winner is None or abs(saved_winner - winner) > 0.11:
+        raise ValueError("ラップと結果DBの勝ち時計が不一致・不明")
+    segments = row.get("segments")
+    if not isinstance(segments, list) or not segments:
+        raise ValueError("ラップ区間が不明")
+    distance, elapsed, total = 0, 0.0, 0.0
+    for index, segment in enumerate(segments):
+        if not isinstance(segment, dict):
+            raise ValueError("ラップ行が不正")
+        end = segment.get("distance_m")
+        cumulative = segment.get("cumulative_seconds")
+        lap = segment.get("lap_seconds")
+        if (
+            type(end) is not int or end <= distance
+            or type(cumulative) not in (int, float)
+            or type(lap) not in (int, float)
+            or not math.isfinite(cumulative) or not math.isfinite(lap)
+        ):
+            raise ValueError("ラップ距離・時計が不正")
+        length = end - distance
+        if (
+            (index == 0 and not 0 < length <= 200)
+            or (index > 0 and length != 200)
+            or segment.get("segment_distance_m") != length
+            or not 0 < lap < 60 or cumulative <= elapsed
+            or abs(cumulative - elapsed - lap) > 0.11
+        ):
+            raise ValueError("ラップ区間長・累積時計が不一致")
+        distance, elapsed = end, cumulative
+        total += lap
+    if (
+        distance != row["distance"] or abs(elapsed - winner) > 0.11
+        or abs(total - winner) > 0.11
+    ):
+        raise ValueError("ラップの距離・合計時計が不一致")
+    return {key: row.get(key) for key in (
+        "race_id", "race_date", "distance", "surface", "segments",
+        "winner_time_seconds", "source_pace_code", "source_url",
+        "fetched_at", "html_sha256",
+    )}
+
+
+def connect_race_laps(result, race, database, laps):
+    target_date = parse_date(race.get("race_date"))
+    status, reason = "connected", ""
+    if not laps:
+        status, reason = "unavailable", "ラップ取得ファイルが未生成"
+    elif (
+        text(laps.get("target_race_id")) != text(race.get("race_id"))
+        or parse_date(laps.get("target_date")) != target_date
+    ):
+        status, reason = "target_mismatch", "別レースのラップファイルを使用しない"
+    elif (
+        laps.get("version") != "past_laps_v1"
+        or laps.get("future_race_usage") is not False
+        or laps.get("leak_check_passed") is not True
+        or laps.get("scoring_applied") is not False
+        or not isinstance(laps.get("races"), list)
+        or any(not isinstance(r, dict) for r in laps["races"])
+    ):
+        status, reason = "invalid_source", "ラップの形式・漏洩防止情報が不正"
+    past_rows = [r for h in result["horses"] for r in h["past_races"]]
+    requested = {r["race_id"] for r in past_rows if r["race_id"]}
+    historical = {text(r.get("race_id")): r for r in database.get("races", [])}
+    valid, invalid = {}, {}
+    if status == "connected":
+        counts = Counter(text(r.get("race_id")) for r in laps["races"])
+        for row in laps["races"]:
+            rid = text(row.get("race_id"))
+            if rid not in requested:
+                continue
+            if counts[rid] != 1:
+                invalid[rid] = "同一Race IDのラップが重複"
+                continue
+            if rid not in historical:
+                invalid[rid] = "結果DBとの照合ができない"
+                continue
+            try:
+                valid[rid] = validate_race_laps(row, historical[rid], target_date)
+            except (ValueError, TypeError, KeyError):
+                invalid[rid] = "ラップ取得失敗または照合・検証不成立"
+    linked = 0
+    for past in past_rows:
+        rid, field = past["race_id"], past["field"]
+        usable = (
+            rid in valid and field["matched"]
+            and numeric(past.get("distance")) == valid[rid]["distance"]
+            and text(past.get("surface")) == valid[rid]["surface"]
+        )
+        field["race_lap_key"] = rid if usable else None
+        field["source_pace_code"] = valid[rid]["source_pace_code"] if usable else None
+        field["race_lap_unknown_reason"] = "" if usable else (
+            reason or invalid.get(rid) or (
+                "過去走・結果DB・ラップの照合不成立" if rid in valid
+                else "対応する検証済みラップがない"
+            )
+        )
+        if usable:
+            linked += 1
+            field["pace_unknown_reason"] = "ラップ接続済み。ペース判定・展開有利不利は未判定"
+    result["lap_connection_schema_version"] = "race_lap_connection_v1"
+    result["lap_connection"] = {"status": status, "unknown_reason": reason,
+                                "invalid_races": invalid}
+    result["race_laps"] = valid
+    result["summary"].update({
+        "race_lap_unique_count": len(valid), "race_lap_linked_run_count": linked,
+        "race_lap_unlinked_run_count": len(past_rows) - linked,
+        "race_lap_invalid_count": len(invalid),
+        "source_pace_known_run_count": sum(
+            r["field"]["source_pace_code"] is not None for r in past_rows
+        ),
+    })
+    result["notes"].extend([
+        "race_lapsはRace ID別のレース全体ラップ。個別馬ラップではない。",
+        "各過去走のfield.race_lap_keyで参照。同じレースのラップを重複保存しない。",
+        "source_pace_codeは取得元の参考表示。pace_label・展開有利不利は未判定。",
+        "ラップ接続は材料の保存のみ。能力点・今回発揮率・最終配点には未反映。",
+    ])
+    return result
+
+
 def main():
     database_path = Path("runner_race_db.json")
     database = load(database_path) if database_path.exists() else {}
+    race = load("race.json")
 
     result = build(
-        load("race.json"),
+        race,
         load("runner_history.json"),
         database,
+    )
+    laps_path = Path("runner_past_laps.json")
+    result = connect_race_laps(
+        result, race, database,
+        load(laps_path) if laps_path.exists() else {},
     )
 
     temporary = OUTPUT.with_suffix(".json.tmp")
