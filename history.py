@@ -1,6 +1,7 @@
 import sys
 import json
 import re
+import unicodedata
 from datetime import datetime, timezone
 
 import requests
@@ -67,19 +68,31 @@ def detect_race_class(page_text):
     text = re.sub(
         r"\s+",
         " ",
-        page_text
+        unicodedata.normalize("NFKC", str(page_text or ""))
     )
 
+    # GIをGII/GIIIの一部として拾わず、明示されたグレードだけを使う。
+    grade_map = {"I": "G1", "II": "G2", "III": "G3",
+                 "1": "G1", "2": "G2", "3": "G3"}
+    grades = {
+        grade_map[token.upper()]
+        for token in re.findall(
+            r"(?<![A-Z0-9])G\s*(III|II|I|[123])(?![A-Z0-9])",
+            text,
+            re.IGNORECASE,
+        )
+    }
+    if grades:
+        # 対象レースの表示が食い違う場合は推測で選ばない。
+        return next(iter(grades)) if len(grades) == 1 else ""
+
     patterns = [
-        (r"(?:GⅠ|GI|ＧⅠ|ＧＩ|G1|Ｇ１)", "G1"),
-        (r"(?:GⅡ|GII|ＧⅡ|ＧＩＩ|G2|Ｇ２)", "G2"),
-        (r"(?:GⅢ|GIII|ＧⅢ|ＧＩＩＩ|G3|Ｇ３)", "G3"),
         (
-            r"(?:リステッド|Listed|LISTED|\(L\)|（L）)",
+            r"(?:リステッド|(?<![A-Z0-9])LISTED(?![A-Z0-9])|\(L\))",
             "L"
         ),
         (
-            r"(?:オープン|OPEN|Open|OP)",
+            r"(?:オープン|(?<![A-Z0-9])(?:OPEN|OP)(?![A-Z0-9]))",
             "OP"
         ),
         (
@@ -385,11 +398,24 @@ def parse_race_info(soup, race_id):
     # クラス
     # ==========================================
 
-    info["race_class"] = (
-        detect_race_class(
-            page_text
+    # 本文全体の関連記事・広告から別レースのクラスを拾わない。
+    class_sources = [
+        txt(element)
+        for element in soup.select(
+            ".Race_Name, .RaceName, .Race_Info, .RaceData02"
         )
-    )
+    ]
+    race_name = soup.select_one(".Race_Name, .RaceName")
+    if race_name is not None and race_name.parent is not None:
+        class_sources.extend(
+            txt(element)
+            for element in race_name.parent.select(".Icon_GradeType")
+        )
+    if soup.title is not None:
+        class_sources.append(txt(soup.title).split("|")[0])
+    for meta in soup.select('meta[property="og:title"]'):
+        class_sources.append(str(meta.get("content") or "").split("|")[0])
+    info["race_class"] = detect_race_class(" ".join(class_sources))
 
     # ==========================================
     # 年齢条件
