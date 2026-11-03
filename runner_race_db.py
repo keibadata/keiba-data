@@ -7,11 +7,13 @@ import sys
 import tempfile
 import time
 from datetime import datetime, timezone, timedelta
+from history import detect_race_class
 
 
 RUNNER_HISTORY_FILE = "runner_history.json"
 OUTPUT_FILE = "runner_race_db.json"
 HISTORY_SCRIPT = "history.py"
+CLASS_CACHE_VERSION = "race_class_cache_v1"
 
 MAX_WORKERS = 8
 FETCH_TIMEOUT_SECONDS = 90
@@ -232,6 +234,104 @@ def base_race_data_is_valid(race):
     return True
 
 
+def prepare_class_cache(races, runner_history, target_date, requested_ids):
+    sources = {}
+    horses = runner_history.get("horses", []) or []
+    if not isinstance(horses, list):
+        horses = []
+    for horse in horses:
+        if not isinstance(horse, dict):
+            continue
+        past_races = horse.get("past_races", []) or []
+        if not isinstance(past_races, list):
+            continue
+        for past in past_races:
+            if not isinstance(past, dict):
+                continue
+            rid = clean(past.get("race_id"))
+            sources.setdefault(rid, []).append({
+                "date": parse_race_date(past.get("race_date") or past.get("date")),
+                "race_name": clean(past.get("race_name")),
+                "race_class": detect_race_class(clean(past.get("race_name"))),
+            })
+    requested = set(requested_ids)
+    prepared = []
+    report = {"version": CLASS_CACHE_VERSION, "verified_count": 0,
+              "corrected_count": 0, "rejected_count": 0,
+              "corrections": [], "rejections": []}
+    for cached in races:
+        item = dict(cached)
+        rid = clean(item.get("race_id"))
+        if rid not in requested:
+            prepared.append(item)
+            continue
+        when = parse_race_date(item.get("race_date") or item.get("date"))
+        entries = sources.get(rid, [])
+        labels = {e["race_class"] for e in entries if e["race_class"]}
+        marker = item.get("race_class_validation")
+        marker = marker if isinstance(marker, dict) else {}
+        previous = clean(item.get("race_class"))
+        reason, expected = "", ""
+        if when is None or when >= target_date:
+            reason = "キャッシュの日付が不明・対象日当日以降"
+        elif any(e["date"] != when for e in entries):
+            reason = "過去走一覧とキャッシュの日付が不一致"
+        elif len(labels) > 1:
+            reason = "同一Race IDの過去走名に異なるクラスがある"
+        elif len(labels) == 1:
+            expected = next(iter(labels))
+            if (
+                marker.get("version") == CLASS_CACHE_VERSION
+                and marker.get("source") == "history.py"
+                and marker.get("value") == previous
+                and previous != expected
+            ):
+                reason = "取得済みページと過去走名のクラスが不一致"
+        elif (
+            marker.get("version") == CLASS_CACHE_VERSION
+            and marker.get("source") == "history.py"
+            and marker.get("status") in ("verified", "corrected", "fetched")
+            and marker.get("value") == previous
+            and marker.get("race_id") == rid
+            and parse_race_date(marker.get("race_date")) == when
+            and previous == detect_race_class(previous)
+            and previous
+        ):
+            expected = previous
+        else:
+            reason = "クラスを確認できる過去走名・取得記録がない"
+        if reason:
+            report["rejected_count"] += 1
+            report["rejections"].append({"race_id": rid, "reason": reason})
+            item["race_class_validation"] = {
+                "version": CLASS_CACHE_VERSION, "status": "unverified",
+                "reason": reason,
+            }
+        else:
+            changed = previous != expected
+            source = "runner_history.race_name" if labels else "history.py"
+            item["race_class"] = expected
+            item["race_class_validation"] = {
+                "version": CLASS_CACHE_VERSION,
+                "status": "corrected" if changed else "verified",
+                "source": source, "value": expected,
+                "previous_value": previous, "race_id": rid,
+                "race_date": when.isoformat(),
+                "source_names": sorted({e["race_name"] for e in entries if e["race_class"]}),
+            }
+            if changed:
+                report["corrected_count"] += 1
+                report["corrections"].append({
+                    "race_id": rid, "previous_value": previous,
+                    "value": expected, "source": source,
+                    "source_names": item["race_class_validation"]["source_names"],
+                })
+            else:
+                report["verified_count"] += 1
+        prepared.append(item)
+    return prepared, report
+
+
 def cache_has_required_fields(race):
     """
     中央専用。
@@ -262,6 +362,20 @@ def cache_has_required_fields(race):
         return False
 
     if not age_condition:
+        return False
+
+    marker = race.get("race_class_validation")
+    if (
+        not isinstance(marker, dict)
+        or marker.get("version") != CLASS_CACHE_VERSION
+        or marker.get("status") not in ("verified", "corrected", "fetched")
+        or marker.get("source") not in ("runner_history.race_name", "history.py")
+        or marker.get("value") != race_class
+        or marker.get("race_id") != clean(race.get("race_id"))
+        or parse_race_date(marker.get("race_date")) != parse_race_date(
+            race.get("race_date") or race.get("date")
+        )
+    ):
         return False
 
     return True
@@ -491,11 +605,7 @@ def validate_fetched_history(
             "中央レース基本情報またはresultsが不完全です",
         )
 
-    race_class = clean(
-        history.get(
-            "race_class"
-        )
-    )
+    race_class = detect_race_class(clean(history.get("race_class")))
 
     age_condition = clean(
         history.get(
@@ -530,6 +640,13 @@ def validate_fetched_history(
     history[
         "runner_race_reference"
     ] = True
+    history["race_class"] = race_class
+    history["race_class_validation"] = {
+        "version": CLASS_CACHE_VERSION, "status": "fetched",
+        "source": "history.py", "value": race_class,
+        "race_id": race_id,
+        "race_date": clean(history.get("race_date") or history.get("date")),
+    }
 
     return (
         True,
@@ -725,6 +842,7 @@ def build_output(
     errors,
     skipped_future,
     invalid_cache_count,
+    class_cache_review=None,
 ):
     connected_ids = [
         race_id
@@ -788,6 +906,7 @@ def build_output(
 
         "invalid_cache_count":
             invalid_cache_count,
+        "class_cache_review": class_cache_review or {},
 
         "excluded_local_race_count":
             len(
@@ -977,6 +1096,11 @@ def main():
         requested_ids
     )
 
+    existing_races, class_cache_review = prepare_class_cache(
+        existing_races, runner_history, target_date, requested_ids,
+    )
+    print("クラスキャッシュ再検証:", class_cache_review)
+
     invalid_cache_ids = []
 
     for race in existing_races:
@@ -1057,6 +1181,7 @@ def main():
         invalid_cache_count=len(
             invalid_cache_ids
         ),
+        class_cache_review=class_cache_review,
     )
 
     save_json(
@@ -1200,6 +1325,7 @@ def main():
                         invalid_cache_count=len(
                             invalid_cache_ids
                         ),
+                        class_cache_review=class_cache_review,
                     )
                 )
 
@@ -1227,6 +1353,7 @@ def main():
         invalid_cache_count=len(
             invalid_cache_ids
         ),
+        class_cache_review=class_cache_review,
     )
 
     save_json(
