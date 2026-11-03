@@ -6,6 +6,7 @@ from datetime import datetime, timezone, timedelta
 
 import requests
 from bs4 import BeautifulSoup
+from history import detect_race_class
 
 
 # =========================================================
@@ -460,63 +461,19 @@ def extract_race_condition(
 
     race_class = ""
 
-    class_patterns = [
-        (
-            "新馬",
-            r"(?:新馬|メイクデビュー)"
-        ),
-        (
-            "未勝利",
-            r"未勝利"
-        ),
-        (
-            "1勝クラス",
-            r"(?:1勝クラス|500万下)"
-        ),
-        (
-            "2勝クラス",
-            r"(?:2勝クラス|1000万下)"
-        ),
-        (
-            "3勝クラス",
-            r"(?:3勝クラス|1600万下)"
-        ),
-        (
-            "G1",
-            r"(?:G1|GI|GⅠ)"
-        ),
-        (
-            "G2",
-            r"(?:G2|GII|GⅡ)"
-        ),
-        (
-            "G3",
-            r"(?:G3|GIII|GⅢ)"
-        ),
-        (
-            "リステッド",
-            r"(?:リステッド|Listed|\(L\))"
-        ),
-        (
-            "オープン",
-            r"(?:オープン|\bOP\b)"
-        ),
-    ]
-
     class_source = normalize_text(
         race_name
         + " "
         + race_info_text
     )
 
-    for label, pattern in class_patterns:
-        if re.search(
-            pattern,
-            class_source,
-            re.IGNORECASE
-        ):
-            race_class = label
-            break
+    # 過去レース側と同じ判定で、GIをGII/GIIIの一部として拾わない。
+    class_code = detect_race_class(class_source)
+    # 現在レース側の既存ラベルは維持する。
+    race_class = {
+        "L": "リステッド",
+        "OP": "オープン",
+    }.get(class_code, class_code)
 
     # -----------------------------------------------------
     # 年齢条件
