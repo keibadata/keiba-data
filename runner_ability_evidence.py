@@ -85,6 +85,83 @@ def numeric_position(value):
     return value if value is not None else None
 
 
+def corner_group(order, horse_number):
+    value = unicodedata.normalize("NFKC", text(order))
+    if re.search(r"\d\s+\d", value):
+        return None
+    value = re.sub(r"\s+", "", value).replace("−", "-").replace("，", ",")
+    horse_number = finish(horse_number)
+    if not value or horse_number is None:
+        return None
+    seen, groups = set(), []
+    offset, rank = 0, 1
+    for match in re.finditer(r"\([^()]*\)|\*?\d+", value):
+        gap = value[offset:match.start()]
+        if (offset == 0 and gap) or not re.fullmatch(r"[,=\-]*", gap):
+            return None
+        token = match.group()
+        inside = token[1:-1] if token.startswith("(") else token
+        if not re.fullmatch(r"\*?[1-9]\d*(?:,\*?[1-9]\d*)*", inside):
+            return None
+        if inside.count("*") > 1:
+            return None
+        members = [int(v) for v in re.findall(r"\d+", inside)]
+        if any(v > 18 or v in seen for v in members) or len(set(members)) != len(members):
+            return None
+        leader = re.search(r"\*(\d+)", inside)
+        groups.append({
+            "horse_numbers": members, "rank_min": rank,
+            "rank_max": rank + len(members) - 1,
+            "leader_horse_number": int(leader[1]) if leader else None,
+        })
+        seen.update(members)
+        rank += len(members)
+        offset = match.end()
+    if offset != len(value):
+        return None
+    return next((g for g in groups if horse_number in g["horse_numbers"]), None)
+
+
+def passing_4c_evidence(past, own, historical):
+    raw = unicodedata.normalize("NFKC", text(past.get("passing")))
+    observed = None
+    if re.fullmatch(r"[1-9]\d*(?:\s*-\s*[1-9]\d*)*", raw):
+        observed = int(re.findall(r"\d+", raw)[-1])
+    database_value = numeric_position(own.get("passing_4c"))
+    corner_order = historical.get("corner_order") or {}
+    order = corner_order.get("4c", "") if isinstance(corner_order, dict) else ""
+    group = corner_group(order, own.get("horse_number"))
+    result = {
+        "value": None, "status": "unknown", "source": None,
+        "history_value": observed, "database_flat_value": database_value,
+        "past_horse_number": text(own.get("horse_number")),
+        "corner_order_raw": text(order), "group": group,
+        "database_difference": (
+            observed != database_value
+            if observed is not None and database_value is not None else None
+        ),
+        "unknown_reason": "馬群表記との照合ができない",
+    }
+    if group is None:
+        return result
+    if observed is not None:
+        if not group["rank_min"] <= observed <= group["rank_max"]:
+            result.update(status="conflict", unknown_reason="過去走の4角位置が馬群の順位範囲外")
+            return result
+        result.update(
+            value=observed, status="history_within_group_range",
+            source="runner_history.passing", unknown_reason="",
+        )
+    elif group["rank_min"] == group["rank_max"]:
+        result.update(
+            value=group["rank_min"], status="singleton_group",
+            source="corner_order_singleton", unknown_reason="",
+        )
+    else:
+        result["unknown_reason"] = "馬群内の前後順位は括弧内の並びから確定しない"
+    return result
+
+
 def field_evidence(past, horse_id, database, target_date, entrants=None):
     entrants = entrants or {}
     unknown = {
@@ -94,6 +171,7 @@ def field_evidence(past, horse_id, database, target_date, entrants=None):
         "last3f_rank": None,
         "winner_time_gap_seconds": None,
         "passing_4c": None,
+        "passing_4c_evidence": None,
         "current_opponents": [],
         "comparison_conflicts": [],
         "pace_label": None,
@@ -238,6 +316,7 @@ def field_evidence(past, horse_id, database, target_date, entrants=None):
             ),
         })
 
+    position = passing_4c_evidence(past, own, historical)
     return {
         "matched": True,
         "classified_finish_count": sum(
@@ -256,7 +335,8 @@ def field_evidence(past, horse_id, database, target_date, entrants=None):
             and winner_clock is not None
             else None
         ),
-        "passing_4c": numeric_position(own.get("passing_4c")),
+        "passing_4c": position["value"],
+        "passing_4c_evidence": position,
         "current_opponents": opponents,
         "comparison_conflicts": [],
         "pace_label": None,
@@ -414,6 +494,7 @@ def build(race, history, database):
         "target_race_id": target_id,
         "version": "ability_evidence_v1",
         "comparison_schema_version": "field_comparison_v1",
+        "position_schema_version": "corner_position_evidence_v1",
         "database_connected": bool(database),
         "scoring_applied": False,
         "future_race_usage": False,
@@ -447,6 +528,20 @@ def build(race, history, database):
                 if row["outcome"] is not None
             }),
             "pace_known_count": 0,
+            "passing_4c_known_count": sum(r["field"]["passing_4c"] is not None for r in all_rows),
+            "passing_4c_unknown_count": sum(r["field"]["passing_4c"] is None for r in all_rows),
+            "passing_4c_history_observed_count": sum(
+                (r["field"]["passing_4c_evidence"] or {}).get("history_value") is not None
+                for r in all_rows
+            ),
+            "passing_4c_db_difference_count": sum(
+                (r["field"]["passing_4c_evidence"] or {}).get("database_difference") is True
+                for r in all_rows
+            ),
+            "passing_4c_conflict_count": sum(
+                (r["field"]["passing_4c_evidence"] or {}).get("status") == "conflict"
+                for r in all_rows
+            ),
         },
         "notes": [
             "クラスは実績の分類。クラス名だけで能力を決めない。",
@@ -454,6 +549,10 @@ def build(race, history, database):
             "直接対戦は両馬の記録に出る。同じ比較キーは1対戦として扱う。",
             "同一レースの着順・時計差・上がりは、独立した複数の上昇根拠と数えない。",
             "このファイルの不明は、既存の別ファイルに材料がないことを意味しない。",
+            "馬群の括弧内は内側からの並び。前後順位として連番化しない。",
+            "4角位置は過去走の明示値と馬群の順位範囲を照合。範囲内の一致は厳密な順位一致とは別。",
+            "結果DBの旧passing_4cは比較用に保存し、馬群内の順位確定には使わない。",
+            "元の明示位置はhistory_valueに保持。照合不成立を能力不足と決めつけない。",
         ],
         "horses": horses,
     }
