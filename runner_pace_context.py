@@ -148,6 +148,54 @@ def compare_clocks(past, horse_id, race_entry, target_date):
     }
 
 
+def observe_late_race(past, lap, raw, comparison):
+    if comparison["status"] != "ok" or lap is None or not isinstance(raw, dict):
+        return {"status": "unknown", "reason": "個別時計またはレースラップの照合なし"}
+
+    distance = number(past.get("distance"))
+    if (
+        distance is None
+        or distance <= 600
+        or not distance.is_integer()
+        or any(raw.get(key) != lap.get(key) for key in (
+            "race_id", "race_date", "distance", "surface", "source_pace_code"
+        ))
+    ):
+        return {"status": "unknown", "reason": "元ラップの照合不成立"}
+
+    split = int(distance) - 600
+    segments = raw.get("segments")
+    matches = [
+        number(row.get("cumulative_seconds"))
+        for row in segments
+        if isinstance(row, dict) and row.get("distance_m") == split
+    ] if isinstance(segments, list) else []
+    if len(matches) != 1 or matches[0] is None or matches[0] <= 0:
+        return {"status": "unknown", "reason": "残り600m地点の累積時計不明"}
+
+    leader = matches[0]
+    horse = comparison["to_last_600m_seconds"]
+    gap = round(horse - leader, 4)
+    if gap < -0.11:
+        return {"status": "unknown", "reason": "個別算出時計と先頭累積時計の不整合"}
+
+    delta = number((lap.get("features") or {}).get(
+        "final_minus_preceding_seconds_per_200m"
+    ))
+    return {
+        "status": "ok",
+        "split_distance_m": split,
+        "horse_elapsed_seconds": horse,
+        "leader_elapsed_seconds": leader,
+        "horse_minus_leader_seconds": gap,
+        "negative_gap_within_tolerance": gap < 0,
+        "race_final_minus_preceding_seconds_per_200m": delta,
+        "race_delta_within_0_1_seconds_per_200m": (
+            abs(delta) <= 0.1 if delta is not None else None
+        ),
+    }
+
+
 def build_context(past, lap):
     field = past.get("field") or {}
 
@@ -269,6 +317,11 @@ def main():
 
         feature_map[race_id] = row
 
+    raw_laps = evidence.get("race_laps")
+    if not isinstance(raw_laps, dict):
+        raw_laps = {}
+
+    observation_statuses = Counter()
     comparison_index = index_comparison_races(database)
     comparison_statuses = Counter()
     result_horses = []
@@ -315,6 +368,9 @@ def main():
                 target_date,
             )
             context["same_race_clock_comparison"] = comparison
+            observation = observe_late_race(past, lap, raw_laps.get(race_id), comparison)
+            context["late_race_observation"] = observation
+            observation_statuses[observation["status"]] += 1
             comparison_statuses[comparison["status"]] += 1
             statuses[context["lap_connection_status"]] += 1
             contexts.append(context)
@@ -345,6 +401,8 @@ def main():
             "lap_connected_run_count": statuses["connected"],
             "clock_comparison_ok_count": comparison_statuses["ok"],
             "clock_comparison_unknown_count": comparison_statuses["unknown"],
+            "late_race_observation_ok_count": observation_statuses["ok"],
+            "late_race_observation_unknown_count": observation_statuses["unknown"],
             "lap_unknown_run_count": statuses["unknown"],
         },
         "notes": [
@@ -352,6 +410,8 @@ def main():
             "両時計が有効な完走馬を同じ母集団とし、同値は同順位。",
             "レース全体のラップと個別馬の実績をRace IDで接続。",
             "4角位置・上がり順位・着順・時計差は観測事実。",
+            "残り600m地点は実測の累積時計がある場合に比較し、補間しない。",
+            "終盤変化量はレース全体の200m当たりの差。絶対値0.1秒以下を別記する。",
             "4角位置は道中全体の位置取りを保証しない。",
             "上がり順位だけで末脚能力や展開有利を断定しない。",
             "ラップはレース全体の値。個別馬ラップではない。",
