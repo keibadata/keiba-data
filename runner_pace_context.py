@@ -196,6 +196,30 @@ def observe_late_race(past, lap, raw, comparison):
     }
 
 
+def observe_position_change(context, comparison, late_observation):
+    if late_observation["status"] != "ok":
+        return {"status": "unknown", "reason": late_observation["reason"]}
+
+    evidence = context["horse_performance_evidence"]
+    field_count = evidence["field_count"]
+    if field_count is None or field_count != comparison["comparison_count"]:
+        return {"status": "unknown", "reason": "時計比較頭数と着順集計頭数が不一致"}
+
+    split_rank = comparison["to_last_600m_rank"]
+    finish = evidence["finish"]
+    if finish is None or not 1 <= finish <= field_count:
+        return {"status": "unknown", "reason": "有効な着順なし"}
+
+    return {
+        "status": "ok",
+        "comparison_count": field_count,
+        "to_last_600m_rank": split_rank,
+        "last3f_rank": comparison["last3f_rank"],
+        "finish": finish,
+        "positions_gained": split_rank - finish,
+    }
+
+
 def build_context(past, lap):
     field = past.get("field") or {}
 
@@ -322,6 +346,7 @@ def main():
         raw_laps = {}
 
     observation_statuses = Counter()
+    position_statuses = Counter()
     comparison_index = index_comparison_races(database)
     comparison_statuses = Counter()
     result_horses = []
@@ -371,6 +396,9 @@ def main():
             observation = observe_late_race(past, lap, raw_laps.get(race_id), comparison)
             context["late_race_observation"] = observation
             observation_statuses[observation["status"]] += 1
+            change = observe_position_change(context, comparison, observation)
+            context["late_position_change"] = change
+            position_statuses[change["status"]] += 1
             comparison_statuses[comparison["status"]] += 1
             statuses[context["lap_connection_status"]] += 1
             contexts.append(context)
@@ -403,6 +431,8 @@ def main():
             "clock_comparison_unknown_count": comparison_statuses["unknown"],
             "late_race_observation_ok_count": observation_statuses["ok"],
             "late_race_observation_unknown_count": observation_statuses["unknown"],
+            "late_position_change_ok_count": position_statuses["ok"],
+            "late_position_change_unknown_count": position_statuses["unknown"],
             "lap_unknown_run_count": statuses["unknown"],
         },
         "notes": [
@@ -412,6 +442,7 @@ def main():
             "4角位置・上がり順位・着順・時計差は観測事実。",
             "残り600m地点は実測の累積時計がある場合に比較し、補間しない。",
             "終盤変化量はレース全体の200m当たりの差。絶対値0.1秒以下を別記する。",
+            "残り600mの時計順位から着順を引いた値を、比較頭数が一致する場合に保存。",
             "4角位置は道中全体の位置取りを保証しない。",
             "上がり順位だけで末脚能力や展開有利を断定しない。",
             "ラップはレース全体の値。個別馬ラップではない。",
