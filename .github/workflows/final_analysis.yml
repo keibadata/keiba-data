@@ -1,3 +1,4 @@
+
 name: Race Full Analysis
 on:
   workflow_dispatch:
@@ -272,6 +273,8 @@ jobs:
         run: python runner_past_laps.py
       - name: Build runner ability evidence
         run: python runner_ability_evidence.py
+      - name: Build runner lap features
+        run: python runner_lap_features.py
       - name: Analyze runner time fit
         run: python runner_time_fit.py
       - name: Analyze runners
@@ -314,6 +317,7 @@ jobs:
             "runner_race_db.json"
             "runner_ability_evidence.json"
             "runner_past_laps.json"
+            "runner_lap_features.json"
             "runner_time_fit.json"
             "runner_analysis.json"
             "previous_race_analysis.json"
