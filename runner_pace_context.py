@@ -143,6 +143,7 @@ def compare_clocks(past, horse_id, race_entry, target_date):
         "comparison_count": len(peers),
         "to_last_600m_seconds": early / 10,
         "to_last_600m_rank": 1 + sum(pair[0] < early for pair, _ in peers.values()),
+        "to_last_600m_tie_count": sum(pair[0] == early for pair, _ in peers.values()),
         "last3f_seconds": late / 10,
         "last3f_rank": 1 + sum(pair[1] < late for pair, _ in peers.values()),
     }
@@ -206,13 +207,27 @@ def observe_position_change(context, comparison, late_observation):
         return {"status": "unknown", "reason": "時計比較頭数と着順集計頭数が不一致"}
 
     split_rank = comparison["to_last_600m_rank"]
+    tie_count = comparison["to_last_600m_tie_count"]
+    last_split_rank = split_rank + tie_count - 1
     finish = evidence["finish"]
     if finish is None or not 1 <= finish <= field_count:
         return {"status": "unknown", "reason": "有効な着順なし"}
 
+    if finish < split_rank:
+        direction = "gained"
+    elif finish > last_split_rank:
+        direction = "lost"
+    elif tie_count == 1:
+        direction = "unchanged"
+    else:
+        direction = "undetermined"
+
     return {
         "status": "ok",
         "comparison_count": field_count,
+        "to_last_600m_rank_max": last_split_rank,
+        "to_last_600m_tie_count": tie_count,
+        "direction": direction,
         "to_last_600m_rank": split_rank,
         "last3f_rank": comparison["last3f_rank"],
         "finish": finish,
@@ -443,6 +458,7 @@ def main():
             "残り600m地点は実測の累積時計がある場合に比較し、補間しない。",
             "終盤変化量はレース全体の200m当たりの差。絶対値0.1秒以下を別記する。",
             "残り600mの時計順位から着順を引いた値を、比較頭数が一致する場合に保存。",
+            "positions_gainedは同時計を最上位の順位で扱う従来値。方向は同時計の順位範囲で判定。",
             "4角位置は道中全体の位置取りを保証しない。",
             "上がり順位だけで末脚能力や展開有利を断定しない。",
             "ラップはレース全体の値。個別馬ラップではない。",
