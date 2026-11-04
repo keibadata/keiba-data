@@ -297,7 +297,12 @@ jobs:
       - name: Apply newcomer pedigree-only analysis
         run: python newcomer_final_analysis.py
       - name: Validate final analysis and save prediction snapshot
-        run: python production_snapshot_hook.py
+        run: |
+          BACKUP_RACE_ID="$(mktemp)"
+          cp -p race_id.txt "$BACKUP_RACE_ID"
+          trap 'mv -- "$BACKUP_RACE_ID" race_id.txt' EXIT
+          printf '%s\n' "$RACE_ID" > race_id.txt
+          python production_snapshot_hook.py
       - name: Build prediction history index
         run: python build_prediction_history_index.py
       - name: Commit analysis files, prediction snapshot and history index
