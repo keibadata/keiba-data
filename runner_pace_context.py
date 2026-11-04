@@ -197,6 +197,32 @@ def observe_late_race(past, lap, raw, comparison):
     }
 
 
+def observe_gap_change(context, late_observation):
+    if late_observation["status"] != "ok":
+        return {"status": "unknown", "reason": late_observation["reason"]}
+
+    split_gap = late_observation["horse_minus_leader_seconds"]
+    finish_gap = context["horse_performance_evidence"]["winner_time_gap_seconds"]
+    if split_gap < 0 or finish_gap is None or finish_gap < 0:
+        return {"status": "unknown", "reason": "比較に使える先頭差または勝ち馬との差がない"}
+
+    change = round(finish_gap - split_gap, 4)
+    if change < 0:
+        direction = "narrowed"
+    elif change > 0:
+        direction = "widened"
+    else:
+        direction = "unchanged"
+
+    return {
+        "status": "ok",
+        "split_gap_to_leader_seconds": split_gap,
+        "finish_gap_to_winner_seconds": finish_gap,
+        "finish_minus_split_gap_seconds": change,
+        "direction": direction,
+    }
+
+
 def observe_position_change(context, comparison, late_observation):
     if late_observation["status"] != "ok":
         return {"status": "unknown", "reason": late_observation["reason"]}
@@ -410,6 +436,7 @@ def main():
             context["same_race_clock_comparison"] = comparison
             observation = observe_late_race(past, lap, raw_laps.get(race_id), comparison)
             context["late_race_observation"] = observation
+            context["late_gap_change"] = observe_gap_change(context, observation)
             observation_statuses[observation["status"]] += 1
             change = observe_position_change(context, comparison, observation)
             context["late_position_change"] = change
@@ -459,6 +486,7 @@ def main():
             "終盤変化量はレース全体の200m当たりの差。絶対値0.1秒以下を別記する。",
             "残り600mの時計順位から着順を引いた値を、比較頭数が一致する場合に保存。",
             "positions_gainedは同時計を最上位の順位で扱う従来値。方向は同時計の順位範囲で判定。",
+            "残り600m地点の先頭とゴールの勝ち馬は別の馬の場合がある。",
             "4角位置は道中全体の位置取りを保証しない。",
             "上がり順位だけで末脚能力や展開有利を断定しない。",
             "ラップはレース全体の値。個別馬ラップではない。",
