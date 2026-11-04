@@ -284,6 +284,8 @@ jobs:
         run: python runner_analysis.py
       - name: Analyze previous race
         run: python previous_race_analysis.py
+      - name: Build previous runner late review
+        run: python runner_previous_late_review.py
       - name: Analyze pace
         run: python pace_analysis.py
       - name: Build bloodline statistics
@@ -326,6 +328,7 @@ jobs:
             "runner_time_fit.json"
             "runner_analysis.json"
             "previous_race_analysis.json"
+            "runner_previous_late_review.json"
             "pace_analysis.json"
             "bloodline_stats.json"
             "race_bloodline_score.json"
