@@ -1,14 +1,14 @@
-
 import json
 import math
 import re
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 
 EVIDENCE_FILE = Path("runner_ability_evidence.json")
 FEATURES_FILE = Path("runner_lap_features.json")
+DATABASE_FILE = Path("runner_race_db.json")
 OUTPUT_FILE = Path("runner_pace_context.json")
 
 VERSION = "runner_pace_context_v1"
@@ -47,70 +47,151 @@ def safe_ratio(numerator, denominator):
     return round(numerator / denominator, 4)
 
 
+def clock_pair(row):
+    if not re.fullmatch(r"[1-9][0-9]*", text(row.get("rank"))):
+        return None
+
+    clock = re.fullmatch(
+        r"([0-9]+):([0-5]?[0-9])\.([0-9])",
+        text(row.get("time")),
+    )
+    closing = re.fullmatch(
+        r"([0-9]{2})\.([0-9])",
+        text(row.get("last3f")),
+    )
+    if not clock or not closing:
+        return None
+
+    total = int(clock[1]) * 600 + int(clock[2]) * 10 + int(clock[3])
+    late = int(closing[1]) * 10 + int(closing[2])
+    if not 250 <= late <= 500 or total <= late:
+        return None
+
+    return total - late, late
+
+
+def index_comparison_races(database):
+    rows = database.get("races")
+    if not isinstance(rows, list):
+        raise ValueError("Invalid race database structure")
+
+    index = {}
+    for race in rows:
+        race_id = text(race.get("race_id"))
+        if not re.fullmatch(r"[0-9]{12}", race_id) or race_id in index:
+            raise ValueError("Invalid or duplicate database Race ID")
+
+        results = race.get("results")
+        if not isinstance(results, list):
+            raise ValueError("Invalid database results")
+
+        ids = Counter(text(row.get("horse_id")) for row in results)
+        peers = {}
+        for row in results:
+            horse_id = text(row.get("horse_id"))
+            pair = clock_pair(row)
+            if horse_id and ids[horse_id] == 1 and pair is not None:
+                peers[horse_id] = (pair, int(text(row.get("rank"))))
+
+        index[race_id] = (race, peers)
+
+    return index
+
+
+def compare_clocks(past, horse_id, race_entry, target_date):
+    if not race_entry or (past.get("field") or {}).get("matched") is not True:
+        return {"status": "unknown", "reason": "結果DBとの過去走照合なし"}
+
+    race, peers = race_entry
+    try:
+        race_date = date.fromisoformat(
+            text(race.get("race_date") or race.get("date")).replace("/", "-")
+        )
+        past_date = date.fromisoformat(text(past.get("date")).replace("/", "-"))
+    except ValueError:
+        return {"status": "unknown", "reason": "過去走の日付不明"}
+
+    if (
+        race_date != past_date
+        or race_date >= target_date
+        or number(past.get("distance")) != number(race.get("distance"))
+        or (number(past.get("distance")) or 0) <= 600
+        or text(past.get("surface")) not in ("芝", "ダート")
+        or text(past.get("surface")) != text(race.get("surface"))
+    ):
+        return {
+            "status": "unknown",
+            "reason": "日付・距離・馬場区分の照合不成立",
+        }
+
+    own = peers.get(horse_id)
+    if own is None or len(peers) < 2:
+        return {
+            "status": "unknown",
+            "reason": "本人または比較相手の有効時計不足",
+        }
+
+    (early, late), finish = own
+    if finish != integer(past.get("finish")) or late / 10 != number(past.get("last3f")):
+        return {
+            "status": "unknown",
+            "reason": "本人の着順・上がり3Fが不一致",
+        }
+
+    return {
+        "status": "ok",
+        "comparison_count": len(peers),
+        "to_last_600m_seconds": early / 10,
+        "to_last_600m_rank": 1 + sum(pair[0] < early for pair, _ in peers.values()),
+        "last3f_seconds": late / 10,
+        "last3f_rank": 1 + sum(pair[1] < late for pair, _ in peers.values()),
+    }
+
+
 def build_context(past, lap):
     field = past.get("field") or {}
 
     finish = integer(past.get("finish"))
     last3f_rank = integer(field.get("last3f_rank"))
-    last3f_count = integer(
-        field.get("last3f_observed_count")
-    )
+    last3f_count = integer(field.get("last3f_observed_count"))
     fourth = integer(field.get("passing_4c"))
-    field_count = integer(
-        field.get("classified_finish_count")
-    )
+    field_count = integer(field.get("classified_finish_count"))
 
-    gap = number(
-        field.get("winner_time_gap_seconds")
-    )
+    gap = number(field.get("winner_time_gap_seconds"))
     last3f = number(past.get("last3f"))
 
     lap_features = (
         lap.get("features")
-        if isinstance(lap, dict)
-        and lap.get("status") == "ok"
+        if isinstance(lap, dict) and lap.get("status") == "ok"
         else None
     )
-
     if not isinstance(lap_features, dict):
         lap_features = None
 
-    # 着順・上がり順位・4角位置は独立した
-    # 能力加点として扱わない。
+    # 着順・上がり順位・4角位置は独立した能力加点として扱わない。
     evidence = {
         "finish": finish,
         "field_count": field_count,
-        "finish_ratio": safe_ratio(
-            finish, field_count
-        ),
+        "finish_ratio": safe_ratio(finish, field_count),
         "fourth_corner_position": fourth,
-        "fourth_corner_ratio": safe_ratio(
-            fourth, field_count
-        ),
+        "fourth_corner_ratio": safe_ratio(fourth, field_count),
         "fourth_corner_evidence_status": (
-            (field.get("passing_4c_evidence") or {})
-            .get("status")
+            (field.get("passing_4c_evidence") or {}).get("status")
         ),
         "last3f_seconds": last3f,
         "last3f_rank": last3f_rank,
         "last3f_observed_count": last3f_count,
-        "last3f_rank_ratio": safe_ratio(
-            last3f_rank, last3f_count
-        ),
+        "last3f_rank_ratio": safe_ratio(last3f_rank, last3f_count),
         "winner_time_gap_seconds": gap,
     }
 
     unknowns = []
-
     if fourth is None:
         unknowns.append("4角位置不明")
-
     if last3f_rank is None:
         unknowns.append("上がり順位不明")
-
     if gap is None:
         unknowns.append("勝ち馬との時計差不明")
-
     if lap_features is None:
         unknowns.append("ラップ特徴量不明")
 
@@ -121,14 +202,10 @@ def build_context(past, lap):
         "surface": text(past.get("surface")),
         "distance": past.get("distance"),
         "lap_connection_status": (
-            "connected"
-            if lap_features is not None
-            else "unknown"
+            "connected" if lap_features is not None else "unknown"
         ),
         "source_pace_code": (
-            lap.get("source_pace_code")
-            if lap_features is not None
-            else None
+            lap.get("source_pace_code") if lap_features is not None else None
         ),
         "race_lap_features": lap_features,
         "horse_performance_evidence": evidence,
@@ -149,104 +226,70 @@ def build_context(past, lap):
 def main():
     evidence = load(EVIDENCE_FILE)
     features = load(FEATURES_FILE)
-
-    target_id = text(
-        evidence.get("target_race_id")
+    database = load(DATABASE_FILE)
+    target_date = date.fromisoformat(
+        text(database.get("target_date")).replace("/", "-")
     )
 
+    target_id = text(evidence.get("target_race_id"))
     if (
         not re.fullmatch(r"\d{12}", target_id)
-        or target_id != text(
-            features.get("target_race_id")
-        )
+        or target_id != text(features.get("target_race_id"))
     ):
-        raise ValueError(
-            "Target Race ID mismatch"
-        )
+        raise ValueError("Target Race ID mismatch")
 
     if (
-        evidence.get("version")
-        != "ability_evidence_v1"
-        or evidence.get("future_race_usage")
-        is not False
-        or evidence.get("leak_check_passed")
-        is not True
-        or evidence.get("scoring_applied")
-        is not False
-        or features.get("version")
-        != "race_lap_features_v1"
-        or features.get("future_race_usage")
-        is not False
-        or features.get("leak_check_passed")
-        is not True
-        or features.get("scoring_applied")
-        is not False
+        text(database.get("target_race_id")) != target_id
+        or database.get("future_race_usage") is not False
+        or database.get("leak_check_passed") is not True
+        or evidence.get("version") != "ability_evidence_v1"
+        or evidence.get("future_race_usage") is not False
+        or evidence.get("leak_check_passed") is not True
+        or evidence.get("scoring_applied") is not False
+        or features.get("version") != "race_lap_features_v1"
+        or features.get("future_race_usage") is not False
+        or features.get("leak_check_passed") is not True
+        or features.get("scoring_applied") is not False
     ):
-        raise ValueError(
-            "Source safety validation failed"
-        )
+        raise ValueError("Source safety validation failed")
 
     horses = evidence.get("horses")
     feature_rows = features.get("races")
-
-    if (
-        not isinstance(horses, list)
-        or not isinstance(feature_rows, list)
-    ):
-        raise ValueError(
-            "Invalid source structure"
-        )
+    if not isinstance(horses, list) or not isinstance(feature_rows, list):
+        raise ValueError("Invalid source structure")
 
     feature_map = {}
-
     for row in feature_rows:
         if not isinstance(row, dict):
-            raise ValueError(
-                "Invalid feature row"
-            )
+            raise ValueError("Invalid feature row")
 
         race_id = text(row.get("race_id"))
-
-        if (
-            not re.fullmatch(r"\d{12}", race_id)
-            or race_id in feature_map
-        ):
-            raise ValueError(
-                "Invalid or duplicate Race ID"
-            )
+        if not re.fullmatch(r"\d{12}", race_id) or race_id in feature_map:
+            raise ValueError("Invalid or duplicate Race ID")
 
         feature_map[race_id] = row
 
+    comparison_index = index_comparison_races(database)
+    comparison_statuses = Counter()
     result_horses = []
     statuses = Counter()
 
     for horse in horses:
         if not isinstance(horse, dict):
-            raise ValueError(
-                "Invalid horse row"
-            )
+            raise ValueError("Invalid horse row")
 
         past_races = horse.get("past_races")
-
         if not isinstance(past_races, list):
-            raise ValueError(
-                "Invalid past races"
-            )
+            raise ValueError("Invalid past races")
 
         contexts = []
-
         for past in past_races:
             if not isinstance(past, dict):
-                raise ValueError(
-                    "Invalid past race row"
-                )
+                raise ValueError("Invalid past race row")
 
             field = past.get("field") or {}
             race_id = text(past.get("race_id"))
-            lap_key = text(
-                field.get("race_lap_key")
-            )
-
+            lap_key = text(field.get("race_lap_key"))
             lap = None
 
             if (
@@ -255,76 +298,58 @@ def main():
                 and race_id in feature_map
             ):
                 candidate = feature_map[race_id]
-
                 if (
                     candidate.get("status") == "ok"
-                    and text(
-                        candidate.get("surface")
-                    ) == text(
-                        past.get("surface")
-                    )
-                    and candidate.get("distance")
-                    == past.get("distance")
-                    and text(
-                        candidate.get("race_date")
-                    ) == text(
-                        past.get("date")
-                    )
-                    and candidate.get(
-                        "source_pace_code"
-                    ) == field.get(
-                        "source_pace_code"
-                    )
+                    and text(candidate.get("surface")) == text(past.get("surface"))
+                    and candidate.get("distance") == past.get("distance")
+                    and text(candidate.get("race_date")) == text(past.get("date"))
+                    and candidate.get("source_pace_code") == field.get("source_pace_code")
                 ):
                     lap = candidate
 
             context = build_context(past, lap)
-
-            statuses[
-                context["lap_connection_status"]
-            ] += 1
-
+            comparison = compare_clocks(
+                past,
+                text(horse.get("horse_id")),
+                comparison_index.get(race_id),
+                target_date,
+            )
+            context["same_race_clock_comparison"] = comparison
+            comparison_statuses[comparison["status"]] += 1
+            statuses[context["lap_connection_status"]] += 1
             contexts.append(context)
 
         result_horses.append({
             "horse_id": horse.get("horse_id"),
-            "horse_number": horse.get(
-                "horse_number"
-            ),
-            "horse_name": horse.get(
-                "horse_name"
-            ),
+            "horse_number": horse.get("horse_number"),
+            "horse_name": horse.get("horse_name"),
             "past_race_count": len(contexts),
             "past_races": contexts,
         })
 
     output = {
         "version": VERSION,
-        "updated_at": datetime.now(
-            timezone(timedelta(hours=9))
-        ).isoformat(),
+        "updated_at": datetime.now(timezone(timedelta(hours=9))).isoformat(),
         "target_race_id": target_id,
         "source_files": [
             str(EVIDENCE_FILE),
             str(FEATURES_FILE),
+            str(DATABASE_FILE),
         ],
         "future_race_usage": False,
         "leak_check_passed": True,
         "scoring_applied": False,
         "summary": {
             "horse_count": len(result_horses),
-            "past_race_count": sum(
-                h["past_race_count"]
-                for h in result_horses
-            ),
-            "lap_connected_run_count": (
-                statuses["connected"]
-            ),
-            "lap_unknown_run_count": (
-                statuses["unknown"]
-            ),
+            "past_race_count": sum(h["past_race_count"] for h in result_horses),
+            "lap_connected_run_count": statuses["connected"],
+            "clock_comparison_ok_count": comparison_statuses["ok"],
+            "clock_comparison_unknown_count": comparison_statuses["unknown"],
+            "lap_unknown_run_count": statuses["unknown"],
         },
         "notes": [
+            "残り600mまでの時計は走破時計から上がり3Fを引いた算出値。",
+            "両時計が有効な完走馬を同じ母集団とし、同値は同順位。",
             "レース全体のラップと個別馬の実績をRace IDで接続。",
             "4角位置・上がり順位・着順・時計差は観測事実。",
             "4角位置は道中全体の位置取りを保証しない。",
@@ -338,10 +363,7 @@ def main():
         "horses": result_horses,
     }
 
-    temporary = OUTPUT_FILE.with_suffix(
-        ".json.tmp"
-    )
-
+    temporary = OUTPUT_FILE.with_suffix(".json.tmp")
     temporary.write_text(
         json.dumps(
             output,
@@ -351,14 +373,9 @@ def main():
         ),
         encoding="utf-8",
     )
-
     temporary.replace(OUTPUT_FILE)
 
-    print(
-        "Runner pace context:",
-        target_id,
-        output["summary"],
-    )
+    print("Runner pace context:", target_id, output["summary"])
 
 
 if __name__ == "__main__":
