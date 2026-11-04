@@ -1,6 +1,6 @@
 {
   "version": "runner_pace_context_v1",
-  "updated_at": "2026-11-05T06:04:20.843043+09:00",
+  "updated_at": "2026-11-05T06:20:20.366053+09:00",
   "target_race_id": "202605041112",
   "source_files": [
     "runner_ability_evidence.json",
@@ -31,6 +31,7 @@
     "終盤変化量はレース全体の200m当たりの差。絶対値0.1秒以下を別記する。",
     "残り600mの時計順位から着順を引いた値を、比較頭数が一致する場合に保存。",
     "positions_gainedは同時計を最上位の順位で扱う従来値。方向は同時計の順位範囲で判定。",
+    "残り600m地点の先頭とゴールの勝ち馬は別の馬の場合がある。",
     "4角位置は道中全体の位置取りを保証しない。",
     "上がり順位だけで末脚能力や展開有利を断定しない。",
     "ラップはレース全体の値。個別馬ラップではない。",
@@ -108,6 +109,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.8,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 1.8,
+            "finish_minus_split_gap_seconds": 0.8,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 11,
@@ -181,6 +189,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.6,
+            "finish_gap_to_winner_seconds": 1.3,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -258,6 +273,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.8,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 11,
@@ -331,6 +353,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.8333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.8,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -406,6 +435,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 1.3,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -479,6 +515,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.7,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -554,6 +597,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 0.9,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -627,6 +677,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.1667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -702,6 +759,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.9333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": -1.0,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -775,6 +839,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.7333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 4.9,
+            "finish_gap_to_winner_seconds": 9.2,
+            "finish_minus_split_gap_seconds": 4.3,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -850,6 +921,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.0667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": -0.4,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -923,6 +1001,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.7,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -998,6 +1083,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.0667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.8,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -1071,6 +1163,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.4,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -1154,6 +1253,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.5667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.5,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -1227,6 +1333,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.3,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.9,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -1302,6 +1415,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 1.6,
+            "finish_minus_split_gap_seconds": 0.8,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 8,
@@ -1375,6 +1495,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.7667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -1450,6 +1577,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.4667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -1523,6 +1657,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.8333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -1606,6 +1747,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.0,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -1679,6 +1827,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.9333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.4,
+            "finish_gap_to_winner_seconds": 2.3,
+            "finish_minus_split_gap_seconds": 1.9,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -1754,6 +1909,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 1.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -1827,6 +1989,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.1,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -1902,6 +2071,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.0,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": 0.6,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 12,
@@ -1975,6 +2151,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.5667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 3.2,
+            "finish_minus_split_gap_seconds": 2.0,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -2050,6 +2233,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.6667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": 0.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -2123,6 +2313,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.6,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
           },
           "late_position_change": {
             "status": "ok",
@@ -2198,6 +2395,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.7,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -2271,6 +2475,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.8333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": 1.2,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -2346,6 +2557,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.0667,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": 0.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 11,
@@ -2419,6 +2637,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1,
             "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 2.1,
+            "finish_minus_split_gap_seconds": 1.4,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -2494,6 +2719,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -2567,6 +2799,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.6,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 2.3,
+            "finish_gap_to_winner_seconds": 2.8,
+            "finish_minus_split_gap_seconds": 0.5,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -2650,6 +2889,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 2.6,
+            "finish_minus_split_gap_seconds": 2.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -2723,6 +2969,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 0.8,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -2798,6 +3051,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 1.7,
+            "finish_minus_split_gap_seconds": 1.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -2871,6 +3131,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
           },
           "late_position_change": {
             "status": "ok",
@@ -2946,6 +3213,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.4,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 0.2,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -3019,6 +3293,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.8,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.4,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -3094,6 +3375,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -3167,6 +3455,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -3242,6 +3537,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.4,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -3316,6 +3618,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "unknown",
             "reason": "時計比較頭数と着順集計頭数が不一致"
@@ -3382,6 +3691,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.5,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 1.8,
+            "finish_minus_split_gap_seconds": 1.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -3457,6 +3773,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.4,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.7,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -3531,6 +3854,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 1.3,
+            "finish_minus_split_gap_seconds": 0.4,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 18,
@@ -3604,6 +3934,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 2.5,
+            "finish_minus_split_gap_seconds": 1.8,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -3687,6 +4024,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.4333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 2.3,
+            "finish_minus_split_gap_seconds": 1.4,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -3760,6 +4104,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 1.5,
+            "finish_minus_split_gap_seconds": 0.5,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -3835,6 +4186,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.6,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.6,
+            "finish_gap_to_winner_seconds": 1.6,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -3908,6 +4266,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 0.2,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -3983,6 +4348,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.9,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -4056,6 +4428,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.4,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.0,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -4131,6 +4510,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.0333,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 1.6,
+            "finish_minus_split_gap_seconds": 0.5,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -4204,6 +4590,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -4279,6 +4672,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.0,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": -0.6,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -4352,6 +4752,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 2.3,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": -1.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -4427,6 +4834,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.0,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 10,
@@ -4500,6 +4914,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 0.1,
+            "finish_minus_split_gap_seconds": -0.8,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -4575,6 +4996,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.5667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -4648,6 +5076,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.1,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": -0.9,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -4723,6 +5158,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.4,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 1.7,
+            "finish_minus_split_gap_seconds": 0.9,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -4796,6 +5238,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1,
             "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 1.8,
+            "finish_minus_split_gap_seconds": 1.0,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -4871,6 +5320,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.6,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -4944,6 +5400,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.4333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": 0.6,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -5019,6 +5482,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 2.5,
+            "finish_gap_to_winner_seconds": 0.2,
+            "finish_minus_split_gap_seconds": -2.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 8,
@@ -5092,6 +5562,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.6,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -5167,6 +5644,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.0667,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.6,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.6,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 12,
@@ -5240,6 +5724,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.6333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": 0.7,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -5315,6 +5806,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -5389,6 +5887,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.2,
+            "finish_minus_split_gap_seconds": 0.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -5462,6 +5967,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.7333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 2.2,
+            "finish_gap_to_winner_seconds": 1.8,
+            "finish_minus_split_gap_seconds": -0.4,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -5545,6 +6057,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 2.6,
+            "finish_minus_split_gap_seconds": 2.6,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 12,
@@ -5618,6 +6137,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.8667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.8,
+            "finish_gap_to_winner_seconds": 1.9,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -5693,6 +6219,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.8,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 13,
@@ -5766,6 +6299,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.4,
+            "finish_gap_to_winner_seconds": 2.1,
+            "finish_minus_split_gap_seconds": 1.7,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -5841,6 +6381,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.5,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": -0.8,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 13,
@@ -5914,6 +6461,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.0,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 1.0,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -5991,6 +6545,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 2.3,
+            "finish_minus_split_gap_seconds": 2.3,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 11,
@@ -6064,6 +6625,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.9667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 1.3,
+            "finish_minus_split_gap_seconds": 1.3,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -6139,6 +6707,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 1.9,
+            "finish_minus_split_gap_seconds": 1.9,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 12,
@@ -6212,6 +6787,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 0.9,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -6287,6 +6869,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -6360,6 +6949,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.1,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -6435,6 +7031,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.4667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 0.9,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -6509,6 +7112,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.8,
+            "finish_gap_to_winner_seconds": 1.5,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -6582,6 +7192,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 2.5,
+            "finish_gap_to_winner_seconds": 2.6,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -6665,6 +7282,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.8,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 0.9,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 10,
@@ -6720,6 +7344,10 @@
             "reason": "結果DBとの過去走照合なし"
           },
           "late_race_observation": {
+            "status": "unknown",
+            "reason": "個別時計またはレースラップの照合なし"
+          },
+          "late_gap_change": {
             "status": "unknown",
             "reason": "個別時計またはレースラップの照合なし"
           },
@@ -6789,6 +7417,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.8667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": -0.8,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -6864,6 +7499,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.0667,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 1.5,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -6937,6 +7579,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.5,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -7012,6 +7661,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 0.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 12,
@@ -7085,6 +7741,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.3,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
           },
           "late_position_change": {
             "status": "ok",
@@ -7160,6 +7823,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.0,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -7233,6 +7903,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.3,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -7308,6 +7985,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": -0.4,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -7381,6 +8065,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.8667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.6,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": -0.9,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -7456,6 +8147,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.1,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.0,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -7529,6 +8227,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": -0.7,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -7604,6 +8309,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.6,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.6,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 18,
@@ -7677,6 +8389,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 0.1,
+            "finish_minus_split_gap_seconds": -1.3,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -7752,6 +8471,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 2.3,
+            "finish_gap_to_winner_seconds": 1.7,
+            "finish_minus_split_gap_seconds": -0.6,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -7825,6 +8551,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -1.3333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.6,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": 0.2,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -7900,6 +8633,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.0333,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": -0.9,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 11,
@@ -7973,6 +8713,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.5,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 0.9,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -8048,6 +8795,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": -0.5,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 11,
@@ -8121,6 +8875,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.2333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.5,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": -0.4,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -8196,6 +8957,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 10,
@@ -8269,6 +9037,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.3333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.6,
+            "finish_gap_to_winner_seconds": 0.1,
+            "finish_minus_split_gap_seconds": -1.5,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -8344,6 +9119,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.0667,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": -0.5,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 9,
@@ -8417,6 +9199,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.3667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.7,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.7,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -8492,6 +9281,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -8565,6 +9361,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.1667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.7,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": -1.4,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -8640,6 +9443,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.3333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 1.5,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -8713,6 +9523,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -8796,6 +9613,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.6,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": 0.5,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -8869,6 +9693,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -8944,6 +9775,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.4667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 9,
@@ -9017,6 +9855,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.5667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -9092,6 +9937,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.0333,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.7,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -9165,6 +10017,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.5,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -9240,6 +10099,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.0333,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": -0.5,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -9313,6 +10179,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.3333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -9388,6 +10261,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.4,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -9462,6 +10342,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": -0.7,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -9535,6 +10422,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -9612,6 +10506,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.5,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.5,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 6,
@@ -9685,6 +10586,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -1.3333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -9768,6 +10676,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.2667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 1.9,
+            "finish_minus_split_gap_seconds": 1.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 10,
@@ -9841,6 +10756,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.4333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -9916,6 +10838,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.6,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": -1.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -9989,6 +10918,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.6,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -10064,6 +11000,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.0333,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": -0.5,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -10137,6 +11080,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 2.6,
+            "finish_minus_split_gap_seconds": 1.6,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -10212,6 +11162,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.5,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": 0.4,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 13,
@@ -10285,6 +11242,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.2,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -10360,6 +11324,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.4333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -10433,6 +11404,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -10508,6 +11486,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.8667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 0.9,
+            "finish_minus_split_gap_seconds": -0.4,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -10581,6 +11566,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.4,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -10656,6 +11648,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.2333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 2.3,
+            "finish_minus_split_gap_seconds": 1.6,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 10,
@@ -10729,6 +11728,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.4333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 3.1,
+            "finish_gap_to_winner_seconds": 3.2,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -10804,6 +11810,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.4333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": 0.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -10877,6 +11890,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.6333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.7,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -10952,6 +11972,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.1333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.2,
+            "finish_minus_split_gap_seconds": -0.5,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -11025,6 +12052,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 1.8,
+            "finish_minus_split_gap_seconds": 0.8,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -11108,6 +12142,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 3.0,
+            "finish_minus_split_gap_seconds": 2.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -11181,6 +12222,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.4333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 2.2,
+            "finish_minus_split_gap_seconds": 1.3,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -11256,6 +12304,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 13,
@@ -11330,6 +12385,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.5333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 2.3,
+            "finish_minus_split_gap_seconds": 1.2,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -11403,6 +12465,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.3,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -11486,6 +12555,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.0,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -11559,6 +12635,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 1.8,
+            "finish_minus_split_gap_seconds": 0.7,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -11634,6 +12717,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -11707,6 +12797,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.7333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.4,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
           },
           "late_position_change": {
             "status": "ok",
@@ -11782,6 +12879,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.9667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": -0.4,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -11855,6 +12959,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 1.3,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 1.5,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -11930,6 +13041,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.3,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 0.5,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -12003,6 +13121,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -12078,6 +13203,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.3333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -12151,6 +13283,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.8333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -12228,6 +13367,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.6667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.0,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.0,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -12302,6 +13448,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.7,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": 0.4,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -12375,6 +13528,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.8333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.5,
+            "finish_gap_to_winner_seconds": 0.1,
+            "finish_minus_split_gap_seconds": -1.4,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -12452,6 +13612,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.7,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 15,
@@ -12525,6 +13692,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 3.0,
+            "finish_minus_split_gap_seconds": 1.7,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -12600,6 +13774,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.3,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.9,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -12674,6 +13855,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.4667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 3.8,
+            "finish_minus_split_gap_seconds": 3.6,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 9,
@@ -12747,6 +13935,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.2,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 2.7,
+            "finish_minus_split_gap_seconds": 1.9,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -12830,6 +14025,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.4,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 12,
@@ -12903,6 +14105,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.0667,
             "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 2.3,
+            "finish_minus_split_gap_seconds": 1.8,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -12978,6 +14187,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -13051,6 +14267,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 4.6,
+            "finish_minus_split_gap_seconds": 4.4,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -13126,6 +14349,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -13199,6 +14429,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.0,
             "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.8,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -13274,6 +14511,13 @@
             "race_final_minus_preceding_seconds_per_200m": 1.0,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 0.5,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -13347,6 +14591,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.7667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 1.6,
+            "finish_minus_split_gap_seconds": 1.6,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -13422,6 +14673,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.2,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -13495,6 +14753,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.9,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -13570,6 +14835,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.2333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": 0.6,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -13644,6 +14916,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 2.9,
+            "finish_minus_split_gap_seconds": 2.4,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -13717,6 +14996,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.2667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.9,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -13800,6 +15086,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.0333,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.4,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.4,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -13873,6 +15166,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.2333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.8,
+            "finish_minus_split_gap_seconds": 0.8,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -13948,6 +15248,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.6333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 2.7,
+            "finish_minus_split_gap_seconds": 1.3,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 10,
@@ -14003,6 +15310,10 @@
             "reason": "結果DBとの過去走照合なし"
           },
           "late_race_observation": {
+            "status": "unknown",
+            "reason": "個別時計またはレースラップの照合なし"
+          },
+          "late_gap_change": {
             "status": "unknown",
             "reason": "個別時計またはレースラップの照合なし"
           },
@@ -14072,6 +15383,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.7667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -14147,6 +15465,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.0,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 1.3,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 10,
@@ -14220,6 +15545,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.1,
             "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 2.5,
+            "finish_minus_split_gap_seconds": 2.4,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -14295,6 +15627,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 0.2,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -14368,6 +15707,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.8333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": 0.2,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -14451,6 +15797,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.1,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 0.5,
+            "finish_minus_split_gap_seconds": -0.8,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -14524,6 +15877,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.5667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 0.7,
+            "finish_minus_split_gap_seconds": 0.6,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -14599,6 +15959,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 1.5,
+            "finish_minus_split_gap_seconds": 0.7,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 10,
@@ -14672,6 +16039,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.6,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 1.1,
+            "finish_minus_split_gap_seconds": 0.4,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -14747,6 +16121,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.0333,
             "race_delta_within_0_1_seconds_per_200m": true
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": 0.1,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 13,
@@ -14820,6 +16201,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.3667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": 0.0,
+            "direction": "unchanged"
           },
           "late_position_change": {
             "status": "ok",
@@ -14895,6 +16283,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.6333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.8,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.8,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 13,
@@ -14968,6 +16363,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": -0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 0.6,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -15043,6 +16445,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": -0.9,
+            "direction": "narrowed"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 13,
@@ -15116,6 +16525,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.5,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -1.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -15191,6 +16607,13 @@
             "race_final_minus_preceding_seconds_per_200m": 0.1333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.7,
+            "finish_gap_to_winner_seconds": 3.4,
+            "finish_minus_split_gap_seconds": 1.7,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 14,
@@ -15264,6 +16687,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.9333,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.6,
+            "finish_gap_to_winner_seconds": 0.1,
+            "finish_minus_split_gap_seconds": -0.5,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
@@ -15339,6 +16769,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.8667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 0.7,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 11,
@@ -15412,6 +16849,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.9,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
           },
           "late_position_change": {
             "status": "ok",
@@ -15487,6 +16931,13 @@
             "race_final_minus_preceding_seconds_per_200m": -0.3,
             "race_delta_within_0_1_seconds_per_200m": false
           },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.3,
+            "finish_gap_to_winner_seconds": 3.0,
+            "finish_minus_split_gap_seconds": 1.7,
+            "direction": "widened"
+          },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 16,
@@ -15560,6 +17011,13 @@
             "negative_gap_within_tolerance": false,
             "race_final_minus_preceding_seconds_per_200m": 0.6667,
             "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.2,
+            "finish_gap_to_winner_seconds": 0.0,
+            "finish_minus_split_gap_seconds": -0.2,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
