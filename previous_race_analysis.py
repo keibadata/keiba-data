@@ -129,23 +129,25 @@ def analyze_previous_race(race_row):
     unknowns = []
     last3f_observations = []
     finish_observations = []
+    condition_observations = []
 
     same_surface = surface == TARGET_SURFACE_NORMALIZED
     same_distance = distance == TARGET_DISTANCE
 
+    # 条件の一致は観測記録として保持する。
     if same_surface:
-        positives.append("今回と同じ馬場種別")
+        condition_observations.append("今回と同じ馬場種別")
     elif surface:
         issues.append("前走は今回と異なる馬場種別")
     else:
         unknowns.append("前走の芝ダート不明")
 
     if same_distance:
-        positives.append(f"今回と同じ{TARGET_DISTANCE}m")
+        condition_observations.append(f"今回と同じ{TARGET_DISTANCE}m")
     elif distance is not None:
         diff = distance - TARGET_DISTANCE
         if abs(diff) <= 200:
-            positives.append("前走距離は今回条件に近い")
+            condition_observations.append("前走距離は今回条件に近い")
         elif diff > 0:
             issues.append("前走から距離短縮")
         else:
@@ -283,6 +285,7 @@ def analyze_previous_race(race_row):
         "horse_weight": horse_weight,
         "same_surface": same_surface,
         "same_distance": same_distance,
+        "condition_observations": condition_observations,
         "positives": positives,
         "issues": issues,
         "condition_changes": condition_changes,
