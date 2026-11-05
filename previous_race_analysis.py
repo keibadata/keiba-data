@@ -2,7 +2,7 @@ import json
 import re
 from datetime import datetime, timezone, timedelta
 
-from analysis_evidence import resolution_evidence
+from analysis_evidence import actual_issues, resolution_evidence
 
 
 INPUT_FILE = "runner_history.json"
@@ -193,7 +193,7 @@ def analyze_previous_race(race_row):
             elif margin >= 1.0:
                 issues.append("着差が大きい")
 
-    # 確認待ちの項目を保持する。
+    # 条件変更も含め、確認待ちの項目を保持する。
     overcoming = []
 
     if "前走から距離短縮" in issues:
@@ -204,6 +204,11 @@ def analyze_previous_race(race_row):
         overcoming.append("今回の位置取り改善材料を確認")
     if "前走は今回と異なる馬場種別" in issues:
         overcoming.append("馬場種別変更への適応材料を確認")
+
+    # 条件変更は保存し、課題の採点件数から外す。
+    scoring_issues = actual_issues({"issues": issues})
+    condition_changes = [item for item in issues if item not in scoring_issues]
+    issues = scoring_issues
 
     if not issues:
         issue_status = "明確な課題なし"
@@ -252,6 +257,7 @@ def analyze_previous_race(race_row):
         "same_distance": same_distance,
         "positives": positives,
         "issues": issues,
+        "condition_changes": condition_changes,
         "unknowns": unknowns,
         "overcoming_materials": [record["fact"] for record in confirmed],
         "overcoming_checks": overcoming,
