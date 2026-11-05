@@ -36,9 +36,12 @@ def main():
             if pattern is None:
                 continue
 
+            small_change = abs(gap["finish_minus_split_gap_seconds"]) <= 0.1
             counts[pattern] += 1
+            counts["small_gap_change"] += int(small_change)
             candidates.append({
                 "pattern": pattern,
+                "gap_change_within_0_1_seconds": small_change,
                 "horse_id": horse["horse_id"],
                 "horse_number": horse["horse_number"],
                 "horse_name": horse["horse_name"],
@@ -63,9 +66,14 @@ def main():
         "summary": {
             "past_run_count": run_count,
             "candidate_count": len(candidates),
+            "small_gap_change_count": counts["small_gap_change"],
             "rank_gained_gap_widened_count": counts["rank_gained_gap_widened"],
             "rank_lost_gap_narrowed_count": counts["rank_lost_gap_narrowed"],
         },
+        "notes": [
+            "時計差の変化が絶対値0.1秒以下の候補に確認用の目印を付ける。",
+            "0.1秒は検証用の区分。能力・課題・克服の判定基準ではない。",
+        ],
         "candidates": candidates,
     }
     temporary = OUTPUT.with_suffix(".json.tmp")
