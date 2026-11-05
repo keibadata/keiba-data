@@ -127,6 +127,7 @@ def analyze_previous_race(race_row):
     issues = []
     positives = []
     unknowns = []
+    last3f_observations = []
 
     same_surface = surface == TARGET_SURFACE_NORMALIZED
     same_distance = distance == TARGET_DISTANCE
@@ -177,14 +178,15 @@ def analyze_previous_race(race_row):
         elif position_change <= -3:
             issues.append("道中で位置を下げた")
 
+    # 絶対時計によるラベルは観測記録として保持する。
     if last3f is None:
         unknowns.append("前走上がり不明")
     elif last3f <= 34.0:
-        positives.append("速い上がりを記録")
+        last3f_observations.append("速い上がりを記録")
     elif last3f <= 35.0:
-        positives.append("上がりは一定水準")
+        last3f_observations.append("上がりは一定水準")
     elif last3f >= 37.0:
-        issues.append("前走上がり時計は遅め")
+        last3f_observations.append("前走上がり時計は遅め")
 
     if margin is not None:
         if rank is not None and rank > 1:
@@ -252,6 +254,7 @@ def analyze_previous_race(race_row):
         "final_position": final_position,
         "position_change": position_change,
         "last3f": last3f,
+        "last3f_observations": last3f_observations,
         "horse_weight": horse_weight,
         "same_surface": same_surface,
         "same_distance": same_distance,
