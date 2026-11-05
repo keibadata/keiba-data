@@ -212,6 +212,38 @@ def analyze_previous_race(race_row):
     condition_changes = [item for item in issues if item not in scoring_issues]
     issues = scoring_issues
 
+    # 既存の共通処理で確認済みの克服根拠を取得する。
+    confirmed = resolution_evidence(
+        {
+            "issues": issues,
+            "verified_overcoming_evidence": race_row.get(
+                "verified_overcoming_evidence"
+            ),
+        },
+        TARGET_RACE_ID,
+    )
+
+    position_labels = {
+        "前走は前方位置",
+        "後方位置依存",
+        "やや後方からの競馬",
+        "勝利したが後方依存",
+        "道中から位置を押し上げた",
+        "道中で位置を下げた",
+    }
+    position_observations = [
+        item for item in positives + issues if item in position_labels
+    ]
+
+    # 位置の自動ラベルは観測値として保存する。
+    # 確認済み克服根拠に対応する課題は評価への接続を保つ。
+    confirmed_issues = {record["issue"] for record in confirmed}
+    positives = [item for item in positives if item not in position_labels]
+    issues = [
+        item for item in issues
+        if item not in position_labels or item in confirmed_issues
+    ]
+
     if not issues:
         issue_status = "明確な課題なし"
     else:
@@ -226,17 +258,6 @@ def analyze_previous_race(race_row):
         overcoming_status = "客観データ上の明確な克服材料なし"
     else:
         overcoming_status = " / ".join(overcoming)
-
-    # 採点へ渡す材料は既存の共通処理で確認する。
-    confirmed = resolution_evidence(
-        {
-            "issues": issues,
-            "verified_overcoming_evidence": race_row.get(
-                "verified_overcoming_evidence"
-            ),
-        },
-        TARGET_RACE_ID,
-    )
 
     return {
         "race_id": txt(race_row.get("race_id")),
@@ -253,6 +274,7 @@ def analyze_previous_race(race_row):
         "first_position": first_position,
         "final_position": final_position,
         "position_change": position_change,
+        "position_observations": position_observations,
         "last3f": last3f,
         "last3f_observations": last3f_observations,
         "horse_weight": horse_weight,
