@@ -128,6 +128,7 @@ def analyze_previous_race(race_row):
     positives = []
     unknowns = []
     last3f_observations = []
+    finish_observations = []
 
     same_surface = surface == TARGET_SURFACE_NORMALIZED
     same_distance = distance == TARGET_DISTANCE
@@ -152,14 +153,15 @@ def analyze_previous_race(race_row):
     else:
         unknowns.append("前走距離不明")
 
+    # 着順のラベルは観測記録として保持する。
     if rank is None:
         unknowns.append("前走着順を数値評価できない")
     elif rank == 1:
-        positives.append("前走勝利")
+        finish_observations.append("前走勝利")
         if final_position is not None and final_position >= 8:
             issues.append("勝利したが後方依存")
     elif rank <= 3:
-        positives.append("前走3着以内")
+        finish_observations.append("前走3着以内")
 
     if final_position is None:
         unknowns.append("前走位置取り不明")
@@ -265,6 +267,7 @@ def analyze_previous_race(race_row):
         "meeting": txt(race_row.get("meeting")),
         "race_name": txt(race_row.get("race_name")),
         "rank": rank,
+        "finish_observations": finish_observations,
         "surface": surface,
         "distance": distance,
         "track_condition": track,
