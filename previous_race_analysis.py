@@ -248,6 +248,17 @@ def analyze_previous_race(race_row):
         if item not in position_labels or item in confirmed_issues
     ]
 
+    # 着差の自動ラベルも観測値として保存する。
+    margin_labels = {"着差は小さい", "着差が大きい"}
+    margin_observations = [
+        item for item in positives + issues if item in margin_labels
+    ]
+    positives = [item for item in positives if item not in margin_labels]
+    issues = [
+        item for item in issues
+        if item not in margin_labels or item in confirmed_issues
+    ]
+
     if not issues:
         issue_status = "明確な課題なし"
     else:
@@ -275,6 +286,7 @@ def analyze_previous_race(race_row):
         "track_condition": track,
         "time": txt(race_row.get("time")),
         "margin": txt(race_row.get("margin")),
+        "margin_observations": margin_observations,
         "passing": passing_raw,
         "first_position": first_position,
         "final_position": final_position,
