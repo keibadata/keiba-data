@@ -1,0 +1,99 @@
+name: Diagnose Single History Fetch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install packages
+        run: pip install -r requirements.txt
+      - name: Fetch and inspect one race
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          from runner_race_db import validate_fetched_history
+
+          race_id = "202305030211"
+          directory = Path("history_fetch_diagnostic")
+          directory.mkdir(exist_ok=True)
+          script = Path("history.py").resolve()
+          log_path = directory / "fetch.log"
+
+          with log_path.open("w", encoding="utf-8") as log:
+              try:
+                  completed = subprocess.run(
+                      [sys.executable, "-u", str(script), race_id],
+                      cwd=directory,
+                      stdout=log,
+                      stderr=subprocess.STDOUT,
+                      timeout=90,
+                      check=False,
+                  )
+                  returncode = completed.returncode
+              except subprocess.TimeoutExpired:
+                  returncode = 124
+
+          print(log_path.read_text(encoding="utf-8"))
+          report = {
+              "requested_race_id": race_id,
+              "returncode": returncode,
+              "history_json_exists": False,
+              "validation_ok": False,
+              "validation_error": "",
+          }
+          history_path = directory / "history.json"
+          report["history_json_exists"] = history_path.exists()
+          if history_path.exists():
+              try:
+                  history = json.loads(history_path.read_text(encoding="utf-8"))
+                  if isinstance(history, dict):
+                      fields = [
+                          "race_id", "race_date", "date", "racecourse",
+                          "surface", "distance", "race_class", "age_condition",
+                      ]
+                      report["fields"] = {key: history.get(key) for key in fields}
+                      results = history.get("results")
+                      report["results_type"] = type(results).__name__
+                      report["result_count"] = (
+                          len(results) if isinstance(results, list) else None
+                      )
+                  valid, error = validate_fetched_history(history, race_id)
+                  report["validation_ok"] = valid
+                  report["validation_error"] = error
+              except Exception as exc:
+                  report["validation_error"] = f"{type(exc).__name__}: {exc}"
+          else:
+              report["validation_error"] = "history.json was not generated"
+
+          report_text = json.dumps(report, ensure_ascii=False, indent=2)
+          (directory / "diagnosis.json").write_text(
+              report_text + "\n", encoding="utf-8"
+          )
+          print(report_text)
+          if returncode != 0 or not report["validation_ok"]:
+              raise SystemExit(1)
+          PY
+      - name: Upload diagnostic files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: history-fetch-202305030211
+          path: history_fetch_diagnostic/
+          retention-days: 7
+          if-no-files-found: warn
