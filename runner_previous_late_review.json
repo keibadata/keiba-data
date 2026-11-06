@@ -1,12 +1,12 @@
 {
   "version": "runner_previous_late_review_v1",
-  "target_race_id": "202305030211",
+  "target_race_id": "202605041111",
   "source_files": [
     "runner_late_review.json",
     "previous_race_analysis.json"
   ],
-  "review_source_updated_at": "2026-11-06T18:13:27.760117+09:00",
-  "previous_analysis_updated_at": "2026-11-06T18:13:28.595681+09:00",
+  "review_source_updated_at": "2026-11-06T18:28:05.879031+09:00",
+  "previous_analysis_updated_at": "2026-11-06T18:28:07.391871+09:00",
   "scoring_applied": false,
   "notes": [
     "馬ID・前走Race ID・開催日が一致した候補のみ収録。",
@@ -14,49 +14,89 @@
     "終盤の観測値は前走課題・克服根拠・採点とは別に保持。"
   ],
   "summary": {
-    "horse_count": 18,
-    "candidate_count": 11,
-    "matched_previous_run_count": 1
+    "horse_count": 17,
+    "candidate_count": 22,
+    "matched_previous_run_count": 2
   },
   "matches": [
     {
-      "horse_id": "2019103034",
-      "horse_number": "6",
-      "horse_name": "ダノンスコーピオン",
-      "previous_race_id": "202305020711",
-      "previous_race_date": "2023-05-13",
+      "horse_id": "2020103075",
+      "horse_number": "5",
+      "horse_name": "シャンパンカラー",
+      "previous_race_id": "202605040211",
+      "previous_race_date": "2026-10-04",
+      "existing_previous_analysis": {
+        "issue_summary": "明確な課題なし",
+        "overcoming_summary": "今回の位置取り改善材料を確認"
+      },
+      "late_review_observation": {
+        "pattern": "rank_lost_gap_narrowed",
+        "gap_change_within_0_1_seconds": false,
+        "horse_id": "2020103075",
+        "horse_number": "5",
+        "horse_name": "シャンパンカラー",
+        "past_race_id": "202605040211",
+        "past_race_date": "2026-10-04",
+        "past_race_name": "毎日王冠(GII)",
+        "position_change": {
+          "status": "ok",
+          "comparison_count": 17,
+          "to_last_600m_rank_max": 12,
+          "to_last_600m_tie_count": 3,
+          "direction": "lost",
+          "to_last_600m_rank": 10,
+          "last3f_rank": 6,
+          "finish": 13,
+          "positions_gained": -3
+        },
+        "gap_change": {
+          "status": "ok",
+          "split_gap_to_leader_seconds": 1.1,
+          "finish_gap_to_winner_seconds": 0.7,
+          "finish_minus_split_gap_seconds": -0.4,
+          "direction": "narrowed"
+        },
+        "race_final_minus_preceding_seconds_per_200m": -0.8
+      }
+    },
+    {
+      "horse_id": "2022104094",
+      "horse_number": "15",
+      "horse_name": "サクラファレル",
+      "previous_race_id": "202601010811",
+      "previous_race_date": "2026-08-16",
       "existing_previous_analysis": {
         "issue_summary": "明確な課題なし",
         "overcoming_summary": "客観データ上の明確な克服材料なし"
       },
       "late_review_observation": {
-        "pattern": "rank_lost_gap_narrowed",
-        "gap_change_within_0_1_seconds": false,
-        "horse_id": "2019103034",
-        "horse_number": "6",
-        "horse_name": "ダノンスコーピオン",
-        "past_race_id": "202305020711",
-        "past_race_date": "2023-05-13",
-        "past_race_name": "京王杯スプリングC(GII)",
+        "pattern": "rank_gained_gap_widened",
+        "gap_change_within_0_1_seconds": true,
+        "horse_id": "2022104094",
+        "horse_number": "15",
+        "horse_name": "サクラファレル",
+        "past_race_id": "202601010811",
+        "past_race_date": "2026-08-16",
+        "past_race_name": "札幌記念(GII)",
         "position_change": {
           "status": "ok",
-          "comparison_count": 18,
-          "to_last_600m_rank_max": 7,
-          "to_last_600m_tie_count": 1,
-          "direction": "lost",
-          "to_last_600m_rank": 7,
-          "last3f_rank": 13,
-          "finish": 11,
-          "positions_gained": -4
+          "comparison_count": 16,
+          "to_last_600m_rank_max": 5,
+          "to_last_600m_tie_count": 2,
+          "direction": "gained",
+          "to_last_600m_rank": 4,
+          "last3f_rank": 3,
+          "finish": 2,
+          "positions_gained": 2
         },
         "gap_change": {
           "status": "ok",
-          "split_gap_to_leader_seconds": 0.7,
-          "finish_gap_to_winner_seconds": 0.5,
-          "finish_minus_split_gap_seconds": -0.2,
-          "direction": "narrowed"
+          "split_gap_to_leader_seconds": 0.3,
+          "finish_gap_to_winner_seconds": 0.4,
+          "finish_minus_split_gap_seconds": 0.1,
+          "direction": "widened"
         },
-        "race_final_minus_preceding_seconds_per_200m": -0.1667
+        "race_final_minus_preceding_seconds_per_200m": -0.3333
       }
     }
   ]
