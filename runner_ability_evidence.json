@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-11-07T21:44:00.219348+09:00",
-  "target_race_id": "202605050201",
+  "updated_at": "2026-11-08T08:52:36.603796+09:00",
+  "target_race_id": "202603030201",
   "version": "ability_evidence_v1",
   "comparison_schema_version": "field_comparison_v1",
   "position_schema_version": "corner_position_evidence_v1",
@@ -9,26 +9,26 @@
   "future_race_usage": false,
   "leak_check_passed": true,
   "summary": {
-    "horse_count": 11,
-    "past_race_count": 23,
-    "field_matched_count": 23,
+    "horse_count": 16,
+    "past_race_count": 26,
+    "field_matched_count": 26,
     "field_conflict_count": 0,
-    "winner_time_gap_count": 23,
-    "direct_comparison_row_count": 0,
-    "comparable_direct_row_count": 0,
-    "unique_direct_meeting_count": 0,
-    "unique_comparable_meeting_count": 0,
+    "winner_time_gap_count": 26,
+    "direct_comparison_row_count": 4,
+    "comparable_direct_row_count": 4,
+    "unique_direct_meeting_count": 2,
+    "unique_comparable_meeting_count": 2,
     "pace_known_count": 0,
-    "passing_4c_known_count": 22,
-    "passing_4c_unknown_count": 1,
-    "passing_4c_history_observed_count": 23,
-    "passing_4c_db_difference_count": 9,
+    "passing_4c_known_count": 26,
+    "passing_4c_unknown_count": 0,
+    "passing_4c_history_observed_count": 26,
+    "passing_4c_db_difference_count": 6,
     "passing_4c_conflict_count": 0,
     "race_lap_unique_count": 23,
-    "race_lap_linked_run_count": 23,
-    "race_lap_unlinked_run_count": 0,
-    "race_lap_invalid_count": 0,
-    "source_pace_known_run_count": 23
+    "race_lap_linked_run_count": 25,
+    "race_lap_unlinked_run_count": 1,
+    "race_lap_invalid_count": 1,
+    "source_pace_known_run_count": 25
   },
   "notes": [
     "クラスは実績の分類。クラス名だけで能力を決めない。",
@@ -47,427 +47,32 @@
   ],
   "horses": [
     {
-      "horse_id": "2024101943",
+      "horse_id": "2024102592",
       "horse_number": "1",
-      "horse_name": "パワープレイ",
+      "horse_name": "ブラックブレット",
       "class_counts": {
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202605040704",
-          "date": "2026-10-18",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1600.0,
-          "finish_raw": "4",
-          "finish": 4,
-          "last3f": 37.9,
-          "passing_raw": "10-8",
-          "margin_raw": "2.2",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 16,
-            "last3f_observed_count": 16,
-            "last3f_rank": 3,
-            "winner_time_gap_seconds": 2.2,
-            "passing_4c": 8,
-            "passing_4c_evidence": {
-              "value": 8,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 8,
-              "database_flat_value": 8,
-              "past_horse_number": "2",
-              "corner_order_raw": "15(3,8)(16,12)-1,7(2,4,13)9,10(6,11)(5,14)",
-              "group": {
-                "horse_numbers": [
-                  2,
-                  4,
-                  13
-                ],
-                "rank_min": 8,
-                "rank_max": 10,
-                "leader_horse_number": null
-              },
-              "database_difference": false,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202605040704",
-            "source_pace_code": "M",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024106814",
-      "horse_number": "2",
-      "horse_name": "サノノファイター",
-      "class_counts": {
-        "未勝利": 2,
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202604040101",
-          "date": "2026-10-17",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1600.0,
-          "finish_raw": "3",
-          "finish": 3,
-          "last3f": 34.2,
-          "passing_raw": "5-5",
-          "margin_raw": "0.3",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 5,
-            "winner_time_gap_seconds": 0.3,
-            "passing_4c": 5,
-            "passing_4c_evidence": {
-              "value": 5,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 5,
-              "database_flat_value": 7,
-              "past_horse_number": "7",
-              "corner_order_raw": "(*2,3)(1,9)(5,4,7)(6,8,10)11,12",
-              "group": {
-                "horse_numbers": [
-                  5,
-                  4,
-                  7
-                ],
-                "rank_min": 5,
-                "rank_max": 7,
-                "leader_horse_number": null
-              },
-              "database_difference": true,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202604040101",
-            "source_pace_code": "S",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202606040503",
-          "date": "2026-09-19",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1600.0,
-          "finish_raw": "2",
-          "finish": 2,
-          "last3f": 35.3,
-          "passing_raw": "2-1-1",
-          "margin_raw": "0.2",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 2,
-            "winner_time_gap_seconds": 0.2,
-            "passing_4c": 1,
-            "passing_4c_evidence": {
-              "value": 1,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 1,
-              "database_flat_value": 1,
-              "past_horse_number": "1",
-              "corner_order_raw": "1(3,8)2(5,12)(4,9,10)(6,7)-11",
-              "group": {
-                "horse_numbers": [
-                  1
-                ],
-                "rank_min": 1,
-                "rank_max": 1,
-                "leader_horse_number": null
-              },
-              "database_difference": false,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202606040503",
-            "source_pace_code": "M",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202603020305",
-          "date": "2026-07-04",
+          "race_id": "202610020606",
+          "date": "2026-07-12",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
           "surface": "芝",
-          "distance": 1800.0,
-          "finish_raw": "12",
-          "finish": 12,
-          "last3f": 37.3,
-          "passing_raw": "7-5-5-5",
-          "margin_raw": "2.1",
+          "distance": 1200.0,
+          "finish_raw": "9",
+          "finish": 9,
+          "last3f": 37.4,
+          "passing_raw": "9-9",
+          "margin_raw": "2.9",
           "field": {
             "matched": true,
-            "classified_finish_count": 14,
-            "last3f_observed_count": 14,
-            "last3f_rank": 10,
-            "winner_time_gap_seconds": 2.1,
-            "passing_4c": 5,
-            "passing_4c_evidence": {
-              "value": 5,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 5,
-              "database_flat_value": 6,
-              "past_horse_number": "3",
-              "corner_order_raw": "13(1,14,10)(2,3,9)(5,7,6)8(11,12)=4",
-              "group": {
-                "horse_numbers": [
-                  2,
-                  3,
-                  9
-                ],
-                "rank_min": 5,
-                "rank_max": 7,
-                "leader_horse_number": null
-              },
-              "database_difference": true,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202603020305",
-            "source_pace_code": "M",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024101690",
-      "horse_number": "3",
-      "horse_name": "セイウンサイフィー",
-      "class_counts": {
-        "未勝利": 1,
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202604040203",
-          "date": "2026-10-18",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1800.0,
-          "finish_raw": "8",
-          "finish": 8,
-          "last3f": 35.1,
-          "passing_raw": "9-7",
-          "margin_raw": "0.9",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 13,
-            "last3f_observed_count": 13,
-            "last3f_rank": 7,
-            "winner_time_gap_seconds": 0.9,
-            "passing_4c": 7,
-            "passing_4c_evidence": {
-              "value": 7,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 7,
-              "database_flat_value": 8,
-              "past_horse_number": "4",
-              "corner_order_raw": "(*2,13)(3,6,8)12(5,4)(11,7)(10,9)1",
-              "group": {
-                "horse_numbers": [
-                  5,
-                  4
-                ],
-                "rank_min": 7,
-                "rank_max": 8,
-                "leader_horse_number": null
-              },
-              "database_difference": true,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202604040203",
-            "source_pace_code": "S",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202604020302",
-          "date": "2026-08-01",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1800.0,
-          "finish_raw": "6",
-          "finish": 6,
-          "last3f": 34.6,
-          "passing_raw": "3-3",
-          "margin_raw": "1.5",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 8,
-            "last3f_observed_count": 8,
-            "last3f_rank": 6,
-            "winner_time_gap_seconds": 1.5,
-            "passing_4c": 3,
-            "passing_4c_evidence": {
-              "value": 3,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 3,
-              "database_flat_value": 3,
-              "past_horse_number": "6",
-              "corner_order_raw": "(*7,3)(6,2)(1,4)(5,8)",
-              "group": {
-                "horse_numbers": [
-                  6,
-                  2
-                ],
-                "rank_min": 3,
-                "rank_max": 4,
-                "leader_horse_number": null
-              },
-              "database_difference": false,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202604020302",
-            "source_pace_code": "S",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024106761",
-      "horse_number": "4",
-      "horse_name": "ルボワ",
-      "class_counts": {
-        "未勝利": 2,
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202608040502",
-          "date": "2026-10-12",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1800.0,
-          "finish_raw": "2",
-          "finish": 2,
-          "last3f": 37.3,
-          "passing_raw": "8-8-9-9",
-          "margin_raw": "0.7",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 1,
-            "winner_time_gap_seconds": 0.7,
+            "classified_finish_count": 9,
+            "last3f_observed_count": 9,
+            "last3f_rank": 9,
+            "winner_time_gap_seconds": 2.9,
             "passing_4c": 9,
             "passing_4c_evidence": {
               "value": 9,
@@ -475,11 +80,11 @@
               "source": "runner_history.passing",
               "history_value": 9,
               "database_flat_value": 9,
-              "past_horse_number": "10",
-              "corner_order_raw": "(*12,6,11)(5,4)2(3,9)10(1,7)8",
+              "past_horse_number": "8",
+              "corner_order_raw": "4(1,6)2,5,9,3,7,8",
               "group": {
                 "horse_numbers": [
-                  10
+                  8
                 ],
                 "rank_min": 9,
                 "rank_max": 9,
@@ -492,128 +97,7 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202608040502",
-            "source_pace_code": "S",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202609040501",
-          "date": "2026-09-19",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1800.0,
-          "finish_raw": "5",
-          "finish": 5,
-          "last3f": 38.4,
-          "passing_raw": "7-7-6-5",
-          "margin_raw": "1.4",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 8,
-            "last3f_observed_count": 8,
-            "last3f_rank": 5,
-            "winner_time_gap_seconds": 1.4,
-            "passing_4c": 5,
-            "passing_4c_evidence": {
-              "value": 5,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 5,
-              "database_flat_value": 6,
-              "past_horse_number": "2",
-              "corner_order_raw": "8-(3,7,4)(1,2,6)5",
-              "group": {
-                "horse_numbers": [
-                  1,
-                  2,
-                  6
-                ],
-                "rank_min": 5,
-                "rank_max": 7,
-                "leader_horse_number": null
-              },
-              "database_difference": true,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202609040501",
-            "source_pace_code": "M",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        },
-        {
-          "race_id": "202601020305",
-          "date": "2026-08-29",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
-          "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1700.0,
-          "finish_raw": "8",
-          "finish": 8,
-          "last3f": 38.6,
-          "passing_raw": "14-14-14-12",
-          "margin_raw": "1.4",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 14,
-            "last3f_observed_count": 14,
-            "last3f_rank": 2,
-            "winner_time_gap_seconds": 1.4,
-            "passing_4c": 12,
-            "passing_4c_evidence": {
-              "value": 12,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 12,
-              "database_flat_value": 13,
-              "past_horse_number": "14",
-              "corner_order_raw": "5(10,11)-1,12,8,13(2,9)(4,3)(6,14)7",
-              "group": {
-                "horse_numbers": [
-                  6,
-                  14
-                ],
-                "rank_min": 12,
-                "rank_max": 13,
-                "leader_horse_number": null
-              },
-              "database_difference": true,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202601020305",
+            "race_lap_key": "202610020606",
             "source_pace_code": "H",
             "race_lap_unknown_reason": ""
           },
@@ -632,49 +116,48 @@
       ]
     },
     {
-      "horse_id": "2024101323",
-      "horse_number": "5",
-      "horse_name": "シャイニーヒーロー",
+      "horse_id": "2024104721",
+      "horse_number": "2",
+      "horse_name": "シースファイア",
       "class_counts": {
-        "未勝利": 4,
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202605040603",
+          "race_id": "202604040105",
           "date": "2026-10-17",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
           "race_class_source": "race_name",
           "surface": "ダート",
-          "distance": 1600.0,
-          "finish_raw": "6",
-          "finish": 6,
-          "last3f": 38.8,
-          "passing_raw": "9-10",
-          "margin_raw": "3.2",
+          "distance": 1200.0,
+          "finish_raw": "5",
+          "finish": 5,
+          "last3f": 37.7,
+          "passing_raw": "9-9",
+          "margin_raw": "0.9",
           "field": {
             "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 7,
-            "winner_time_gap_seconds": 3.2,
-            "passing_4c": 10,
+            "classified_finish_count": 15,
+            "last3f_observed_count": 15,
+            "last3f_rank": 3,
+            "winner_time_gap_seconds": 0.9,
+            "passing_4c": 9,
             "passing_4c_evidence": {
-              "value": 10,
+              "value": 9,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 10,
-              "database_flat_value": 11,
-              "past_horse_number": "4",
-              "corner_order_raw": "6(7,8)-(1,5,11)(3,10)9(2,4)12",
+              "history_value": 9,
+              "database_flat_value": 10,
+              "past_horse_number": "1",
+              "corner_order_raw": "3(7,10)11-(8,12,14,15)(9,1)-(2,5)-4,6=13",
               "group": {
                 "horse_numbers": [
-                  2,
-                  4
+                  9,
+                  1
                 ],
-                "rank_min": 10,
-                "rank_max": 11,
+                "rank_min": 9,
+                "rank_max": 10,
                 "leader_horse_number": null
               },
               "database_difference": true,
@@ -684,7 +167,136 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202605040603",
+            "race_lap_key": "202604040105",
+            "source_pace_code": "H",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024101054",
+      "horse_number": "3",
+      "horse_name": "イリスロッソ",
+      "class_counts": {
+        "未勝利": 2,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202604020803",
+          "date": "2026-08-16",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1200.0,
+          "finish_raw": "2",
+          "finish": 2,
+          "last3f": 38.0,
+          "passing_raw": "2-2",
+          "margin_raw": "0.0",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 15,
+            "last3f_observed_count": 15,
+            "last3f_rank": 3,
+            "winner_time_gap_seconds": 0.0,
+            "passing_4c": 2,
+            "passing_4c_evidence": {
+              "value": 2,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 2,
+              "database_flat_value": 2,
+              "past_horse_number": "8",
+              "corner_order_raw": "3,8-(6,10)(7,12)1-4,11,5(2,13)(9,14)-15",
+              "group": {
+                "horse_numbers": [
+                  8
+                ],
+                "rank_min": 2,
+                "rank_max": 2,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202604020803",
+            "source_pace_code": "H",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202601010201",
+          "date": "2026-07-26",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1000.0,
+          "finish_raw": "2",
+          "finish": 2,
+          "last3f": 36.0,
+          "passing_raw": "5-5",
+          "margin_raw": "0.6",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 12,
+            "last3f_observed_count": 12,
+            "last3f_rank": 1,
+            "winner_time_gap_seconds": 0.6,
+            "passing_4c": 5,
+            "passing_4c_evidence": {
+              "value": 5,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 5,
+              "database_flat_value": 5,
+              "past_horse_number": "2",
+              "corner_order_raw": "10,9,1,6,2(3,11)(4,5,8)(7,12)",
+              "group": {
+                "horse_numbers": [
+                  2
+                ],
+                "rank_min": 5,
+                "rank_max": 5,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202601010201",
             "source_pace_code": "M",
             "race_lap_unknown_reason": ""
           },
@@ -701,24 +313,369 @@
           "flags": []
         },
         {
-          "race_id": "202609040802",
-          "date": "2026-09-26",
+          "race_id": "202602010905",
+          "date": "2026-07-11",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "8",
+          "finish": 8,
+          "last3f": 36.1,
+          "passing_raw": "3-3",
+          "margin_raw": "2.1",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 11,
+            "winner_time_gap_seconds": 2.1,
+            "passing_4c": 3,
+            "passing_4c_evidence": {
+              "value": 3,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 3,
+              "database_flat_value": 4,
+              "past_horse_number": "5",
+              "corner_order_raw": "8-11-(6,5)(3,9)-(4,2)1-(10,7)",
+              "group": {
+                "horse_numbers": [
+                  6,
+                  5
+                ],
+                "rank_min": 3,
+                "rank_max": 4,
+                "leader_horse_number": null
+              },
+              "database_difference": true,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202602010905",
+            "source_pace_code": "M",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024101608",
+      "horse_number": "4",
+      "horse_name": "サノノソルジャー",
+      "class_counts": {
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202605040506",
+          "date": "2026-10-12",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1300.0,
+          "finish_raw": "2",
+          "finish": 2,
+          "last3f": 37.3,
+          "passing_raw": "2-2",
+          "margin_raw": "0.3",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 16,
+            "last3f_observed_count": 16,
+            "last3f_rank": 3,
+            "winner_time_gap_seconds": 0.3,
+            "passing_4c": 2,
+            "passing_4c_evidence": {
+              "value": 2,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 2,
+              "database_flat_value": 2,
+              "past_horse_number": "14",
+              "corner_order_raw": "11,14(5,16)(2,8,10)(6,1)7-(4,9)(12,3)(13,15)",
+              "group": {
+                "horse_numbers": [
+                  14
+                ],
+                "rank_min": 2,
+                "rank_max": 2,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202605040506",
+            "source_pace_code": "M",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024101341",
+      "horse_number": "5",
+      "horse_name": "ドナビッグベン",
+      "class_counts": {
+        "未勝利": 3,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202604040202",
+          "date": "2026-10-18",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
           "surface": "ダート",
-          "distance": 1800.0,
-          "finish_raw": "5",
-          "finish": 5,
-          "last3f": 40.9,
-          "passing_raw": "6-7-7-6",
-          "margin_raw": "3.5",
+          "distance": 1200.0,
+          "finish_raw": "2",
+          "finish": 2,
+          "last3f": 38.5,
+          "passing_raw": "3-3",
+          "margin_raw": "0.1",
           "field": {
             "matched": true,
-            "classified_finish_count": 7,
-            "last3f_observed_count": 7,
-            "last3f_rank": 5,
-            "winner_time_gap_seconds": 3.5,
+            "classified_finish_count": 15,
+            "last3f_observed_count": 15,
+            "last3f_rank": 6,
+            "winner_time_gap_seconds": 0.1,
+            "passing_4c": 3,
+            "passing_4c_evidence": {
+              "value": 3,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 3,
+              "database_flat_value": 3,
+              "past_horse_number": "1",
+              "corner_order_raw": "(*14,15)1(13,12)7(2,5)3-9(6,10)(8,11)=4",
+              "group": {
+                "horse_numbers": [
+                  1
+                ],
+                "rank_min": 3,
+                "rank_max": 3,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [
+              {
+                "comparison_key": "202604040202|2024101341|2024102979",
+                "horse_id": "2024102979",
+                "horse_name": "マルモタワー",
+                "current_horse_number": "15",
+                "past_horse_number": "7",
+                "finish_raw": "3",
+                "finish": 3,
+                "own_finish": 2,
+                "outcome": "先着",
+                "own_minus_opponent_seconds": -0.3
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202604040202",
+            "source_pace_code": "H",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202606040703",
+          "date": "2026-09-22",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1200.0,
+          "finish_raw": "3",
+          "finish": 3,
+          "last3f": 37.9,
+          "passing_raw": "1-1",
+          "margin_raw": "0.1",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 4,
+            "winner_time_gap_seconds": 0.1,
+            "passing_4c": 1,
+            "passing_4c_evidence": {
+              "value": 1,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 1,
+              "database_flat_value": 1,
+              "past_horse_number": "5",
+              "corner_order_raw": "(*5,8)(6,2)-9,7,4,3(11,10)1",
+              "group": {
+                "horse_numbers": [
+                  5,
+                  8
+                ],
+                "rank_min": 1,
+                "rank_max": 2,
+                "leader_horse_number": 5
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [
+              {
+                "comparison_key": "202606040703|2024101341|2024101604",
+                "horse_id": "2024101604",
+                "horse_name": "ベアアミーチ",
+                "current_horse_number": "9",
+                "past_horse_number": "6",
+                "finish_raw": "4",
+                "finish": 4,
+                "own_finish": 3,
+                "outcome": "先着",
+                "own_minus_opponent_seconds": -0.6
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202606040703",
+            "source_pace_code": "H",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202603020801",
+          "date": "2026-07-19",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1150.0,
+          "finish_raw": "2",
+          "finish": 2,
+          "last3f": 37.6,
+          "passing_raw": "3-2",
+          "margin_raw": "0.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 10,
+            "last3f_observed_count": 10,
+            "last3f_rank": 2,
+            "winner_time_gap_seconds": 0.4,
+            "passing_4c": 2,
+            "passing_4c_evidence": {
+              "value": 2,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 2,
+              "database_flat_value": 3,
+              "past_horse_number": "6",
+              "corner_order_raw": "1(5,6)-(9,10)-(2,3,4)=8=7",
+              "group": {
+                "horse_numbers": [
+                  5,
+                  6
+                ],
+                "rank_min": 2,
+                "rank_max": 3,
+                "leader_horse_number": null
+              },
+              "database_difference": true,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ・ペース判定データ未接続",
+            "race_lap_key": null,
+            "source_pace_code": null,
+            "race_lap_unknown_reason": "ラップ取得失敗または照合・検証不成立"
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202603020204",
+          "date": "2026-06-28",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "4",
+          "finish": 4,
+          "last3f": 35.2,
+          "passing_raw": "6-6",
+          "margin_raw": "2.0",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 14,
+            "last3f_observed_count": 14,
+            "last3f_rank": 9,
+            "winner_time_gap_seconds": 2.0,
             "passing_4c": 6,
             "passing_4c_evidence": {
               "value": 6,
@@ -726,11 +683,11 @@
               "source": "runner_history.passing",
               "history_value": 6,
               "database_flat_value": 6,
-              "past_horse_number": "7",
-              "corner_order_raw": "6(1,3)2,5-7,4",
+              "past_horse_number": "4",
+              "corner_order_raw": "(*7,9)8-(6,10)4,3(14,13)-11,5,12(2,1)",
               "group": {
                 "horse_numbers": [
-                  7
+                  4
                 ],
                 "rank_min": 6,
                 "rank_max": 6,
@@ -743,7 +700,7 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202609040802",
+            "race_lap_key": "202603020204",
             "source_pace_code": "M",
             "race_lap_unknown_reason": ""
           },
@@ -758,42 +715,62 @@
             "課題克服"
           ],
           "flags": []
-        },
+        }
+      ]
+    },
+    {
+      "horse_id": "2024103237",
+      "horse_number": "6",
+      "horse_name": "ルージュロア",
+      "class_counts": {},
+      "past_races": []
+    },
+    {
+      "horse_id": "2024100733",
+      "horse_number": "7",
+      "horse_name": "アースグリッパー",
+      "class_counts": {
+        "未勝利": 2,
+        "新馬": 1
+      },
+      "past_races": [
         {
-          "race_id": "202606040301",
-          "date": "2026-09-12",
+          "race_id": "202609040602",
+          "date": "2026-09-20",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
           "surface": "ダート",
-          "distance": 1800.0,
-          "finish_raw": "10",
-          "finish": 10,
-          "last3f": 42.3,
-          "passing_raw": "7-6-8-10",
-          "margin_raw": "4.1",
+          "distance": 1200.0,
+          "finish_raw": "11",
+          "finish": 11,
+          "last3f": 40.4,
+          "passing_raw": "2-2",
+          "margin_raw": "2.6",
           "field": {
             "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 11,
-            "last3f_rank": 10,
-            "winner_time_gap_seconds": 4.1,
-            "passing_4c": 10,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 11,
+            "winner_time_gap_seconds": 2.6,
+            "passing_4c": 2,
             "passing_4c_evidence": {
-              "value": 10,
+              "value": 2,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 10,
-              "database_flat_value": 10,
-              "past_horse_number": "4",
-              "corner_order_raw": "(7,*9)-11,2,12=(3,6)1-8-4=5=10",
+              "history_value": 2,
+              "database_flat_value": 2,
+              "past_horse_number": "2",
+              "corner_order_raw": "(*1,2,8)(7,10)11(12,13)(3,6)-5(9,4)",
               "group": {
                 "horse_numbers": [
-                  4
+                  1,
+                  2,
+                  8
                 ],
-                "rank_min": 10,
-                "rank_max": 10,
-                "leader_horse_number": null
+                "rank_min": 1,
+                "rank_max": 3,
+                "leader_horse_number": 1
               },
               "database_difference": false,
               "unknown_reason": ""
@@ -802,7 +779,7 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202606040301",
+            "race_lap_key": "202609040602",
             "source_pace_code": "H",
             "race_lap_unknown_reason": ""
           },
@@ -819,40 +796,41 @@
           "flags": []
         },
         {
-          "race_id": "202601020303",
-          "date": "2026-08-29",
+          "race_id": "202607020101",
+          "date": "2026-07-25",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1800.0,
-          "finish_raw": "11",
-          "finish": 11,
-          "last3f": 39.1,
-          "passing_raw": "7-7-9-11",
-          "margin_raw": "4.0",
+          "surface": "ダート",
+          "distance": 1200.0,
+          "finish_raw": "3",
+          "finish": 3,
+          "last3f": 38.7,
+          "passing_raw": "2-2",
+          "margin_raw": "0.8",
           "field": {
             "matched": true,
-            "classified_finish_count": 11,
-            "last3f_observed_count": 11,
-            "last3f_rank": 11,
-            "winner_time_gap_seconds": 4.0,
-            "passing_4c": 11,
+            "classified_finish_count": 9,
+            "last3f_observed_count": 9,
+            "last3f_rank": 4,
+            "winner_time_gap_seconds": 0.8,
+            "passing_4c": 2,
             "passing_4c_evidence": {
-              "value": 11,
+              "value": 2,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 11,
-              "database_flat_value": 11,
-              "past_horse_number": "11",
-              "corner_order_raw": "3,5(8,9)-(6,10,1)2(4,7)=11",
+              "history_value": 2,
+              "database_flat_value": 2,
+              "past_horse_number": "3",
+              "corner_order_raw": "(*1,3)(6,7)8,2-5-4-9",
               "group": {
                 "horse_numbers": [
-                  11
+                  1,
+                  3
                 ],
-                "rank_min": 11,
-                "rank_max": 11,
-                "leader_horse_number": null
+                "rank_min": 1,
+                "rank_max": 2,
+                "leader_horse_number": 1
               },
               "database_difference": false,
               "unknown_reason": ""
@@ -861,8 +839,8 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202601020303",
-            "source_pace_code": "S",
+            "race_lap_key": "202607020101",
+            "source_pace_code": "H",
             "race_lap_unknown_reason": ""
           },
           "opponent_strength": null,
@@ -878,40 +856,39 @@
           "flags": []
         },
         {
-          "race_id": "202601010805",
-          "date": "2026-08-16",
+          "race_id": "202602010306",
+          "date": "2026-06-20",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1800.0,
-          "finish_raw": "9",
-          "finish": 9,
-          "last3f": 36.9,
-          "passing_raw": "3-4-8-9",
-          "margin_raw": "1.9",
+          "surface": "ダート",
+          "distance": 1000.0,
+          "finish_raw": "4",
+          "finish": 4,
+          "last3f": 36.5,
+          "passing_raw": "6-5",
+          "margin_raw": "1.6",
           "field": {
             "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 9,
-            "winner_time_gap_seconds": 1.9,
-            "passing_4c": 9,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 3,
+            "winner_time_gap_seconds": 1.6,
+            "passing_4c": 5,
             "passing_4c_evidence": {
-              "value": 9,
+              "value": 5,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 9,
-              "database_flat_value": 9,
-              "past_horse_number": "7",
-              "corner_order_raw": "12(11,9,8)6(1,10)5(7,3)-4,2",
+              "history_value": 5,
+              "database_flat_value": 5,
+              "past_horse_number": "3",
+              "corner_order_raw": "4,10(1,7)3,6,11,2,8-(9,5)",
               "group": {
                 "horse_numbers": [
-                  7,
                   3
                 ],
-                "rank_min": 9,
-                "rank_max": 10,
+                "rank_min": 5,
+                "rank_max": 5,
                 "leader_horse_number": null
               },
               "database_difference": false,
@@ -921,77 +898,7 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202601010805",
-            "source_pace_code": "S",
-            "race_lap_unknown_reason": ""
-          },
-          "opponent_strength": null,
-          "pace_advantage": null,
-          "trouble": null,
-          "issue_resolution": null,
-          "unknowns": [
-            "相手の実力",
-            "展開の有利不利",
-            "不利の有無",
-            "課題克服"
-          ],
-          "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104822",
-      "horse_number": "6",
-      "horse_name": "タイセイアドーレ",
-      "class_counts": {
-        "未勝利": 1,
-        "新馬": 1
-      },
-      "past_races": [
-        {
-          "race_id": "202603020503",
-          "date": "2026-07-11",
-          "race_name": "2歳未勝利",
-          "race_class": "未勝利",
-          "race_class_source": "race_name",
-          "surface": "芝",
-          "distance": 1800.0,
-          "finish_raw": "9",
-          "finish": 9,
-          "last3f": 36.2,
-          "passing_raw": "9-9-11-11",
-          "margin_raw": "1.3",
-          "field": {
-            "matched": true,
-            "classified_finish_count": 14,
-            "last3f_observed_count": 14,
-            "last3f_rank": 6,
-            "winner_time_gap_seconds": 1.3,
-            "passing_4c": 11,
-            "passing_4c_evidence": {
-              "value": 11,
-              "status": "history_within_group_range",
-              "source": "runner_history.passing",
-              "history_value": 11,
-              "database_flat_value": 11,
-              "past_horse_number": "6",
-              "corner_order_raw": "(*2,14,5,9)(1,8,7,13)(4,12)6(3,11)=10",
-              "group": {
-                "horse_numbers": [
-                  6
-                ],
-                "rank_min": 11,
-                "rank_max": 11,
-                "leader_horse_number": null
-              },
-              "database_difference": false,
-              "unknown_reason": ""
-            },
-            "current_opponents": [],
-            "comparison_conflicts": [],
-            "pace_label": null,
-            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202603020503",
+            "race_lap_key": "202602010306",
             "source_pace_code": "M",
             "race_lap_unknown_reason": ""
           },
@@ -1006,41 +913,52 @@
             "課題克服"
           ],
           "flags": []
-        },
+        }
+      ]
+    },
+    {
+      "horse_id": "2024104100",
+      "horse_number": "8",
+      "horse_name": "シウンハゴロモ",
+      "class_counts": {
+        "新馬": 1
+      },
+      "past_races": [
         {
-          "race_id": "202605030405",
-          "date": "2026-06-14",
+          "race_id": "202606040504",
+          "date": "2026-09-19",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
           "surface": "芝",
-          "distance": 1600.0,
-          "finish_raw": "4",
-          "finish": 4,
-          "last3f": 34.9,
-          "passing_raw": "1-1",
-          "margin_raw": "0.8",
+          "distance": 1200.0,
+          "finish_raw": "11",
+          "finish": 11,
+          "last3f": 35.5,
+          "passing_raw": "2-4",
+          "margin_raw": "1.4",
           "field": {
             "matched": true,
-            "classified_finish_count": 8,
-            "last3f_observed_count": 8,
-            "last3f_rank": 5,
-            "winner_time_gap_seconds": 0.8,
-            "passing_4c": 1,
+            "classified_finish_count": 16,
+            "last3f_observed_count": 16,
+            "last3f_rank": 15,
+            "winner_time_gap_seconds": 1.4,
+            "passing_4c": 4,
             "passing_4c_evidence": {
-              "value": 1,
+              "value": 4,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 1,
-              "database_flat_value": 1,
-              "past_horse_number": "5",
-              "corner_order_raw": "5,7(3,8)4(2,6,1)",
+              "history_value": 4,
+              "database_flat_value": 4,
+              "past_horse_number": "3",
+              "corner_order_raw": "5(10,13)(3,9)(2,14)(6,16)4-(1,12)11-15,7-8",
               "group": {
                 "horse_numbers": [
-                  5
+                  3,
+                  9
                 ],
-                "rank_min": 1,
-                "rank_max": 1,
+                "rank_min": 4,
+                "rank_max": 5,
                 "leader_horse_number": null
               },
               "database_difference": false,
@@ -1050,8 +968,8 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202605030405",
-            "source_pace_code": "S",
+            "race_lap_key": "202606040504",
+            "source_pace_code": "M",
             "race_lap_unknown_reason": ""
           },
           "opponent_strength": null,
@@ -1069,32 +987,32 @@
       ]
     },
     {
-      "horse_id": "2024102355",
-      "horse_number": "7",
-      "horse_name": "ブルーサンタ",
+      "horse_id": "2024101604",
+      "horse_number": "9",
+      "horse_name": "ベアアミーチ",
       "class_counts": {
-        "未勝利": 1,
+        "未勝利": 2,
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202604040102",
-          "date": "2026-10-17",
+          "race_id": "202606040703",
+          "date": "2026-09-22",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
           "surface": "ダート",
-          "distance": 1800.0,
+          "distance": 1200.0,
           "finish_raw": "4",
           "finish": 4,
-          "last3f": 40.1,
-          "passing_raw": "1-1-1-3",
+          "last3f": 37.9,
+          "passing_raw": "6-3",
           "margin_raw": "0.7",
           "field": {
             "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 7,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 4,
             "winner_time_gap_seconds": 0.7,
             "passing_4c": 3,
             "passing_4c_evidence": {
@@ -1103,24 +1021,38 @@
               "source": "runner_history.passing",
               "history_value": 3,
               "database_flat_value": 3,
-              "past_horse_number": "4",
-              "corner_order_raw": "(*12,11)4,7(8,3)-1-2-6(5,9,10)",
+              "past_horse_number": "6",
+              "corner_order_raw": "(*5,8)(6,2)-9,7,4,3(11,10)1",
               "group": {
                 "horse_numbers": [
-                  4
+                  6,
+                  2
                 ],
                 "rank_min": 3,
-                "rank_max": 3,
+                "rank_max": 4,
                 "leader_horse_number": null
               },
               "database_difference": false,
               "unknown_reason": ""
             },
-            "current_opponents": [],
+            "current_opponents": [
+              {
+                "comparison_key": "202606040703|2024101341|2024101604",
+                "horse_id": "2024101341",
+                "horse_name": "ドナビッグベン",
+                "current_horse_number": "5",
+                "past_horse_number": "5",
+                "finish_raw": "3",
+                "finish": 3,
+                "own_finish": 4,
+                "outcome": "後着",
+                "own_minus_opponent_seconds": 0.6
+              }
+            ],
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202604040102",
+            "race_lap_key": "202606040703",
             "source_pace_code": "H",
             "race_lap_unknown_reason": ""
           },
@@ -1137,49 +1069,50 @@
           "flags": []
         },
         {
-          "race_id": "202606040803",
-          "date": "2026-09-26",
-          "race_name": "2歳新馬",
-          "race_class": "新馬",
+          "race_id": "202603020203",
+          "date": "2026-06-28",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
           "race_class_source": "race_name",
-          "surface": "ダート",
-          "distance": 1800.0,
-          "finish_raw": "6",
-          "finish": 6,
-          "last3f": 39.1,
-          "passing_raw": "3-2-1-1",
-          "margin_raw": "1.1",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "4",
+          "finish": 4,
+          "last3f": 36.3,
+          "passing_raw": "2-2",
+          "margin_raw": "1.7",
           "field": {
             "matched": true,
-            "classified_finish_count": 16,
-            "last3f_observed_count": 16,
-            "last3f_rank": 7,
-            "winner_time_gap_seconds": 1.1,
-            "passing_4c": 1,
+            "classified_finish_count": 5,
+            "last3f_observed_count": 5,
+            "last3f_rank": 5,
+            "winner_time_gap_seconds": 1.7,
+            "passing_4c": 2,
             "passing_4c_evidence": {
-              "value": 1,
+              "value": 2,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 1,
-              "database_flat_value": 1,
-              "past_horse_number": "8",
-              "corner_order_raw": "8(13,3)(12,5)(16,9)14(15,4)2-(11,1)-7-10=6",
+              "history_value": 2,
+              "database_flat_value": 3,
+              "past_horse_number": "3",
+              "corner_order_raw": "5(1,3)2=4",
               "group": {
                 "horse_numbers": [
-                  8
+                  1,
+                  3
                 ],
-                "rank_min": 1,
-                "rank_max": 1,
+                "rank_min": 2,
+                "rank_max": 3,
                 "leader_horse_number": null
               },
-              "database_difference": false,
+              "database_difference": true,
               "unknown_reason": ""
             },
             "current_opponents": [],
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202606040803",
+            "race_lap_key": "202603020203",
             "source_pace_code": "M",
             "race_lap_unknown_reason": ""
           },
@@ -1194,52 +1127,41 @@
             "課題克服"
           ],
           "flags": []
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104505",
-      "horse_number": "8",
-      "horse_name": "グラスリズム",
-      "class_counts": {
-        "新馬": 1
-      },
-      "past_races": [
+        },
         {
-          "race_id": "202605040905",
-          "date": "2026-10-25",
+          "race_id": "202605030104",
+          "date": "2026-06-06",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
           "surface": "芝",
-          "distance": 1800.0,
-          "finish_raw": "11",
-          "finish": 11,
-          "last3f": 36.5,
-          "passing_raw": "9-11-10",
-          "margin_raw": "2.4",
+          "distance": 1400.0,
+          "finish_raw": "5",
+          "finish": 5,
+          "last3f": 35.7,
+          "passing_raw": "2-2",
+          "margin_raw": "1.2",
           "field": {
             "matched": true,
-            "classified_finish_count": 13,
-            "last3f_observed_count": 13,
-            "last3f_rank": 12,
-            "winner_time_gap_seconds": 2.4,
-            "passing_4c": 10,
+            "classified_finish_count": 7,
+            "last3f_observed_count": 7,
+            "last3f_rank": 5,
+            "winner_time_gap_seconds": 1.2,
+            "passing_4c": 2,
             "passing_4c_evidence": {
-              "value": 10,
+              "value": 2,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 10,
-              "database_flat_value": 10,
-              "past_horse_number": "9",
-              "corner_order_raw": "(*6,7,2)10(1,8,11)4,5(9,13)3,12",
+              "history_value": 2,
+              "database_flat_value": 2,
+              "past_horse_number": "7",
+              "corner_order_raw": "5,7(1,3,4)2,6",
               "group": {
                 "horse_numbers": [
-                  9,
-                  13
+                  7
                 ],
-                "rank_min": 10,
-                "rank_max": 11,
+                "rank_min": 2,
+                "rank_max": 2,
                 "leader_horse_number": null
               },
               "database_difference": false,
@@ -1249,7 +1171,7 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202605040905",
+            "race_lap_key": "202605030104",
             "source_pace_code": "S",
             "race_lap_unknown_reason": ""
           },
@@ -1268,51 +1190,66 @@
       ]
     },
     {
-      "horse_id": "2024102668",
-      "horse_number": "9",
-      "horse_name": "ナックドリーム",
+      "horse_id": "2024102531",
+      "horse_number": "10",
+      "horse_name": "ヒガンバナ",
+      "class_counts": {},
+      "past_races": []
+    },
+    {
+      "horse_id": "2024104110",
+      "horse_number": "11",
+      "horse_name": "オラパ",
       "class_counts": {
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202605040804",
-          "date": "2026-10-24",
+          "race_id": "202606040305",
+          "date": "2026-09-12",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
-          "surface": "ダート",
+          "surface": "芝",
           "distance": 1600.0,
-          "finish_raw": "3",
-          "finish": 3,
-          "last3f": 37.3,
-          "passing_raw": "11-10",
-          "margin_raw": "1.0",
+          "finish_raw": "5",
+          "finish": 5,
+          "last3f": 35.2,
+          "passing_raw": "2-2-3",
+          "margin_raw": "0.4",
           "field": {
             "matched": true,
-            "classified_finish_count": 15,
-            "last3f_observed_count": 15,
-            "last3f_rank": 2,
-            "winner_time_gap_seconds": 1.0,
-            "passing_4c": null,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 7,
+            "winner_time_gap_seconds": 0.4,
+            "passing_4c": 3,
             "passing_4c_evidence": {
-              "value": null,
-              "status": "unknown",
-              "source": null,
-              "history_value": 10,
-              "database_flat_value": 11,
-              "past_horse_number": "15",
-              "corner_order_raw": "16(3,8,11)(12,10)6(9,7)(4,15)-(14,13)-2=1   5",
-              "group": null,
-              "database_difference": true,
-              "unknown_reason": "馬群表記との照合ができない"
+              "value": 3,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 3,
+              "database_flat_value": 3,
+              "past_horse_number": "10",
+              "corner_order_raw": "(*4,8)(10,9)(1,2)(5,7)6-3=11",
+              "group": {
+                "horse_numbers": [
+                  10,
+                  9
+                ],
+                "rank_min": 3,
+                "rank_max": 4,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
             },
             "current_opponents": [],
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202605040804",
-            "source_pace_code": "M",
+            "race_lap_key": "202606040305",
+            "source_pace_code": "S",
             "race_lap_unknown_reason": ""
           },
           "opponent_strength": null,
@@ -1330,49 +1267,49 @@
       ]
     },
     {
-      "horse_id": "2024100754",
-      "horse_number": "10",
-      "horse_name": "ドッカイッチャッテ",
+      "horse_id": "2024104987",
+      "horse_number": "12",
+      "horse_name": "アスコットペスカ",
       "class_counts": {
         "未勝利": 1,
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202604030201",
-          "date": "2026-08-23",
+          "race_id": "202601020402",
+          "date": "2026-08-30",
           "race_name": "2歳未勝利",
           "race_class": "未勝利",
           "race_class_source": "race_name",
           "surface": "芝",
-          "distance": 1400.0,
-          "finish_raw": "9",
-          "finish": 9,
-          "last3f": 35.9,
-          "passing_raw": "7-7",
-          "margin_raw": "1.7",
+          "distance": 1200.0,
+          "finish_raw": "10",
+          "finish": 10,
+          "last3f": 36.0,
+          "passing_raw": "4-4",
+          "margin_raw": "1.1",
           "field": {
             "matched": true,
-            "classified_finish_count": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank": 7,
-            "winner_time_gap_seconds": 1.7,
-            "passing_4c": 7,
+            "classified_finish_count": 14,
+            "last3f_observed_count": 14,
+            "last3f_rank": 11,
+            "winner_time_gap_seconds": 1.1,
+            "passing_4c": 4,
             "passing_4c_evidence": {
-              "value": 7,
+              "value": 4,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 7,
-              "database_flat_value": 8,
-              "past_horse_number": "3",
-              "corner_order_raw": "12,8(7,6)(2,5)(1,3)(10,9)-4-11",
+              "history_value": 4,
+              "database_flat_value": 5,
+              "past_horse_number": "10",
+              "corner_order_raw": "5-8,13(6,10)(2,4,14)12,3(1,11)9,7",
               "group": {
                 "horse_numbers": [
-                  1,
-                  3
+                  6,
+                  10
                 ],
-                "rank_min": 7,
-                "rank_max": 8,
+                "rank_min": 4,
+                "rank_max": 5,
                 "leader_horse_number": null
               },
               "database_difference": true,
@@ -1382,7 +1319,7 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202604030201",
+            "race_lap_key": "202601020402",
             "source_pace_code": "M",
             "race_lap_unknown_reason": ""
           },
@@ -1399,24 +1336,24 @@
           "flags": []
         },
         {
-          "race_id": "202604020602",
+          "race_id": "202601010605",
           "date": "2026-08-09",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
           "surface": "芝",
-          "distance": 1200.0,
-          "finish_raw": "8",
-          "finish": 8,
-          "last3f": 35.3,
-          "passing_raw": "8-8",
-          "margin_raw": "1.3",
+          "distance": 1500.0,
+          "finish_raw": "11",
+          "finish": 11,
+          "last3f": 37.2,
+          "passing_raw": "5-7-8",
+          "margin_raw": "2.6",
           "field": {
             "matched": true,
-            "classified_finish_count": 11,
-            "last3f_observed_count": 11,
-            "last3f_rank": 8,
-            "winner_time_gap_seconds": 1.3,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 11,
+            "winner_time_gap_seconds": 2.6,
             "passing_4c": 8,
             "passing_4c_evidence": {
               "value": 8,
@@ -1424,14 +1361,16 @@
               "source": "runner_history.passing",
               "history_value": 8,
               "database_flat_value": 8,
-              "past_horse_number": "11",
-              "corner_order_raw": "(*7,9)10,5(8,4)1,11,6=3-2",
+              "past_horse_number": "3",
+              "corner_order_raw": "11(10,13)-(8,12,6)9(3,4,7)5=1=2",
               "group": {
                 "horse_numbers": [
-                  11
+                  3,
+                  4,
+                  7
                 ],
                 "rank_min": 8,
-                "rank_max": 8,
+                "rank_max": 10,
                 "leader_horse_number": null
               },
               "database_difference": false,
@@ -1441,7 +1380,7 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202604020602",
+            "race_lap_key": "202601010605",
             "source_pace_code": "M",
             "race_lap_unknown_reason": ""
           },
@@ -1460,49 +1399,118 @@
       ]
     },
     {
-      "horse_id": "2024105732",
-      "horse_number": "11",
-      "horse_name": "ココビスケット",
+      "horse_id": "2024102642",
+      "horse_number": "13",
+      "horse_name": "ヴォルールドクール",
       "class_counts": {
         "新馬": 1
       },
       "past_races": [
         {
-          "race_id": "202605040806",
-          "date": "2026-10-24",
+          "race_id": "202604020303",
+          "date": "2026-08-01",
           "race_name": "2歳新馬",
           "race_class": "新馬",
           "race_class_source": "race_name",
-          "surface": "ダート",
+          "surface": "芝",
           "distance": 1400.0,
-          "finish_raw": "8",
-          "finish": 8,
-          "last3f": 37.2,
-          "passing_raw": "13-12",
+          "finish_raw": "11",
+          "finish": 11,
+          "last3f": 35.7,
+          "passing_raw": "9-9",
           "margin_raw": "2.0",
           "field": {
             "matched": true,
-            "classified_finish_count": 16,
-            "last3f_observed_count": 16,
-            "last3f_rank": 3,
+            "classified_finish_count": 18,
+            "last3f_observed_count": 18,
+            "last3f_rank": 14,
             "winner_time_gap_seconds": 2.0,
-            "passing_4c": 12,
+            "passing_4c": 9,
             "passing_4c_evidence": {
-              "value": 12,
+              "value": 9,
               "status": "history_within_group_range",
               "source": "runner_history.passing",
-              "history_value": 12,
-              "database_flat_value": 13,
-              "past_horse_number": "13",
-              "corner_order_raw": "11-7(3,14)(5,8,12)-6-4(2,10)(1,13,15)9=16",
+              "history_value": 9,
+              "database_flat_value": 9,
+              "past_horse_number": "7",
+              "corner_order_raw": "2,6,16(3,10)13,11,18,7(4,8,14)-12-15(5,17)(1,9)",
               "group": {
                 "horse_numbers": [
-                  1,
-                  13,
-                  15
+                  7
                 ],
-                "rank_min": 12,
-                "rank_max": 14,
+                "rank_min": 9,
+                "rank_max": 9,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202604020303",
+            "source_pace_code": "M",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024103376",
+      "horse_number": "14",
+      "horse_name": "タガノカハンカ",
+      "class_counts": {
+        "未勝利": 1,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202604020201",
+          "date": "2026-07-26",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1400.0,
+          "finish_raw": "9",
+          "finish": 9,
+          "last3f": 36.1,
+          "passing_raw": "3-3",
+          "margin_raw": "1.0",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 11,
+            "last3f_observed_count": 11,
+            "last3f_rank": 10,
+            "winner_time_gap_seconds": 1.0,
+            "passing_4c": 3,
+            "passing_4c_evidence": {
+              "value": 3,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 3,
+              "database_flat_value": 4,
+              "past_horse_number": "8",
+              "corner_order_raw": "1,6(5,8)7,4,10(3,9)11-2",
+              "group": {
+                "horse_numbers": [
+                  5,
+                  8
+                ],
+                "rank_min": 3,
+                "rank_max": 4,
                 "leader_horse_number": null
               },
               "database_difference": true,
@@ -1512,7 +1520,68 @@
             "comparison_conflicts": [],
             "pace_label": null,
             "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
-            "race_lap_key": "202605040806",
+            "race_lap_key": "202604020201",
+            "source_pace_code": "M",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202603020406",
+          "date": "2026-07-05",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "4",
+          "finish": 4,
+          "last3f": 36.6,
+          "passing_raw": "3-3",
+          "margin_raw": "0.3",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 13,
+            "last3f_observed_count": 13,
+            "last3f_rank": 10,
+            "winner_time_gap_seconds": 0.3,
+            "passing_4c": 3,
+            "passing_4c_evidence": {
+              "value": 3,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 3,
+              "database_flat_value": 3,
+              "past_horse_number": "13",
+              "corner_order_raw": "7,9(13,8,10)-12-5,4-(3,1)6=2-11",
+              "group": {
+                "horse_numbers": [
+                  13,
+                  8,
+                  10
+                ],
+                "rank_min": 3,
+                "rank_max": 5,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202603020406",
             "source_pace_code": "H",
             "race_lap_unknown_reason": ""
           },
@@ -1529,420 +1598,523 @@
           "flags": []
         }
       ]
+    },
+    {
+      "horse_id": "2024102979",
+      "horse_number": "15",
+      "horse_name": "マルモタワー",
+      "class_counts": {
+        "未勝利": 2,
+        "新馬": 1
+      },
+      "past_races": [
+        {
+          "race_id": "202604040202",
+          "date": "2026-10-18",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1200.0,
+          "finish_raw": "3",
+          "finish": 3,
+          "last3f": 38.4,
+          "passing_raw": "6-6",
+          "margin_raw": "0.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 15,
+            "last3f_observed_count": 15,
+            "last3f_rank": 5,
+            "winner_time_gap_seconds": 0.4,
+            "passing_4c": 6,
+            "passing_4c_evidence": {
+              "value": 6,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 6,
+              "database_flat_value": 6,
+              "past_horse_number": "7",
+              "corner_order_raw": "(*14,15)1(13,12)7(2,5)3-9(6,10)(8,11)=4",
+              "group": {
+                "horse_numbers": [
+                  7
+                ],
+                "rank_min": 6,
+                "rank_max": 6,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [
+              {
+                "comparison_key": "202604040202|2024101341|2024102979",
+                "horse_id": "2024101341",
+                "horse_name": "ドナビッグベン",
+                "current_horse_number": "5",
+                "past_horse_number": "1",
+                "finish_raw": "2",
+                "finish": 2,
+                "own_finish": 3,
+                "outcome": "後着",
+                "own_minus_opponent_seconds": 0.3
+              }
+            ],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202604040202",
+            "source_pace_code": "H",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202607020701",
+          "date": "2026-08-15",
+          "race_name": "2歳未勝利",
+          "race_class": "未勝利",
+          "race_class_source": "race_name",
+          "surface": "ダート",
+          "distance": 1400.0,
+          "finish_raw": "14",
+          "finish": 14,
+          "last3f": 42.4,
+          "passing_raw": "4-5",
+          "margin_raw": "3.0",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 16,
+            "last3f_observed_count": 16,
+            "last3f_rank": 15,
+            "winner_time_gap_seconds": 3.0,
+            "passing_4c": 5,
+            "passing_4c_evidence": {
+              "value": 5,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 5,
+              "database_flat_value": 5,
+              "past_horse_number": "3",
+              "corner_order_raw": "(*2,4)16,6(3,13)(14,15)(1,7)(8,11,10)5-12-9",
+              "group": {
+                "horse_numbers": [
+                  3,
+                  13
+                ],
+                "rank_min": 5,
+                "rank_max": 6,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202607020701",
+            "source_pace_code": "H",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        },
+        {
+          "race_id": "202610020705",
+          "date": "2026-07-18",
+          "race_name": "2歳新馬",
+          "race_class": "新馬",
+          "race_class_source": "race_name",
+          "surface": "芝",
+          "distance": 1200.0,
+          "finish_raw": "7",
+          "finish": 7,
+          "last3f": 38.5,
+          "passing_raw": "3-7",
+          "margin_raw": "3.4",
+          "field": {
+            "matched": true,
+            "classified_finish_count": 7,
+            "last3f_observed_count": 7,
+            "last3f_rank": 7,
+            "winner_time_gap_seconds": 3.4,
+            "passing_4c": 7,
+            "passing_4c_evidence": {
+              "value": 7,
+              "status": "history_within_group_range",
+              "source": "runner_history.passing",
+              "history_value": 7,
+              "database_flat_value": 7,
+              "past_horse_number": "6",
+              "corner_order_raw": "(*1,5)-3-(4,2)7,6",
+              "group": {
+                "horse_numbers": [
+                  6
+                ],
+                "rank_min": 7,
+                "rank_max": 7,
+                "leader_horse_number": null
+              },
+              "database_difference": false,
+              "unknown_reason": ""
+            },
+            "current_opponents": [],
+            "comparison_conflicts": [],
+            "pace_label": null,
+            "pace_unknown_reason": "ラップ接続済み。ペース判定・展開有利不利は未判定",
+            "race_lap_key": "202610020705",
+            "source_pace_code": "H",
+            "race_lap_unknown_reason": ""
+          },
+          "opponent_strength": null,
+          "pace_advantage": null,
+          "trouble": null,
+          "issue_resolution": null,
+          "unknowns": [
+            "相手の実力",
+            "展開の有利不利",
+            "不利の有無",
+            "課題克服"
+          ],
+          "flags": []
+        }
+      ]
+    },
+    {
+      "horse_id": "2024105093",
+      "horse_number": "16",
+      "horse_name": "スマイルハープ",
+      "class_counts": {},
+      "past_races": []
     }
   ],
   "lap_connection_schema_version": "race_lap_connection_v1",
   "lap_connection": {
     "status": "connected",
     "unknown_reason": "",
-    "invalid_races": {}
+    "invalid_races": {
+      "202603020801": "ラップ取得失敗または照合・検証不成立"
+    }
   },
   "race_laps": {
-    "202601010805": {
-      "race_id": "202601010805",
-      "race_date": "2026-08-16",
-      "distance": 1800,
-      "surface": "芝",
+    "202601010201": {
+      "race_id": "202601010201",
+      "race_date": "2026-07-26",
+      "distance": 1000,
+      "surface": "ダート",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 12.9,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.7,
-          "lap_seconds": 11.8
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 37.4,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 50.3,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 63.1,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 75.9,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 88.3,
+          "cumulative_seconds": 12.4,
           "lap_seconds": 12.4
         },
         {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 100.0,
-          "lap_seconds": 11.7
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 111.7,
-          "lap_seconds": 11.7
-        }
-      ],
-      "winner_time_seconds": 111.7,
-      "source_pace_code": "S",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202601010805",
-      "fetched_at": "2026-11-07T21:43:26.810317+09:00",
-      "html_sha256": "d272b7e3518c941d7d501b6e9f21602506d2405b07664d58cb5bd3ee43a08428"
-    },
-    "202601020303": {
-      "race_id": "202601020303",
-      "race_date": "2026-08-29",
-      "distance": 1800,
-      "surface": "芝",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.8,
-          "lap_seconds": 12.8
-        },
-        {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 24.8,
-          "lap_seconds": 12.0
+          "cumulative_seconds": 23.4,
+          "lap_seconds": 11.0
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 37.6,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 35.1,
+          "lap_seconds": 11.7
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 50.6,
-          "lap_seconds": 13.0
+          "cumulative_seconds": 47.2,
+          "lap_seconds": 12.1
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 63.7,
-          "lap_seconds": 13.1
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 76.3,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 88.5,
-          "lap_seconds": 12.2
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 100.5,
-          "lap_seconds": 12.0
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 112.5,
-          "lap_seconds": 12.0
+          "cumulative_seconds": 59.6,
+          "lap_seconds": 12.4
         }
       ],
-      "winner_time_seconds": 112.5,
-      "source_pace_code": "S",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202601020303",
-      "fetched_at": "2026-11-07T21:43:28.266500+09:00",
-      "html_sha256": "20f87afafb86a0116d4a35e4cf41b24469b0bd699abdab9765b8ac0dde2a6ee7"
+      "winner_time_seconds": 59.6,
+      "source_pace_code": "M",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202601010201",
+      "fetched_at": "2026-11-08T08:52:03.030741+09:00",
+      "html_sha256": "b488f49687a47268cd0006b3255a094ba64a8002d2afc303df6011aeb9e22a84"
     },
-    "202601020305": {
-      "race_id": "202601020305",
-      "race_date": "2026-08-29",
-      "distance": 1700,
-      "surface": "ダート",
+    "202601010605": {
+      "race_id": "202601010605",
+      "race_date": "2026-08-09",
+      "distance": 1500,
+      "surface": "芝",
       "segments": [
         {
           "distance_m": 100,
           "segment_distance_m": 100,
-          "cumulative_seconds": 7.1,
-          "lap_seconds": 7.1
+          "cumulative_seconds": 6.8,
+          "lap_seconds": 6.8
         },
         {
           "distance_m": 300,
           "segment_distance_m": 200,
-          "cumulative_seconds": 18.5,
-          "lap_seconds": 11.4
+          "cumulative_seconds": 18.0,
+          "lap_seconds": 11.2
         },
         {
           "distance_m": 500,
           "segment_distance_m": 200,
-          "cumulative_seconds": 31.3,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 29.9,
+          "lap_seconds": 11.9
         },
         {
           "distance_m": 700,
           "segment_distance_m": 200,
-          "cumulative_seconds": 44.3,
-          "lap_seconds": 13.0
+          "cumulative_seconds": 42.3,
+          "lap_seconds": 12.4
         },
         {
           "distance_m": 900,
           "segment_distance_m": 200,
-          "cumulative_seconds": 56.8,
-          "lap_seconds": 12.5
+          "cumulative_seconds": 54.0,
+          "lap_seconds": 11.7
         },
         {
           "distance_m": 1100,
           "segment_distance_m": 200,
-          "cumulative_seconds": 68.9,
-          "lap_seconds": 12.1
+          "cumulative_seconds": 65.7,
+          "lap_seconds": 11.7
         },
         {
           "distance_m": 1300,
           "segment_distance_m": 200,
-          "cumulative_seconds": 81.7,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 77.2,
+          "lap_seconds": 11.5
         },
         {
           "distance_m": 1500,
           "segment_distance_m": 200,
-          "cumulative_seconds": 94.7,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 1700,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 108.1,
-          "lap_seconds": 13.4
+          "cumulative_seconds": 89.2,
+          "lap_seconds": 12.0
         }
       ],
-      "winner_time_seconds": 108.1,
-      "source_pace_code": "H",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202601020305",
-      "fetched_at": "2026-11-07T21:43:29.611755+09:00",
-      "html_sha256": "9e2c7ff1c79b95dbd3d52a160b023bc757a18d473633d6dc542a4d6e2dec59a2"
+      "winner_time_seconds": 89.2,
+      "source_pace_code": "M",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202601010605",
+      "fetched_at": "2026-11-08T08:52:04.454218+09:00",
+      "html_sha256": "62cf93ea5fa820c5be6509d1a3b7dd760dbc5e60476936e7093b218a6ed17384"
     },
-    "202603020305": {
-      "race_id": "202603020305",
-      "race_date": "2026-07-04",
-      "distance": 1800,
+    "202601020402": {
+      "race_id": "202601020402",
+      "race_date": "2026-08-30",
+      "distance": 1200,
       "surface": "芝",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 12.8,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 24.3,
-          "lap_seconds": 11.5
+          "cumulative_seconds": 23.3,
+          "lap_seconds": 11.1
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 36.3,
-          "lap_seconds": 12.0
+          "cumulative_seconds": 34.6,
+          "lap_seconds": 11.3
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 48.6,
-          "lap_seconds": 12.3
+          "cumulative_seconds": 46.1,
+          "lap_seconds": 11.5
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 60.9,
-          "lap_seconds": 12.3
+          "cumulative_seconds": 57.9,
+          "lap_seconds": 11.8
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 73.2,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 85.5,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 97.5,
-          "lap_seconds": 12.0
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 109.0,
-          "lap_seconds": 11.5
+          "cumulative_seconds": 70.1,
+          "lap_seconds": 12.2
         }
       ],
-      "winner_time_seconds": 109.0,
+      "winner_time_seconds": 70.1,
       "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020305",
-      "fetched_at": "2026-11-07T21:43:30.908299+09:00",
-      "html_sha256": "d416b675710d7e4d1c2a929889daca5c20a9b468cc4940c406e39619e78c98c5"
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202601020402",
+      "fetched_at": "2026-11-08T08:52:05.665045+09:00",
+      "html_sha256": "f8961034b223376dc113d48399f736ac1e58d3cd5dce7a36a52d43acd461196c"
     },
-    "202603020503": {
-      "race_id": "202603020503",
-      "race_date": "2026-07-11",
-      "distance": 1800,
-      "surface": "芝",
+    "202602010306": {
+      "race_id": "202602010306",
+      "race_date": "2026-06-20",
+      "distance": 1000,
+      "surface": "ダート",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 12.5,
-          "lap_seconds": 12.5
+          "cumulative_seconds": 12.6,
+          "lap_seconds": 12.6
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
           "cumulative_seconds": 23.8,
-          "lap_seconds": 11.3
+          "lap_seconds": 11.2
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 35.2,
-          "lap_seconds": 11.4
+          "cumulative_seconds": 35.8,
+          "lap_seconds": 12.0
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
           "cumulative_seconds": 47.5,
-          "lap_seconds": 12.3
+          "lap_seconds": 11.7
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 59.9,
-          "lap_seconds": 12.4
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 72.0,
-          "lap_seconds": 12.1
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 84.1,
-          "lap_seconds": 12.1
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 96.2,
-          "lap_seconds": 12.1
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 107.6,
-          "lap_seconds": 11.4
+          "cumulative_seconds": 59.2,
+          "lap_seconds": 11.7
         }
       ],
-      "winner_time_seconds": 107.6,
+      "winner_time_seconds": 59.2,
       "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020503",
-      "fetched_at": "2026-11-07T21:43:32.356711+09:00",
-      "html_sha256": "9dfc0d6f54b792cccc1c1f15aa041241e54e02e0cdd0dedba38f9bbd6b9a2908"
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202602010306",
+      "fetched_at": "2026-11-08T08:52:06.875175+09:00",
+      "html_sha256": "b82f6da350f380a5ce74da6781e0baf3ce6e71a70c31f7b8c49c05343d46d6c9"
     },
-    "202604020302": {
-      "race_id": "202604020302",
-      "race_date": "2026-08-01",
-      "distance": 1800,
+    "202602010905": {
+      "race_id": "202602010905",
+      "race_date": "2026-07-11",
+      "distance": 1200,
       "surface": "芝",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 13.1,
-          "lap_seconds": 13.1
+          "cumulative_seconds": 12.3,
+          "lap_seconds": 12.3
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 25.2,
-          "lap_seconds": 12.1
+          "cumulative_seconds": 23.5,
+          "lap_seconds": 11.2
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 37.6,
-          "lap_seconds": 12.4
+          "cumulative_seconds": 34.7,
+          "lap_seconds": 11.2
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 50.5,
-          "lap_seconds": 12.9
+          "cumulative_seconds": 46.3,
+          "lap_seconds": 11.6
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 63.6,
-          "lap_seconds": 13.1
+          "cumulative_seconds": 57.5,
+          "lap_seconds": 11.2
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 75.8,
-          "lap_seconds": 12.2
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 86.8,
-          "lap_seconds": 11.0
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 97.7,
-          "lap_seconds": 10.9
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 109.2,
-          "lap_seconds": 11.5
+          "cumulative_seconds": 69.3,
+          "lap_seconds": 11.8
         }
       ],
-      "winner_time_seconds": 109.2,
-      "source_pace_code": "S",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020302",
-      "fetched_at": "2026-11-07T21:43:33.706568+09:00",
-      "html_sha256": "bcef96a97eda970861ae0b8c7867ae7ba93525c5ec99bc61baf6517d640dd0e1"
+      "winner_time_seconds": 69.3,
+      "source_pace_code": "M",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202602010905",
+      "fetched_at": "2026-11-08T08:52:08.440257+09:00",
+      "html_sha256": "32389dc39922990e599e96de6d3101ceae8c4ce083ffb1815e1b808e8f178b70"
     },
-    "202604020602": {
-      "race_id": "202604020602",
-      "race_date": "2026-08-09",
+    "202603020203": {
+      "race_id": "202603020203",
+      "race_date": "2026-06-28",
+      "distance": 1200,
+      "surface": "芝",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.1,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.9,
+          "lap_seconds": 10.8
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 33.7,
+          "lap_seconds": 10.8
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 44.9,
+          "lap_seconds": 11.2
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 56.4,
+          "lap_seconds": 11.5
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 68.4,
+          "lap_seconds": 12.0
+        }
+      ],
+      "winner_time_seconds": 68.4,
+      "source_pace_code": "M",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020203",
+      "fetched_at": "2026-11-08T08:52:10.143492+09:00",
+      "html_sha256": "4d2cbaee6395a05627fc05b15f0a5b4b5848f90f90c09adaef75f1f5249a2210"
+    },
+    "202603020204": {
+      "race_id": "202603020204",
+      "race_date": "2026-06-28",
       "distance": 1200,
       "surface": "芝",
       "segments": [
@@ -1961,155 +2133,88 @@
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 34.8,
-          "lap_seconds": 11.6
+          "cumulative_seconds": 34.5,
+          "lap_seconds": 11.3
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 46.5,
-          "lap_seconds": 11.7
+          "cumulative_seconds": 45.9,
+          "lap_seconds": 11.4
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 58.1,
-          "lap_seconds": 11.6
+          "cumulative_seconds": 57.3,
+          "lap_seconds": 11.4
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 69.5,
-          "lap_seconds": 11.4
+          "cumulative_seconds": 68.4,
+          "lap_seconds": 11.1
         }
       ],
-      "winner_time_seconds": 69.5,
+      "winner_time_seconds": 68.4,
       "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020602",
-      "fetched_at": "2026-11-07T21:43:35.267932+09:00",
-      "html_sha256": "208e4ccafe07b3f36efca927fadb467ec64e2bc8f7a13d9d58a413e2d9d3ab19"
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020204",
+      "fetched_at": "2026-11-08T08:52:11.698127+09:00",
+      "html_sha256": "9035021f43b0db1554debc9802d962d6fee57a918e29e7bd621a44e60d35073b"
     },
-    "202604030201": {
-      "race_id": "202604030201",
-      "race_date": "2026-08-23",
-      "distance": 1400,
+    "202603020406": {
+      "race_id": "202603020406",
+      "race_date": "2026-07-05",
+      "distance": 1200,
       "surface": "芝",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 12.5,
-          "lap_seconds": 12.5
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 23.2,
-          "lap_seconds": 10.7
+          "cumulative_seconds": 22.6,
+          "lap_seconds": 10.4
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 34.8,
-          "lap_seconds": 11.6
+          "cumulative_seconds": 33.4,
+          "lap_seconds": 10.8
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 46.9,
-          "lap_seconds": 12.1
+          "cumulative_seconds": 45.2,
+          "lap_seconds": 11.8
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 58.9,
-          "lap_seconds": 12.0
+          "cumulative_seconds": 57.6,
+          "lap_seconds": 12.4
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
           "cumulative_seconds": 70.2,
-          "lap_seconds": 11.3
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 81.7,
-          "lap_seconds": 11.5
-        }
-      ],
-      "winner_time_seconds": 81.7,
-      "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604030201",
-      "fetched_at": "2026-11-07T14:02:57.848756+09:00",
-      "html_sha256": "9dfa93452295f053af2bde82d25e69d86cc9d04bc546b1bd71c435e52d659730"
-    },
-    "202604040101": {
-      "race_id": "202604040101",
-      "race_date": "2026-10-17",
-      "distance": 1600,
-      "surface": "芝",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.5,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 23.2,
-          "lap_seconds": 10.7
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 35.1,
-          "lap_seconds": 11.9
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 47.6,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 60.2,
           "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 71.8,
-          "lap_seconds": 11.6
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 82.8,
-          "lap_seconds": 11.0
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 94.5,
-          "lap_seconds": 11.7
         }
       ],
-      "winner_time_seconds": 94.5,
-      "source_pace_code": "S",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040101",
-      "fetched_at": "2026-11-07T21:43:37.005615+09:00",
-      "html_sha256": "bfcd1b2040f78d1a512a95f875df8154c950a37ad12ad7ff1975a4890b0612a3"
+      "winner_time_seconds": 70.2,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020406",
+      "fetched_at": "2026-11-08T08:52:13.198315+09:00",
+      "html_sha256": "92e90b2c80b82f6016aa46b12e8681ddfb9edf22879e1d427a569f0bbd60b845"
     },
-    "202604040102": {
-      "race_id": "202604040102",
-      "race_date": "2026-10-17",
-      "distance": 1800,
-      "surface": "ダート",
+    "202604020201": {
+      "race_id": "202604020201",
+      "race_date": "2026-07-26",
+      "distance": 1400,
+      "surface": "芝",
       "segments": [
         {
           "distance_m": 200,
@@ -2120,190 +2225,154 @@
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 24.3,
-          "lap_seconds": 11.7
+          "cumulative_seconds": 23.1,
+          "lap_seconds": 10.5
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 37.1,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 34.6,
+          "lap_seconds": 11.5
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 50.4,
-          "lap_seconds": 13.3
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 63.1,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 75.7,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 88.8,
-          "lap_seconds": 13.1
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 102.1,
-          "lap_seconds": 13.3
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 115.1,
-          "lap_seconds": 13.0
-        }
-      ],
-      "winner_time_seconds": 115.1,
-      "source_pace_code": "H",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040102",
-      "fetched_at": "2026-11-07T21:43:38.358329+09:00",
-      "html_sha256": "f4d74a7b478907cc0c54df8e8afeece75e8543b1b79d5f2f8712342e33ad298a"
-    },
-    "202604040203": {
-      "race_id": "202604040203",
-      "race_date": "2026-10-18",
-      "distance": 1800,
-      "surface": "芝",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.7,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.1,
-          "lap_seconds": 11.4
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 35.9,
-          "lap_seconds": 11.8
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 48.2,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 60.8,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 72.9,
-          "lap_seconds": 12.1
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 84.4,
-          "lap_seconds": 11.5
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 95.9,
-          "lap_seconds": 11.5
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 107.7,
-          "lap_seconds": 11.8
-        }
-      ],
-      "winner_time_seconds": 107.7,
-      "source_pace_code": "S",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040203",
-      "fetched_at": "2026-11-07T21:43:39.932159+09:00",
-      "html_sha256": "ec16bedb678d61d2dab124597491366945fc33a448c61d7b07cc67b5b5a47f08"
-    },
-    "202605030405": {
-      "race_id": "202605030405",
-      "race_date": "2026-06-14",
-      "distance": 1600,
-      "surface": "芝",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.8,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.7,
+          "cumulative_seconds": 46.5,
           "lap_seconds": 11.9
         },
         {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 36.8,
-          "lap_seconds": 12.1
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 49.3,
-          "lap_seconds": 12.5
-        },
-        {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 61.7,
-          "lap_seconds": 12.4
+          "cumulative_seconds": 58.4,
+          "lap_seconds": 11.9
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 73.4,
-          "lap_seconds": 11.7
+          "cumulative_seconds": 70.2,
+          "lap_seconds": 11.8
         },
         {
           "distance_m": 1400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 84.5,
-          "lap_seconds": 11.1
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 95.8,
-          "lap_seconds": 11.3
+          "cumulative_seconds": 82.0,
+          "lap_seconds": 11.8
         }
       ],
-      "winner_time_seconds": 95.8,
-      "source_pace_code": "S",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605030405",
-      "fetched_at": "2026-11-07T21:43:41.232105+09:00",
-      "html_sha256": "1afdf070d0f1701c12bc842d355b0ebe2083624cfd7089213b8b1992a91239a8"
+      "winner_time_seconds": 82.0,
+      "source_pace_code": "M",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020201",
+      "fetched_at": "2026-11-08T08:52:17.308620+09:00",
+      "html_sha256": "23fdbd32f42ec92c828cf0f89bea13263b02ed85b2fcaf37066054abdf7240e4"
     },
-    "202605040603": {
-      "race_id": "202605040603",
+    "202604020303": {
+      "race_id": "202604020303",
+      "race_date": "2026-08-01",
+      "distance": 1400,
+      "surface": "芝",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.6,
+          "lap_seconds": 12.6
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.6,
+          "lap_seconds": 11.0
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.0,
+          "lap_seconds": 11.4
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.7,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.9,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 70.5,
+          "lap_seconds": 11.6
+        },
+        {
+          "distance_m": 1400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 81.6,
+          "lap_seconds": 11.1
+        }
+      ],
+      "winner_time_seconds": 81.6,
+      "source_pace_code": "M",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020303",
+      "fetched_at": "2026-11-08T08:52:18.601709+09:00",
+      "html_sha256": "bfb88a6df3e281efe912f6f2b9977dff8c6a944d274ee3172b7fa6dc25ab233a"
+    },
+    "202604020803": {
+      "race_id": "202604020803",
+      "race_date": "2026-08-16",
+      "distance": 1200,
+      "surface": "ダート",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.1,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.9,
+          "lap_seconds": 10.8
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.2,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.3,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.9,
+          "lap_seconds": 12.6
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 72.3,
+          "lap_seconds": 13.4
+        }
+      ],
+      "winner_time_seconds": 72.3,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020803",
+      "fetched_at": "2026-11-08T08:52:20.167398+09:00",
+      "html_sha256": "b97808973a369c3a7f6e49931aa2e8f618a9494dd01b9308c2715b94d88d92c1"
+    },
+    "202604040105": {
+      "race_id": "202604040105",
       "race_date": "2026-10-17",
-      "distance": 1600,
+      "distance": 1200,
       "surface": "ダート",
       "segments": [
         {
@@ -2315,178 +2384,362 @@
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 23.6,
-          "lap_seconds": 11.4
+          "cumulative_seconds": 23.4,
+          "lap_seconds": 11.2
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 35.7,
-          "lap_seconds": 12.1
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 48.4,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 61.2,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 73.6,
-          "lap_seconds": 12.4
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 85.7,
-          "lap_seconds": 12.1
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 97.8,
-          "lap_seconds": 12.1
-        }
-      ],
-      "winner_time_seconds": 97.8,
-      "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605040603",
-      "fetched_at": "2026-11-07T21:43:43.142300+09:00",
-      "html_sha256": "b4c05a254e77ee128b6167b9e1ecf1e1b7ad3b380f7fcd1a443688bc89fba1d1"
-    },
-    "202605040704": {
-      "race_id": "202605040704",
-      "race_date": "2026-10-18",
-      "distance": 1600,
-      "surface": "ダート",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.3,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 23.1,
-          "lap_seconds": 10.8
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 35.4,
-          "lap_seconds": 12.3
+          "cumulative_seconds": 35.2,
+          "lap_seconds": 11.8
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
           "cumulative_seconds": 48.0,
-          "lap_seconds": 12.6
+          "lap_seconds": 12.8
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 60.8,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 60.6,
+          "lap_seconds": 12.6
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 73.4,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 85.7,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 97.7,
-          "lap_seconds": 12.0
+          "cumulative_seconds": 73.3,
+          "lap_seconds": 12.7
         }
       ],
-      "winner_time_seconds": 97.7,
-      "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605040704",
-      "fetched_at": "2026-11-07T21:43:44.451060+09:00",
-      "html_sha256": "42ed46a4dbca25ca1471374042ce8c65447482491103e4b5e30343134f268187"
+      "winner_time_seconds": 73.3,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040105",
+      "fetched_at": "2026-11-08T08:52:21.604102+09:00",
+      "html_sha256": "b92f32dff74f205ea24636fbd639c8724513e0583581606e1e3f93f80d18f39c"
     },
-    "202605040804": {
-      "race_id": "202605040804",
-      "race_date": "2026-10-24",
-      "distance": 1600,
+    "202604040202": {
+      "race_id": "202604040202",
+      "race_date": "2026-10-18",
+      "distance": 1200,
       "surface": "ダート",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 13.0,
-          "lap_seconds": 13.0
+          "cumulative_seconds": 11.8,
+          "lap_seconds": 11.8
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 24.4,
-          "lap_seconds": 11.4
+          "cumulative_seconds": 22.7,
+          "lap_seconds": 10.9
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 36.6,
-          "lap_seconds": 12.2
+          "cumulative_seconds": 34.5,
+          "lap_seconds": 11.8
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 49.2,
-          "lap_seconds": 12.6
+          "cumulative_seconds": 47.4,
+          "lap_seconds": 12.9
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 62.3,
+          "cumulative_seconds": 60.5,
           "lap_seconds": 13.1
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 75.1,
+          "cumulative_seconds": 73.1,
+          "lap_seconds": 12.6
+        }
+      ],
+      "winner_time_seconds": 73.1,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040202",
+      "fetched_at": "2026-11-08T08:52:22.845064+09:00",
+      "html_sha256": "bc73e5d3e7b4c501569997d72523e06439489fe8ac4052e99fbff53cb62b0452"
+    },
+    "202605030104": {
+      "race_id": "202605030104",
+      "race_date": "2026-06-06",
+      "distance": 1400,
+      "surface": "芝",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.8,
           "lap_seconds": 12.8
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.4,
+          "lap_seconds": 10.6
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.1,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 47.5,
+          "lap_seconds": 12.4
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 59.3,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 70.7,
+          "lap_seconds": 11.4
         },
         {
           "distance_m": 1400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 87.5,
+          "cumulative_seconds": 82.2,
+          "lap_seconds": 11.5
+        }
+      ],
+      "winner_time_seconds": 82.2,
+      "source_pace_code": "S",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605030104",
+      "fetched_at": "2026-11-08T08:52:24.159848+09:00",
+      "html_sha256": "7ec5c1379b2af104fae75c87486c96c8457fbc9cbb0314276052fc03884e52d8"
+    },
+    "202605040506": {
+      "race_id": "202605040506",
+      "race_date": "2026-10-12",
+      "distance": 1300,
+      "surface": "ダート",
+      "segments": [
+        {
+          "distance_m": 100,
+          "segment_distance_m": 100,
+          "cumulative_seconds": 7.3,
+          "lap_seconds": 7.3
+        },
+        {
+          "distance_m": 300,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 18.6,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 500,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 30.4,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 700,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 43.4,
+          "lap_seconds": 13.0
+        },
+        {
+          "distance_m": 900,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 56.4,
+          "lap_seconds": 13.0
+        },
+        {
+          "distance_m": 1100,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 68.3,
+          "lap_seconds": 11.9
+        },
+        {
+          "distance_m": 1300,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 80.6,
+          "lap_seconds": 12.3
+        }
+      ],
+      "winner_time_seconds": 80.6,
+      "source_pace_code": "M",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605040506",
+      "fetched_at": "2026-11-08T08:52:25.547886+09:00",
+      "html_sha256": "87e92a34383655dabdc32da024859ad81c65ba17bd7720f6b9d31874088d7408"
+    },
+    "202606040305": {
+      "race_id": "202606040305",
+      "race_date": "2026-09-12",
+      "distance": 1600,
+      "surface": "芝",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 13.3,
+          "lap_seconds": 13.3
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 26.2,
+          "lap_seconds": 12.9
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 38.9,
+          "lap_seconds": 12.7
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 51.3,
           "lap_seconds": 12.4
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 63.7,
+          "lap_seconds": 12.4
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 75.6,
+          "lap_seconds": 11.9
+        },
+        {
+          "distance_m": 1400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 87.0,
+          "lap_seconds": 11.4
         },
         {
           "distance_m": 1600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 99.7,
-          "lap_seconds": 12.2
+          "cumulative_seconds": 98.6,
+          "lap_seconds": 11.6
         }
       ],
-      "winner_time_seconds": 99.7,
-      "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605040804",
-      "fetched_at": "2026-11-07T21:43:46.205575+09:00",
-      "html_sha256": "9ef81515829713257e2e4f6a88062df3f452800d703ae2374d0995491e4eb6f6"
+      "winner_time_seconds": 98.6,
+      "source_pace_code": "S",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040305",
+      "fetched_at": "2026-11-08T08:52:26.772542+09:00",
+      "html_sha256": "ea1e17cd918917b7d172e4c3a180e0c3f50fafe4b4cdcdcb6532c7ea37205b6c"
     },
-    "202605040806": {
-      "race_id": "202605040806",
-      "race_date": "2026-10-24",
-      "distance": 1400,
+    "202606040504": {
+      "race_id": "202606040504",
+      "race_date": "2026-09-19",
+      "distance": 1200,
+      "surface": "芝",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.5,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.6,
+          "lap_seconds": 11.1
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.2,
+          "lap_seconds": 11.6
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.7,
+          "lap_seconds": 11.5
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.1,
+          "lap_seconds": 11.4
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 69.6,
+          "lap_seconds": 11.5
+        }
+      ],
+      "winner_time_seconds": 69.6,
+      "source_pace_code": "M",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040504",
+      "fetched_at": "2026-11-08T08:52:28.085042+09:00",
+      "html_sha256": "9dbd0269b7b184f19993ac2066bfb2c85fbf144d802bb717832188ceadff022a"
+    },
+    "202606040703": {
+      "race_id": "202606040703",
+      "race_date": "2026-09-22",
+      "distance": 1200,
+      "surface": "ダート",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.8,
+          "lap_seconds": 10.6
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.3,
+          "lap_seconds": 11.5
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.7,
+          "lap_seconds": 12.4
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 59.0,
+          "lap_seconds": 12.3
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 72.1,
+          "lap_seconds": 13.1
+        }
+      ],
+      "winner_time_seconds": 72.1,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040703",
+      "fetched_at": "2026-11-08T08:52:29.440238+09:00",
+      "html_sha256": "c7db9c75c9bbdc18c0bd423aac69ad08cc4159f798ecd64edbb1dcf6e61ed1f0"
+    },
+    "202607020101": {
+      "race_id": "202607020101",
+      "race_date": "2026-07-25",
+      "distance": 1200,
       "surface": "ダート",
       "segments": [
         {
@@ -2498,312 +2751,99 @@
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 23.8,
-          "lap_seconds": 11.3
+          "cumulative_seconds": 23.5,
+          "lap_seconds": 11.0
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 35.6,
-          "lap_seconds": 11.8
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 47.9,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 60.1,
+          "cumulative_seconds": 35.7,
           "lap_seconds": 12.2
         },
         {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 72.4,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 85.2,
-          "lap_seconds": 12.8
-        }
-      ],
-      "winner_time_seconds": 85.2,
-      "source_pace_code": "H",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605040806",
-      "fetched_at": "2026-11-07T21:43:47.935872+09:00",
-      "html_sha256": "febb3d7be6f438287439f57b66a51a2e94fdca1d5430e1a4adb0459545612faa"
-    },
-    "202605040905": {
-      "race_id": "202605040905",
-      "race_date": "2026-10-25",
-      "distance": 1800,
-      "surface": "芝",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 13.1,
-          "lap_seconds": 13.1
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.4,
-          "lap_seconds": 11.3
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 36.7,
-          "lap_seconds": 12.3
-        },
-        {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 49.7,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 63.0,
-          "lap_seconds": 13.3
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 76.3,
-          "lap_seconds": 13.3
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 88.3,
-          "lap_seconds": 12.0
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 99.8,
-          "lap_seconds": 11.5
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 111.1,
-          "lap_seconds": 11.3
-        }
-      ],
-      "winner_time_seconds": 111.1,
-      "source_pace_code": "S",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605040905",
-      "fetched_at": "2026-11-07T21:43:49.240897+09:00",
-      "html_sha256": "74e88c022376eec9910a96567373c2e3620e8468dc1990064666acf323317052"
-    },
-    "202606040301": {
-      "race_id": "202606040301",
-      "race_date": "2026-09-12",
-      "distance": 1800,
-      "surface": "ダート",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.9,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.9,
-          "lap_seconds": 12.0
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 37.6,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 50.1,
+          "cumulative_seconds": 48.2,
           "lap_seconds": 12.5
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 62.3,
+          "cumulative_seconds": 60.4,
           "lap_seconds": 12.2
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 74.5,
-          "lap_seconds": 12.2
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 87.1,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 100.4,
-          "lap_seconds": 13.3
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 114.2,
-          "lap_seconds": 13.8
+          "cumulative_seconds": 73.6,
+          "lap_seconds": 13.2
         }
       ],
-      "winner_time_seconds": 114.2,
+      "winner_time_seconds": 73.6,
       "source_pace_code": "H",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040301",
-      "fetched_at": "2026-11-07T21:43:50.851941+09:00",
-      "html_sha256": "9c7662182151e63dcace93a28a4aa6ec894495f44e8f252e9ecb086f6a626e7b"
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202607020101",
+      "fetched_at": "2026-11-08T08:52:30.753283+09:00",
+      "html_sha256": "d6970917103082114d94af26b6211516a1f319efd590f514727a92669cbf5680"
     },
-    "202606040503": {
-      "race_id": "202606040503",
-      "race_date": "2026-09-19",
-      "distance": 1600,
-      "surface": "芝",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.7,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.0,
-          "lap_seconds": 11.3
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 35.8,
-          "lap_seconds": 11.8
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 47.6,
-          "lap_seconds": 11.8
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 59.5,
-          "lap_seconds": 11.9
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 71.2,
-          "lap_seconds": 11.7
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 83.2,
-          "lap_seconds": 12.0
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 94.6,
-          "lap_seconds": 11.4
-        }
-      ],
-      "winner_time_seconds": 94.6,
-      "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040503",
-      "fetched_at": "2026-11-07T21:43:52.595430+09:00",
-      "html_sha256": "cc91d51e0e3ecf2957aa4467cee3feb012af377c4d2bdfa5176c814057ac49f5"
-    },
-    "202606040803": {
-      "race_id": "202606040803",
-      "race_date": "2026-09-26",
-      "distance": 1800,
+    "202607020701": {
+      "race_id": "202607020701",
+      "race_date": "2026-08-15",
+      "distance": 1400,
       "surface": "ダート",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 13.0,
-          "lap_seconds": 13.0
+          "cumulative_seconds": 12.0,
+          "lap_seconds": 12.0
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 25.1,
-          "lap_seconds": 12.1
+          "cumulative_seconds": 22.7,
+          "lap_seconds": 10.7
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 38.9,
-          "lap_seconds": 13.8
+          "cumulative_seconds": 34.0,
+          "lap_seconds": 11.3
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 52.6,
-          "lap_seconds": 13.7
+          "cumulative_seconds": 46.4,
+          "lap_seconds": 12.4
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 65.3,
-          "lap_seconds": 12.7
+          "cumulative_seconds": 59.3,
+          "lap_seconds": 12.9
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 77.5,
-          "lap_seconds": 12.2
+          "cumulative_seconds": 72.4,
+          "lap_seconds": 13.1
         },
         {
           "distance_m": 1400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 90.2,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 103.1,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 115.5,
-          "lap_seconds": 12.4
+          "cumulative_seconds": 86.1,
+          "lap_seconds": 13.7
         }
       ],
-      "winner_time_seconds": 115.5,
-      "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040803",
-      "fetched_at": "2026-11-07T21:43:54.183404+09:00",
-      "html_sha256": "f57bb9931c79469cafec695812b7149c437b4e2d9b3f60e4d7bbdbf554ed35ae"
+      "winner_time_seconds": 86.1,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202607020701",
+      "fetched_at": "2026-11-08T08:52:32.061365+09:00",
+      "html_sha256": "260e34e83cb99e7e25bd1180898763395a01a394e56eddbb6162c621dd5080e8"
     },
-    "202608040502": {
-      "race_id": "202608040502",
-      "race_date": "2026-10-12",
-      "distance": 1800,
+    "202609040602": {
+      "race_id": "202609040602",
+      "race_date": "2026-09-20",
+      "distance": 1200,
       "surface": "ダート",
       "segments": [
         {
@@ -2815,191 +2855,137 @@
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 24.3,
-          "lap_seconds": 11.9
+          "cumulative_seconds": 23.2,
+          "lap_seconds": 10.8
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 37.8,
-          "lap_seconds": 13.5
+          "cumulative_seconds": 35.2,
+          "lap_seconds": 12.0
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 51.0,
-          "lap_seconds": 13.2
+          "cumulative_seconds": 47.4,
+          "lap_seconds": 12.2
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 64.2,
-          "lap_seconds": 13.2
+          "cumulative_seconds": 60.1,
+          "lap_seconds": 12.7
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 77.1,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 90.0,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 102.3,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 114.6,
-          "lap_seconds": 12.3
-        }
-      ],
-      "winner_time_seconds": 114.6,
-      "source_pace_code": "S",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040502",
-      "fetched_at": "2026-11-07T21:43:56.095262+09:00",
-      "html_sha256": "61fca3027226141fc3fed166f505c5a824da31c71cb5b31447b8f02c560ae81d"
-    },
-    "202609040501": {
-      "race_id": "202609040501",
-      "race_date": "2026-09-19",
-      "distance": 1800,
-      "surface": "ダート",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.8,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.4,
-          "lap_seconds": 11.6
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 38.9,
-          "lap_seconds": 14.5
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 52.1,
-          "lap_seconds": 13.2
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 65.0,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 77.5,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 90.0,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 102.9,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 115.5,
-          "lap_seconds": 12.6
-        }
-      ],
-      "winner_time_seconds": 115.5,
-      "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202609040501",
-      "fetched_at": "2026-11-07T21:43:58.001368+09:00",
-      "html_sha256": "0b2227d6ef788ea20a2fd7a082e4c63c15156e94d9c1487dab215a0c978eed23"
-    },
-    "202609040802": {
-      "race_id": "202609040802",
-      "race_date": "2026-09-26",
-      "distance": 1800,
-      "surface": "ダート",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 13.0,
+          "cumulative_seconds": 73.1,
           "lap_seconds": 13.0
+        }
+      ],
+      "winner_time_seconds": 73.1,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202609040602",
+      "fetched_at": "2026-11-08T08:52:33.666704+09:00",
+      "html_sha256": "49a17fe1a072c261a7deb0b80a3dec4bc251ea473b4282d0ad8d7b8a3b3c4ac9"
+    },
+    "202610020606": {
+      "race_id": "202610020606",
+      "race_date": "2026-07-12",
+      "distance": 1200,
+      "surface": "芝",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 24.8,
+          "cumulative_seconds": 22.5,
+          "lap_seconds": 10.3
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 33.4,
+          "lap_seconds": 10.9
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 45.2,
           "lap_seconds": 11.8
         },
         {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 38.4,
-          "lap_seconds": 13.6
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 51.2,
-          "lap_seconds": 12.8
-        },
-        {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 63.8,
-          "lap_seconds": 12.6
+          "cumulative_seconds": 57.3,
+          "lap_seconds": 12.1
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 76.5,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 89.5,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 102.2,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 115.2,
-          "lap_seconds": 13.0
+          "cumulative_seconds": 69.4,
+          "lap_seconds": 12.1
         }
       ],
-      "winner_time_seconds": 115.2,
-      "source_pace_code": "M",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202609040802",
-      "fetched_at": "2026-11-07T21:43:59.384399+09:00",
-      "html_sha256": "adb6cdb8dc3bb3b460e339321f546fe469257b64cc1e9c8eccd2593738a0052d"
+      "winner_time_seconds": 69.4,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202610020606",
+      "fetched_at": "2026-11-08T08:52:34.983987+09:00",
+      "html_sha256": "c9a85ab13d6a6986bc61b8c6e0e0a5447ec1ae9f945b89d76367b020d6229d50"
+    },
+    "202610020705": {
+      "race_id": "202610020705",
+      "race_date": "2026-07-18",
+      "distance": 1200,
+      "surface": "芝",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.8,
+          "lap_seconds": 10.6
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 33.9,
+          "lap_seconds": 11.1
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 45.5,
+          "lap_seconds": 11.6
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 57.3,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 69.3,
+          "lap_seconds": 12.0
+        }
+      ],
+      "winner_time_seconds": 69.3,
+      "source_pace_code": "H",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202610020705",
+      "fetched_at": "2026-11-08T08:52:36.339378+09:00",
+      "html_sha256": "e82f450135ee3dc4ccd768b5b2b1c8fd8f1efbdf8e0a2ccbf757a113f3abfc4e"
     }
   }
 }
