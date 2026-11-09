@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-09T22:06:17.209373+09:00",
+  "updated_at": "2026-11-09T22:06:59.641469+09:00",
   "db_type": "runner_past_race_jra_only",
   "source": "runner_history.json",
   "target_race_id": "202605050107",
@@ -9,12 +9,12 @@
   "leak_check_passed": true,
   "requested_race_count": 1,
   "connected_race_count": 1,
-  "new_race_count": 1,
-  "reused_race_count": 0,
+  "new_race_count": 0,
+  "reused_race_count": 1,
   "invalid_cache_count": 0,
   "class_cache_review": {
     "version": "race_class_cache_v1",
-    "verified_count": 0,
+    "verified_count": 1,
     "corrected_count": 0,
     "rejected_count": 0,
     "corrections": [],
@@ -354,11 +354,15 @@
       "runner_race_reference": true,
       "race_class_validation": {
         "version": "race_class_cache_v1",
-        "status": "fetched",
-        "source": "history.py",
+        "status": "verified",
+        "source": "runner_history.race_name",
         "value": "新馬",
+        "previous_value": "新馬",
         "race_id": "202601010305",
-        "race_date": "2026-08-01"
+        "race_date": "2026-08-01",
+        "source_names": [
+          "2歳新馬"
+        ]
       }
     }
   ]
