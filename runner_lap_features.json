@@ -1,14 +1,14 @@
 {
   "version": "race_lap_features_v1",
-  "updated_at": "2026-11-09T22:01:28.072227+09:00",
-  "target_race_id": "202605050106",
+  "updated_at": "2026-11-09T22:06:19.059431+09:00",
+  "target_race_id": "202605050107",
   "source": "runner_ability_evidence.json",
   "future_race_usage": false,
   "leak_check_passed": true,
   "scoring_applied": false,
   "summary": {
-    "race_count": 0,
-    "ok_count": 0,
+    "race_count": 1,
+    "ok_count": 1,
     "unknown_count": 0
   },
   "notes": [
@@ -23,5 +23,35 @@
     "検証不成立はunknown。0点で補完しない。"
   ],
   "errors": {},
-  "races": []
+  "races": [
+    {
+      "race_id": "202601010305",
+      "race_date": "2026-08-01",
+      "surface": "芝",
+      "distance": 1500,
+      "status": "ok",
+      "source_pace_code": "S",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202601010305",
+      "features": {
+        "early_avg_200m": 12.24,
+        "middle_avg_200m": 12.18,
+        "late_avg_200m": 11.74,
+        "final_600_avg_200m": 11.8,
+        "preceding_600_avg_200m": 12.2,
+        "late_minus_early_seconds_per_200m": -0.5,
+        "final_minus_preceding_seconds_per_200m": -0.4,
+        "full_segment_variation_seconds_per_200m": 1.1,
+        "complete_200m_segment_count": 7
+      },
+      "interpretation": {
+        "late_minus_early_positive": "後半減速",
+        "late_minus_early_negative": "後半加速",
+        "final_minus_preceding_positive": "終盤減速",
+        "final_minus_preceding_negative": "終盤加速",
+        "threshold_classification_applied": false,
+        "individual_horse_pace_advantage": null,
+        "individual_horse_ability_adjustment": null
+      }
+    }
+  ]
 }
