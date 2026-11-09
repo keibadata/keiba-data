@@ -1,0 +1,154 @@
+name: Direct Comparison Trial
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: "Git ref containing the saved evidence JSON (blank uses this run's commit)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout saved evidence
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Summarize direct comparisons by past race
+        run: |
+          python - <<'PY'
+          import json
+          import math
+          import re
+          import subprocess
+          from collections import defaultdict
+          from pathlib import Path
+
+          source = Path("runner_ability_evidence.json")
+          data = json.loads(source.read_text(encoding="utf-8"))
+          target_id = data.get("target_race_id", "")
+          if (
+              not re.fullmatch(r"[0-9]{12}", target_id)
+              or data.get("version") != "ability_evidence_v1"
+              or data.get("comparison_schema_version") != "field_comparison_v1"
+              or data.get("future_race_usage") is not False
+              or data.get("leak_check_passed") is not True
+              or data.get("scoring_applied") is not False
+          ):
+              raise ValueError("Unexpected evidence version or safety flags")
+
+          horses = data["horses"]
+          horse_ids = {horse["horse_id"] for horse in horses}
+          if "" in horse_ids or len(horse_ids) != len(horses):
+              raise ValueError("Missing or duplicate horse IDs")
+
+          outcome_points = {"先着": 1.0, "同着": 0.5, "後着": 0.0}
+          meetings = {}
+          conflicts = set()
+          for horse in horses:
+              own_id = horse["horse_id"]
+              for past in horse["past_races"]:
+                  race_id = past["race_id"]
+                  if not re.fullmatch(r"[0-9]{12}", race_id) or race_id == target_id:
+                      continue
+                  for peer in (past.get("field") or {}).get("current_opponents", []):
+                      peer_id = peer.get("horse_id")
+                      points = outcome_points.get(peer.get("outcome"))
+                      gap = peer.get("own_minus_opponent_seconds")
+                      if (
+                          peer_id == own_id
+                          or peer_id not in horse_ids
+                          or points is None
+                          or type(gap) not in (int, float)
+                          or not math.isfinite(gap)
+                      ):
+                          continue
+
+                      first_id, second_id = sorted((own_id, peer_id))
+                      key = (race_id, first_id, second_id)
+                      if peer.get("comparison_key") != "|".join(key):
+                          continue
+                      observation = (
+                          (points, gap) if own_id == first_id else (1.0 - points, -gap)
+                      )
+                      if meetings.setdefault(key, observation) != observation:
+                          conflicts.add(key)
+
+          by_horse = defaultdict(lambda: defaultdict(list))
+          for key, (points, _) in meetings.items():
+              if key in conflicts:
+                  continue
+              race_id, first_id, second_id = key
+              by_horse[first_id][race_id].append(points)
+              by_horse[second_id][race_id].append(1.0 - points)
+
+          rows = []
+          for horse in horses:
+              races = [
+                  {
+                      "past_race_id": race_id,
+                      "opponent_count": len(points),
+                      "ahead_count": points.count(1.0),
+                      "tied_count": points.count(0.5),
+                      "behind_count": points.count(0.0),
+                      "ahead_share_percent": round(100 * sum(points) / len(points), 2),
+                  }
+                  for race_id, points in sorted(by_horse[horse["horse_id"]].items())
+              ]
+              # レース単位で平均する。途中では丸めない。
+              shares = [
+                  sum(points) / len(points)
+                  for points in by_horse[horse["horse_id"]].values()
+              ]
+              rows.append({
+                  "horse_id": horse["horse_id"],
+                  "horse_name": horse["horse_name"],
+                  "status": "observed" if shares else "unknown",
+                  "compared_race_count": len(races),
+                  "race_weighted_ahead_share_percent": (
+                      round(100 * sum(shares) / len(shares), 2) if shares else None
+                  ),
+                  "races": races,
+              })
+
+          result = {
+              "version": "direct_comparison_trial_v1",
+              "target_race_id": target_id,
+              "source_commit": subprocess.check_output(
+                  ["git", "rev-parse", "HEAD"], text=True
+              ).strip(),
+              "scoring_applied": False,
+              "unique_comparison_count": len(meetings) - len(conflicts),
+              "conflicting_comparison_count": len(conflicts),
+              "horse_count_with_observations": sum(
+                  row["status"] == "observed" for row in rows
+              ),
+              "horses": rows,
+          }
+          Path("direct_comparison_trial.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+              encoding="utf-8",
+          )
+          print("Target race:", target_id)
+          print("Comparable meetings:", result["unique_comparison_count"])
+          print("Horses with observations:", result["horse_count_with_observations"])
+          print("Conflicting meetings excluded:", result["conflicting_comparison_count"])
+          PY
+      - name: Upload observations
+        uses: actions/upload-artifact@v4
+        with:
+          name: direct-comparison-trial
+          path: direct_comparison_trial.json
+          if-no-files-found: error
+          retention-days: 7
