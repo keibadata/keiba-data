@@ -1,0 +1,1422 @@
+{
+  "schema_version": 1,
+  "evidence_version": "performance_evidence_v1",
+  "target_race_id": "202605050101",
+  "race_date": "2026-11-07",
+  "updated_at": "2026-11-11T08:06:09.492292+09:00",
+  "policy": {
+    "diagnostic_only": true,
+    "training_used": false,
+    "numerical_performance_rate_produced": false,
+    "registered_evidence_requires_source_content_review": true,
+    "shared_track_observations_stored_once": true,
+    "assessment_requires_review": true,
+    "pre_start_timing_verified": false,
+    "formal_evaluation_eligible": false
+  },
+  "optional_source_status": {
+    "track_condition.json": "matched",
+    "day_bias.json": "matched"
+  },
+  "race_track_observations": {
+    "physical": {
+      "moisture_finish": 6.3,
+      "moisture_4corner": 7.4,
+      "moisture_measurement_time": "11月7日（土曜）5時30分"
+    },
+    "source_url": "https://www.jra.go.jp/keiba/baba/index.html",
+    "bias_status": "no_previous_races",
+    "reference_race_numbers": [],
+    "reference_race_count": 0,
+    "confidence": 0.0,
+    "running_style_bias": "",
+    "inside_outside_bias": "",
+    "bias_reason": "対象が1Rのため、対象レース以前の同日実レースが存在しない。未来レースを使用しないため当日バイアス判定は行わない。"
+  },
+  "race_pace_hypothesis": {
+    "base_pace": "スロー〜ミドル",
+    "reason": "逃げ候補1頭で単騎逃げの可能性",
+    "leader_candidate_count": 1,
+    "front_candidate_count": 2,
+    "leader_candidates": [
+      {
+        "horse_number": "7",
+        "horse_name": "ルージュロマーナ"
+      }
+    ],
+    "scenario_slow": "逃げ馬が主張せず隊列が早期に決まる",
+    "scenario_middle": "標準的な先行争い",
+    "scenario_high": "複数馬がハナ・好位を主張し前半加速",
+    "front_collapse_scenario": "ハイペース化した場合は前潰れまで考慮"
+  },
+  "horses": [
+    {
+      "horse_id": "2024104969",
+      "horse_number": "1",
+      "horse_name": "ヴァルガルデーナ",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202605040901",
+          "date": "2026/10/25",
+          "rank": 6,
+          "surface": "ダート",
+          "distance": 1600,
+          "margin": "1.5",
+          "passing": "12-11",
+          "last3f": 38.3,
+          "position_observations": [
+            "後方位置依存"
+          ],
+          "margin_observations": [
+            "着差が大きい"
+          ],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [
+          "今回の位置取り改善材料を確認"
+        ],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 2,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 2,
+            "known_race_count": 2
+          },
+          "distance_any_surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 2
+          },
+          "surface_and_distance": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 2
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202605040901",
+            "date": "2026/10/25",
+            "surface": "ダート",
+            "distance": 1600,
+            "rank": 6,
+            "time": "1:40.7",
+            "margin": "1.5",
+            "passing": "12-11",
+            "last3f": 38.3
+          },
+          {
+            "race_id": "202605040304",
+            "date": "2026/10/10",
+            "surface": "ダート",
+            "distance": 1400,
+            "rank": 12,
+            "time": "1:28.7",
+            "margin": "2.2",
+            "passing": "16-15",
+            "last3f": 37.8
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "後方",
+          "likely_leader": false,
+          "slow_pace": "注意",
+          "middle_pace": "標準",
+          "high_pace": "プラス",
+          "pace_dependency": "前崩れ依存度高め"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/10/25",
+            "race_name": "2歳未勝利",
+            "passing": "12-11",
+            "first_position": 12,
+            "final_position": 11,
+            "style": "後方"
+          },
+          {
+            "date": "2026/10/10",
+            "race_name": "2歳新馬",
+            "passing": "16-15",
+            "first_position": 16,
+            "final_position": 15,
+            "style": "後方"
+          }
+        ],
+        "jockey": "木幡巧",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "460",
+        "body_weight_change": "+2",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 458,
+        "previous_race_id": "202605040901",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024103357",
+      "horse_number": "2",
+      "horse_name": "エンドクレジット",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202605040804",
+          "date": "2026/10/24",
+          "rank": 10,
+          "surface": "ダート",
+          "distance": 1600,
+          "margin": "2.4",
+          "passing": "14-14",
+          "last3f": 37.8,
+          "position_observations": [
+            "後方位置依存"
+          ],
+          "margin_observations": [
+            "着差が大きい"
+          ],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [
+          "今回の位置取り改善材料を確認"
+        ],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 1,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "distance_any_surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "surface_and_distance": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202605040804",
+            "date": "2026/10/24",
+            "surface": "ダート",
+            "distance": 1600,
+            "rank": 10,
+            "time": "1:42.1",
+            "margin": "2.4",
+            "passing": "14-14",
+            "last3f": 37.8
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "後方",
+          "likely_leader": false,
+          "slow_pace": "注意",
+          "middle_pace": "標準",
+          "high_pace": "プラス",
+          "pace_dependency": "前崩れ依存度高め"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/10/24",
+            "race_name": "2歳新馬",
+            "passing": "14-14",
+            "first_position": 14,
+            "final_position": 14,
+            "style": "後方"
+          }
+        ],
+        "jockey": "☆ 長浜",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "440",
+        "body_weight_change": "-2",
+        "carried_weight": "54.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 442,
+        "previous_race_id": "202605040804",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024104622",
+      "horse_number": "3",
+      "horse_name": "ピトンピンク",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202605041004",
+          "date": "2026/10/31",
+          "rank": 13,
+          "surface": "ダート",
+          "distance": 1400,
+          "margin": "3.0",
+          "passing": "14-13",
+          "last3f": 37.6,
+          "position_observations": [
+            "後方位置依存"
+          ],
+          "margin_observations": [
+            "着差が大きい"
+          ],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [
+          "今回の位置取り改善材料を確認"
+        ],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 1,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "distance_any_surface": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 1
+          },
+          "surface_and_distance": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 1
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202605041004",
+            "date": "2026/10/31",
+            "surface": "ダート",
+            "distance": 1400,
+            "rank": 13,
+            "time": "1:28.6",
+            "margin": "3.0",
+            "passing": "14-13",
+            "last3f": 37.6
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "後方",
+          "likely_leader": false,
+          "slow_pace": "注意",
+          "middle_pace": "標準",
+          "high_pace": "プラス",
+          "pace_dependency": "前崩れ依存度高め"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/10/31",
+            "race_name": "2歳新馬",
+            "passing": "14-13",
+            "first_position": 14,
+            "final_position": 13,
+            "style": "後方"
+          }
+        ],
+        "jockey": "原",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "432",
+        "body_weight_change": "0",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 432,
+        "previous_race_id": "202605041004",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024106506",
+      "horse_number": "4",
+      "horse_name": "アリアニコ",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202604040301",
+          "date": "2026/10/24",
+          "rank": 3,
+          "surface": "ダート",
+          "distance": 1800,
+          "margin": "2.2",
+          "passing": "7-6-6-6",
+          "last3f": 41.0,
+          "position_observations": [],
+          "margin_observations": [
+            "着差が大きい"
+          ],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 2,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 2
+          },
+          "distance_any_surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 2
+          },
+          "surface_and_distance": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 2
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202604040301",
+            "date": "2026/10/24",
+            "surface": "ダート",
+            "distance": 1800,
+            "rank": 3,
+            "time": "1:57.5",
+            "margin": "2.2",
+            "passing": "7-6-6-6",
+            "last3f": 41.0
+          },
+          {
+            "race_id": "202609040305",
+            "date": "2026/09/12",
+            "surface": "芝",
+            "distance": 1600,
+            "rank": 10,
+            "time": "1:37.6",
+            "margin": "1.7",
+            "passing": "2-3",
+            "last3f": 35.6
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "中団前",
+          "likely_leader": false,
+          "slow_pace": "標準",
+          "middle_pace": "プラス",
+          "high_pace": "プラス",
+          "pace_dependency": "位置取りの自由度あり"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/10/24",
+            "race_name": "2歳未勝利",
+            "passing": "7-6-6-6",
+            "first_position": 7,
+            "final_position": 6,
+            "style": "中団"
+          },
+          {
+            "date": "2026/09/12",
+            "race_name": "2歳新馬",
+            "passing": "2-3",
+            "first_position": 2,
+            "final_position": 3,
+            "style": "先行"
+          }
+        ],
+        "jockey": "Cデムーロ",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "480",
+        "body_weight_change": "-8",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 488,
+        "previous_race_id": "202604040301",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024107047",
+      "horse_number": "5",
+      "horse_name": "ブリスブリンク",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202606040604",
+          "date": "2026/09/20",
+          "rank": 2,
+          "surface": "ダート",
+          "distance": 1800,
+          "margin": "0.1",
+          "passing": "4-3-5-5",
+          "last3f": 38.5,
+          "position_observations": [],
+          "margin_observations": [
+            "着差は小さい"
+          ],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 1,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "distance_any_surface": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 1
+          },
+          "surface_and_distance": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 1
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202606040604",
+            "date": "2026/09/20",
+            "surface": "ダート",
+            "distance": 1800,
+            "rank": 2,
+            "time": "1:53.8",
+            "margin": "0.1",
+            "passing": "4-3-5-5",
+            "last3f": 38.5
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "中団前",
+          "likely_leader": false,
+          "slow_pace": "標準",
+          "middle_pace": "プラス",
+          "high_pace": "プラス",
+          "pace_dependency": "位置取りの自由度あり"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/09/20",
+            "race_name": "2歳新馬",
+            "passing": "4-3-5-5",
+            "first_position": 4,
+            "final_position": 5,
+            "style": "中団"
+          }
+        ],
+        "jockey": "ルメール",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "498",
+        "body_weight_change": "+2",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 496,
+        "previous_race_id": "202606040604",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024106320",
+      "horse_number": "6",
+      "horse_name": "ハーモニープルーフ",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202606040206",
+          "date": "2026/09/06",
+          "rank": 11,
+          "surface": "ダート",
+          "distance": 1800,
+          "margin": "6.9",
+          "passing": "7-7-7-10",
+          "last3f": 43.2,
+          "position_observations": [
+            "後方位置依存",
+            "道中で位置を下げた"
+          ],
+          "margin_observations": [
+            "着差が大きい"
+          ],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [
+          "今回の位置取り改善材料を確認"
+        ],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 1,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "distance_any_surface": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 1
+          },
+          "surface_and_distance": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 1
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202606040206",
+            "date": "2026/09/06",
+            "surface": "ダート",
+            "distance": 1800,
+            "rank": 11,
+            "time": "2:00.8",
+            "margin": "6.9",
+            "passing": "7-7-7-10",
+            "last3f": 43.2
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "後方",
+          "likely_leader": false,
+          "slow_pace": "注意",
+          "middle_pace": "標準",
+          "high_pace": "プラス",
+          "pace_dependency": "前崩れ依存度高め"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/09/06",
+            "race_name": "2歳新馬",
+            "passing": "7-7-7-10",
+            "first_position": 7,
+            "final_position": 10,
+            "style": "後方"
+          }
+        ],
+        "jockey": "マーカンド",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "506",
+        "body_weight_change": "+4",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 502,
+        "previous_race_id": "202606040206",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024102132",
+      "horse_number": "7",
+      "horse_name": "ルージュロマーナ",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202601010702",
+          "date": "2026/08/15",
+          "rank": 3,
+          "surface": "芝",
+          "distance": 1800,
+          "margin": "0.3",
+          "passing": "1-1-1-1",
+          "last3f": 36.5,
+          "position_observations": [
+            "前走は前方位置"
+          ],
+          "margin_observations": [
+            "着差は小さい"
+          ],
+          "condition_changes": [
+            "前走は今回と異なる馬場種別"
+          ],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [
+          "馬場種別変更への適応材料を確認"
+        ],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 2,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 2
+          },
+          "distance_any_surface": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 2
+          },
+          "surface_and_distance": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 2
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202601010702",
+            "date": "2026/08/15",
+            "surface": "芝",
+            "distance": 1800,
+            "rank": 3,
+            "time": "1:49.4",
+            "margin": "0.3",
+            "passing": "1-1-1-1",
+            "last3f": 36.5
+          },
+          {
+            "race_id": "202602011205",
+            "date": "2026/07/19",
+            "surface": "芝",
+            "distance": 1800,
+            "rank": 3,
+            "time": "1:51.5",
+            "margin": "0.4",
+            "passing": "6-5-5-3",
+            "last3f": 37.6
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "逃げ",
+          "likely_leader": true,
+          "slow_pace": "プラス",
+          "middle_pace": "標準",
+          "high_pace": "注意",
+          "pace_dependency": "前目の位置を取れるかが重要"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/08/15",
+            "race_name": "2歳未勝利",
+            "passing": "1-1-1-1",
+            "first_position": 1,
+            "final_position": 1,
+            "style": "逃げ"
+          },
+          {
+            "date": "2026/07/19",
+            "race_name": "2歳新馬",
+            "passing": "6-5-5-3",
+            "first_position": 6,
+            "final_position": 3,
+            "style": "先行"
+          }
+        ],
+        "jockey": "横山典",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "462",
+        "body_weight_change": "-4",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 466,
+        "previous_race_id": "202601010702",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024108140",
+      "horse_number": "8",
+      "horse_name": "アイファーエリース",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202605040401",
+          "date": "2026/10/11",
+          "rank": 4,
+          "surface": "ダート",
+          "distance": 1600,
+          "margin": "1.0",
+          "passing": "9-7",
+          "last3f": 36.9,
+          "position_observations": [
+            "やや後方からの競馬"
+          ],
+          "margin_observations": [
+            "着差が大きい"
+          ],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [
+          "今回の位置取り改善材料を確認"
+        ],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 2,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 2
+          },
+          "distance_any_surface": {
+            "status": "observed",
+            "matched_race_count": 2,
+            "known_race_count": 2
+          },
+          "surface_and_distance": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 2
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202605040401",
+            "date": "2026/10/11",
+            "surface": "ダート",
+            "distance": 1600,
+            "rank": 4,
+            "time": "1:41.0",
+            "margin": "1.0",
+            "passing": "9-7",
+            "last3f": 36.9
+          },
+          {
+            "race_id": "202606040705",
+            "date": "2026/09/22",
+            "surface": "芝",
+            "distance": 1600,
+            "rank": 9,
+            "time": "1:38.6",
+            "margin": "1.3",
+            "passing": "14-12-11",
+            "last3f": 36.6
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "後方",
+          "likely_leader": false,
+          "slow_pace": "注意",
+          "middle_pace": "標準",
+          "high_pace": "プラス",
+          "pace_dependency": "位置取りの自由度あり"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/10/11",
+            "race_name": "2歳未勝利",
+            "passing": "9-7",
+            "first_position": 9,
+            "final_position": 7,
+            "style": "中団"
+          },
+          {
+            "date": "2026/09/22",
+            "race_name": "2歳新馬",
+            "passing": "14-12-11",
+            "first_position": 14,
+            "final_position": 11,
+            "style": "後方"
+          }
+        ],
+        "jockey": "松岡",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "430",
+        "body_weight_change": "+4",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 426,
+        "previous_race_id": "202605040401",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024106206",
+      "horse_number": "9",
+      "horse_name": "チャームドール",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202605040404",
+          "date": "2026/10/11",
+          "rank": 4,
+          "surface": "ダート",
+          "distance": 1600,
+          "margin": "1.2",
+          "passing": "10-10",
+          "last3f": 37.7,
+          "position_observations": [
+            "後方位置依存"
+          ],
+          "margin_observations": [
+            "着差が大きい"
+          ],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [
+          "今回の位置取り改善材料を確認"
+        ],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 1,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "distance_any_surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "surface_and_distance": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202605040404",
+            "date": "2026/10/11",
+            "surface": "ダート",
+            "distance": 1600,
+            "rank": 4,
+            "time": "1:39.9",
+            "margin": "1.2",
+            "passing": "10-10",
+            "last3f": 37.7
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "後方",
+          "likely_leader": false,
+          "slow_pace": "注意",
+          "middle_pace": "標準",
+          "high_pace": "プラス",
+          "pace_dependency": "前崩れ依存度高め"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/10/11",
+            "race_name": "2歳新馬",
+            "passing": "10-10",
+            "first_position": 10,
+            "final_position": 10,
+            "style": "後方"
+          }
+        ],
+        "jockey": "三浦",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "452",
+        "body_weight_change": "-2",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 454,
+        "previous_race_id": "202605040404",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024107122",
+      "horse_number": "10",
+      "horse_name": "レヴフィリア",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202605040404",
+          "date": "2026/10/11",
+          "rank": 2,
+          "surface": "ダート",
+          "distance": 1600,
+          "margin": "0.9",
+          "passing": "2-2",
+          "last3f": 38.2,
+          "position_observations": [
+            "前走は前方位置"
+          ],
+          "margin_observations": [],
+          "condition_changes": [],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 1,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "distance_any_surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "surface_and_distance": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202605040404",
+            "date": "2026/10/11",
+            "surface": "ダート",
+            "distance": 1600,
+            "rank": 2,
+            "time": "1:39.6",
+            "margin": "0.9",
+            "passing": "2-2",
+            "last3f": 38.2
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "先行",
+          "likely_leader": false,
+          "slow_pace": "プラス",
+          "middle_pace": "プラス",
+          "high_pace": "標準",
+          "pace_dependency": "前目の位置を取れるかが重要"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/10/11",
+            "race_name": "2歳新馬",
+            "passing": "2-2",
+            "first_position": 2,
+            "final_position": 2,
+            "style": "先行"
+          }
+        ],
+        "jockey": "横山武",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "450",
+        "body_weight_change": "0",
+        "carried_weight": "55.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 450,
+        "previous_race_id": "202605040404",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024102495",
+      "horse_number": "11",
+      "horse_name": "パネヴァ",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": "202604040105",
+          "date": "2026/10/17",
+          "rank": 15,
+          "surface": "ダート",
+          "distance": 1200,
+          "margin": "4.3",
+          "passing": "15-15",
+          "last3f": 38.7,
+          "position_observations": [
+            "後方位置依存"
+          ],
+          "margin_observations": [
+            "着差が大きい"
+          ],
+          "condition_changes": [
+            "前走から距離延長"
+          ],
+          "unknowns": []
+        },
+        "issues": [],
+        "cause_assessment": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [
+          "距離延長による追走負荷・持続力適性を確認",
+          "今回の位置取り改善材料を確認"
+        ],
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 1,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "observed",
+            "matched_race_count": 1,
+            "known_race_count": 1
+          },
+          "distance_any_surface": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 1
+          },
+          "surface_and_distance": {
+            "status": "not_observed_in_evaluated_runs",
+            "matched_race_count": 0,
+            "known_race_count": 1
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "observed_runs": [
+          {
+            "race_id": "202604040105",
+            "date": "2026/10/17",
+            "surface": "ダート",
+            "distance": 1200,
+            "rank": 15,
+            "time": "1:17.6",
+            "margin": "4.3",
+            "passing": "15-15",
+            "last3f": 38.7
+          }
+        ],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "後方",
+          "likely_leader": false,
+          "slow_pace": "注意",
+          "middle_pace": "標準",
+          "high_pace": "プラス",
+          "pace_dependency": "前崩れ依存度高め"
+        },
+        "past_position_records": [
+          {
+            "date": "2026/10/17",
+            "race_name": "2歳新馬",
+            "passing": "15-15",
+            "first_position": 15,
+            "final_position": 15,
+            "style": "後方"
+          }
+        ],
+        "jockey": "▲ 遠藤",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "456",
+        "body_weight_change": "0",
+        "carried_weight": "52.0",
+        "sex_age": "牝2",
+        "previous_body_weight": 456,
+        "previous_race_id": "202604040105",
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    }
+  ]
+}
