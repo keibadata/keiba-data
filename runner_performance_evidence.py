@@ -7,6 +7,7 @@ from analysis_evidence import actual_issues, resolution_evidence
 from pace_analysis import analyze_horse as analyze_pace
 from pace_analysis import build_race_scenario
 from runner_ability_evidence import build as validate_history
+from runner_previous_late_review import race_key
 
 
 OUTPUT_FILE = "runner_performance_evidence.json"
@@ -107,7 +108,58 @@ def track_observations(track, bias):
     }
 
 
-def build_horse(runner, ability, previous_horse, pace, race_id):
+def late_observation_index(race_id, expected_ids, statuses):
+    filename = "runner_pace_context.json"
+    if not Path(filename).exists():
+        statuses[filename] = "missing"
+        return {}
+    data = read_json(filename)
+    require_target(data, race_id, filename)
+    if (
+        data.get("version") != "runner_pace_context_v1"
+        or data.get("future_race_usage") is not False
+        or data.get("leak_check_passed") is not True
+        or data.get("scoring_applied") is not False
+    ):
+        raise ValueError("Invalid pace context version or safety flags")
+    horses = horse_index(data, expected_ids, filename)
+    result = {}
+    for horse_id, horse in horses.items():
+        for run in horse.get("past_races", []):
+            key = race_key(horse_id, run.get("race_id"), run.get("date"))
+            if key is None or key in result:
+                raise ValueError("Invalid or duplicate pace context run")
+            result[key] = run
+    statuses[filename] = "matched"
+    return result
+
+
+def previous_late_observation(horse_id, previous, late_runs):
+    key = race_key(horse_id, previous.get("race_id"), previous.get("date"))
+    run = late_runs.get(key)
+    if run is None:
+        return {"status": "unknown", "reason": "前走の終盤比較データ未接続"}
+    fields = (
+        "same_race_clock_comparison", "late_race_observation",
+        "late_gap_change", "late_position_change",
+    )
+    if any((run.get(field) or {}).get("status") != "ok" for field in fields):
+        return {"status": "unknown", "reason": "前走の終盤比較データに欠損"}
+    return {
+        "status": "available_for_review",
+        "source": "runner_pace_context.json",
+        "past_race_id": run["race_id"],
+        "past_race_date": run["date"],
+        "clock_comparison": run["same_race_clock_comparison"],
+        "leader_gap_at_last_600m": run["late_race_observation"],
+        "gap_change": run["late_gap_change"],
+        "position_change": run["late_position_change"],
+        "interpretation_status": "unknown",
+        "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する",
+    }
+
+
+def build_horse(runner, ability, previous_horse, pace, race_id, late_runs):
     previous = previous_horse.get("previous_race") or {}
     issues = list(dict.fromkeys(actual_issues(previous)))
     registered = resolution_evidence(previous, race_id)
@@ -140,6 +192,9 @@ def build_horse(runner, ability, previous_horse, pace, race_id):
                 for issue_id, issue in zip(issue_ids, issues)
             ],
             "cause_assessment": "unknown",
+            "late_observation": previous_late_observation(
+                text(runner["horse_id"]), previous, late_runs
+            ),
             "pending": "前走の観測値だけでは敗因を確定しない",
         },
         "issue_resolution": {
@@ -229,11 +284,12 @@ def main():
     }
 
     statuses = {}
+    late_runs = late_observation_index(race_id, expected, statuses)
     track = optional_source("track_condition.json", race, statuses)
     bias = optional_source("day_bias.json", race, statuses, check_future=True)
     output = {
         "schema_version": 1,
-        "evidence_version": "performance_evidence_v1",
+        "evidence_version": "performance_evidence_v2",
         "target_race_id": race_id,
         "race_date": race["race_date"],
         "updated_at": datetime.now(timezone(timedelta(hours=9))).isoformat(),
@@ -254,7 +310,7 @@ def main():
             build_horse(
                 runner, ability_by_id[text(runner["horse_id"])],
                 previous_by_id[text(runner["horse_id"])],
-                pace_by_id[text(runner["horse_id"])], race_id,
+                pace_by_id[text(runner["horse_id"])], race_id, late_runs,
             )
             for runner in runners
         ],
