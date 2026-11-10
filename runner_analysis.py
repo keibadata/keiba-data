@@ -158,6 +158,70 @@ def classify(value):
     return "D"
 
 
+def describe_condition_observation(matches, known, total, excluded):
+    if matches:
+        status = "observed"
+    elif total == 0 or known < total or excluded:
+        status = "unknown"
+    else:
+        status = "not_observed_in_evaluated_runs"
+
+    return {
+        "status": status,
+        "matched_race_count": matches,
+        "known_race_count": known,
+    }
+
+
+def build_condition_evidence(analyzed, excluded, target):
+    total = len(analyzed)
+    excluded_count = len(excluded)
+    known_surfaces = sum(
+        row["surface"] in ("芝", "ダート", "障害")
+        for row in analyzed
+    )
+    known_distances = sum(
+        row["distance"] is not None
+        for row in analyzed
+    )
+    known_pairs = sum(
+        row["surface"] in ("芝", "ダート", "障害")
+        and row["distance"] is not None
+        for row in analyzed
+    )
+    same_surface = sum(
+        row["same_surface"] is True
+        for row in analyzed
+    )
+    same_distance = sum(
+        row["distance"] == target["distance"]
+        for row in analyzed
+    )
+    same_condition = sum(
+        row["same_surface"] is True
+        and row["distance"] == target["distance"]
+        for row in analyzed
+    )
+
+    return {
+        "scope": "evaluated_past_races_only",
+        "evaluated_race_count": total,
+        "excluded_race_count": excluded_count,
+        "surface": describe_condition_observation(
+            same_surface, known_surfaces, total, excluded_count
+        ),
+        "distance_any_surface": describe_condition_observation(
+            same_distance, known_distances, total, excluded_count
+        ),
+        "surface_and_distance": describe_condition_observation(
+            same_condition, known_pairs, total, excluded_count
+        ),
+        "incompatibility_status": "unknown",
+        "incompatibility_reason":
+            "条件の経験有無・着順だけでは不適性の原因を確定できない",
+    }
+
+
 def analyze_horse(horse, target, evidence):
     source = horse.get("past_races", []) or []
     analyzed = []
@@ -253,6 +317,9 @@ def analyze_horse(horse, target, evidence):
         "unknown": ability_score is None,
         "noise_flags": flags,
         "class_counts": evidence.get("class_counts", {}),
+        "condition_evidence": build_condition_evidence(
+            analyzed, excluded, target
+        ),
         "analysis": analyzed,
         "excluded_races": excluded,
     }
