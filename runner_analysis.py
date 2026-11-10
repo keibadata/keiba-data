@@ -217,16 +217,7 @@ def analyze_horse(horse, target, evidence):
     exact_count = sum(r["distance"] == target["distance"] for r in analyzed)
 
     if analyzed and same_count == 0:
-        surface = target["surface"]
-        past_surfaces = {row["surface"] for row in analyzed}
-        # 最終評価の未知条件ガードへ、反対の馬場種別だけと確認できた馬を渡す。
-        if (
-            (surface == "芝" and past_surfaces == {"ダート"})
-            or (surface == "ダート" and past_surfaces == {"芝"})
-        ):
-            flags.append(surface + "実績なし")
-        else:
-            flags.append(surface + "実績未確認")
+        flags.append(target["surface"] + "実績未確認")
     if analyzed and exact_count == 0:
         flags.append(str(target["distance"]) + "m実績未確認")
 
