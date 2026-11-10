@@ -1,4 +1,3 @@
-
 name: Race Full Analysis
 on:
   workflow_dispatch:
@@ -289,6 +288,8 @@ jobs:
         run: python runner_previous_late_review.py
       - name: Analyze pace
         run: python pace_analysis.py
+      - name: Build runner performance evidence
+        run: python runner_performance_evidence.py
       - name: Build bloodline statistics
         run: python bloodline_stats.py
       - name: Score race bloodlines
@@ -337,6 +338,7 @@ jobs:
             "previous_race_analysis.json"
             "runner_previous_late_review.json"
             "pace_analysis.json"
+            "runner_performance_evidence.json"
             "bloodline_stats.json"
             "race_bloodline_score.json"
             "final_analysis.json"
