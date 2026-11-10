@@ -1,12 +1,12 @@
 {
   "version": "runner_previous_late_review_v1",
-  "target_race_id": "202608050210",
+  "target_race_id": "202608050211",
   "source_files": [
     "runner_late_review.json",
     "previous_race_analysis.json"
   ],
-  "review_source_updated_at": "2026-11-10T22:51:18.224530+09:00",
-  "previous_analysis_updated_at": "2026-11-10T22:51:19.003965+09:00",
+  "review_source_updated_at": "2026-11-11T00:11:58.104077+09:00",
+  "previous_analysis_updated_at": "2026-11-11T00:11:59.934568+09:00",
   "scoring_applied": false,
   "notes": [
     "馬ID・前走Race ID・開催日が一致した候補のみ収録。",
@@ -14,9 +14,50 @@
     "終盤の観測値は前走課題・克服根拠・採点とは別に保持。"
   ],
   "summary": {
-    "horse_count": 10,
-    "candidate_count": 13,
-    "matched_previous_run_count": 0
+    "horse_count": 16,
+    "candidate_count": 21,
+    "matched_previous_run_count": 1
   },
-  "matches": []
+  "matches": [
+    {
+      "horse_id": "2021106640",
+      "horse_number": "9",
+      "horse_name": "ラムジェット",
+      "previous_race_id": "202609040811",
+      "previous_race_date": "2026-09-26",
+      "existing_previous_analysis": {
+        "issue_summary": "明確な課題なし",
+        "overcoming_summary": "客観データ上の明確な克服材料なし"
+      },
+      "late_review_observation": {
+        "pattern": "rank_lost_gap_narrowed",
+        "gap_change_within_0_1_seconds": true,
+        "horse_id": "2021106640",
+        "horse_number": "9",
+        "horse_name": "ラムジェット",
+        "past_race_id": "202609040811",
+        "past_race_date": "2026-09-26",
+        "past_race_name": "シリウスS(GIII)",
+        "position_change": {
+          "status": "ok",
+          "comparison_count": 16,
+          "to_last_600m_rank_max": 6,
+          "to_last_600m_tie_count": 1,
+          "direction": "lost",
+          "to_last_600m_rank": 6,
+          "last3f_rank": 5,
+          "finish": 7,
+          "positions_gained": -1
+        },
+        "gap_change": {
+          "status": "ok",
+          "split_gap_to_leader_seconds": 0.5,
+          "finish_gap_to_winner_seconds": 0.4,
+          "finish_minus_split_gap_seconds": -0.1,
+          "direction": "narrowed"
+        },
+        "race_final_minus_preceding_seconds_per_200m": -0.4667
+      }
+    }
+  ]
 }
