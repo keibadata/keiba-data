@@ -1,7 +1,7 @@
 {
   "version": "runner_pace_context_v1",
-  "updated_at": "2026-11-10T21:24:13.699239+09:00",
-  "target_race_id": "202608050202",
+  "updated_at": "2026-11-10T21:59:06.975591+09:00",
+  "target_race_id": "202608050203",
   "source_files": [
     "runner_ability_evidence.json",
     "runner_lap_features.json",
@@ -11,14 +11,14 @@
   "leak_check_passed": true,
   "scoring_applied": false,
   "summary": {
-    "horse_count": 13,
-    "past_race_count": 21,
-    "lap_connected_run_count": 21,
-    "clock_comparison_ok_count": 21,
+    "horse_count": 6,
+    "past_race_count": 8,
+    "lap_connected_run_count": 8,
+    "clock_comparison_ok_count": 8,
     "clock_comparison_unknown_count": 0,
-    "late_race_observation_ok_count": 21,
+    "late_race_observation_ok_count": 8,
     "late_race_observation_unknown_count": 0,
-    "late_position_change_ok_count": 21,
+    "late_position_change_ok_count": 8,
     "late_position_change_unknown_count": 0,
     "lap_unknown_run_count": 0
   },
@@ -42,41 +42,472 @@
   ],
   "horses": [
     {
-      "horse_id": "2024106406",
+      "horse_id": "2024106417",
       "horse_number": "1",
-      "horse_name": "サルトヴェローチェ",
-      "past_race_count": 3,
+      "horse_name": "トップオブドリーム",
+      "past_race_count": 1,
       "past_races": [
         {
-          "race_id": "202608040902",
-          "date": "2026-10-25",
-          "race_name": "2歳未勝利",
-          "surface": "ダート",
-          "distance": 1400.0,
+          "race_id": "202609040805",
+          "date": "2026-09-26",
+          "race_name": "2歳新馬",
+          "surface": "芝",
+          "distance": 2000.0,
           "lap_connection_status": "connected",
-          "source_pace_code": "H",
+          "source_pace_code": "S",
           "race_lap_features": {
-            "early_avg_200m": 11.4714,
-            "middle_avg_200m": 12.1571,
-            "late_avg_200m": 12.2,
-            "final_600_avg_200m": 12.2,
-            "preceding_600_avg_200m": 11.6667,
-            "late_minus_early_seconds_per_200m": 0.7286,
-            "final_minus_preceding_seconds_per_200m": 0.5333,
+            "early_avg_200m": 12.66,
+            "middle_avg_200m": 12.56,
+            "late_avg_200m": 11.77,
+            "final_600_avg_200m": 11.7333,
+            "preceding_600_avg_200m": 12.3667,
+            "late_minus_early_seconds_per_200m": -0.89,
+            "final_minus_preceding_seconds_per_200m": -0.6333,
             "full_segment_variation_seconds_per_200m": 1.6,
-            "complete_200m_segment_count": 7
+            "complete_200m_segment_count": 10
           },
           "horse_performance_evidence": {
             "finish": 2,
-            "field_count": 10,
-            "finish_ratio": 0.2,
-            "fourth_corner_position": 1,
-            "fourth_corner_ratio": 0.1,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 36.6,
+            "field_count": 14,
+            "finish_ratio": 0.1429,
+            "fourth_corner_position": null,
+            "fourth_corner_ratio": null,
+            "fourth_corner_evidence_status": "unknown",
+            "last3f_seconds": 35.1,
             "last3f_rank": 2,
+            "last3f_observed_count": 14,
+            "last3f_rank_ratio": 0.1429,
+            "winner_time_gap_seconds": 0.4
+          },
+          "assessment": {
+            "pace_advantage": null,
+            "pace_disadvantage": null,
+            "individual_lap": null,
+            "trouble": null,
+            "previous_race_issue": null,
+            "issue_resolution": null,
+            "ability_adjustment": null,
+            "performance_rate_adjustment": null
+          },
+          "unknowns": [
+            "4角位置不明"
+          ],
+          "same_race_clock_comparison": {
+            "status": "ok",
+            "comparison_count": 14,
+            "to_last_600m_seconds": 88.6,
+            "to_last_600m_rank": 7,
+            "to_last_600m_tie_count": 2,
+            "last3f_seconds": 35.1,
+            "last3f_rank": 2
+          },
+          "late_race_observation": {
+            "status": "ok",
+            "split_distance_m": 1400,
+            "horse_elapsed_seconds": 88.6,
+            "leader_elapsed_seconds": 88.1,
+            "horse_minus_leader_seconds": 0.5,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -0.6333,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.5,
+            "finish_gap_to_winner_seconds": 0.4,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
+          },
+          "late_position_change": {
+            "status": "ok",
+            "comparison_count": 14,
+            "to_last_600m_rank_max": 8,
+            "to_last_600m_tie_count": 2,
+            "direction": "gained",
+            "to_last_600m_rank": 7,
+            "last3f_rank": 2,
+            "finish": 2,
+            "positions_gained": 5
+          }
+        }
+      ]
+    },
+    {
+      "horse_id": "2024100835",
+      "horse_number": "2",
+      "horse_name": "フィソステギア",
+      "past_race_count": 1,
+      "past_races": [
+        {
+          "race_id": "202608040605",
+          "date": "2026-10-17",
+          "race_name": "2歳新馬",
+          "surface": "芝",
+          "distance": 1800.0,
+          "lap_connection_status": "connected",
+          "source_pace_code": "S",
+          "race_lap_features": {
+            "early_avg_200m": 11.9667,
+            "middle_avg_200m": 12.6667,
+            "late_avg_200m": 11.6,
+            "final_600_avg_200m": 11.6,
+            "preceding_600_avg_200m": 12.6667,
+            "late_minus_early_seconds_per_200m": -0.3667,
+            "final_minus_preceding_seconds_per_200m": -1.0667,
+            "full_segment_variation_seconds_per_200m": 2.0,
+            "complete_200m_segment_count": 9
+          },
+          "horse_performance_evidence": {
+            "finish": 6,
+            "field_count": 8,
+            "finish_ratio": 0.75,
+            "fourth_corner_position": 7,
+            "fourth_corner_ratio": 0.875,
+            "fourth_corner_evidence_status": "history_within_group_range",
+            "last3f_seconds": 35.1,
+            "last3f_rank": 4,
+            "last3f_observed_count": 8,
+            "last3f_rank_ratio": 0.5,
+            "winner_time_gap_seconds": 1.0
+          },
+          "assessment": {
+            "pace_advantage": null,
+            "pace_disadvantage": null,
+            "individual_lap": null,
+            "trouble": null,
+            "previous_race_issue": null,
+            "issue_resolution": null,
+            "ability_adjustment": null,
+            "performance_rate_adjustment": null
+          },
+          "unknowns": [],
+          "same_race_clock_comparison": {
+            "status": "ok",
+            "comparison_count": 8,
+            "to_last_600m_seconds": 74.6,
+            "to_last_600m_rank": 7,
+            "to_last_600m_tie_count": 2,
+            "last3f_seconds": 35.1,
+            "last3f_rank": 4
+          },
+          "late_race_observation": {
+            "status": "ok",
+            "split_distance_m": 1200,
+            "horse_elapsed_seconds": 74.6,
+            "leader_elapsed_seconds": 73.9,
+            "horse_minus_leader_seconds": 0.7,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -1.0667,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.7,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
+          "late_position_change": {
+            "status": "ok",
+            "comparison_count": 8,
+            "to_last_600m_rank_max": 8,
+            "to_last_600m_tie_count": 2,
+            "direction": "gained",
+            "to_last_600m_rank": 7,
+            "last3f_rank": 4,
+            "finish": 6,
+            "positions_gained": 1
+          }
+        }
+      ]
+    },
+    {
+      "horse_id": "2024100505",
+      "horse_number": "3",
+      "horse_name": "ナポリ",
+      "past_race_count": 3,
+      "past_races": [
+        {
+          "race_id": "202609040303",
+          "date": "2026-09-12",
+          "race_name": "2歳未勝利",
+          "surface": "ダート",
+          "distance": 1800.0,
+          "lap_connection_status": "connected",
+          "source_pace_code": "S",
+          "race_lap_features": {
+            "early_avg_200m": 13.3667,
+            "middle_avg_200m": 13.4,
+            "late_avg_200m": 12.4333,
+            "final_600_avg_200m": 12.4333,
+            "preceding_600_avg_200m": 13.4,
+            "late_minus_early_seconds_per_200m": -0.9333,
+            "final_minus_preceding_seconds_per_200m": -0.9667,
+            "full_segment_variation_seconds_per_200m": 2.6,
+            "complete_200m_segment_count": 9
+          },
+          "horse_performance_evidence": {
+            "finish": 5,
+            "field_count": 7,
+            "finish_ratio": 0.7143,
+            "fourth_corner_position": 4,
+            "fourth_corner_ratio": 0.5714,
+            "fourth_corner_evidence_status": "history_within_group_range",
+            "last3f_seconds": 38.3,
+            "last3f_rank": 5,
+            "last3f_observed_count": 7,
+            "last3f_rank_ratio": 0.7143,
+            "winner_time_gap_seconds": 1.3
+          },
+          "assessment": {
+            "pace_advantage": null,
+            "pace_disadvantage": null,
+            "individual_lap": null,
+            "trouble": null,
+            "previous_race_issue": null,
+            "issue_resolution": null,
+            "ability_adjustment": null,
+            "performance_rate_adjustment": null
+          },
+          "unknowns": [],
+          "same_race_clock_comparison": {
+            "status": "ok",
+            "comparison_count": 7,
+            "to_last_600m_seconds": 80.6,
+            "to_last_600m_rank": 4,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 38.3,
+            "last3f_rank": 5
+          },
+          "late_race_observation": {
+            "status": "ok",
+            "split_distance_m": 1200,
+            "horse_elapsed_seconds": 80.6,
+            "leader_elapsed_seconds": 80.3,
+            "horse_minus_leader_seconds": 0.3,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -0.9667,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.3,
+            "finish_gap_to_winner_seconds": 1.3,
+            "finish_minus_split_gap_seconds": 1.0,
+            "direction": "widened"
+          },
+          "late_position_change": {
+            "status": "ok",
+            "comparison_count": 7,
+            "to_last_600m_rank_max": 4,
+            "to_last_600m_tie_count": 1,
+            "direction": "lost",
+            "to_last_600m_rank": 4,
+            "last3f_rank": 5,
+            "finish": 5,
+            "positions_gained": -1
+          }
+        },
+        {
+          "race_id": "202607030401",
+          "date": "2026-08-30",
+          "race_name": "2歳未勝利",
+          "surface": "芝",
+          "distance": 1400.0,
+          "lap_connection_status": "connected",
+          "source_pace_code": "M",
+          "race_lap_features": {
+            "early_avg_200m": 11.6143,
+            "middle_avg_200m": 11.5571,
+            "late_avg_200m": 11.3714,
+            "final_600_avg_200m": 11.4,
+            "preceding_600_avg_200m": 11.4,
+            "late_minus_early_seconds_per_200m": -0.2429,
+            "final_minus_preceding_seconds_per_200m": 0.0,
+            "full_segment_variation_seconds_per_200m": 1.1,
+            "complete_200m_segment_count": 7
+          },
+          "horse_performance_evidence": {
+            "finish": 6,
+            "field_count": 10,
+            "finish_ratio": 0.6,
+            "fourth_corner_position": 8,
+            "fourth_corner_ratio": 0.8,
+            "fourth_corner_evidence_status": "history_within_group_range",
+            "last3f_seconds": 34.8,
+            "last3f_rank": 5,
             "last3f_observed_count": 10,
-            "last3f_rank_ratio": 0.2,
+            "last3f_rank_ratio": 0.5,
+            "winner_time_gap_seconds": 1.4
+          },
+          "assessment": {
+            "pace_advantage": null,
+            "pace_disadvantage": null,
+            "individual_lap": null,
+            "trouble": null,
+            "previous_race_issue": null,
+            "issue_resolution": null,
+            "ability_adjustment": null,
+            "performance_rate_adjustment": null
+          },
+          "unknowns": [],
+          "same_race_clock_comparison": {
+            "status": "ok",
+            "comparison_count": 10,
+            "to_last_600m_seconds": 47.2,
+            "to_last_600m_rank": 8,
+            "to_last_600m_tie_count": 2,
+            "last3f_seconds": 34.8,
+            "last3f_rank": 5
+          },
+          "late_race_observation": {
+            "status": "ok",
+            "split_distance_m": 800,
+            "horse_elapsed_seconds": 47.2,
+            "leader_elapsed_seconds": 46.4,
+            "horse_minus_leader_seconds": 0.8,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": 0.0,
+            "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.8,
+            "finish_gap_to_winner_seconds": 1.4,
+            "finish_minus_split_gap_seconds": 0.6,
+            "direction": "widened"
+          },
+          "late_position_change": {
+            "status": "ok",
+            "comparison_count": 10,
+            "to_last_600m_rank_max": 9,
+            "to_last_600m_tie_count": 2,
+            "direction": "gained",
+            "to_last_600m_rank": 8,
+            "last3f_rank": 5,
+            "finish": 6,
+            "positions_gained": 2
+          }
+        },
+        {
+          "race_id": "202609030305",
+          "date": "2026-06-13",
+          "race_name": "2歳新馬",
+          "surface": "芝",
+          "distance": 1200.0,
+          "lap_connection_status": "connected",
+          "source_pace_code": "M",
+          "race_lap_features": {
+            "early_avg_200m": 11.65,
+            "middle_avg_200m": 11.2,
+            "late_avg_200m": 11.25,
+            "final_600_avg_200m": 11.2667,
+            "preceding_600_avg_200m": 11.4667,
+            "late_minus_early_seconds_per_200m": -0.4,
+            "final_minus_preceding_seconds_per_200m": -0.2,
+            "full_segment_variation_seconds_per_200m": 1.3,
+            "complete_200m_segment_count": 6
+          },
+          "horse_performance_evidence": {
+            "finish": 11,
+            "field_count": 11,
+            "finish_ratio": 1.0,
+            "fourth_corner_position": 11,
+            "fourth_corner_ratio": 1.0,
+            "fourth_corner_evidence_status": "history_within_group_range",
+            "last3f_seconds": 35.4,
+            "last3f_rank": 9,
+            "last3f_observed_count": 11,
+            "last3f_rank_ratio": 0.8182,
+            "winner_time_gap_seconds": 3.8
+          },
+          "assessment": {
+            "pace_advantage": null,
+            "pace_disadvantage": null,
+            "individual_lap": null,
+            "trouble": null,
+            "previous_race_issue": null,
+            "issue_resolution": null,
+            "ability_adjustment": null,
+            "performance_rate_adjustment": null
+          },
+          "unknowns": [],
+          "same_race_clock_comparison": {
+            "status": "ok",
+            "comparison_count": 11,
+            "to_last_600m_seconds": 36.6,
+            "to_last_600m_rank": 11,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 35.4,
+            "last3f_rank": 9
+          },
+          "late_race_observation": {
+            "status": "ok",
+            "split_distance_m": 600,
+            "horse_elapsed_seconds": 36.6,
+            "leader_elapsed_seconds": 34.4,
+            "horse_minus_leader_seconds": 2.2,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -0.2,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 2.2,
+            "finish_gap_to_winner_seconds": 3.8,
+            "finish_minus_split_gap_seconds": 1.6,
+            "direction": "widened"
+          },
+          "late_position_change": {
+            "status": "ok",
+            "comparison_count": 11,
+            "to_last_600m_rank_max": 11,
+            "to_last_600m_tie_count": 1,
+            "direction": "unchanged",
+            "to_last_600m_rank": 11,
+            "last3f_rank": 9,
+            "finish": 11,
+            "positions_gained": 0
+          }
+        }
+      ]
+    },
+    {
+      "horse_id": "2024102480",
+      "horse_number": "4",
+      "horse_name": "メールデトワール",
+      "past_race_count": 1,
+      "past_races": [
+        {
+          "race_id": "202608040705",
+          "date": "2026-10-18",
+          "race_name": "2歳新馬",
+          "surface": "芝",
+          "distance": 2000.0,
+          "lap_connection_status": "connected",
+          "source_pace_code": "S",
+          "race_lap_features": {
+            "early_avg_200m": 12.75,
+            "middle_avg_200m": 12.65,
+            "late_avg_200m": 11.23,
+            "final_600_avg_200m": 11.1333,
+            "preceding_600_avg_200m": 12.4667,
+            "late_minus_early_seconds_per_200m": -1.52,
+            "final_minus_preceding_seconds_per_200m": -1.3333,
+            "full_segment_variation_seconds_per_200m": 2.5,
+            "complete_200m_segment_count": 10
+          },
+          "horse_performance_evidence": {
+            "finish": 2,
+            "field_count": 5,
+            "finish_ratio": 0.4,
+            "fourth_corner_position": 1,
+            "fourth_corner_ratio": 0.2,
+            "fourth_corner_evidence_status": "history_within_group_range",
+            "last3f_seconds": 33.4,
+            "last3f_rank": 3,
+            "last3f_observed_count": 5,
+            "last3f_rank_ratio": 0.6,
             "winner_time_gap_seconds": 0.0
           },
           "assessment": {
@@ -92,21 +523,21 @@
           "unknowns": [],
           "same_race_clock_comparison": {
             "status": "ok",
-            "comparison_count": 10,
-            "to_last_600m_seconds": 47.0,
+            "comparison_count": 5,
+            "to_last_600m_seconds": 88.7,
             "to_last_600m_rank": 1,
             "to_last_600m_tie_count": 1,
-            "last3f_seconds": 36.6,
-            "last3f_rank": 2
+            "last3f_seconds": 33.4,
+            "last3f_rank": 3
           },
           "late_race_observation": {
             "status": "ok",
-            "split_distance_m": 800,
-            "horse_elapsed_seconds": 47.0,
-            "leader_elapsed_seconds": 47.0,
+            "split_distance_m": 1400,
+            "horse_elapsed_seconds": 88.7,
+            "leader_elapsed_seconds": 88.7,
             "horse_minus_leader_seconds": 0.0,
             "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.5333,
+            "race_final_minus_preceding_seconds_per_200m": -1.3333,
             "race_delta_within_0_1_seconds_per_200m": false
           },
           "late_gap_change": {
@@ -118,88 +549,7 @@
           },
           "late_position_change": {
             "status": "ok",
-            "comparison_count": 10,
-            "to_last_600m_rank_max": 1,
-            "to_last_600m_tie_count": 1,
-            "direction": "lost",
-            "to_last_600m_rank": 1,
-            "last3f_rank": 2,
-            "finish": 2,
-            "positions_gained": -1
-          }
-        },
-        {
-          "race_id": "202601010601",
-          "date": "2026-08-09",
-          "race_name": "2歳未勝利",
-          "surface": "ダート",
-          "distance": 1700.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.9765,
-            "middle_avg_200m": 12.4647,
-            "late_avg_200m": 13.3588,
-            "final_600_avg_200m": 13.3667,
-            "preceding_600_avg_200m": 12.3667,
-            "late_minus_early_seconds_per_200m": 1.3824,
-            "final_minus_preceding_seconds_per_200m": 1.0,
-            "full_segment_variation_seconds_per_200m": 2.5,
-            "complete_200m_segment_count": 8
-          },
-          "horse_performance_evidence": {
-            "finish": 2,
-            "field_count": 12,
-            "finish_ratio": 0.1667,
-            "fourth_corner_position": 1,
-            "fourth_corner_ratio": 0.0833,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 40.4,
-            "last3f_rank": 3,
-            "last3f_observed_count": 12,
-            "last3f_rank_ratio": 0.25,
-            "winner_time_gap_seconds": 0.3
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 12,
-            "to_last_600m_seconds": 67.0,
-            "to_last_600m_rank": 1,
-            "to_last_600m_tie_count": 1,
-            "last3f_seconds": 40.4,
-            "last3f_rank": 3
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 1100,
-            "horse_elapsed_seconds": 67.0,
-            "leader_elapsed_seconds": 67.0,
-            "horse_minus_leader_seconds": 0.0,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 1.0,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.0,
-            "finish_gap_to_winner_seconds": 0.3,
-            "finish_minus_split_gap_seconds": 0.3,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 12,
+            "comparison_count": 5,
             "to_last_600m_rank_max": 1,
             "to_last_600m_tie_count": 1,
             "direction": "lost",
@@ -208,556 +558,46 @@
             "finish": 2,
             "positions_gained": -1
           }
-        },
-        {
-          "race_id": "202602011205",
-          "date": "2026-07-19",
-          "race_name": "2歳新馬",
-          "surface": "芝",
-          "distance": 1800.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "M",
-          "race_lap_features": {
-            "early_avg_200m": 11.9667,
-            "middle_avg_200m": 12.5333,
-            "late_avg_200m": 12.5333,
-            "final_600_avg_200m": 12.5333,
-            "preceding_600_avg_200m": 12.5333,
-            "late_minus_early_seconds_per_200m": 0.5667,
-            "final_minus_preceding_seconds_per_200m": 0.0,
-            "full_segment_variation_seconds_per_200m": 1.5,
-            "complete_200m_segment_count": 9
-          },
-          "horse_performance_evidence": {
-            "finish": 5,
-            "field_count": 14,
-            "finish_ratio": 0.3571,
-            "fourth_corner_position": 2,
-            "fourth_corner_ratio": 0.1429,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 38.1,
-            "last3f_rank": 8,
-            "last3f_observed_count": 14,
-            "last3f_rank_ratio": 0.5714,
-            "winner_time_gap_seconds": 0.7
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 14,
-            "to_last_600m_seconds": 73.7,
-            "to_last_600m_rank": 2,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 38.1,
-            "last3f_rank": 8
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 1200,
-            "horse_elapsed_seconds": 73.7,
-            "leader_elapsed_seconds": 73.5,
-            "horse_minus_leader_seconds": 0.2,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.0,
-            "race_delta_within_0_1_seconds_per_200m": true
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.2,
-            "finish_gap_to_winner_seconds": 0.7,
-            "finish_minus_split_gap_seconds": 0.5,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 14,
-            "to_last_600m_rank_max": 3,
-            "to_last_600m_tie_count": 2,
-            "direction": "lost",
-            "to_last_600m_rank": 2,
-            "last3f_rank": 8,
-            "finish": 5,
-            "positions_gained": -3
-          }
         }
       ]
     },
     {
-      "horse_id": "2024103373",
-      "horse_number": "2",
-      "horse_name": "スゴイジャン",
-      "past_race_count": 1,
-      "past_races": [
-        {
-          "race_id": "202604040302",
-          "date": "2026-10-24",
-          "race_name": "2歳未勝利",
-          "surface": "芝",
-          "distance": 1400.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "M",
-          "race_lap_features": {
-            "early_avg_200m": 11.4,
-            "middle_avg_200m": 11.9714,
-            "late_avg_200m": 11.9,
-            "final_600_avg_200m": 11.9667,
-            "preceding_600_avg_200m": 11.3333,
-            "late_minus_early_seconds_per_200m": 0.5,
-            "final_minus_preceding_seconds_per_200m": 0.6333,
-            "full_segment_variation_seconds_per_200m": 2.0,
-            "complete_200m_segment_count": 7
-          },
-          "horse_performance_evidence": {
-            "finish": 12,
-            "field_count": 18,
-            "finish_ratio": 0.6667,
-            "fourth_corner_position": 10,
-            "fourth_corner_ratio": 0.5556,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 36.3,
-            "last3f_rank": 13,
-            "last3f_observed_count": 18,
-            "last3f_rank_ratio": 0.7222,
-            "winner_time_gap_seconds": 1.1
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 18,
-            "to_last_600m_seconds": 47.1,
-            "to_last_600m_rank": 8,
-            "to_last_600m_tie_count": 3,
-            "last3f_seconds": 36.3,
-            "last3f_rank": 13
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 800,
-            "horse_elapsed_seconds": 47.1,
-            "leader_elapsed_seconds": 46.4,
-            "horse_minus_leader_seconds": 0.7,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.6333,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.7,
-            "finish_gap_to_winner_seconds": 1.1,
-            "finish_minus_split_gap_seconds": 0.4,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 18,
-            "to_last_600m_rank_max": 10,
-            "to_last_600m_tie_count": 3,
-            "direction": "lost",
-            "to_last_600m_rank": 8,
-            "last3f_rank": 13,
-            "finish": 12,
-            "positions_gained": -4
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104045",
-      "horse_number": "3",
-      "horse_name": "フィアローゼン",
-      "past_race_count": 1,
-      "past_races": [
-        {
-          "race_id": "202608040904",
-          "date": "2026-10-25",
-          "race_name": "2歳新馬",
-          "surface": "ダート",
-          "distance": 1400.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "M",
-          "race_lap_features": {
-            "early_avg_200m": 11.9571,
-            "middle_avg_200m": 12.5143,
-            "late_avg_200m": 12.3,
-            "final_600_avg_200m": 12.3667,
-            "preceding_600_avg_200m": 12.1667,
-            "late_minus_early_seconds_per_200m": 0.3429,
-            "final_minus_preceding_seconds_per_200m": 0.2,
-            "full_segment_variation_seconds_per_200m": 1.0,
-            "complete_200m_segment_count": 7
-          },
-          "horse_performance_evidence": {
-            "finish": 11,
-            "field_count": 16,
-            "finish_ratio": 0.6875,
-            "fourth_corner_position": 3,
-            "fourth_corner_ratio": 0.1875,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 38.2,
-            "last3f_rank": 12,
-            "last3f_observed_count": 16,
-            "last3f_rank_ratio": 0.75,
-            "winner_time_gap_seconds": 1.6
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 16,
-            "to_last_600m_seconds": 49.2,
-            "to_last_600m_rank": 5,
-            "to_last_600m_tie_count": 1,
-            "last3f_seconds": 38.2,
-            "last3f_rank": 12
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 800,
-            "horse_elapsed_seconds": 49.2,
-            "leader_elapsed_seconds": 48.7,
-            "horse_minus_leader_seconds": 0.5,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.2,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.5,
-            "finish_gap_to_winner_seconds": 1.6,
-            "finish_minus_split_gap_seconds": 1.1,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 16,
-            "to_last_600m_rank_max": 5,
-            "to_last_600m_tie_count": 1,
-            "direction": "lost",
-            "to_last_600m_rank": 5,
-            "last3f_rank": 12,
-            "finish": 11,
-            "positions_gained": -6
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024103480",
-      "horse_number": "4",
-      "horse_name": "カムトゥルー",
-      "past_race_count": 2,
-      "past_races": [
-        {
-          "race_id": "202604040303",
-          "date": "2026-10-24",
-          "race_name": "2歳未勝利",
-          "surface": "ダート",
-          "distance": 1200.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.8,
-            "middle_avg_200m": 12.2,
-            "late_avg_200m": 12.55,
-            "final_600_avg_200m": 12.5333,
-            "preceding_600_avg_200m": 11.8333,
-            "late_minus_early_seconds_per_200m": 0.75,
-            "final_minus_preceding_seconds_per_200m": 0.7,
-            "full_segment_variation_seconds_per_200m": 1.5,
-            "complete_200m_segment_count": 6
-          },
-          "horse_performance_evidence": {
-            "finish": 6,
-            "field_count": 14,
-            "finish_ratio": 0.4286,
-            "fourth_corner_position": 9,
-            "fourth_corner_ratio": 0.6429,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 37.3,
-            "last3f_rank": 3,
-            "last3f_observed_count": 14,
-            "last3f_rank_ratio": 0.2143,
-            "winner_time_gap_seconds": 0.3
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 14,
-            "to_last_600m_seconds": 36.1,
-            "to_last_600m_rank": 8,
-            "to_last_600m_tie_count": 3,
-            "last3f_seconds": 37.3,
-            "last3f_rank": 3
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 600,
-            "horse_elapsed_seconds": 36.1,
-            "leader_elapsed_seconds": 35.5,
-            "horse_minus_leader_seconds": 0.6,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.7,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.6,
-            "finish_gap_to_winner_seconds": 0.3,
-            "finish_minus_split_gap_seconds": -0.3,
-            "direction": "narrowed"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 14,
-            "to_last_600m_rank_max": 10,
-            "to_last_600m_tie_count": 3,
-            "direction": "gained",
-            "to_last_600m_rank": 8,
-            "last3f_rank": 3,
-            "finish": 6,
-            "positions_gained": 2
-          }
-        },
-        {
-          "race_id": "202608040306",
-          "date": "2026-10-10",
-          "race_name": "2歳新馬",
-          "surface": "ダート",
-          "distance": 1200.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.65,
-            "middle_avg_200m": 11.85,
-            "late_avg_200m": 12.6,
-            "final_600_avg_200m": 12.5,
-            "preceding_600_avg_200m": 11.5667,
-            "late_minus_early_seconds_per_200m": 0.95,
-            "final_minus_preceding_seconds_per_200m": 0.9333,
-            "full_segment_variation_seconds_per_200m": 2.0,
-            "complete_200m_segment_count": 6
-          },
-          "horse_performance_evidence": {
-            "finish": 3,
-            "field_count": 11,
-            "finish_ratio": 0.2727,
-            "fourth_corner_position": 7,
-            "fourth_corner_ratio": 0.6364,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 36.3,
-            "last3f_rank": 2,
-            "last3f_observed_count": 11,
-            "last3f_rank_ratio": 0.1818,
-            "winner_time_gap_seconds": 0.6
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 11,
-            "to_last_600m_seconds": 36.5,
-            "to_last_600m_rank": 7,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 36.3,
-            "last3f_rank": 2
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 600,
-            "horse_elapsed_seconds": 36.5,
-            "leader_elapsed_seconds": 34.7,
-            "horse_minus_leader_seconds": 1.8,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.9333,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 1.8,
-            "finish_gap_to_winner_seconds": 0.6,
-            "finish_minus_split_gap_seconds": -1.2,
-            "direction": "narrowed"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 11,
-            "to_last_600m_rank_max": 8,
-            "to_last_600m_tie_count": 2,
-            "direction": "gained",
-            "to_last_600m_rank": 7,
-            "last3f_rank": 2,
-            "finish": 3,
-            "positions_gained": 4
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024103852",
+      "horse_id": "2024105411",
       "horse_number": "5",
-      "horse_name": "トワイライトローズ",
-      "past_race_count": 2,
+      "horse_name": "ベルウッドイタル",
+      "past_race_count": 1,
       "past_races": [
         {
-          "race_id": "202608040602",
-          "date": "2026-10-17",
-          "race_name": "2歳未勝利",
-          "surface": "芝",
-          "distance": 1200.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "M",
-          "race_lap_features": {
-            "early_avg_200m": 11.65,
-            "middle_avg_200m": 11.25,
-            "late_avg_200m": 11.35,
-            "final_600_avg_200m": 11.3667,
-            "preceding_600_avg_200m": 11.4667,
-            "late_minus_early_seconds_per_200m": -0.3,
-            "final_minus_preceding_seconds_per_200m": -0.1,
-            "full_segment_variation_seconds_per_200m": 1.3,
-            "complete_200m_segment_count": 6
-          },
-          "horse_performance_evidence": {
-            "finish": 5,
-            "field_count": 11,
-            "finish_ratio": 0.4545,
-            "fourth_corner_position": 9,
-            "fourth_corner_ratio": 0.8182,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 33.7,
-            "last3f_rank": 1,
-            "last3f_observed_count": 11,
-            "last3f_rank_ratio": 0.0909,
-            "winner_time_gap_seconds": 0.6
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 11,
-            "to_last_600m_seconds": 35.4,
-            "to_last_600m_rank": 10,
-            "to_last_600m_tie_count": 1,
-            "last3f_seconds": 33.7,
-            "last3f_rank": 1
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 600,
-            "horse_elapsed_seconds": 35.4,
-            "leader_elapsed_seconds": 34.4,
-            "horse_minus_leader_seconds": 1.0,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": -0.1,
-            "race_delta_within_0_1_seconds_per_200m": true
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 1.0,
-            "finish_gap_to_winner_seconds": 0.6,
-            "finish_minus_split_gap_seconds": -0.4,
-            "direction": "narrowed"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 11,
-            "to_last_600m_rank_max": 10,
-            "to_last_600m_tie_count": 1,
-            "direction": "gained",
-            "to_last_600m_rank": 10,
-            "last3f_rank": 1,
-            "finish": 5,
-            "positions_gained": 5
-          }
-        },
-        {
-          "race_id": "202601020405",
-          "date": "2026-08-30",
+          "race_id": "202605041105",
+          "date": "2026-11-01",
           "race_name": "2歳新馬",
           "surface": "芝",
-          "distance": 1800.0,
+          "distance": 2000.0,
           "lap_connection_status": "connected",
           "source_pace_code": "S",
           "race_lap_features": {
-            "early_avg_200m": 13.0667,
-            "middle_avg_200m": 12.9333,
-            "late_avg_200m": 11.6667,
-            "final_600_avg_200m": 11.6667,
-            "preceding_600_avg_200m": 12.9333,
-            "late_minus_early_seconds_per_200m": -1.4,
-            "final_minus_preceding_seconds_per_200m": -1.2667,
-            "full_segment_variation_seconds_per_200m": 2.2,
-            "complete_200m_segment_count": 9
+            "early_avg_200m": 12.28,
+            "middle_avg_200m": 12.67,
+            "late_avg_200m": 11.74,
+            "final_600_avg_200m": 11.6333,
+            "preceding_600_avg_200m": 12.8,
+            "late_minus_early_seconds_per_200m": -0.54,
+            "final_minus_preceding_seconds_per_200m": -1.1667,
+            "full_segment_variation_seconds_per_200m": 1.9,
+            "complete_200m_segment_count": 10
           },
           "horse_performance_evidence": {
-            "finish": 5,
+            "finish": 8,
             "field_count": 8,
-            "finish_ratio": 0.625,
-            "fourth_corner_position": 4,
-            "fourth_corner_ratio": 0.5,
+            "finish_ratio": 1.0,
+            "fourth_corner_position": 8,
+            "fourth_corner_ratio": 1.0,
             "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 36.4,
-            "last3f_rank": 5,
+            "last3f_seconds": 35.7,
+            "last3f_rank": 6,
             "last3f_observed_count": 8,
-            "last3f_rank_ratio": 0.625,
-            "winner_time_gap_seconds": 1.7
+            "last3f_rank_ratio": 0.75,
+            "winner_time_gap_seconds": 2.2
           },
           "assessment": {
             "pace_advantage": null,
@@ -773,1074 +613,127 @@
           "same_race_clock_comparison": {
             "status": "ok",
             "comparison_count": 8,
-            "to_last_600m_seconds": 78.3,
-            "to_last_600m_rank": 6,
+            "to_last_600m_seconds": 88.8,
+            "to_last_600m_rank": 8,
             "to_last_600m_tie_count": 1,
-            "last3f_seconds": 36.4,
-            "last3f_rank": 5
+            "last3f_seconds": 35.7,
+            "last3f_rank": 6
+          },
+          "late_race_observation": {
+            "status": "ok",
+            "split_distance_m": 1400,
+            "horse_elapsed_seconds": 88.8,
+            "leader_elapsed_seconds": 87.4,
+            "horse_minus_leader_seconds": 1.4,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -1.1667,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "late_gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.4,
+            "finish_gap_to_winner_seconds": 2.2,
+            "finish_minus_split_gap_seconds": 0.8,
+            "direction": "widened"
+          },
+          "late_position_change": {
+            "status": "ok",
+            "comparison_count": 8,
+            "to_last_600m_rank_max": 8,
+            "to_last_600m_tie_count": 1,
+            "direction": "unchanged",
+            "to_last_600m_rank": 8,
+            "last3f_rank": 6,
+            "finish": 8,
+            "positions_gained": 0
+          }
+        }
+      ]
+    },
+    {
+      "horse_id": "2024107196",
+      "horse_number": "6",
+      "horse_name": "ゴールデンプロミス",
+      "past_race_count": 1,
+      "past_races": [
+        {
+          "race_id": "202608040905",
+          "date": "2026-10-25",
+          "race_name": "2歳新馬",
+          "surface": "芝",
+          "distance": 1800.0,
+          "lap_connection_status": "connected",
+          "source_pace_code": "S",
+          "race_lap_features": {
+            "early_avg_200m": 12.9667,
+            "middle_avg_200m": 12.9667,
+            "late_avg_200m": 11.4,
+            "final_600_avg_200m": 11.4,
+            "preceding_600_avg_200m": 12.9667,
+            "late_minus_early_seconds_per_200m": -1.5667,
+            "final_minus_preceding_seconds_per_200m": -1.5667,
+            "full_segment_variation_seconds_per_200m": 2.4,
+            "complete_200m_segment_count": 9
+          },
+          "horse_performance_evidence": {
+            "finish": 3,
+            "field_count": 8,
+            "finish_ratio": 0.375,
+            "fourth_corner_position": 4,
+            "fourth_corner_ratio": 0.5,
+            "fourth_corner_evidence_status": "history_within_group_range",
+            "last3f_seconds": 34.1,
+            "last3f_rank": 2,
+            "last3f_observed_count": 8,
+            "last3f_rank_ratio": 0.25,
+            "winner_time_gap_seconds": 0.2
+          },
+          "assessment": {
+            "pace_advantage": null,
+            "pace_disadvantage": null,
+            "individual_lap": null,
+            "trouble": null,
+            "previous_race_issue": null,
+            "issue_resolution": null,
+            "ability_adjustment": null,
+            "performance_rate_adjustment": null
+          },
+          "unknowns": [],
+          "same_race_clock_comparison": {
+            "status": "ok",
+            "comparison_count": 8,
+            "to_last_600m_seconds": 78.1,
+            "to_last_600m_rank": 4,
+            "to_last_600m_tie_count": 2,
+            "last3f_seconds": 34.1,
+            "last3f_rank": 2
           },
           "late_race_observation": {
             "status": "ok",
             "split_distance_m": 1200,
-            "horse_elapsed_seconds": 78.3,
-            "leader_elapsed_seconds": 78.0,
+            "horse_elapsed_seconds": 78.1,
+            "leader_elapsed_seconds": 77.8,
             "horse_minus_leader_seconds": 0.3,
             "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": -1.2667,
+            "race_final_minus_preceding_seconds_per_200m": -1.5667,
             "race_delta_within_0_1_seconds_per_200m": false
           },
           "late_gap_change": {
             "status": "ok",
             "split_gap_to_leader_seconds": 0.3,
-            "finish_gap_to_winner_seconds": 1.7,
-            "finish_minus_split_gap_seconds": 1.4,
-            "direction": "widened"
+            "finish_gap_to_winner_seconds": 0.2,
+            "finish_minus_split_gap_seconds": -0.1,
+            "direction": "narrowed"
           },
           "late_position_change": {
             "status": "ok",
             "comparison_count": 8,
-            "to_last_600m_rank_max": 6,
-            "to_last_600m_tie_count": 1,
+            "to_last_600m_rank_max": 5,
+            "to_last_600m_tie_count": 2,
             "direction": "gained",
-            "to_last_600m_rank": 6,
-            "last3f_rank": 5,
-            "finish": 5,
-            "positions_gained": 1
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104092",
-      "horse_number": "6",
-      "horse_name": "オメガダフネ",
-      "past_race_count": 1,
-      "past_races": [
-        {
-          "race_id": "202609040106",
-          "date": "2026-09-05",
-          "race_name": "2歳新馬",
-          "surface": "ダート",
-          "distance": 1400.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.6571,
-            "middle_avg_200m": 11.9571,
-            "late_avg_200m": 12.9,
-            "final_600_avg_200m": 12.7,
-            "preceding_600_avg_200m": 11.5667,
-            "late_minus_early_seconds_per_200m": 1.2429,
-            "final_minus_preceding_seconds_per_200m": 1.1333,
-            "full_segment_variation_seconds_per_200m": 2.5,
-            "complete_200m_segment_count": 7
-          },
-          "horse_performance_evidence": {
-            "finish": 7,
-            "field_count": 13,
-            "finish_ratio": 0.5385,
-            "fourth_corner_position": 9,
-            "fourth_corner_ratio": 0.6923,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 40.2,
-            "last3f_rank": 9,
-            "last3f_observed_count": 13,
-            "last3f_rank_ratio": 0.6923,
-            "winner_time_gap_seconds": 3.3
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 13,
-            "to_last_600m_seconds": 48.3,
-            "to_last_600m_rank": 7,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 40.2,
-            "last3f_rank": 9
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 800,
-            "horse_elapsed_seconds": 48.3,
-            "leader_elapsed_seconds": 47.1,
-            "horse_minus_leader_seconds": 1.2,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 1.1333,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 1.2,
-            "finish_gap_to_winner_seconds": 3.3,
-            "finish_minus_split_gap_seconds": 2.1,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 13,
-            "to_last_600m_rank_max": 8,
-            "to_last_600m_tie_count": 2,
-            "direction": "undetermined",
-            "to_last_600m_rank": 7,
-            "last3f_rank": 9,
-            "finish": 7,
-            "positions_gained": 0
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024102930",
-      "horse_number": "7",
-      "horse_name": "エルダークローネ",
-      "past_race_count": 4,
-      "past_races": [
-        {
-          "race_id": "202608040602",
-          "date": "2026-10-17",
-          "race_name": "2歳未勝利",
-          "surface": "芝",
-          "distance": 1200.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "M",
-          "race_lap_features": {
-            "early_avg_200m": 11.65,
-            "middle_avg_200m": 11.25,
-            "late_avg_200m": 11.35,
-            "final_600_avg_200m": 11.3667,
-            "preceding_600_avg_200m": 11.4667,
-            "late_minus_early_seconds_per_200m": -0.3,
-            "final_minus_preceding_seconds_per_200m": -0.1,
-            "full_segment_variation_seconds_per_200m": 1.3,
-            "complete_200m_segment_count": 6
-          },
-          "horse_performance_evidence": {
-            "finish": 4,
-            "field_count": 11,
-            "finish_ratio": 0.3636,
-            "fourth_corner_position": 9,
-            "fourth_corner_ratio": 0.8182,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 34.0,
+            "to_last_600m_rank": 4,
             "last3f_rank": 2,
-            "last3f_observed_count": 11,
-            "last3f_rank_ratio": 0.1818,
-            "winner_time_gap_seconds": 0.6
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 11,
-            "to_last_600m_seconds": 35.1,
-            "to_last_600m_rank": 8,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 34.0,
-            "last3f_rank": 2
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 600,
-            "horse_elapsed_seconds": 35.1,
-            "leader_elapsed_seconds": 34.4,
-            "horse_minus_leader_seconds": 0.7,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": -0.1,
-            "race_delta_within_0_1_seconds_per_200m": true
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.7,
-            "finish_gap_to_winner_seconds": 0.6,
-            "finish_minus_split_gap_seconds": -0.1,
-            "direction": "narrowed"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 11,
-            "to_last_600m_rank_max": 9,
-            "to_last_600m_tie_count": 2,
-            "direction": "gained",
-            "to_last_600m_rank": 8,
-            "last3f_rank": 2,
-            "finish": 4,
-            "positions_gained": 4
-          }
-        },
-        {
-          "race_id": "202609040703",
-          "date": "2026-09-21",
-          "race_name": "2歳未勝利",
-          "surface": "芝",
-          "distance": 1200.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "M",
-          "race_lap_features": {
-            "early_avg_200m": 11.55,
-            "middle_avg_200m": 11.2,
-            "late_avg_200m": 11.55,
-            "final_600_avg_200m": 11.5,
-            "preceding_600_avg_200m": 11.3667,
-            "late_minus_early_seconds_per_200m": 0.0,
-            "final_minus_preceding_seconds_per_200m": 0.1333,
-            "full_segment_variation_seconds_per_200m": 1.7,
-            "complete_200m_segment_count": 6
-          },
-          "horse_performance_evidence": {
-            "finish": 5,
-            "field_count": 13,
-            "finish_ratio": 0.3846,
-            "fourth_corner_position": 5,
-            "fourth_corner_ratio": 0.3846,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 34.9,
-            "last3f_rank": 5,
-            "last3f_observed_count": 13,
-            "last3f_rank_ratio": 0.3846,
-            "winner_time_gap_seconds": 1.0
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 13,
-            "to_last_600m_seconds": 34.7,
-            "to_last_600m_rank": 5,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 34.9,
-            "last3f_rank": 5
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 600,
-            "horse_elapsed_seconds": 34.7,
-            "leader_elapsed_seconds": 34.1,
-            "horse_minus_leader_seconds": 0.6,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.1333,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.6,
-            "finish_gap_to_winner_seconds": 1.0,
-            "finish_minus_split_gap_seconds": 0.4,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 13,
-            "to_last_600m_rank_max": 6,
-            "to_last_600m_tie_count": 2,
-            "direction": "undetermined",
-            "to_last_600m_rank": 5,
-            "last3f_rank": 5,
-            "finish": 5,
-            "positions_gained": 0
-          }
-        },
-        {
-          "race_id": "202607020101",
-          "date": "2026-07-25",
-          "race_name": "2歳未勝利",
-          "surface": "ダート",
-          "distance": 1200.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.75,
-            "middle_avg_200m": 12.35,
-            "late_avg_200m": 12.7,
-            "final_600_avg_200m": 12.6333,
-            "preceding_600_avg_200m": 11.9,
-            "late_minus_early_seconds_per_200m": 0.95,
-            "final_minus_preceding_seconds_per_200m": 0.7333,
-            "full_segment_variation_seconds_per_200m": 2.2,
-            "complete_200m_segment_count": 6
-          },
-          "horse_performance_evidence": {
-            "finish": 4,
-            "field_count": 9,
-            "finish_ratio": 0.4444,
-            "fourth_corner_position": 7,
-            "fourth_corner_ratio": 0.7778,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 38.9,
-            "last3f_rank": 5,
-            "last3f_observed_count": 9,
-            "last3f_rank_ratio": 0.5556,
-            "winner_time_gap_seconds": 1.5
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 9,
-            "to_last_600m_seconds": 36.2,
-            "to_last_600m_rank": 7,
-            "to_last_600m_tie_count": 1,
-            "last3f_seconds": 38.9,
-            "last3f_rank": 5
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 600,
-            "horse_elapsed_seconds": 36.2,
-            "leader_elapsed_seconds": 35.7,
-            "horse_minus_leader_seconds": 0.5,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.7333,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.5,
-            "finish_gap_to_winner_seconds": 1.5,
-            "finish_minus_split_gap_seconds": 1.0,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 9,
-            "to_last_600m_rank_max": 7,
-            "to_last_600m_tie_count": 1,
-            "direction": "gained",
-            "to_last_600m_rank": 7,
-            "last3f_rank": 5,
-            "finish": 4,
-            "positions_gained": 3
-          }
-        },
-        {
-          "race_id": "202610020205",
-          "date": "2026-06-28",
-          "race_name": "2歳新馬",
-          "surface": "芝",
-          "distance": 1200.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.45,
-            "middle_avg_200m": 11.3,
-            "late_avg_200m": 12.0,
-            "final_600_avg_200m": 11.8,
-            "preceding_600_avg_200m": 11.3667,
-            "late_minus_early_seconds_per_200m": 0.55,
-            "final_minus_preceding_seconds_per_200m": 0.4333,
-            "full_segment_variation_seconds_per_200m": 1.2,
-            "complete_200m_segment_count": 6
-          },
-          "horse_performance_evidence": {
-            "finish": 2,
-            "field_count": 10,
-            "finish_ratio": 0.2,
-            "fourth_corner_position": 3,
-            "fourth_corner_ratio": 0.3,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 35.3,
-            "last3f_rank": 2,
-            "last3f_observed_count": 10,
-            "last3f_rank_ratio": 0.2,
-            "winner_time_gap_seconds": 0.4
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 10,
-            "to_last_600m_seconds": 34.6,
-            "to_last_600m_rank": 3,
-            "to_last_600m_tie_count": 1,
-            "last3f_seconds": 35.3,
-            "last3f_rank": 2
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 600,
-            "horse_elapsed_seconds": 34.6,
-            "leader_elapsed_seconds": 34.1,
-            "horse_minus_leader_seconds": 0.5,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.4333,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.5,
-            "finish_gap_to_winner_seconds": 0.4,
-            "finish_minus_split_gap_seconds": -0.1,
-            "direction": "narrowed"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 10,
-            "to_last_600m_rank_max": 3,
-            "to_last_600m_tie_count": 1,
-            "direction": "gained",
-            "to_last_600m_rank": 3,
-            "last3f_rank": 2,
-            "finish": 2,
-            "positions_gained": 1
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024105282",
-      "horse_number": "8",
-      "horse_name": "キャンディリヒト",
-      "past_race_count": 1,
-      "past_races": [
-        {
-          "race_id": "202605040306",
-          "date": "2026-10-10",
-          "race_name": "2歳新馬",
-          "surface": "芝",
-          "distance": 1600.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "S",
-          "race_lap_features": {
-            "early_avg_200m": 12.05,
-            "middle_avg_200m": 12.7375,
-            "late_avg_200m": 11.2875,
-            "final_600_avg_200m": 11.3667,
-            "preceding_600_avg_200m": 12.7667,
-            "late_minus_early_seconds_per_200m": -0.7625,
-            "final_minus_preceding_seconds_per_200m": -1.4,
-            "full_segment_variation_seconds_per_200m": 2.0,
-            "complete_200m_segment_count": 8
-          },
-          "horse_performance_evidence": {
-            "finish": 9,
-            "field_count": 14,
-            "finish_ratio": 0.6429,
-            "fourth_corner_position": 2,
-            "fourth_corner_ratio": 0.1429,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 35.1,
-            "last3f_rank": 13,
-            "last3f_observed_count": 14,
-            "last3f_rank_ratio": 0.9286,
-            "winner_time_gap_seconds": 1.2
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 14,
-            "to_last_600m_seconds": 62.3,
-            "to_last_600m_rank": 2,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 35.1,
-            "last3f_rank": 13
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 1000,
-            "horse_elapsed_seconds": 62.3,
-            "leader_elapsed_seconds": 62.1,
-            "horse_minus_leader_seconds": 0.2,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": -1.4,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.2,
-            "finish_gap_to_winner_seconds": 1.2,
-            "finish_minus_split_gap_seconds": 1.0,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 14,
-            "to_last_600m_rank_max": 3,
-            "to_last_600m_tie_count": 2,
-            "direction": "lost",
-            "to_last_600m_rank": 2,
-            "last3f_rank": 13,
-            "finish": 9,
-            "positions_gained": -7
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024108008",
-      "horse_number": "9",
-      "horse_name": "アランチャ",
-      "past_race_count": 1,
-      "past_races": [
-        {
-          "race_id": "202608040904",
-          "date": "2026-10-25",
-          "race_name": "2歳新馬",
-          "surface": "ダート",
-          "distance": 1400.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "M",
-          "race_lap_features": {
-            "early_avg_200m": 11.9571,
-            "middle_avg_200m": 12.5143,
-            "late_avg_200m": 12.3,
-            "final_600_avg_200m": 12.3667,
-            "preceding_600_avg_200m": 12.1667,
-            "late_minus_early_seconds_per_200m": 0.3429,
-            "final_minus_preceding_seconds_per_200m": 0.2,
-            "full_segment_variation_seconds_per_200m": 1.0,
-            "complete_200m_segment_count": 7
-          },
-          "horse_performance_evidence": {
-            "finish": 16,
-            "field_count": 16,
-            "finish_ratio": 1.0,
-            "fourth_corner_position": 14,
-            "fourth_corner_ratio": 0.875,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 38.7,
-            "last3f_rank": 14,
-            "last3f_observed_count": 16,
-            "last3f_rank_ratio": 0.875,
-            "winner_time_gap_seconds": 3.1
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 16,
-            "to_last_600m_seconds": 50.2,
-            "to_last_600m_rank": 13,
-            "to_last_600m_tie_count": 1,
-            "last3f_seconds": 38.7,
-            "last3f_rank": 14
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 800,
-            "horse_elapsed_seconds": 50.2,
-            "leader_elapsed_seconds": 48.7,
-            "horse_minus_leader_seconds": 1.5,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.2,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 1.5,
-            "finish_gap_to_winner_seconds": 3.1,
-            "finish_minus_split_gap_seconds": 1.6,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 16,
-            "to_last_600m_rank_max": 13,
-            "to_last_600m_tie_count": 1,
-            "direction": "lost",
-            "to_last_600m_rank": 13,
-            "last3f_rank": 14,
-            "finish": 16,
-            "positions_gained": -3
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024105446",
-      "horse_number": "10",
-      "horse_name": "ミライショウグン",
-      "past_race_count": 2,
-      "past_races": [
-        {
-          "race_id": "202601020101",
-          "date": "2026-08-22",
-          "race_name": "2歳未勝利",
-          "surface": "ダート",
-          "distance": 1700.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.8118,
-            "middle_avg_200m": 12.6118,
-            "late_avg_200m": 13.1647,
-            "final_600_avg_200m": 13.1333,
-            "preceding_600_avg_200m": 12.5667,
-            "late_minus_early_seconds_per_200m": 1.3529,
-            "final_minus_preceding_seconds_per_200m": 0.5667,
-            "full_segment_variation_seconds_per_200m": 2.6,
-            "complete_200m_segment_count": 8
-          },
-          "horse_performance_evidence": {
-            "finish": 9,
-            "field_count": 12,
-            "finish_ratio": 0.75,
-            "fourth_corner_position": 9,
-            "fourth_corner_ratio": 0.75,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 44.5,
-            "last3f_rank": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank_ratio": 1.0,
-            "winner_time_gap_seconds": 6.2
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 12,
-            "to_last_600m_seconds": 68.2,
-            "to_last_600m_rank": 7,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 44.5,
-            "last3f_rank": 12
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 1100,
-            "horse_elapsed_seconds": 68.2,
-            "leader_elapsed_seconds": 67.1,
-            "horse_minus_leader_seconds": 1.1,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.5667,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 1.1,
-            "finish_gap_to_winner_seconds": 6.2,
-            "finish_minus_split_gap_seconds": 5.1,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 12,
-            "to_last_600m_rank_max": 8,
-            "to_last_600m_tie_count": 2,
-            "direction": "lost",
-            "to_last_600m_rank": 7,
-            "last3f_rank": 12,
-            "finish": 9,
-            "positions_gained": -2
-          }
-        },
-        {
-          "race_id": "202601010805",
-          "date": "2026-08-16",
-          "race_name": "2歳新馬",
-          "surface": "芝",
-          "distance": 1800.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "S",
-          "race_lap_features": {
-            "early_avg_200m": 12.4667,
-            "middle_avg_200m": 12.8333,
-            "late_avg_200m": 11.9333,
-            "final_600_avg_200m": 11.9333,
-            "preceding_600_avg_200m": 12.8333,
-            "late_minus_early_seconds_per_200m": -0.5333,
-            "final_minus_preceding_seconds_per_200m": -0.9,
-            "full_segment_variation_seconds_per_200m": 1.2,
-            "complete_200m_segment_count": 9
-          },
-          "horse_performance_evidence": {
-            "finish": 12,
-            "field_count": 12,
-            "finish_ratio": 1.0,
-            "fourth_corner_position": 6,
-            "fourth_corner_ratio": 0.5,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 38.9,
-            "last3f_rank": 12,
-            "last3f_observed_count": 12,
-            "last3f_rank_ratio": 1.0,
-            "winner_time_gap_seconds": 3.3
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 12,
-            "to_last_600m_seconds": 76.1,
-            "to_last_600m_rank": 2,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 38.9,
-            "last3f_rank": 12
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 1200,
-            "horse_elapsed_seconds": 76.1,
-            "leader_elapsed_seconds": 75.9,
-            "horse_minus_leader_seconds": 0.2,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": -0.9,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.2,
-            "finish_gap_to_winner_seconds": 3.3,
-            "finish_minus_split_gap_seconds": 3.1,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 12,
-            "to_last_600m_rank_max": 3,
-            "to_last_600m_tie_count": 2,
-            "direction": "lost",
-            "to_last_600m_rank": 2,
-            "last3f_rank": 12,
-            "finish": 12,
-            "positions_gained": -10
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104625",
-      "horse_number": "11",
-      "horse_name": "アスレイ",
-      "past_race_count": 1,
-      "past_races": [
-        {
-          "race_id": "202608040904",
-          "date": "2026-10-25",
-          "race_name": "2歳新馬",
-          "surface": "ダート",
-          "distance": 1400.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "M",
-          "race_lap_features": {
-            "early_avg_200m": 11.9571,
-            "middle_avg_200m": 12.5143,
-            "late_avg_200m": 12.3,
-            "final_600_avg_200m": 12.3667,
-            "preceding_600_avg_200m": 12.1667,
-            "late_minus_early_seconds_per_200m": 0.3429,
-            "final_minus_preceding_seconds_per_200m": 0.2,
-            "full_segment_variation_seconds_per_200m": 1.0,
-            "complete_200m_segment_count": 7
-          },
-          "horse_performance_evidence": {
-            "finish": 6,
-            "field_count": 16,
-            "finish_ratio": 0.375,
-            "fourth_corner_position": 7,
-            "fourth_corner_ratio": 0.4375,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 37.4,
-            "last3f_rank": 9,
-            "last3f_observed_count": 16,
-            "last3f_rank_ratio": 0.5625,
-            "winner_time_gap_seconds": 1.0
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 16,
-            "to_last_600m_seconds": 49.4,
-            "to_last_600m_rank": 7,
-            "to_last_600m_tie_count": 1,
-            "last3f_seconds": 37.4,
-            "last3f_rank": 9
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 800,
-            "horse_elapsed_seconds": 49.4,
-            "leader_elapsed_seconds": 48.7,
-            "horse_minus_leader_seconds": 0.7,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.2,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 0.7,
-            "finish_gap_to_winner_seconds": 1.0,
-            "finish_minus_split_gap_seconds": 0.3,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 16,
-            "to_last_600m_rank_max": 7,
-            "to_last_600m_tie_count": 1,
-            "direction": "gained",
-            "to_last_600m_rank": 7,
-            "last3f_rank": 9,
-            "finish": 6,
-            "positions_gained": 1
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024104531",
-      "horse_number": "12",
-      "horse_name": "ハイグッドカンフー",
-      "past_race_count": 1,
-      "past_races": [
-        {
-          "race_id": "202604040105",
-          "date": "2026-10-17",
-          "race_name": "2歳新馬",
-          "surface": "ダート",
-          "distance": 1200.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.7,
-            "middle_avg_200m": 12.3,
-            "late_avg_200m": 12.65,
-            "final_600_avg_200m": 12.7,
-            "preceding_600_avg_200m": 11.7333,
-            "late_minus_early_seconds_per_200m": 0.95,
-            "final_minus_preceding_seconds_per_200m": 0.9667,
-            "full_segment_variation_seconds_per_200m": 1.6,
-            "complete_200m_segment_count": 6
-          },
-          "horse_performance_evidence": {
-            "finish": 8,
-            "field_count": 15,
-            "finish_ratio": 0.5333,
-            "fourth_corner_position": 5,
-            "fourth_corner_ratio": 0.3333,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 38.7,
-            "last3f_rank": 10,
-            "last3f_observed_count": 15,
-            "last3f_rank_ratio": 0.6667,
-            "winner_time_gap_seconds": 1.6
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 15,
-            "to_last_600m_seconds": 36.2,
-            "to_last_600m_rank": 5,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 38.7,
-            "last3f_rank": 10
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 600,
-            "horse_elapsed_seconds": 36.2,
-            "leader_elapsed_seconds": 35.2,
-            "horse_minus_leader_seconds": 1.0,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.9667,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 1.0,
-            "finish_gap_to_winner_seconds": 1.6,
-            "finish_minus_split_gap_seconds": 0.6,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 15,
-            "to_last_600m_rank_max": 6,
-            "to_last_600m_tie_count": 2,
-            "direction": "lost",
-            "to_last_600m_rank": 5,
-            "last3f_rank": 10,
-            "finish": 8,
-            "positions_gained": -3
-          }
-        }
-      ]
-    },
-    {
-      "horse_id": "2024101199",
-      "horse_number": "13",
-      "horse_name": "パロディ",
-      "past_race_count": 1,
-      "past_races": [
-        {
-          "race_id": "202604040405",
-          "date": "2026-10-25",
-          "race_name": "2歳新馬",
-          "surface": "芝",
-          "distance": 1400.0,
-          "lap_connection_status": "connected",
-          "source_pace_code": "H",
-          "race_lap_features": {
-            "early_avg_200m": 11.8571,
-            "middle_avg_200m": 11.9286,
-            "late_avg_200m": 12.3,
-            "final_600_avg_200m": 12.3,
-            "preceding_600_avg_200m": 11.5667,
-            "late_minus_early_seconds_per_200m": 0.4429,
-            "final_minus_preceding_seconds_per_200m": 0.7333,
-            "full_segment_variation_seconds_per_200m": 1.5,
-            "complete_200m_segment_count": 7
-          },
-          "horse_performance_evidence": {
-            "finish": 8,
-            "field_count": 18,
-            "finish_ratio": 0.4444,
-            "fourth_corner_position": 8,
-            "fourth_corner_ratio": 0.4444,
-            "fourth_corner_evidence_status": "history_within_group_range",
-            "last3f_seconds": 37.3,
-            "last3f_rank": 10,
-            "last3f_observed_count": 18,
-            "last3f_rank_ratio": 0.5556,
-            "winner_time_gap_seconds": 2.5
-          },
-          "assessment": {
-            "pace_advantage": null,
-            "pace_disadvantage": null,
-            "individual_lap": null,
-            "trouble": null,
-            "previous_race_issue": null,
-            "issue_resolution": null,
-            "ability_adjustment": null,
-            "performance_rate_adjustment": null
-          },
-          "unknowns": [],
-          "same_race_clock_comparison": {
-            "status": "ok",
-            "comparison_count": 18,
-            "to_last_600m_seconds": 49.4,
-            "to_last_600m_rank": 9,
-            "to_last_600m_tie_count": 2,
-            "last3f_seconds": 37.3,
-            "last3f_rank": 10
-          },
-          "late_race_observation": {
-            "status": "ok",
-            "split_distance_m": 800,
-            "horse_elapsed_seconds": 49.4,
-            "leader_elapsed_seconds": 47.3,
-            "horse_minus_leader_seconds": 2.1,
-            "negative_gap_within_tolerance": false,
-            "race_final_minus_preceding_seconds_per_200m": 0.7333,
-            "race_delta_within_0_1_seconds_per_200m": false
-          },
-          "late_gap_change": {
-            "status": "ok",
-            "split_gap_to_leader_seconds": 2.1,
-            "finish_gap_to_winner_seconds": 2.5,
-            "finish_minus_split_gap_seconds": 0.4,
-            "direction": "widened"
-          },
-          "late_position_change": {
-            "status": "ok",
-            "comparison_count": 18,
-            "to_last_600m_rank_max": 10,
-            "to_last_600m_tie_count": 2,
-            "direction": "gained",
-            "to_last_600m_rank": 9,
-            "last3f_rank": 10,
-            "finish": 8,
+            "finish": 3,
             "positions_gained": 1
           }
         }
