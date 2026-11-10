@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "evidence_version": "performance_evidence_v1",
+  "evidence_version": "performance_evidence_v2",
   "target_race_id": "202605050101",
   "race_date": "2026-11-07",
-  "updated_at": "2026-11-11T08:06:09.492292+09:00",
+  "updated_at": "2026-11-11T08:15:30.686570+09:00",
   "policy": {
     "diagnostic_only": true,
     "training_used": false,
@@ -15,6 +15,7 @@
     "formal_evaluation_eligible": false
   },
   "optional_source_status": {
+    "runner_pace_context.json": "matched",
     "track_condition.json": "matched",
     "day_bias.json": "matched"
   },
@@ -76,6 +77,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202605040901",
+          "past_race_date": "2026-10-25",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_seconds": 62.4,
+            "to_last_600m_rank": 11,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 38.3,
+            "last3f_rank": 3
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1000,
+            "horse_elapsed_seconds": 62.4,
+            "leader_elapsed_seconds": 61.2,
+            "horse_minus_leader_seconds": 1.2,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": 0.0667,
+            "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.2,
+            "finish_gap_to_winner_seconds": 1.5,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_rank_max": 11,
+            "to_last_600m_tie_count": 1,
+            "direction": "gained",
+            "to_last_600m_rank": 11,
+            "last3f_rank": 3,
+            "finish": 6,
+            "positions_gained": 5
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -213,6 +259,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202605040804",
+          "past_race_date": "2026-10-24",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 15,
+            "to_last_600m_seconds": 64.3,
+            "to_last_600m_rank": 14,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 37.8,
+            "last3f_rank": 4
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1000,
+            "horse_elapsed_seconds": 64.3,
+            "leader_elapsed_seconds": 62.3,
+            "horse_minus_leader_seconds": 2.0,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -0.1667,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 2.0,
+            "finish_gap_to_winner_seconds": 2.4,
+            "finish_minus_split_gap_seconds": 0.4,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 15,
+            "to_last_600m_rank_max": 14,
+            "to_last_600m_tie_count": 1,
+            "direction": "gained",
+            "to_last_600m_rank": 14,
+            "last3f_rank": 4,
+            "finish": 10,
+            "positions_gained": 4
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -331,6 +422,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202605041004",
+          "past_race_date": "2026-10-31",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_seconds": 51.0,
+            "to_last_600m_rank": 14,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 37.6,
+            "last3f_rank": 10
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 800,
+            "horse_elapsed_seconds": 51.0,
+            "leader_elapsed_seconds": 49.2,
+            "horse_minus_leader_seconds": 1.8,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": 0.0333,
+            "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.8,
+            "finish_gap_to_winner_seconds": 3.0,
+            "finish_minus_split_gap_seconds": 1.2,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_rank_max": 14,
+            "to_last_600m_tie_count": 1,
+            "direction": "gained",
+            "to_last_600m_rank": 14,
+            "last3f_rank": 10,
+            "finish": 13,
+            "positions_gained": 1
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -447,6 +583,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202604040301",
+          "past_race_date": "2026-10-24",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 12,
+            "to_last_600m_seconds": 76.5,
+            "to_last_600m_rank": 6,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 41.0,
+            "last3f_rank": 4
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1200,
+            "horse_elapsed_seconds": 76.5,
+            "leader_elapsed_seconds": 75.4,
+            "horse_minus_leader_seconds": 1.1,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": 0.5333,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.1,
+            "finish_gap_to_winner_seconds": 2.2,
+            "finish_minus_split_gap_seconds": 1.1,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 12,
+            "to_last_600m_rank_max": 6,
+            "to_last_600m_tie_count": 1,
+            "direction": "gained",
+            "to_last_600m_rank": 6,
+            "last3f_rank": 4,
+            "finish": 3,
+            "positions_gained": 3
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -580,6 +761,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202606040604",
+          "past_race_date": "2026-09-20",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_seconds": 75.3,
+            "to_last_600m_rank": 5,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 38.5,
+            "last3f_rank": 4
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1200,
+            "horse_elapsed_seconds": 75.3,
+            "leader_elapsed_seconds": 74.9,
+            "horse_minus_leader_seconds": 0.4,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": 0.4667,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.4,
+            "finish_gap_to_winner_seconds": 0.1,
+            "finish_minus_split_gap_seconds": -0.3,
+            "direction": "narrowed"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_rank_max": 5,
+            "to_last_600m_tie_count": 1,
+            "direction": "gained",
+            "to_last_600m_rank": 5,
+            "last3f_rank": 4,
+            "finish": 2,
+            "positions_gained": 3
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -697,6 +923,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202606040206",
+          "past_race_date": "2026-09-06",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 12,
+            "to_last_600m_seconds": 77.6,
+            "to_last_600m_rank": 7,
+            "to_last_600m_tie_count": 2,
+            "last3f_seconds": 43.2,
+            "last3f_rank": 11
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1200,
+            "horse_elapsed_seconds": 77.6,
+            "leader_elapsed_seconds": 76.0,
+            "horse_minus_leader_seconds": 1.6,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -0.1,
+            "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 1.6,
+            "finish_gap_to_winner_seconds": 6.9,
+            "finish_minus_split_gap_seconds": 5.3,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 12,
+            "to_last_600m_rank_max": 8,
+            "to_last_600m_tie_count": 2,
+            "direction": "lost",
+            "to_last_600m_rank": 7,
+            "last3f_rank": 11,
+            "finish": 11,
+            "positions_gained": -4
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -817,6 +1088,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202601010702",
+          "past_race_date": "2026-08-15",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 10,
+            "to_last_600m_seconds": 72.9,
+            "to_last_600m_rank": 1,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 36.5,
+            "last3f_rank": 6
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1200,
+            "horse_elapsed_seconds": 72.9,
+            "leader_elapsed_seconds": 72.9,
+            "horse_minus_leader_seconds": 0.0,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -0.1333,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.0,
+            "finish_gap_to_winner_seconds": 0.3,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 10,
+            "to_last_600m_rank_max": 1,
+            "to_last_600m_tie_count": 1,
+            "direction": "lost",
+            "to_last_600m_rank": 1,
+            "last3f_rank": 6,
+            "finish": 3,
+            "positions_gained": -2
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -954,6 +1270,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202605040401",
+          "past_race_date": "2026-10-11",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 15,
+            "to_last_600m_seconds": 64.1,
+            "to_last_600m_rank": 7,
+            "to_last_600m_tie_count": 2,
+            "last3f_seconds": 36.9,
+            "last3f_rank": 4
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1000,
+            "horse_elapsed_seconds": 64.1,
+            "leader_elapsed_seconds": 63.5,
+            "horse_minus_leader_seconds": 0.6,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -1.0667,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.6,
+            "finish_gap_to_winner_seconds": 1.0,
+            "finish_minus_split_gap_seconds": 0.4,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 15,
+            "to_last_600m_rank_max": 8,
+            "to_last_600m_tie_count": 2,
+            "direction": "gained",
+            "to_last_600m_rank": 7,
+            "last3f_rank": 4,
+            "finish": 4,
+            "positions_gained": 3
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -1091,6 +1452,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202605040404",
+          "past_race_date": "2026-10-11",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_seconds": 62.2,
+            "to_last_600m_rank": 10,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 37.7,
+            "last3f_rank": 3
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1000,
+            "horse_elapsed_seconds": 62.2,
+            "leader_elapsed_seconds": 61.3,
+            "horse_minus_leader_seconds": 0.9,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -0.0333,
+            "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.9,
+            "finish_gap_to_winner_seconds": 1.2,
+            "finish_minus_split_gap_seconds": 0.3,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_rank_max": 10,
+            "to_last_600m_tie_count": 1,
+            "direction": "gained",
+            "to_last_600m_rank": 10,
+            "last3f_rank": 3,
+            "finish": 4,
+            "positions_gained": 6
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -1207,6 +1613,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202605040404",
+          "past_race_date": "2026-10-11",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_seconds": 61.4,
+            "to_last_600m_rank": 2,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 38.2,
+            "last3f_rank": 5
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 1000,
+            "horse_elapsed_seconds": 61.4,
+            "leader_elapsed_seconds": 61.3,
+            "horse_minus_leader_seconds": 0.1,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": -0.0333,
+            "race_delta_within_0_1_seconds_per_200m": true
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 0.1,
+            "finish_gap_to_winner_seconds": 0.9,
+            "finish_minus_split_gap_seconds": 0.8,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 16,
+            "to_last_600m_rank_max": 2,
+            "to_last_600m_tie_count": 1,
+            "direction": "unchanged",
+            "to_last_600m_rank": 2,
+            "last3f_rank": 5,
+            "finish": 2,
+            "positions_gained": 0
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
@@ -1325,6 +1776,51 @@
         },
         "issues": [],
         "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "available_for_review",
+          "source": "runner_pace_context.json",
+          "past_race_id": "202604040105",
+          "past_race_date": "2026-10-17",
+          "clock_comparison": {
+            "status": "ok",
+            "comparison_count": 15,
+            "to_last_600m_seconds": 38.9,
+            "to_last_600m_rank": 15,
+            "to_last_600m_tie_count": 1,
+            "last3f_seconds": 38.7,
+            "last3f_rank": 10
+          },
+          "leader_gap_at_last_600m": {
+            "status": "ok",
+            "split_distance_m": 600,
+            "horse_elapsed_seconds": 38.9,
+            "leader_elapsed_seconds": 35.2,
+            "horse_minus_leader_seconds": 3.7,
+            "negative_gap_within_tolerance": false,
+            "race_final_minus_preceding_seconds_per_200m": 0.9667,
+            "race_delta_within_0_1_seconds_per_200m": false
+          },
+          "gap_change": {
+            "status": "ok",
+            "split_gap_to_leader_seconds": 3.7,
+            "finish_gap_to_winner_seconds": 4.3,
+            "finish_minus_split_gap_seconds": 0.6,
+            "direction": "widened"
+          },
+          "position_change": {
+            "status": "ok",
+            "comparison_count": 15,
+            "to_last_600m_rank_max": 15,
+            "to_last_600m_tie_count": 1,
+            "direction": "unchanged",
+            "to_last_600m_rank": 15,
+            "last3f_rank": 10,
+            "finish": 15,
+            "positions_gained": 0
+          },
+          "interpretation_status": "unknown",
+          "pending": "順位変化・時計差変化を観測し、敗因や克服は別途確認する"
+        },
         "pending": "前走の観測値だけでは敗因を確定しない"
       },
       "issue_resolution": {
