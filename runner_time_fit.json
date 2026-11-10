@@ -1,31 +1,31 @@
 {
-  "updated_at": "2026-11-10T21:17:39+09:00",
-  "target_race_id": "202608050201",
+  "updated_at": "2026-11-10T21:24:13+09:00",
+  "target_race_id": "202608050202",
   "target_date": "2026-11-08",
   "current_time_bias": "",
   "future_race_usage": false,
   "leak_check_passed": true,
   "method": "中央競馬のみを対象。runner_historyの過去走race_idをrunner_race_dbの同一レースへ接続し、馬自身の着順や走破時計ではなく当該レースの勝ち時計から時計環境を診断する。基準時計はhistory_dbとrunner_race_dbの対象日前レースを統合し、同一レース自身を除外したうえで、競馬場・芝ダート・距離・クラス・年齢の完全一致から開始。サンプル不足時のみ年齢、クラス群の順に段階的に緩和し、最終的に競馬場・芝ダート・距離一致まで使用する。緩和レベルは各レースに明示する。時計適性は診断補助のみで能力順位を直接作らず、未知数は減点しない。対象レース当日以降は使用しない。",
-  "target_horse_count": 14,
+  "target_horse_count": 13,
   "connected_horse_count": 1,
   "connected_past_race_count": 1,
-  "runner_race_db_race_count": 26,
-  "reference_race_count": 133,
+  "runner_race_db_race_count": 18,
+  "reference_race_count": 125,
   "baseline_condition_count": 1,
   "baseline_level_counts": {
-    "EXACT": 0,
+    "EXACT": 1,
     "CLASS_MATCH": 0,
     "CLASS_GROUP": 0,
-    "COURSE_DISTANCE": 1
+    "COURSE_DISTANCE": 0
   },
   "missing_race_id_count": 0,
   "race_not_in_runner_race_db_count": 0,
   "race_not_in_history_db_count": 0,
-  "baseline_missing_count": 30,
+  "baseline_missing_count": 20,
   "horses": [
     {
-      "horse_id": "2024105438",
-      "horse_name": "シュライアハフト",
+      "horse_id": "2024106406",
+      "horse_name": "サルトヴェローチェ",
       "horse_number": "1",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -37,8 +37,8 @@
       "evaluated_races": [],
       "skipped_races": [
         {
-          "race_id": "202609040801",
-          "racecourse": "阪神",
+          "race_id": "202608040902",
+          "racecourse": "京都",
           "surface": "ダート",
           "distance": 1400,
           "race_class": "未勝利",
@@ -46,19 +46,19 @@
           "reason": "段階緩和後も基準時計サンプル不足"
         },
         {
-          "race_id": "202609040401",
-          "racecourse": "阪神",
-          "surface": "ダート",
-          "distance": 1400,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202610020406",
-          "racecourse": "小倉",
+          "race_id": "202601010601",
+          "racecourse": "札幌",
           "surface": "ダート",
           "distance": 1700,
+          "race_class": "未勝利",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        },
+        {
+          "race_id": "202602011205",
+          "racecourse": "函館",
+          "surface": "芝",
+          "distance": 1800,
           "race_class": "新馬",
           "age_condition": "2歳",
           "reason": "段階緩和後も基準時計サンプル不足"
@@ -67,8 +67,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024106344",
-      "horse_name": "テリオスベラ",
+      "horse_id": "2024103373",
+      "horse_name": "スゴイジャン",
       "horse_number": "2",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -80,20 +80,11 @@
       "evaluated_races": [],
       "skipped_races": [
         {
-          "race_id": "202608040401",
-          "racecourse": "京都",
-          "surface": "ダート",
-          "distance": 1200,
+          "race_id": "202604040302",
+          "racecourse": "新潟",
+          "surface": "芝",
+          "distance": 1400,
           "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202609040604",
-          "racecourse": "阪神",
-          "surface": "ダート",
-          "distance": 1200,
-          "race_class": "新馬",
           "age_condition": "2歳",
           "reason": "段階緩和後も基準時計サンプル不足"
         }
@@ -101,136 +92,9 @@
       "unknown": true
     },
     {
-      "horse_id": "2024102753",
-      "horse_name": "ナムラポピー",
+      "horse_id": "2024104045",
+      "horse_name": "フィアローゼン",
       "horse_number": "3",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [
-        {
-          "race_id": "202608040805",
-          "racecourse": "京都",
-          "surface": "芝",
-          "distance": 1600,
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        }
-      ],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024104814",
-      "horse_name": "リケアワルツ",
-      "horse_number": "4",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [
-        {
-          "race_id": "202609040704",
-          "racecourse": "阪神",
-          "surface": "ダート",
-          "distance": 1400,
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        }
-      ],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024104520",
-      "horse_name": "スマートメモリー",
-      "horse_number": "5",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [
-        {
-          "race_id": "202609040201",
-          "racecourse": "阪神",
-          "surface": "芝",
-          "distance": 1400,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202607020801",
-          "racecourse": "中京",
-          "surface": "芝",
-          "distance": 1200,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202610020101",
-          "racecourse": "小倉",
-          "surface": "芝",
-          "distance": 1200,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202609030305",
-          "racecourse": "阪神",
-          "surface": "芝",
-          "distance": 1200,
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        }
-      ],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024106492",
-      "horse_name": "ナンヨーカルチャー",
-      "horse_number": "6",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [
-        {
-          "race_id": "202609040605",
-          "racecourse": "阪神",
-          "surface": "芝",
-          "distance": 1600,
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        }
-      ],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024102478",
-      "horse_name": "リワナグ",
-      "horse_number": "7",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
       "matching_count": 0,
@@ -253,9 +117,9 @@
       "unknown": true
     },
     {
-      "horse_id": "2024104861",
-      "horse_name": "ベイビーブラザー",
-      "horse_number": "8",
+      "horse_id": "2024103480",
+      "horse_name": "カムトゥルー",
+      "horse_number": "4",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
       "matching_count": 0,
@@ -266,46 +130,19 @@
       "evaluated_races": [],
       "skipped_races": [
         {
-          "race_id": "202608040701",
+          "race_id": "202604040303",
+          "racecourse": "新潟",
+          "surface": "ダート",
+          "distance": 1200,
+          "race_class": "未勝利",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        },
+        {
+          "race_id": "202608040306",
           "racecourse": "京都",
           "surface": "ダート",
           "distance": 1200,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202609040602",
-          "racecourse": "阪神",
-          "surface": "ダート",
-          "distance": 1200,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202601010601",
-          "racecourse": "札幌",
-          "surface": "ダート",
-          "distance": 1700,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202602010901",
-          "racecourse": "函館",
-          "surface": "ダート",
-          "distance": 1000,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202602010306",
-          "racecourse": "函館",
-          "surface": "ダート",
-          "distance": 1000,
           "race_class": "新馬",
           "age_condition": "2歳",
           "reason": "段階緩和後も基準時計サンプル不足"
@@ -314,8 +151,161 @@
       "unknown": true
     },
     {
-      "horse_id": "2024106792",
-      "horse_name": "ランスオブナイト",
+      "horse_id": "2024103852",
+      "horse_name": "トワイライトローズ",
+      "horse_number": "5",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [
+        {
+          "race_id": "202608040602",
+          "racecourse": "京都",
+          "surface": "芝",
+          "distance": 1200,
+          "race_class": "未勝利",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        },
+        {
+          "race_id": "202601020405",
+          "racecourse": "札幌",
+          "surface": "芝",
+          "distance": 1800,
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        }
+      ],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024104092",
+      "horse_name": "オメガダフネ",
+      "horse_number": "6",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [
+        {
+          "race_id": "202609040106",
+          "racecourse": "阪神",
+          "surface": "ダート",
+          "distance": 1400,
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        }
+      ],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024102930",
+      "horse_name": "エルダークローネ",
+      "horse_number": "7",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [
+        {
+          "race_id": "202608040602",
+          "racecourse": "京都",
+          "surface": "芝",
+          "distance": 1200,
+          "race_class": "未勝利",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        },
+        {
+          "race_id": "202609040703",
+          "racecourse": "阪神",
+          "surface": "芝",
+          "distance": 1200,
+          "race_class": "未勝利",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        },
+        {
+          "race_id": "202607020101",
+          "racecourse": "中京",
+          "surface": "ダート",
+          "distance": 1200,
+          "race_class": "未勝利",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        },
+        {
+          "race_id": "202610020205",
+          "racecourse": "小倉",
+          "surface": "芝",
+          "distance": 1200,
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        }
+      ],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024105282",
+      "horse_name": "キャンディリヒト",
+      "horse_number": "8",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 1,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [
+        {
+          "race_id": "202605040306",
+          "date": "2026-10-10",
+          "race_name": "2歳新馬",
+          "racecourse": "東京",
+          "surface": "芝",
+          "distance": 1600,
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "track_condition": "良",
+          "race_winner_time_seconds": 96.2,
+          "baseline_level": "EXACT",
+          "baseline_description": "競馬場・芝ダ・距離・クラス・年齢一致",
+          "baseline_sample_count": 5,
+          "baseline_source_counts": {
+            "history_db": 5
+          },
+          "baseline_median_seconds": 94.3,
+          "baseline_mad_seconds": 1.2,
+          "time_delta_seconds": 1.9,
+          "robust_z": 1.068,
+          "historical_time_environment": "やや低速",
+          "current_time_bias": "",
+          "current_bias_fit": null,
+          "horse_rank": "9"
+        }
+      ],
+      "skipped_races": [],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024108008",
+      "horse_name": "アランチャ",
       "horse_number": "9",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -327,16 +317,7 @@
       "evaluated_races": [],
       "skipped_races": [
         {
-          "race_id": "202608040902",
-          "racecourse": "京都",
-          "surface": "ダート",
-          "distance": 1400,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202608040203",
+          "race_id": "202608040904",
           "racecourse": "京都",
           "surface": "ダート",
           "distance": 1400,
@@ -348,9 +329,68 @@
       "unknown": true
     },
     {
-      "horse_id": "2024103161",
-      "horse_name": "ゼイン",
+      "horse_id": "2024105446",
+      "horse_name": "ミライショウグン",
       "horse_number": "10",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [
+        {
+          "race_id": "202601020101",
+          "racecourse": "札幌",
+          "surface": "ダート",
+          "distance": 1700,
+          "race_class": "未勝利",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        },
+        {
+          "race_id": "202601010805",
+          "racecourse": "札幌",
+          "surface": "芝",
+          "distance": 1800,
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        }
+      ],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024104625",
+      "horse_name": "アスレイ",
+      "horse_number": "11",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [
+        {
+          "race_id": "202608040904",
+          "racecourse": "京都",
+          "surface": "ダート",
+          "distance": 1400,
+          "race_class": "新馬",
+          "age_condition": "2歳",
+          "reason": "段階緩和後も基準時計サンプル不足"
+        }
+      ],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024104531",
+      "horse_name": "ハイグッドカンフー",
+      "horse_number": "12",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
       "matching_count": 0,
@@ -373,157 +413,10 @@
       "unknown": true
     },
     {
-      "horse_id": "2024104947",
-      "horse_name": "ワイドウィンザー",
-      "horse_number": "11",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [
-        {
-          "race_id": "202604040303",
-          "racecourse": "新潟",
-          "surface": "ダート",
-          "distance": 1200,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202601010201",
-          "racecourse": "札幌",
-          "surface": "ダート",
-          "distance": 1000,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202602010901",
-          "racecourse": "函館",
-          "surface": "ダート",
-          "distance": 1000,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202602010306",
-          "racecourse": "函館",
-          "surface": "ダート",
-          "distance": 1000,
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        }
-      ],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024103845",
-      "horse_name": "レグルスロウ",
-      "horse_number": "12",
-      "current_time_bias": "",
-      "evaluated_past_race_count": 0,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [],
-      "skipped_races": [
-        {
-          "race_id": "202608040701",
-          "racecourse": "京都",
-          "surface": "ダート",
-          "distance": 1200,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202609040604",
-          "racecourse": "阪神",
-          "surface": "ダート",
-          "distance": 1200,
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        }
-      ],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024103368",
-      "horse_name": "ツーハーツ",
+      "horse_id": "2024101199",
+      "horse_name": "パロディ",
       "horse_number": "13",
       "current_time_bias": "",
-      "evaluated_past_race_count": 1,
-      "matching_count": 0,
-      "middle_count": 0,
-      "mismatch_count": 0,
-      "median_current_bias_fit": null,
-      "time_fit_label": "未知数",
-      "evaluated_races": [
-        {
-          "race_id": "202605040701",
-          "date": "2026-10-18",
-          "race_name": "2歳未勝利",
-          "racecourse": "東京",
-          "surface": "ダート",
-          "distance": 1400,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "track_condition": "良",
-          "race_winner_time_seconds": 85.7,
-          "baseline_level": "COURSE_DISTANCE",
-          "baseline_description": "競馬場・芝ダ・距離一致",
-          "baseline_sample_count": 19,
-          "baseline_source_counts": {
-            "history_db": 19
-          },
-          "baseline_median_seconds": 84.5,
-          "baseline_mad_seconds": 0.7,
-          "time_delta_seconds": 1.2,
-          "robust_z": 1.156,
-          "historical_time_environment": "やや低速",
-          "current_time_bias": "",
-          "current_bias_fit": null,
-          "horse_rank": "3"
-        }
-      ],
-      "skipped_races": [
-        {
-          "race_id": "202604020601",
-          "racecourse": "新潟",
-          "surface": "芝",
-          "distance": 2000,
-          "race_class": "未勝利",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        },
-        {
-          "race_id": "202610020805",
-          "racecourse": "小倉",
-          "surface": "芝",
-          "distance": 1800,
-          "race_class": "新馬",
-          "age_condition": "2歳",
-          "reason": "段階緩和後も基準時計サンプル不足"
-        }
-      ],
-      "unknown": true
-    },
-    {
-      "horse_id": "2024107272",
-      "horse_name": "キタノゲートウェイ",
-      "horse_number": "14",
-      "current_time_bias": "",
       "evaluated_past_race_count": 0,
       "matching_count": 0,
       "middle_count": 0,
@@ -533,10 +426,10 @@
       "evaluated_races": [],
       "skipped_races": [
         {
-          "race_id": "202609040604",
-          "racecourse": "阪神",
-          "surface": "ダート",
-          "distance": 1200,
+          "race_id": "202604040405",
+          "racecourse": "新潟",
+          "surface": "芝",
+          "distance": 1400,
           "race_class": "新馬",
           "age_condition": "2歳",
           "reason": "段階緩和後も基準時計サンプル不足"
