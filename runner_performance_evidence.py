@@ -191,6 +191,8 @@ def build_horse(runner, ability, previous_horse, pace, race_id, late_runs):
                 {"issue_id": issue_id, "description": issue}
                 for issue_id, issue in zip(issue_ids, issues)
             ],
+            "candidates": previous.get("issue_candidates", []),
+            "summary": previous_horse.get("issue_summary", "不明"),
             "cause_assessment": "unknown",
             "late_observation": previous_late_observation(
                 text(runner["horse_id"]), previous, late_runs
@@ -201,6 +203,7 @@ def build_horse(runner, ability, previous_horse, pace, race_id, late_runs):
             "issue_refs": issue_ids,
             "registered_evidence": resolution_records,
             "pending": previous.get("overcoming_checks", []),
+            "summary": previous_horse.get("overcoming_summary", "不明"),
             "assessment": "unknown",
             "reason": "根拠の登録と出典内容の確認を区別する",
         },
