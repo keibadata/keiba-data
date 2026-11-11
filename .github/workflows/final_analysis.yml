@@ -47,6 +47,9 @@ jobs:
           echo "Target race: $RACE_ID"
       - name: Collect race
         run: python main_v3.py
+      - name: Save pre-race win odds snapshot
+        continue-on-error: true
+        run: python race_market_snapshot.py
       - name: Normalize race metadata
         run: |
           python - <<'PY'
@@ -361,6 +364,12 @@ jobs:
             echo "ERROR: prediction_snapshots directory was not created"
             exit 1
           fi
+          for path in race_market_snapshots/*/"$RACE_ID"/*.json; do
+            if [ -f "$path" ]; then
+              echo "ADD: $path"
+              git add -- "$path"
+            fi
+          done
           echo "Existing generated files: $ADDED_COUNT"
           if git diff --cached --quiet; then
             echo "No generated changes"
