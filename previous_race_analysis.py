@@ -259,20 +259,47 @@ def analyze_previous_race(race_row):
         if item not in margin_labels or item in confirmed_issues
     ]
 
-    if not issues:
-        issue_status = "明確な課題なし"
+    # 着差と通過位置の両方に確認材料がある場合は課題候補にする。
+    # 単独の観測は判定保留とし、既存の観測欄に保持する。
+    pending_issues = [item for item in scoring_issues if item not in issues]
+    position_issues = [item for item in scoring_issues if item in position_labels]
+    issue_candidates = (
+        pending_issues
+        if "着差が大きい" in scoring_issues and position_issues
+        else []
+    )
+    issue_details = list(issues)
+    if issue_candidates:
+        issue_details.append(
+            "課題候補あり・克服未確認（" + "、".join(issue_candidates) + "）"
+        )
+    if issue_details:
+        issue_status = " / ".join(issue_details)
+    elif pending_issues:
+        issue_status = "前走課題は未確認"
+    elif unknowns or (rank is not None and rank > 1 and margin is None):
+        issue_status = "前走課題は不明"
+    elif condition_changes:
+        issue_status = "今回条件の確認待ち"
     else:
-        issue_status = " / ".join(issues)
+        issue_status = "明確な課題なし"
 
     if not positives:
         positive_status = "明確なプラス材料なし"
     else:
         positive_status = " / ".join(positives)
 
-    if not overcoming:
-        overcoming_status = "客観データ上の明確な克服材料なし"
-    else:
-        overcoming_status = " / ".join(overcoming)
+    overcoming_details = []
+    if confirmed:
+        overcoming_details.append("確認済みの克服根拠あり")
+    if issue_candidates:
+        overcoming_details.append("課題候補の克服未確認")
+    overcoming_details.extend(overcoming)
+    overcoming_status = (
+        " / ".join(overcoming_details)
+        if overcoming_details
+        else "客観データ上の明確な克服材料なし"
+    )
 
     return {
         "race_id": txt(race_row.get("race_id")),
@@ -300,6 +327,7 @@ def analyze_previous_race(race_row):
         "condition_observations": condition_observations,
         "positives": positives,
         "issues": issues,
+        "issue_candidates": issue_candidates,
         "condition_changes": condition_changes,
         "unknowns": unknowns,
         "overcoming_materials": [record["fact"] for record in confirmed],
