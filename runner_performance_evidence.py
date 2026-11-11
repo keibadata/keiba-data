@@ -159,8 +159,47 @@ def previous_late_observation(horse_id, previous, late_runs):
     }
 
 
+def condition_reproduction_observations(horse_id, ability, late_runs):
+    runs = []
+    for row in ability.get("analysis", []):
+        if row.get("same_surface") is not True or row.get("distance_fit") != 1.0:
+            continue
+        late = previous_late_observation(horse_id, row, late_runs)
+        key = race_key(horse_id, row.get("race_id"), row.get("date"))
+        context = late_runs.get(key, {})
+        runs.append({
+            "race_id": row.get("race_id"),
+            "date": row.get("date"),
+            "race_name": row.get("race_name"),
+            "meeting": row.get("meeting"),
+            "track_condition": row.get("track_condition"),
+            "finish": row.get("rank"),
+            "source_pace_code": context.get("source_pace_code"),
+            "comparison": late,
+        })
+    return {
+        "matched_run_count": len(runs),
+        "comparable_run_count": sum(
+            run["comparison"]["status"] == "available_for_review" for run in runs
+        ),
+        "runs": runs,
+        "assessment": "unknown",
+    }
+
+
+def previous_late_risk_check(late):
+    if late["status"] != "available_for_review":
+        return "unknown"
+    if (late["position_change"].get("direction") == "lost"
+            and late["gap_change"].get("direction") == "widened"):
+        return "position_lost_and_gap_widened"
+    return "not_observed_in_comparison"
+
+
 def build_horse(runner, ability, previous_horse, pace, race_id, late_runs):
+    horse_id = text(runner["horse_id"])
     previous = previous_horse.get("previous_race") or {}
+    late = previous_late_observation(horse_id, previous, late_runs)
     issues = list(dict.fromkeys(actual_issues(previous)))
     registered = resolution_evidence(previous, race_id)
     observation_keys = (
@@ -181,7 +220,7 @@ def build_horse(runner, ability, previous_horse, pace, race_id, late_runs):
         for record in registered
     ]
     return {
-        "horse_id": text(runner["horse_id"]),
+        "horse_id": horse_id,
         "horse_number": text(runner.get("horse_number")),
         "horse_name": text(runner.get("horse_name")),
         "previous_issues": {
@@ -194,9 +233,8 @@ def build_horse(runner, ability, previous_horse, pace, race_id, late_runs):
             "candidates": previous.get("issue_candidates", []),
             "summary": previous_horse.get("issue_summary", "不明"),
             "cause_assessment": "unknown",
-            "late_observation": previous_late_observation(
-                text(runner["horse_id"]), previous, late_runs
-            ),
+            "late_observation": late,
+            "late_risk_check": previous_late_risk_check(late),
             "pending": "前走の観測値だけでは敗因を確定しない",
         },
         "issue_resolution": {
@@ -210,6 +248,9 @@ def build_horse(runner, ability, previous_horse, pace, race_id, late_runs):
         "condition_fit": {
             "source": "runner_analysis.json",
             "experience": ability.get("condition_evidence"),
+            "reproduction_observations": condition_reproduction_observations(
+                horse_id, ability, late_runs
+            ),
             "observed_runs": [
                 {key: row.get(key) for key in (
                     "race_id", "date", "surface", "distance", "rank",
