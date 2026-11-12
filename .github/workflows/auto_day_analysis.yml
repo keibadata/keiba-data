@@ -1,0 +1,141 @@
+name: Preview Daily Race Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      race_date:
+        description: "開催日（YYYY-MM-DD）"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install packages
+        run: python -m pip install -r requirements.txt
+
+      - name: Preview JRA race list
+        env:
+          RACE_DATE: ${{ inputs.race_date }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          from datetime import date, time
+          from pathlib import Path
+          from urllib.parse import parse_qs, urlsplit
+
+          import requests
+          from bs4 import BeautifulSoup
+
+          from resolve_race_id import HEADERS, TRACK_CODES
+
+          race_date = os.environ["RACE_DATE"].strip()
+          if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", race_date):
+              raise SystemExit("開催日は YYYY-MM-DD で入力してください。")
+          target_date = date.fromisoformat(race_date)
+          ymd = target_date.strftime("%Y%m%d")
+
+          response = requests.get(
+              "https://race.netkeiba.com/top/race_list_sub.html",
+              params={"kaisai_date": ymd},
+              headers=HEADERS,
+              timeout=30,
+              allow_redirects=False,
+          )
+          response.raise_for_status()
+          if response.status_code != 200:
+              raise SystemExit(f"開催一覧を取得できません。HTTP {response.status_code}")
+
+          soup = BeautifulSoup(response.content, "html.parser")
+          race_list = soup.select_one("#RaceTopRace .RaceList_Box")
+          if race_list is None:
+              raise SystemExit("開催一覧のHTML構造を確認できません。")
+
+          rows = []
+          seen = set()
+          for meeting in race_list.select("dl.RaceList_DataList"):
+              header = meeting.select_one(".RaceList_DataTitle")
+              meeting_text = header.get_text(" ", strip=True) if header else ""
+              match = re.fullmatch(r"(\d+)回\s*(\S+)\s*(\d+)日目", meeting_text)
+              if not match or match[2] not in TRACK_CODES:
+                  raise SystemExit(f"JRAの開催場を照合できません。{meeting_text}")
+
+              meeting_no, track, day_no = match.groups()
+              prefix = (
+                  f"{target_date.year:04d}{TRACK_CODES[track]}"
+                  f"{int(meeting_no):02d}{int(day_no):02d}"
+              )
+              payback = meeting.select_one("a.LinkHaraimodoshiichiran[href]")
+              if payback:
+                  metadata = parse_qs(urlsplit(payback["href"]).query)
+                  if metadata.get("kaisai_date") != [ymd] or metadata.get("kaisai_id") != [prefix]:
+                      raise SystemExit(f"一覧の開催日・開催IDが一致しません。{meeting_text}")
+
+              items = meeting.select("li.RaceList_DataItem")
+              if not items:
+                  raise SystemExit(f"開催場のレース一覧が空です。{meeting_text}")
+
+              for item in items:
+                  number_node = item.select_one(".Race_Num")
+                  number_text = number_node.get_text(strip=True) if number_node else ""
+                  number = re.fullmatch(r"(1[0-2]|[1-9])R", number_text)
+                  link = item.select_one('a[href*="race_id="]')
+                  ids = parse_qs(urlsplit(link["href"]).query).get("race_id") if link else None
+                  race_id = f"{prefix}{int(number[1]):02d}" if number else ""
+                  if not race_id or ids != [race_id] or race_id in seen:
+                      raise SystemExit(f"レースIDを照合できません。{meeting_text} {number_text} {ids}")
+                  seen.add(race_id)
+
+                  title_node = item.select_one(".ItemTitle")
+                  title = title_node.get_text(" ", strip=True) if title_node else ""
+                  time_node = item.select_one(".RaceList_Itemtime")
+                  start = time_node.get_text(strip=True) if time_node else ""
+                  data = item.select_one(".RaceData")
+                  course = data.get_text(" ", strip=True) if data else ""
+                  if re.search(r"中止|取り?止め|不成立", item.get_text(" ", strip=True)):
+                      status = "除外（中止・不成立）"
+                  elif "障害" in title or re.search(r"障(?:害)?\s*\d{3,4}\s*m", course):
+                      status = "除外（障害）"
+                  elif not re.search(r"(?:芝|ダ(?:ート)?)\s*\d{3,4}\s*m", course):
+                      status = "保留（コース不明）"
+                  elif not re.fullmatch(r"(?:[01]?\d|2[0-3]):[0-5]\d", start):
+                      status = "保留（発走時刻不明）"
+                  else:
+                      hour, minute = map(int, start.split(":"))
+                      start = time(hour, minute).strftime("%H:%M")
+                      status = "対象"
+
+                  title = title.replace("|", "｜") or "不明"
+                  rows.append((track, number_text, start or "不明", title, race_id, status))
+
+          if not rows:
+              raise SystemExit(f"{race_date} のJRA開催一覧に掲載がありません。開催の有無は不明です。")
+
+          eligible = sum(row[-1] == "対象" for row in rows)
+          excluded = sum(row[-1].startswith("除外") for row in rows)
+          pending = len(rows) - eligible - excluded
+          report = [
+              f"## {race_date} JRA開催一覧（発走時刻はJST）",
+              "",
+              f"掲載 {len(rows)}件 / 対象 {eligible}件 / 除外 {excluded}件 / 保留 {pending}件",
+              "",
+              "| 競馬場 | R | 発走 | レース名 | レースID | 判定 |",
+              "|---|---|---|---|---|---|",
+              *("| " + " | ".join(row) + " |" for row in rows),
+          ]
+          output = "\n".join(report) + "\n"
+          print(output, end="")
+          Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(output, encoding="utf-8")
+          PY
