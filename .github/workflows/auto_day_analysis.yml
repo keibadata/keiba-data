@@ -1,6 +1,9 @@
 name: Preview Daily Race Analysis
 
 on:
+  schedule:
+    - cron: "2-57/5 8-19 * * *"
+      timezone: "Asia/Tokyo"
   workflow_dispatch:
     inputs:
       race_date:
@@ -41,6 +44,7 @@ jobs:
         env:
           RACE_DATE: ${{ inputs.race_date }}
           PREVIEW_TIME: ${{ inputs.preview_time }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           python - <<'PY'
           import json
@@ -59,7 +63,11 @@ jobs:
           JST = timezone(timedelta(hours=9))
           CHECK_WINDOW = timedelta(minutes=60)
 
-          race_date = os.environ["RACE_DATE"].strip()
+          scheduled = os.environ["EVENT_NAME"] == "schedule"
+          race_date = (
+              datetime.now(JST).date().isoformat()
+              if scheduled else os.environ["RACE_DATE"].strip()
+          )
           if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", race_date):
               raise SystemExit("開催日は YYYY-MM-DD で入力してください。")
           target_date = date.fromisoformat(race_date)
@@ -141,6 +149,13 @@ jobs:
                   title = title.replace("|", "｜") or "不明"
                   rows.append((track, number_text, start or "不明", title, race_id, status))
 
+          if not rows and scheduled:
+              message = f"{race_date} のJRA開催一覧に掲載がありません。"
+              print(message)
+              Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(message + "\n", encoding="utf-8")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output_file:
+                  print("ready_races=[]", file=output_file)
+              raise SystemExit(0)
           if not rows:
               raise SystemExit(f"{race_date} のJRA開催一覧に掲載がありません。開催の有無は不明です。")
 
@@ -169,6 +184,17 @@ jobs:
               "|---|---|---|---|---|---|---|",
           ])
 
+          def saved_weight_signature(race_id):
+              snapshot_dir = Path("prediction_snapshots") / race_date / race_id
+              versions = []
+              for path in snapshot_dir.glob("*.json"):
+                  data = json.loads(path.read_text(encoding="utf-8"))
+                  signature = data.get("daily_body_weight_signature")
+                  if data.get("timing", {}).get("evaluation_eligible") is True and signature:
+                      saved_at = datetime.fromisoformat(data["prediction_saved_at"])
+                      versions.append((saved_at, signature))
+              return max(versions)[1] if versions else None
+
           for row in rows:
               _, _, start, _, race_id, status = row
               weight_status = "対象外"
@@ -196,7 +222,9 @@ jobs:
                           elif result["status"] == "ready":
                               weight_status = f"全頭発表済み {published}/{total}頭"
                               ready_count += 1
-                              if not preview_time:
+                              if not preview_time and saved_weight_signature(race_id) == result["weight_signature"]:
+                                  weight_status += "・再解析済み"
+                              elif not preview_time:
                                   ready_races.append({
                                       "race_id": race_id,
                                       "start_at": start_at.isoformat(),
@@ -216,7 +244,10 @@ jobs:
           ready_races.sort(key=lambda race: (race["start_at"], race["race_id"]))
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output_file:
               print(f"ready_races={json.dumps(ready_races)}", file=output_file)
-          report.extend(["", f"全頭発表済み {ready_count}件 / 確認失敗 {error_count}件"])
+          report.extend([
+              "",
+              f"全頭発表済み {ready_count}件 / 再解析候補 {len(ready_races)}件 / 確認失敗 {error_count}件",
+          ])
           output = "\n".join(report) + "\n"
           print(output, end="")
           Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(output, encoding="utf-8")
@@ -225,7 +256,11 @@ jobs:
   reanalyze:
     name: Reanalyze ${{ matrix.race.race_id }}
     needs: preview
-    if: ${{ github.ref == 'refs/heads/main' && inputs.run_reanalysis && inputs.preview_time == '' && needs.preview.outputs.ready_races != '' && needs.preview.outputs.ready_races != '[]' }}
+    if: >-
+      ${{ github.ref == 'refs/heads/main'
+      && (github.event_name == 'schedule' || (inputs.run_reanalysis && inputs.preview_time == ''))
+      && needs.preview.outputs.ready_races != ''
+      && needs.preview.outputs.ready_races != '[]' }}
     permissions:
       contents: write
     strategy:
