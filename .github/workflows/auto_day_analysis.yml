@@ -11,6 +11,11 @@ on:
         description: "試験用の基準時刻（JST、HH:MM。通常は空欄）"
         required: false
         type: string
+      run_reanalysis:
+        description: "当日の発走前に馬体重が揃ったレースを再解析・保存する"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -216,3 +221,20 @@ jobs:
           print(output, end="")
           Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(output, encoding="utf-8")
           PY
+
+  reanalyze:
+    name: Reanalyze ${{ matrix.race.race_id }}
+    needs: preview
+    if: ${{ github.ref == 'refs/heads/main' && inputs.run_reanalysis && inputs.preview_time == '' && needs.preview.outputs.ready_races != '' && needs.preview.outputs.ready_races != '[]' }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        race: ${{ fromJSON(needs.preview.outputs.ready_races) }}
+    uses: ./.github/workflows/final_analysis.yml
+    with:
+      race_id: ${{ matrix.race.race_id }}
+      race_start_at: ${{ matrix.race.start_at }}
+      body_weight_signature: ${{ matrix.race.weight_signature }}
