@@ -86,6 +86,7 @@ def parse_body_weights(html, race_id):
 
 
 def fetch_body_weights(race_id):
+    race_id = race_id.strip()
     if not re.fullmatch(r"[0-9]{12}", race_id):
         raise ValueError("レースIDは半角数字12桁で指定してください。")
 
