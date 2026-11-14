@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-11-14T11:38:29+09:00",
-  "target_race_id": "202608050305",
+  "updated_at": "2026-11-14T11:49:52+09:00",
+  "target_race_id": "202608050306",
   "target_date": "2026-11-14",
   "current_time_bias": "",
   "future_race_usage": false,
   "leak_check_passed": true,
   "method": "中央競馬のみを対象。runner_historyの過去走race_idをrunner_race_dbの同一レースへ接続し、馬自身の着順や走破時計ではなく当該レースの勝ち時計から時計環境を診断する。基準時計はhistory_dbとrunner_race_dbの対象日前レースを統合し、同一レース自身を除外したうえで、競馬場・芝ダート・距離・クラス・年齢の完全一致から開始。サンプル不足時のみ年齢、クラス群の順に段階的に緩和し、最終的に競馬場・芝ダート・距離一致まで使用する。緩和レベルは各レースに明示する。時計適性は診断補助のみで能力順位を直接作らず、未知数は減点しない。対象レース当日以降は使用しない。",
-  "target_horse_count": 11,
+  "target_horse_count": 16,
   "connected_horse_count": 0,
   "connected_past_race_count": 0,
   "runner_race_db_race_count": 0,
@@ -24,8 +24,8 @@
   "baseline_missing_count": 0,
   "horses": [
     {
-      "horse_id": "2024101073",
-      "horse_name": "サウンドホープ",
+      "horse_id": "2024106683",
+      "horse_name": "ルージュナイアス",
       "horse_number": "1",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -39,8 +39,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024101226",
-      "horse_name": "ディアサンライズ",
+      "horse_id": "2024104450",
+      "horse_name": "アディエル",
       "horse_number": "2",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -54,8 +54,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024106572",
-      "horse_name": "マテンロウプリモ",
+      "horse_id": "2024103921",
+      "horse_name": "ガンファースト",
       "horse_number": "3",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -69,8 +69,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024105156",
-      "horse_name": "ボスコベル",
+      "horse_id": "2024101554",
+      "horse_name": "メイショウタマヨ",
       "horse_number": "4",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -84,8 +84,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024101698",
-      "horse_name": "ヴェリシテート",
+      "horse_id": "2024106372",
+      "horse_name": "アランフェス",
       "horse_number": "5",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -99,8 +99,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024100271",
-      "horse_name": "ゼットリバティ",
+      "horse_id": "2024104697",
+      "horse_name": "トゥルーモーメント",
       "horse_number": "6",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -114,8 +114,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024106102",
-      "horse_name": "ベルテイン",
+      "horse_id": "2024100694",
+      "horse_name": "ヘクラ",
       "horse_number": "7",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -129,8 +129,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024103330",
-      "horse_name": "ピースオーカー",
+      "horse_id": "2024105887",
+      "horse_name": "センターフォールド",
       "horse_number": "8",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -144,8 +144,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024106873",
-      "horse_name": "シェルピンスキー",
+      "horse_id": "2024108022",
+      "horse_name": "スノーグロウ",
       "horse_number": "9",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -159,8 +159,8 @@
       "unknown": true
     },
     {
-      "horse_id": "2024106496",
-      "horse_name": "ソブリオ",
+      "horse_id": "2024103338",
+      "horse_name": "マンノアルテミス",
       "horse_number": "10",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
@@ -174,9 +174,84 @@
       "unknown": true
     },
     {
-      "horse_id": "2024102998",
-      "horse_name": "クリノアスティオン",
+      "horse_id": "2024107059",
+      "horse_name": "シブレット",
       "horse_number": "11",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024102344",
+      "horse_name": "バケットリズム",
+      "horse_number": "12",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024104741",
+      "horse_name": "トールドヤ",
+      "horse_number": "13",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024102214",
+      "horse_name": "リメンバーホープ",
+      "horse_number": "14",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024107144",
+      "horse_name": "ハナマンカイ",
+      "horse_number": "15",
+      "current_time_bias": "",
+      "evaluated_past_race_count": 0,
+      "matching_count": 0,
+      "middle_count": 0,
+      "mismatch_count": 0,
+      "median_current_bias_fit": null,
+      "time_fit_label": "未知数",
+      "evaluated_races": [],
+      "skipped_races": [],
+      "unknown": true
+    },
+    {
+      "horse_id": "2024104837",
+      "horse_name": "トモジャハナ",
+      "horse_number": "16",
       "current_time_bias": "",
       "evaluated_past_race_count": 0,
       "matching_count": 0,
