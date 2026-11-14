@@ -1,0 +1,609 @@
+{
+  "schema_version": 1,
+  "verification_kind": "prediction_vs_result",
+  "created_at": "2026-11-15T00:57:53+09:00",
+  "race_id": "202605050305",
+  "race_date": "2026-11-14",
+  "track": "東京",
+  "race_name": "2歳新馬",
+  "surface": "芝",
+  "distance": 1800,
+  "actual_track_condition": "良",
+  "actual_pace": "スロー",
+  "actual_laps": [
+    12.8,
+    12.0,
+    12.2,
+    12.5,
+    12.8,
+    13.0,
+    12.0,
+    11.0,
+    11.1
+  ],
+  "actual_corner_orders": {
+    "1_corner": "",
+    "2_corner": "(* 1 , 4 )7(6,2, 9 )-3,8,5-10",
+    "3_corner": "(* 1 , 4 )(6,7)(2, 9 )3-8-5,10",
+    "4_corner": "1 ( 4 ,7)(6,2) 9 (3,8)-5,10"
+  },
+  "prediction_snapshot": {
+    "snapshot_id": "202605050305_20261114T120341773211+0900_v2",
+    "path": "prediction_snapshots/2026-11-14/202605050305/202605050305_20261114T120341773211+0900_v2.json",
+    "prediction_saved_at": "2026-11-14T12:03:41.899001+09:00",
+    "timing_status": "same_day_before_start",
+    "evaluation_eligible": true,
+    "selection_reason": "latest_evaluation_eligible_snapshot",
+    "candidate_snapshot_count": 1,
+    "eligible_snapshot_count": 1
+  },
+  "evaluation_status": "official_evaluation",
+  "aggregate_eligible": true,
+  "aggregate_exclusion_reason": "",
+  "predicted_race_context": {
+    "analysis_mode": "newcomer_pedigree_only",
+    "base_pace": "評価対象外",
+    "leader_candidate_count": 0,
+    "front_candidate_count": 0,
+    "day_bias_reference_race_count": 0,
+    "predicted_running_style_bias": "",
+    "predicted_inside_outside_bias": "",
+    "predicted_time_bias": ""
+  },
+  "result_source": {
+    "source": "netkeiba",
+    "source_url": "https://race.netkeiba.com/race/result.html?race_id=202605050305",
+    "finisher_count": 10
+  },
+  "summary": {
+    "matched_horse_count": 10,
+    "mean_absolute_rank_error": 2.4,
+    "actual_top3_count": 3,
+    "actual_top3_in_predicted_top3": 1,
+    "actual_top3_in_predicted_top5": 2,
+    "top3_coverage_at_3": 0.333,
+    "top3_coverage_at_5": 0.667,
+    "winner": {
+      "horse_number": 4,
+      "horse_name": "トーセンイビサ",
+      "predicted_rank": 9,
+      "ability_rank": null
+    },
+    "predicted_first": {
+      "horse_number": 6,
+      "horse_name": "トップランキング",
+      "actual_finish": 4
+    },
+    "major_miss_count": 2,
+    "major_miss_horses": [
+      {
+        "horse_number": 2,
+        "horse_name": "イヴリーン",
+        "predicted_rank": 2,
+        "actual_finish": 7,
+        "category": "overvaluation_candidate"
+      },
+      {
+        "horse_number": 4,
+        "horse_name": "トーセンイビサ",
+        "predicted_rank": 9,
+        "actual_finish": 1,
+        "category": "performance_or_adjustment_underestimate_candidate"
+      }
+    ]
+  },
+  "unmatched_predictions": [],
+  "horses": [
+    {
+      "horse_id": "2024103687",
+      "horse_number": 6,
+      "horse_name": "トップランキング",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 1,
+        "judgement": "血統最上位",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 1.969264,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 4,
+        "race_time": "1:49.6",
+        "race_time_seconds": 109.6,
+        "margin": "ハナ",
+        "last3f": 34.1,
+        "popularity": 2,
+        "odds": 4.2,
+        "body_weight": 486,
+        "body_weight_change": 0,
+        "jockey": "マーカ",
+        "carried_weight": 56.0
+      },
+      "comparison": {
+        "rank_difference": 3,
+        "absolute_rank_error": 3,
+        "predicted_top1": true,
+        "predicted_top3": true,
+        "predicted_top5": true,
+        "actual_top1": false,
+        "actual_top3": false,
+        "error_candidate": {
+          "category": "normal_rank_error",
+          "severity": "low",
+          "note": "通常範囲の順位差"
+        }
+      }
+    },
+    {
+      "horse_id": "2024107320",
+      "horse_number": 2,
+      "horse_name": "イヴリーン",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 2,
+        "judgement": "血統最上位",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 1.755489,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 7,
+        "race_time": "1:50.2",
+        "race_time_seconds": 110.2,
+        "margin": "アタマ",
+        "last3f": 34.6,
+        "popularity": 5,
+        "odds": 21.2,
+        "body_weight": 466,
+        "body_weight_change": 0,
+        "jockey": "津村",
+        "carried_weight": 55.0
+      },
+      "comparison": {
+        "rank_difference": 5,
+        "absolute_rank_error": 5,
+        "predicted_top1": false,
+        "predicted_top3": true,
+        "predicted_top5": true,
+        "actual_top1": false,
+        "actual_top3": false,
+        "error_candidate": {
+          "category": "overvaluation_candidate",
+          "severity": "high",
+          "note": "予想上位馬が実着6着以下。能力・発揮率・展開を要検証"
+        }
+      }
+    },
+    {
+      "horse_id": "2024100496",
+      "horse_number": 9,
+      "horse_name": "レイコック",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 3,
+        "judgement": "血統上位",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 1.746806,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 2,
+        "race_time": "1:49.5",
+        "race_time_seconds": 109.5,
+        "margin": "1",
+        "last3f": 33.8,
+        "popularity": 3,
+        "odds": 4.5,
+        "body_weight": 516,
+        "body_weight_change": 0,
+        "jockey": "戸崎圭",
+        "carried_weight": 56.0
+      },
+      "comparison": {
+        "rank_difference": -1,
+        "absolute_rank_error": 1,
+        "predicted_top1": false,
+        "predicted_top3": true,
+        "predicted_top5": true,
+        "actual_top1": false,
+        "actual_top3": true,
+        "error_candidate": {
+          "category": "top3_correct",
+          "severity": "none",
+          "note": "予想上位3頭と実着上位3頭が一致"
+        }
+      }
+    },
+    {
+      "horse_id": "2024105797",
+      "horse_number": 3,
+      "horse_name": "チャモクラウン",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 4,
+        "judgement": "血統上位",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 1.110507,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 5,
+        "race_time": "1:50.1",
+        "race_time_seconds": 110.1,
+        "margin": "3",
+        "last3f": 34.2,
+        "popularity": 7,
+        "odds": 62.3,
+        "body_weight": 464,
+        "body_weight_change": 0,
+        "jockey": "三浦",
+        "carried_weight": 56.0
+      },
+      "comparison": {
+        "rank_difference": 1,
+        "absolute_rank_error": 1,
+        "predicted_top1": false,
+        "predicted_top3": false,
+        "predicted_top5": true,
+        "actual_top1": false,
+        "actual_top3": false,
+        "error_candidate": {
+          "category": "normal_rank_error",
+          "severity": "low",
+          "note": "通常範囲の順位差"
+        }
+      }
+    },
+    {
+      "horse_id": "2024107173",
+      "horse_number": 1,
+      "horse_name": "バタフライノット",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 5,
+        "judgement": "血統相手候補",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 0.637167,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 3,
+        "race_time": "1:49.6",
+        "race_time_seconds": 109.6,
+        "margin": "3/4",
+        "last3f": 34.3,
+        "popularity": 1,
+        "odds": 1.9,
+        "body_weight": 456,
+        "body_weight_change": 0,
+        "jockey": "ルメー",
+        "carried_weight": 56.0
+      },
+      "comparison": {
+        "rank_difference": -2,
+        "absolute_rank_error": 2,
+        "predicted_top1": false,
+        "predicted_top3": false,
+        "predicted_top5": true,
+        "actual_top1": false,
+        "actual_top3": true,
+        "error_candidate": {
+          "category": "near_miss",
+          "severity": "low",
+          "note": "実着上位3頭を予想5位以内には保持"
+        }
+      }
+    },
+    {
+      "horse_id": "2024101647",
+      "horse_number": 10,
+      "horse_name": "ソフロニティス",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 6,
+        "judgement": "血統相手候補",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 0.479869,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 9,
+        "race_time": "1:51.8",
+        "race_time_seconds": 111.8,
+        "margin": "3.1/2",
+        "last3f": 35.0,
+        "popularity": 10,
+        "odds": 189.9,
+        "body_weight": 420,
+        "body_weight_change": 0,
+        "jockey": "木幡巧",
+        "carried_weight": 55.0
+      },
+      "comparison": {
+        "rank_difference": 3,
+        "absolute_rank_error": 3,
+        "predicted_top1": false,
+        "predicted_top3": false,
+        "predicted_top5": false,
+        "actual_top1": false,
+        "actual_top3": false,
+        "error_candidate": {
+          "category": "normal_rank_error",
+          "severity": "low",
+          "note": "通常範囲の順位差"
+        }
+      }
+    },
+    {
+      "horse_id": "2024101150",
+      "horse_number": 8,
+      "horse_name": "ピュアライオン",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 7,
+        "judgement": "血統相手候補",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 0.439073,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 6,
+        "race_time": "1:50.2",
+        "race_time_seconds": 110.2,
+        "margin": "3/4",
+        "last3f": 34.2,
+        "popularity": 6,
+        "odds": 38.8,
+        "body_weight": 430,
+        "body_weight_change": 0,
+        "jockey": "岩田康",
+        "carried_weight": 55.0
+      },
+      "comparison": {
+        "rank_difference": -1,
+        "absolute_rank_error": 1,
+        "predicted_top1": false,
+        "predicted_top3": false,
+        "predicted_top5": false,
+        "actual_top1": false,
+        "actual_top3": false,
+        "error_candidate": {
+          "category": "normal_rank_error",
+          "severity": "low",
+          "note": "通常範囲の順位差"
+        }
+      }
+    },
+    {
+      "horse_id": "2024109078",
+      "horse_number": 7,
+      "horse_name": "ヒカレダイヤモンド",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 8,
+        "judgement": "血統比較下位",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 0.234109,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 8,
+        "race_time": "1:51.2",
+        "race_time_seconds": 111.2,
+        "margin": "6",
+        "last3f": 35.8,
+        "popularity": 8,
+        "odds": 86.2,
+        "body_weight": 476,
+        "body_weight_change": 0,
+        "jockey": "原",
+        "carried_weight": 56.0
+      },
+      "comparison": {
+        "rank_difference": 0,
+        "absolute_rank_error": 0,
+        "predicted_top1": false,
+        "predicted_top3": false,
+        "predicted_top5": false,
+        "actual_top1": false,
+        "actual_top3": false,
+        "error_candidate": {
+          "category": "normal_rank_error",
+          "severity": "low",
+          "note": "通常範囲の順位差"
+        }
+      }
+    },
+    {
+      "horse_id": "2024102459",
+      "horse_number": 4,
+      "horse_name": "トーセンイビサ",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 9,
+        "judgement": "血統比較下位",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": 0.23013,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 1,
+        "race_time": "1:49.4",
+        "race_time_seconds": 109.4,
+        "margin": "",
+        "last3f": 34.0,
+        "popularity": 4,
+        "odds": 5.4,
+        "body_weight": 452,
+        "body_weight_change": 0,
+        "jockey": "横山和",
+        "carried_weight": 55.0
+      },
+      "comparison": {
+        "rank_difference": -8,
+        "absolute_rank_error": 8,
+        "predicted_top1": false,
+        "predicted_top3": false,
+        "predicted_top5": false,
+        "actual_top1": true,
+        "actual_top3": true,
+        "error_candidate": {
+          "category": "performance_or_adjustment_underestimate_candidate",
+          "severity": "high",
+          "note": "能力順位では残っていたが最終順位を下げた補正要因を要検証"
+        }
+      }
+    },
+    {
+      "horse_id": "2024103596",
+      "horse_number": 5,
+      "horse_name": "スターホッピング",
+      "matched_by": "horse_id",
+      "prediction": {
+        "rank": 10,
+        "judgement": "血統比較下位",
+        "ability_known": false,
+        "ability_rank": null,
+        "ability_score": null,
+        "performance_rate": null,
+        "condition_fit_score": null,
+        "final_score": -0.457363,
+        "running_style": "評価対象外",
+        "previous_positive_count": 0,
+        "previous_issue_count": 0,
+        "overcoming_material_count": 0,
+        "pace_adjustment": 0.0,
+        "bloodline_adjustment": 0.0,
+        "time_fit_label": "評価対象外"
+      },
+      "actual": {
+        "finish": 10,
+        "race_time": "1:52.2",
+        "race_time_seconds": 112.2,
+        "margin": "2.1/2",
+        "last3f": 35.6,
+        "popularity": 9,
+        "odds": 159.0,
+        "body_weight": 490,
+        "body_weight_change": 0,
+        "jockey": "☆長浜",
+        "carried_weight": 55.0
+      },
+      "comparison": {
+        "rank_difference": 0,
+        "absolute_rank_error": 0,
+        "predicted_top1": false,
+        "predicted_top3": false,
+        "predicted_top5": false,
+        "actual_top1": false,
+        "actual_top3": false,
+        "error_candidate": {
+          "category": "normal_rank_error",
+          "severity": "low",
+          "note": "通常範囲の順位差"
+        }
+      }
+    }
+  ],
+  "method": {
+    "prediction_is_frozen_snapshot": true,
+    "result_collected_after_race": true,
+    "horse_match_prefers_horse_id": true,
+    "horse_number_is_fallback": true,
+    "post_race_snapshot_excluded_from_aggregate": true,
+    "error_category_is_diagnostic_candidate_only": true,
+    "error_category_is_not_causal_proof": true,
+    "popularity_does_not_modify_prediction": true,
+    "actual_result_does_not_rewrite_prediction": true
+  }
+}
