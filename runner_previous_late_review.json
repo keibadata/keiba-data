@@ -1,12 +1,12 @@
 {
   "version": "runner_previous_late_review_v1",
-  "target_race_id": "202608050308",
+  "target_race_id": "202605050309",
   "source_files": [
     "runner_late_review.json",
     "previous_race_analysis.json"
   ],
-  "review_source_updated_at": "2026-11-14T13:29:29.071098+09:00",
-  "previous_analysis_updated_at": "2026-11-14T13:29:29.579935+09:00",
+  "review_source_updated_at": "2026-11-14T13:52:04.286093+09:00",
+  "previous_analysis_updated_at": "2026-11-14T13:52:05.584106+09:00",
   "scoring_applied": false,
   "notes": [
     "馬ID・前走Race ID・開催日が一致した候補のみ収録。",
@@ -14,9 +14,90 @@
     "終盤の観測値は前走課題・克服根拠・採点とは別に保持。"
   ],
   "summary": {
-    "horse_count": 8,
-    "candidate_count": 11,
-    "matched_previous_run_count": 0
+    "horse_count": 14,
+    "candidate_count": 43,
+    "matched_previous_run_count": 2
   },
-  "matches": []
+  "matches": [
+    {
+      "horse_id": "2022105385",
+      "horse_number": "3",
+      "horse_name": "ステアハート",
+      "previous_race_id": "202605040909",
+      "previous_race_date": "2026-10-25",
+      "existing_previous_analysis": {
+        "issue_summary": "前走課題は未確認",
+        "overcoming_summary": "客観データ上の明確な克服材料なし"
+      },
+      "late_review_observation": {
+        "pattern": "rank_gained_gap_widened",
+        "gap_change_within_0_1_seconds": false,
+        "horse_id": "2022105385",
+        "horse_number": "3",
+        "horse_name": "ステアハート",
+        "past_race_id": "202605040909",
+        "past_race_date": "2026-10-25",
+        "past_race_name": "三鷹特別(2勝クラス)",
+        "position_change": {
+          "status": "ok",
+          "comparison_count": 11,
+          "to_last_600m_rank_max": 9,
+          "to_last_600m_tie_count": 4,
+          "direction": "gained",
+          "to_last_600m_rank": 6,
+          "last3f_rank": 4,
+          "finish": 4,
+          "positions_gained": 2
+        },
+        "gap_change": {
+          "status": "ok",
+          "split_gap_to_leader_seconds": 0.7,
+          "finish_gap_to_winner_seconds": 1.1,
+          "finish_minus_split_gap_seconds": 0.4,
+          "direction": "widened"
+        },
+        "race_final_minus_preceding_seconds_per_200m": -0.3667
+      }
+    },
+    {
+      "horse_id": "2022106951",
+      "horse_number": "7",
+      "horse_name": "ブレゲアン",
+      "previous_race_id": "202605040909",
+      "previous_race_date": "2026-10-25",
+      "existing_previous_analysis": {
+        "issue_summary": "課題候補あり・克服未確認（道中で位置を下げた、着差が大きい）",
+        "overcoming_summary": "課題候補の克服未確認"
+      },
+      "late_review_observation": {
+        "pattern": "rank_gained_gap_widened",
+        "gap_change_within_0_1_seconds": false,
+        "horse_id": "2022106951",
+        "horse_number": "7",
+        "horse_name": "ブレゲアン",
+        "past_race_id": "202605040909",
+        "past_race_date": "2026-10-25",
+        "past_race_name": "三鷹特別(2勝クラス)",
+        "position_change": {
+          "status": "ok",
+          "comparison_count": 11,
+          "to_last_600m_rank_max": 9,
+          "to_last_600m_tie_count": 4,
+          "direction": "gained",
+          "to_last_600m_rank": 6,
+          "last3f_rank": 3,
+          "finish": 3,
+          "positions_gained": 3
+        },
+        "gap_change": {
+          "status": "ok",
+          "split_gap_to_leader_seconds": 0.7,
+          "finish_gap_to_winner_seconds": 1.0,
+          "finish_minus_split_gap_seconds": 0.3,
+          "direction": "widened"
+        },
+        "race_final_minus_preceding_seconds_per_200m": -0.3667
+      }
+    }
+  ]
 }
