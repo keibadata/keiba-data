@@ -126,9 +126,21 @@ def late_observation_index(race_id, expected_ids, statuses):
     result = {}
     for horse_id, horse in horses.items():
         for run in horse.get("past_races", []):
-            key = race_key(horse_id, run.get("race_id"), run.get("date"))
-            if key is None or key in result:
-                raise ValueError("Invalid or duplicate pace context run")
+            race_id_value = text(run.get("race_id"))
+            race_date_value = run.get("date")
+            if not race_id_value:
+                print(
+                    "Pace context run skipped: missing race ID "
+                    f"(horse_id={horse_id}, date={race_date_value})"
+                )
+                continue
+            key = race_key(horse_id, race_id_value, race_date_value)
+            if key is None:
+                raise ValueError(
+                    f"Invalid pace context run: {horse_id} {race_id_value} {race_date_value}"
+                )
+            if key in result:
+                raise ValueError(f"Duplicate pace context run: {key}")
             result[key] = run
     statuses[filename] = "matched"
     return result
