@@ -1,31 +1,31 @@
 {
   "version": "past_laps_v1",
-  "updated_at": "2026-11-15T09:18:09.598435+09:00",
-  "target_race_id": "202608050401",
+  "updated_at": "2026-11-15T09:29:23.835163+09:00",
+  "target_race_id": "202603030401",
   "target_date": "2026-11-15",
   "future_race_usage": false,
   "leak_check_passed": true,
   "scoring_applied": false,
   "summary": {
-    "requested_race_count": 15,
-    "candidate_race_count": 15,
-    "ok_count": 15,
-    "unknown_count": 0,
-    "cache_hit_count": 15,
+    "requested_race_count": 26,
+    "candidate_race_count": 26,
+    "ok_count": 25,
+    "unknown_count": 1,
+    "cache_hit_count": 20,
     "unlinked_race_count": 0
   },
   "performance": {
-    "network_seconds": 0.0,
-    "html_parse_seconds": 0.0,
-    "fixed_wait_seconds": 0.0,
-    "retry_wait_seconds": 0.0,
+    "network_seconds": 2.975,
+    "html_parse_seconds": 0.363,
+    "fixed_wait_seconds": 0.697,
+    "retry_wait_seconds": 1.0,
     "cache_lookup_seconds": 0.001,
-    "network_attempts": 0,
-    "retry_count": 0,
+    "network_attempts": 7,
+    "retry_count": 1,
     "network_errors": 0,
-    "parse_errors": 0,
-    "new_fetch_count": 0,
-    "total_seconds": 0.303
+    "parse_errors": 2,
+    "new_fetch_count": 6,
+    "total_seconds": 5.391
   },
   "notes": [
     "レース全体のラップ。各馬の個別ラップではない。",
@@ -35,295 +35,190 @@
   "races": [
     {
       "version": "past_laps_v1",
-      "race_id": "202601020305",
-      "race_date": "2026-08-29",
-      "distance": 1700,
+      "race_id": "202603020106",
+      "race_date": "2026-06-27",
+      "distance": 1150,
       "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202601020305",
-      "fetched_at": "2026-11-10T22:37:58.440372+09:00",
-      "cache_hit": true,
-      "status": "ok",
-      "segments": [
-        {
-          "distance_m": 100,
-          "segment_distance_m": 100,
-          "cumulative_seconds": 7.1,
-          "lap_seconds": 7.1
-        },
-        {
-          "distance_m": 300,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 18.5,
-          "lap_seconds": 11.4
-        },
-        {
-          "distance_m": 500,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 31.3,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 700,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 44.3,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 900,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 56.8,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 1100,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 68.9,
-          "lap_seconds": 12.1
-        },
-        {
-          "distance_m": 1300,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 81.7,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1500,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 94.7,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 1700,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 108.1,
-          "lap_seconds": 13.4
-        }
-      ],
-      "winner_time_seconds": 108.1,
-      "source_pace_code": "H",
-      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020106",
+      "fetched_at": "2026-11-15T09:29:18.536977+09:00",
+      "cache_hit": false,
+      "status": "unknown",
+      "segments": null,
+      "source_pace_code": null,
       "pace_advantage": null,
-      "html_sha256": "40fb1cf9eaf9d47bcf4734a74976a3522137f19ad4a471e028e19cca3a26d338"
+      "error": "ValueError: 最終ラップ距離とレース距離が不一致"
     },
     {
       "version": "past_laps_v1",
-      "race_id": "202604040402",
-      "race_date": "2026-10-25",
-      "distance": 1800,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040402",
-      "fetched_at": "2026-11-10T02:15:01.410605+09:00",
+      "race_id": "202603020204",
+      "race_date": "2026-06-28",
+      "distance": 1200,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020204",
+      "fetched_at": "2026-11-11T00:26:17.477791+09:00",
       "cache_hit": true,
       "status": "ok",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 12.8,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 24.1,
+          "cumulative_seconds": 23.2,
+          "lap_seconds": 11.0
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.5,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 45.9,
+          "lap_seconds": 11.4
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 57.3,
+          "lap_seconds": 11.4
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 68.4,
+          "lap_seconds": 11.1
+        }
+      ],
+      "winner_time_seconds": 68.4,
+      "source_pace_code": "M",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "1e477c9b19c0b57eac92adb7c0b43baabe69f37205e28746e70fc4f90b8bd18e"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202603020505",
+      "race_date": "2026-07-11",
+      "distance": 1200,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020505",
+      "fetched_at": "2026-11-11T00:26:18.563549+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.5,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.8,
           "lap_seconds": 11.3
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 36.4,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 49.0,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 61.8,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 74.6,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 87.9,
-          "lap_seconds": 13.3
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 100.6,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 113.2,
-          "lap_seconds": 12.6
-        }
-      ],
-      "winner_time_seconds": 113.2,
-      "source_pace_code": "M",
-      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
-      "pace_advantage": null,
-      "html_sha256": "710ee9c6fa0160808fad59863f8a7235b7e33301e979f57ac27ed66d474c799b"
-    },
-    {
-      "version": "past_laps_v1",
-      "race_id": "202607030402",
-      "race_date": "2026-08-30",
-      "distance": 1600,
-      "surface": "芝",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202607030402",
-      "fetched_at": "2026-11-15T07:59:43.038380+09:00",
-      "cache_hit": true,
-      "status": "ok",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.8,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.3,
+          "cumulative_seconds": 35.3,
           "lap_seconds": 11.5
         },
         {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 36.0,
-          "lap_seconds": 11.7
-        },
-        {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 47.9,
+          "cumulative_seconds": 47.2,
           "lap_seconds": 11.9
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 60.2,
-          "lap_seconds": 12.3
+          "cumulative_seconds": 59.0,
+          "lap_seconds": 11.8
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 71.9,
-          "lap_seconds": 11.7
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 83.1,
-          "lap_seconds": 11.2
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 94.6,
-          "lap_seconds": 11.5
+          "cumulative_seconds": 70.8,
+          "lap_seconds": 11.8
         }
       ],
-      "winner_time_seconds": 94.6,
-      "source_pace_code": "S",
+      "winner_time_seconds": 70.8,
+      "source_pace_code": "M",
       "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
       "pace_advantage": null,
-      "html_sha256": "0bba8eb2eb77ab864dbca16a2c7d3be1255e54241c539804a0f3e7dfd94134cc"
+      "html_sha256": "6bc1641cb821571b87e83fe2a4329f2b50a2bcc4fb20f83a173eb49fbaba0a48"
     },
     {
       "version": "past_laps_v1",
-      "race_id": "202608040201",
-      "race_date": "2026-10-04",
-      "distance": 1800,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040201",
-      "fetched_at": "2026-11-10T22:38:02.330357+09:00",
+      "race_id": "202603020701",
+      "race_date": "2026-07-18",
+      "distance": 1200,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202603020701",
+      "fetched_at": "2026-11-11T00:26:19.761591+09:00",
       "cache_hit": true,
       "status": "ok",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 12.9,
-          "lap_seconds": 12.9
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 25.2,
-          "lap_seconds": 12.3
+          "cumulative_seconds": 22.7,
+          "lap_seconds": 10.5
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 38.9,
-          "lap_seconds": 13.7
+          "cumulative_seconds": 33.9,
+          "lap_seconds": 11.2
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 52.1,
-          "lap_seconds": 13.2
+          "cumulative_seconds": 45.8,
+          "lap_seconds": 11.9
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 64.8,
-          "lap_seconds": 12.7
+          "cumulative_seconds": 57.7,
+          "lap_seconds": 11.9
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 77.2,
-          "lap_seconds": 12.4
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 89.7,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 101.9,
-          "lap_seconds": 12.2
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 114.0,
-          "lap_seconds": 12.1
+          "cumulative_seconds": 69.6,
+          "lap_seconds": 11.9
         }
       ],
-      "winner_time_seconds": 114.0,
-      "source_pace_code": "S",
+      "winner_time_seconds": 69.6,
+      "source_pace_code": "H",
       "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
       "pace_advantage": null,
-      "html_sha256": "a3525a2d69925b65f19bc8652ef58b1794a8dd3493dbf219bf0f4f9b8c509bb9"
+      "html_sha256": "d7a64e0bd256ff28a5a1121ffceafd4e8d82fbd4c86b6fceded70255ac1d9cf9"
     },
     {
       "version": "past_laps_v1",
-      "race_id": "202608040403",
-      "race_date": "2026-10-11",
-      "distance": 1400,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040403",
-      "fetched_at": "2026-11-15T07:59:43.557640+09:00",
-      "cache_hit": true,
+      "race_id": "202604020301",
+      "race_date": "2026-08-01",
+      "distance": 1000,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020301",
+      "fetched_at": "2026-11-15T09:29:20.349520+09:00",
+      "cache_hit": false,
       "status": "ok",
       "segments": [
         {
@@ -335,342 +230,96 @@
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 23.1,
-          "lap_seconds": 11.0
+          "cumulative_seconds": 22.8,
+          "lap_seconds": 10.7
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 35.1,
-          "lap_seconds": 12.0
+          "cumulative_seconds": 33.6,
+          "lap_seconds": 10.8
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 47.0,
-          "lap_seconds": 11.9
+          "cumulative_seconds": 44.9,
+          "lap_seconds": 11.3
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 59.7,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 72.4,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 85.2,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 57.0,
+          "lap_seconds": 12.1
         }
       ],
-      "winner_time_seconds": 85.2,
-      "source_pace_code": "H",
-      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
-      "pace_advantage": null,
-      "html_sha256": "5669a7f8a8a8b81f748aea22269b74a7f85fb44cebf7bf99734a4725af92ebb5"
-    },
-    {
-      "version": "past_laps_v1",
-      "race_id": "202608040502",
-      "race_date": "2026-10-12",
-      "distance": 1800,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040502",
-      "fetched_at": "2026-11-10T02:15:25.215280+09:00",
-      "cache_hit": true,
-      "status": "ok",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.4,
-          "lap_seconds": 12.4
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.3,
-          "lap_seconds": 11.9
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 37.8,
-          "lap_seconds": 13.5
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 51.0,
-          "lap_seconds": 13.2
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 64.2,
-          "lap_seconds": 13.2
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 77.1,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 90.0,
-          "lap_seconds": 12.9
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 102.3,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 114.6,
-          "lap_seconds": 12.3
-        }
-      ],
-      "winner_time_seconds": 114.6,
-      "source_pace_code": "S",
-      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
-      "pace_advantage": null,
-      "html_sha256": "74ab9911738eaaeaa97ffb6776122aa1c1094310c24c0ef0b75725896c0ecb8b"
-    },
-    {
-      "version": "past_laps_v1",
-      "race_id": "202608040606",
-      "race_date": "2026-10-17",
-      "distance": 1800,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040606",
-      "fetched_at": "2026-11-15T07:59:43.896504+09:00",
-      "cache_hit": true,
-      "status": "ok",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.7,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 23.9,
-          "lap_seconds": 11.2
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 36.5,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 49.2,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 61.9,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 74.6,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 87.4,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 100.0,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 112.6,
-          "lap_seconds": 12.6
-        }
-      ],
-      "winner_time_seconds": 112.6,
+      "winner_time_seconds": 57.0,
       "source_pace_code": "M",
       "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
       "pace_advantage": null,
-      "html_sha256": "686381df36ad744bc1c9deaf712a6670b54d0bd32a83e8bc71291f5f95bd3032"
+      "html_sha256": "1f039bfd12b34f6b06d386c8627c83f6fa67a98f9bcc9c899d86a8c90c730b39"
     },
     {
       "version": "past_laps_v1",
-      "race_id": "202608040801",
-      "race_date": "2026-10-24",
-      "distance": 1800,
+      "race_id": "202604020502",
+      "race_date": "2026-08-08",
+      "distance": 1200,
       "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040801",
-      "fetched_at": "2026-11-14T10:09:10.972036+09:00",
-      "cache_hit": true,
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020502",
+      "fetched_at": "2026-11-15T09:29:20.837520+09:00",
+      "cache_hit": false,
       "status": "ok",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 12.4,
-          "lap_seconds": 12.4
+          "cumulative_seconds": 12.3,
+          "lap_seconds": 12.3
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 24.0,
-          "lap_seconds": 11.6
+          "cumulative_seconds": 23.8,
+          "lap_seconds": 11.5
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 37.7,
-          "lap_seconds": 13.7
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 50.7,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 62.9,
-          "lap_seconds": 12.2
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 75.4,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 88.0,
-          "lap_seconds": 12.6
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 100.1,
+          "cumulative_seconds": 35.9,
           "lap_seconds": 12.1
         },
         {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 112.0,
-          "lap_seconds": 11.9
-        }
-      ],
-      "winner_time_seconds": 112.0,
-      "source_pace_code": "S",
-      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
-      "pace_advantage": null,
-      "html_sha256": "d1ec88baf96123d1fb8302cbd74f0f037319fff060ec8388a60ce0457612767d"
-    },
-    {
-      "version": "past_laps_v1",
-      "race_id": "202608040803",
-      "race_date": "2026-10-24",
-      "distance": 1800,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040803",
-      "fetched_at": "2026-11-10T22:38:03.585188+09:00",
-      "cache_hit": true,
-      "status": "ok",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 12.4,
-          "lap_seconds": 12.4
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.3,
-          "lap_seconds": 11.9
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 37.2,
-          "lap_seconds": 12.9
-        },
-        {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 50.2,
-          "lap_seconds": 13.0
+          "cumulative_seconds": 48.5,
+          "lap_seconds": 12.6
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 62.9,
-          "lap_seconds": 12.7
+          "cumulative_seconds": 60.6,
+          "lap_seconds": 12.1
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 75.2,
-          "lap_seconds": 12.3
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 87.4,
-          "lap_seconds": 12.2
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 99.6,
-          "lap_seconds": 12.2
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 112.0,
-          "lap_seconds": 12.4
+          "cumulative_seconds": 73.1,
+          "lap_seconds": 12.5
         }
       ],
-      "winner_time_seconds": 112.0,
-      "source_pace_code": "M",
+      "winner_time_seconds": 73.1,
+      "source_pace_code": "H",
       "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
       "pace_advantage": null,
-      "html_sha256": "751ff5fe4d7591d126de0090f772b84db98655f87bae5d3ef01b045590ebe192"
+      "html_sha256": "f2e2ebd96a994b715cc993f7286ad0c2bf66f78d975056e8f648816e0ecbce91"
     },
     {
       "version": "past_laps_v1",
-      "race_id": "202608040901",
-      "race_date": "2026-10-25",
-      "distance": 1800,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040901",
-      "fetched_at": "2026-11-15T07:59:44.652736+09:00",
+      "race_id": "202604020702",
+      "race_date": "2026-08-15",
+      "distance": 1400,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020702",
+      "fetched_at": "2026-11-14T09:30:12.739116+09:00",
       "cache_hit": true,
       "status": "ok",
       "segments": [
@@ -683,57 +332,999 @@
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 23.8,
+          "cumulative_seconds": 23.7,
+          "lap_seconds": 11.1
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.0,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.9,
+          "lap_seconds": 11.9
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.9,
+          "lap_seconds": 12.0
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 70.6,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 1400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 82.2,
+          "lap_seconds": 11.6
+        }
+      ],
+      "winner_time_seconds": 82.2,
+      "source_pace_code": "M",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "22a79a5ce06a95a160086ab092df167592cb9869d3fcf888135e0d19c45c78ff"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202604020803",
+      "race_date": "2026-08-16",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604020803",
+      "fetched_at": "2026-11-11T00:26:24.205125+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.1,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.9,
+          "lap_seconds": 10.8
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.2,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.3,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.9,
+          "lap_seconds": 12.6
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 72.3,
+          "lap_seconds": 13.4
+        }
+      ],
+      "winner_time_seconds": 72.3,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "c4a169a73a4f40957d3db25da02f745e0e393022b8c71fededdabad867b06009"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202604040105",
+      "race_date": "2026-10-17",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040105",
+      "fetched_at": "2026-11-10T21:17:27.094131+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.4,
           "lap_seconds": 11.2
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 36.2,
-          "lap_seconds": 12.4
+          "cumulative_seconds": 35.2,
+          "lap_seconds": 11.8
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 48.6,
-          "lap_seconds": 12.4
+          "cumulative_seconds": 48.0,
+          "lap_seconds": 12.8
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 61.4,
+          "cumulative_seconds": 60.6,
+          "lap_seconds": 12.6
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 73.3,
+          "lap_seconds": 12.7
+        }
+      ],
+      "winner_time_seconds": 73.3,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "b5e80f639f0a22ac45f3c61c79dc1a66f8a54030e9da9011e6bffa57045ae32e"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202604040202",
+      "race_date": "2026-10-18",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040202",
+      "fetched_at": "2026-11-15T09:29:21.734070+09:00",
+      "cache_hit": false,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 11.8,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.7,
+          "lap_seconds": 10.9
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.5,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 47.4,
+          "lap_seconds": 12.9
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 60.5,
+          "lap_seconds": 13.1
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 73.1,
+          "lap_seconds": 12.6
+        }
+      ],
+      "winner_time_seconds": 73.1,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "76bd1e42b8b0f844cb957b0e553afe1fdf325414cd7457371c45d47b560d221f"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202604040303",
+      "race_date": "2026-10-24",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202604040303",
+      "fetched_at": "2026-11-10T21:17:28.008152+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.6,
+          "lap_seconds": 11.4
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.5,
+          "lap_seconds": 11.9
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 48.0,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 60.2,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 73.1,
+          "lap_seconds": 12.9
+        }
+      ],
+      "winner_time_seconds": 73.1,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "dd15463d53312bf7a8929ce1cf938be9bd81d02f8d5bb316b884126d26c76a8a"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202605030404",
+      "race_date": "2026-06-14",
+      "distance": 1400,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202605030404",
+      "fetched_at": "2026-11-10T22:37:58.869985+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.4,
+          "lap_seconds": 12.4
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.4,
+          "lap_seconds": 11.0
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.7,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.4,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.6,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 71.5,
+          "lap_seconds": 12.9
+        },
+        {
+          "distance_m": 1400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 84.6,
+          "lap_seconds": 13.1
+        }
+      ],
+      "winner_time_seconds": 84.6,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "96c6a446b0e5764c451de0f8a2bd73e8cfc31b5d75076ae9032716464355a106"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202606040202",
+      "race_date": "2026-09-06",
+      "distance": 1200,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040202",
+      "fetched_at": "2026-11-14T09:53:33.960313+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.1,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.0,
+          "lap_seconds": 10.9
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.8,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.7,
+          "lap_seconds": 11.9
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.4,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 70.3,
+          "lap_seconds": 11.9
+        }
+      ],
+      "winner_time_seconds": 70.3,
+      "source_pace_code": "M",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "9aeae1db79b0e1aeb2b63d78de3a6bc458817e2e67e0a5b5f6cec4c855b97afe"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202606040306",
+      "race_date": "2026-09-12",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040306",
+      "fetched_at": "2026-11-15T09:29:22.001637+09:00",
+      "cache_hit": false,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.5,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.5,
+          "lap_seconds": 11.0
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.2,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 47.3,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 59.8,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 71.9,
+          "lap_seconds": 12.1
+        }
+      ],
+      "winner_time_seconds": 71.9,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "8f40fd4d18b3a3e5d0495d2ddad16aa7bb61012a58c4ff1177b8b97ee011cdbe"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202606040403",
+      "race_date": "2026-09-13",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040403",
+      "fetched_at": "2026-11-14T10:13:13.299468+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 11.8,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.5,
+          "lap_seconds": 10.7
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 33.8,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.1,
+          "lap_seconds": 12.3
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.6,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 71.6,
+          "lap_seconds": 13.0
+        }
+      ],
+      "winner_time_seconds": 71.6,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "c63bda6d0979aa072475f15aaa6704a84573003dc4ff9aa0ce24c11ce1b1abc3"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202606040702",
+      "race_date": "2026-09-22",
+      "distance": 1200,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040702",
+      "fetched_at": "2026-11-12T01:42:11.594629+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.1,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.2,
+          "lap_seconds": 11.1
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.9,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.6,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.4,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 70.8,
+          "lap_seconds": 12.4
+        }
+      ],
+      "winner_time_seconds": 70.8,
+      "source_pace_code": "M",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "8d70d4ce9fe14a6133e77410f0dc77594ce6cd9cee79420f1900e733590fea0c"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202606040705",
+      "race_date": "2026-09-22",
+      "distance": 1600,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040705",
+      "fetched_at": "2026-11-11T07:14:01.083211+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.5,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 24.1,
+          "lap_seconds": 11.6
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.9,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 47.7,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 59.8,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 72.2,
+          "lap_seconds": 12.4
+        },
+        {
+          "distance_m": 1400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 84.6,
+          "lap_seconds": 12.4
+        },
+        {
+          "distance_m": 1600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 97.3,
+          "lap_seconds": 12.7
+        }
+      ],
+      "winner_time_seconds": 97.3,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "362cc18dedfb7d603369ad96e016a4ed4b6d9c95d8226c091dbbd347fee727cf"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202606040801",
+      "race_date": "2026-09-26",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040801",
+      "fetched_at": "2026-11-15T09:29:22.576707+09:00",
+      "cache_hit": false,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 11.8,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.2,
+          "lap_seconds": 10.4
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 33.3,
+          "lap_seconds": 11.1
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 45.1,
+          "lap_seconds": 11.8
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 57.9,
           "lap_seconds": 12.8
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 74.2,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 71.7,
+          "lap_seconds": 13.8
+        }
+      ],
+      "winner_time_seconds": 71.7,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "8a52d11a018fff5159d053613828d12b57f1acbb0a9ba073f72c6f10bf457cab"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202606040901",
+      "race_date": "2026-09-27",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202606040901",
+      "fetched_at": "2026-11-14T09:30:14.950174+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.1,
+          "lap_seconds": 12.1
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.7,
+          "lap_seconds": 10.6
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.0,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 46.5,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 58.9,
+          "lap_seconds": 12.4
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 71.6,
+          "lap_seconds": 12.7
+        }
+      ],
+      "winner_time_seconds": 71.6,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "8d8bac4f7f06de8607f99eae25ec68144a6a8d259f68685328e6be7360fb0651"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202607020101",
+      "race_date": "2026-07-25",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202607020101",
+      "fetched_at": "2026-11-10T21:24:09.898896+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.5,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.5,
+          "lap_seconds": 11.0
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.7,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 48.2,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 60.4,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 73.6,
+          "lap_seconds": 13.2
+        }
+      ],
+      "winner_time_seconds": 73.6,
+      "source_pace_code": "H",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "96b3223d54ef9aab94e7ee05a8510e7a0b133cb70cc5112ebad64ee5b41217ed"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202607020802",
+      "race_date": "2026-08-16",
+      "distance": 1400,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202607020802",
+      "fetched_at": "2026-11-14T10:44:06.899602+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.2,
+          "lap_seconds": 11.0
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.4,
+          "lap_seconds": 12.2
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 48.4,
+          "lap_seconds": 13.0
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 61.0,
+          "lap_seconds": 12.6
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 73.3,
+          "lap_seconds": 12.3
         },
         {
           "distance_m": 1400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 87.4,
-          "lap_seconds": 13.2
-        },
+          "cumulative_seconds": 85.9,
+          "lap_seconds": 12.6
+        }
+      ],
+      "winner_time_seconds": 85.9,
+      "source_pace_code": "M",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "f592cb0202a814aa82cd623db65071998a0ddda1270d977f065d993643d0f3e8"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202607030203",
+      "race_date": "2026-08-23",
+      "distance": 1400,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202607030203",
+      "fetched_at": "2026-11-14T09:39:02.520338+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
         {
-          "distance_m": 1600,
+          "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 100.0,
+          "cumulative_seconds": 12.6,
           "lap_seconds": 12.6
         },
         {
-          "distance_m": 1800,
+          "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 112.8,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 23.9,
+          "lap_seconds": 11.3
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.6,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 47.5,
+          "lap_seconds": 11.9
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 59.2,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 70.6,
+          "lap_seconds": 11.4
+        },
+        {
+          "distance_m": 1400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 82.0,
+          "lap_seconds": 11.4
         }
       ],
-      "winner_time_seconds": 112.8,
+      "winner_time_seconds": 82.0,
+      "source_pace_code": "S",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "8f0c3b612149b1f1351d5a4b66cc6d4bb0f601edc99fde90b8b2055848c5d338"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202607030407",
+      "race_date": "2026-08-30",
+      "distance": 1400,
+      "surface": "芝",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202607030407",
+      "fetched_at": "2026-11-11T00:26:29.552010+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.0,
+          "lap_seconds": 12.0
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 22.7,
+          "lap_seconds": 10.7
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 34.2,
+          "lap_seconds": 11.5
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 45.9,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 57.4,
+          "lap_seconds": 11.5
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 68.6,
+          "lap_seconds": 11.2
+        },
+        {
+          "distance_m": 1400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 79.7,
+          "lap_seconds": 11.1
+        }
+      ],
+      "winner_time_seconds": 79.7,
+      "source_pace_code": "M",
+      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
+      "pace_advantage": null,
+      "html_sha256": "c5320c920f8238cc55c9b84a64f746f1dfb8480bed2bdda468d9a49d0f9b6fd7"
+    },
+    {
+      "version": "past_laps_v1",
+      "race_id": "202608040701",
+      "race_date": "2026-10-18",
+      "distance": 1200,
+      "surface": "ダート",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608040701",
+      "fetched_at": "2026-11-10T21:17:30.842956+09:00",
+      "cache_hit": true,
+      "status": "ok",
+      "segments": [
+        {
+          "distance_m": 200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 12.5,
+          "lap_seconds": 12.5
+        },
+        {
+          "distance_m": 400,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 23.5,
+          "lap_seconds": 11.0
+        },
+        {
+          "distance_m": 600,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 35.2,
+          "lap_seconds": 11.7
+        },
+        {
+          "distance_m": 800,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 47.5,
+          "lap_seconds": 12.3
+        },
+        {
+          "distance_m": 1000,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 59.8,
+          "lap_seconds": 12.3
+        },
+        {
+          "distance_m": 1200,
+          "segment_distance_m": 200,
+          "cumulative_seconds": 72.5,
+          "lap_seconds": 12.7
+        }
+      ],
+      "winner_time_seconds": 72.5,
       "source_pace_code": "H",
       "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
       "pace_advantage": null,
-      "html_sha256": "2d41557e58ac877c7d6d92f771736c40ec442836cf08a7c8c0229f4e04e31fae"
+      "html_sha256": "75172c370238cf0a67f11cac421dad27517fc38c0e4e0b2f34ca7f7ff6a8d601"
     },
     {
       "version": "past_laps_v1",
@@ -797,285 +1388,63 @@
     },
     {
       "version": "past_laps_v1",
-      "race_id": "202608041106",
-      "race_date": "2026-11-01",
-      "distance": 1800,
+      "race_id": "202609040704",
+      "race_date": "2026-09-21",
+      "distance": 1400,
       "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202608041106",
-      "fetched_at": "2026-11-14T10:09:12.819084+09:00",
+      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202609040704",
+      "fetched_at": "2026-11-10T21:17:35.911099+09:00",
       "cache_hit": true,
       "status": "ok",
       "segments": [
         {
           "distance_m": 200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 12.1,
-          "lap_seconds": 12.1
+          "cumulative_seconds": 12.2,
+          "lap_seconds": 12.2
         },
         {
           "distance_m": 400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 23.5,
-          "lap_seconds": 11.4
+          "cumulative_seconds": 23.1,
+          "lap_seconds": 10.9
         },
         {
           "distance_m": 600,
           "segment_distance_m": 200,
-          "cumulative_seconds": 36.5,
-          "lap_seconds": 13.0
+          "cumulative_seconds": 35.1,
+          "lap_seconds": 12.0
         },
         {
           "distance_m": 800,
           "segment_distance_m": 200,
-          "cumulative_seconds": 49.3,
-          "lap_seconds": 12.8
+          "cumulative_seconds": 47.5,
+          "lap_seconds": 12.4
         },
         {
           "distance_m": 1000,
           "segment_distance_m": 200,
-          "cumulative_seconds": 61.9,
+          "cumulative_seconds": 60.1,
           "lap_seconds": 12.6
         },
         {
           "distance_m": 1200,
           "segment_distance_m": 200,
-          "cumulative_seconds": 74.4,
-          "lap_seconds": 12.5
+          "cumulative_seconds": 72.5,
+          "lap_seconds": 12.4
         },
         {
           "distance_m": 1400,
           "segment_distance_m": 200,
-          "cumulative_seconds": 87.1,
+          "cumulative_seconds": 85.2,
           "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 100.4,
-          "lap_seconds": 13.3
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 113.4,
-          "lap_seconds": 13.0
         }
       ],
-      "winner_time_seconds": 113.4,
+      "winner_time_seconds": 85.2,
       "source_pace_code": "H",
       "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
       "pace_advantage": null,
-      "html_sha256": "4549ca6fb9cb19f0c5b29a32fc9a87c661955b139e504c754d11d91bfa1d638d"
-    },
-    {
-      "version": "past_laps_v1",
-      "race_id": "202609040506",
-      "race_date": "2026-09-19",
-      "distance": 1800,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202609040506",
-      "fetched_at": "2026-11-10T22:38:04.569773+09:00",
-      "cache_hit": true,
-      "status": "ok",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 13.1,
-          "lap_seconds": 13.1
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 23.8,
-          "lap_seconds": 10.7
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 36.3,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 49.1,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 62.2,
-          "lap_seconds": 13.1
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 75.2,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 88.7,
-          "lap_seconds": 13.5
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 101.8,
-          "lap_seconds": 13.1
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 115.2,
-          "lap_seconds": 13.4
-        }
-      ],
-      "winner_time_seconds": 115.2,
-      "source_pace_code": "H",
-      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
-      "pace_advantage": null,
-      "html_sha256": "3f573bf3c966feb1382b1f4a40ed6200b762d8ed61ea138fb8972eb5786eecb2"
-    },
-    {
-      "version": "past_laps_v1",
-      "race_id": "202609040804",
-      "race_date": "2026-09-26",
-      "distance": 1600,
-      "surface": "芝",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202609040804",
-      "fetched_at": "2026-11-14T10:44:10.096376+09:00",
-      "cache_hit": true,
-      "status": "ok",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 13.0,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.8,
-          "lap_seconds": 11.8
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 36.7,
-          "lap_seconds": 11.9
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 49.4,
-          "lap_seconds": 12.7
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 61.9,
-          "lap_seconds": 12.5
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 73.6,
-          "lap_seconds": 11.7
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 84.7,
-          "lap_seconds": 11.1
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 96.5,
-          "lap_seconds": 11.8
-        }
-      ],
-      "winner_time_seconds": 96.5,
-      "source_pace_code": "S",
-      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
-      "pace_advantage": null,
-      "html_sha256": "d277df41e970f80c98c3498cb87eed95186408e184af08b0c5ea3a6b8716c6ab"
-    },
-    {
-      "version": "past_laps_v1",
-      "race_id": "202609040906",
-      "race_date": "2026-09-27",
-      "distance": 1800,
-      "surface": "ダート",
-      "source_url": "https://race.sp.netkeiba.com/?pid=race_result&race_id=202609040906",
-      "fetched_at": "2026-11-10T02:15:31.715648+09:00",
-      "cache_hit": true,
-      "status": "ok",
-      "segments": [
-        {
-          "distance_m": 200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 13.0,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 24.2,
-          "lap_seconds": 11.2
-        },
-        {
-          "distance_m": 600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 37.5,
-          "lap_seconds": 13.3
-        },
-        {
-          "distance_m": 800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 50.6,
-          "lap_seconds": 13.1
-        },
-        {
-          "distance_m": 1000,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 63.6,
-          "lap_seconds": 13.0
-        },
-        {
-          "distance_m": 1200,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 76.7,
-          "lap_seconds": 13.1
-        },
-        {
-          "distance_m": 1400,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 89.5,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1600,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 102.3,
-          "lap_seconds": 12.8
-        },
-        {
-          "distance_m": 1800,
-          "segment_distance_m": 200,
-          "cumulative_seconds": 115.4,
-          "lap_seconds": 13.1
-        }
-      ],
-      "winner_time_seconds": 115.4,
-      "source_pace_code": "M",
-      "source_pace_note": "取得元の表示。展開有利不利や個別馬の評価とは別。",
-      "pace_advantage": null,
-      "html_sha256": "af50a32c099367c20876962b800711b934f1a617c5aa6eeaee5ce14233d17958"
+      "html_sha256": "a5006b48d2e33a18891606f968438e21a11e65d9a24886e659fa13762e5dcd8e"
     }
   ]
 }
