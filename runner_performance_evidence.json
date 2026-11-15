@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "evidence_version": "performance_evidence_v2",
-  "target_race_id": "202608050404",
+  "target_race_id": "202605050405",
   "race_date": "2026-11-15",
-  "updated_at": "2026-11-15T10:52:02.870257+09:00",
+  "updated_at": "2026-11-15T11:57:37.767033+09:00",
   "policy": {
     "diagnostic_only": true,
     "training_used": false,
@@ -21,20 +21,23 @@
   },
   "race_track_observations": {
     "physical": {
-      "moisture_finish": 5.4,
-      "moisture_4corner": 5.9,
-      "moisture_measurement_time": "11月15日（日曜）5時00分"
+      "moisture_finish": 11.3,
+      "moisture_4corner": 11.8,
+      "moisture_measurement_time": "11月15日（日曜）5時30分",
+      "cushion_value": 9.6,
+      "cushion_measurement_time": "11月15日（日曜）7時00分"
     },
     "source_url": "https://www.jra.go.jp/keiba/baba/index.html",
     "bias_status": "analyzed",
     "reference_race_numbers": [
-      1
+      2,
+      3
     ],
-    "reference_race_count": 1,
-    "confidence": 0.2,
+    "reference_race_count": 2,
+    "confidence": 0.4,
     "running_style_bias": "大きな偏りなし",
-    "inside_outside_bias": "内寄り優勢",
-    "bias_reason": "対象レース以前の同日・同競馬場・同馬場の実レース1件を使用。対象レース以降のデータは使用していない。通過順位接続1/1件。時計基準は有効サンプル不足のため判定していない。"
+    "inside_outside_bias": "大きな偏りなし",
+    "bias_reason": "対象レース以前の同日・同競馬場・同馬場の実レース2件を使用。対象レース以降のデータは使用していない。通過順位接続2/2件。時計基準は有効サンプル不足のため判定していない。"
   },
   "race_pace_hypothesis": {
     "base_pace": "ミドル",
@@ -49,9 +52,9 @@
   },
   "horses": [
     {
-      "horse_id": "2024101789",
+      "horse_id": "2024103553",
       "horse_number": "1",
-      "horse_name": "ゴールドビスケッツ",
+      "horse_name": "ペイヴザウェイ",
       "previous_issues": {
         "source": "previous_race_analysis.json",
         "observations": {
@@ -132,952 +135,7 @@
           "pace_dependency": "不明"
         },
         "past_position_records": [],
-        "jockey": "丹内",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "522",
-        "body_weight_change": "0",
-        "carried_weight": "56.0",
-        "sex_age": "牡2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024100488",
-      "horse_number": "2",
-      "horse_name": "アリエスアルバ",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "松若",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "464",
-        "body_weight_change": "0",
-        "carried_weight": "56.0",
-        "sex_age": "牡2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024108384",
-      "horse_number": "3",
-      "horse_name": "ドラゴンジョルノ",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "北村友",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "496",
-        "body_weight_change": "0",
-        "carried_weight": "56.0",
-        "sex_age": "牡2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024105972",
-      "horse_number": "4",
-      "horse_name": "デルマヨシノ",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "西村淳",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "452",
-        "body_weight_change": "0",
-        "carried_weight": "55.0",
-        "sex_age": "牝2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024103021",
-      "horse_number": "5",
-      "horse_name": "ゴッドスカーレット",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "◇ 今村",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "486",
-        "body_weight_change": "0",
-        "carried_weight": "53.0",
-        "sex_age": "牝2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024103429",
-      "horse_number": "6",
-      "horse_name": "ヤマニンウラカン",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "武豊",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "528",
-        "body_weight_change": "0",
-        "carried_weight": "56.0",
-        "sex_age": "牡2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024101891",
-      "horse_number": "7",
-      "horse_name": "モズデキマリ",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "坂井",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "494",
-        "body_weight_change": "0",
-        "carried_weight": "56.0",
-        "sex_age": "牡2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024103264",
-      "horse_number": "8",
-      "horse_name": "タマモマカロン",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "幸",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "478",
-        "body_weight_change": "0",
-        "carried_weight": "55.0",
-        "sex_age": "牝2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024103468",
-      "horse_number": "9",
-      "horse_name": "アマル",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "☆ 田山",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "432",
-        "body_weight_change": "0",
-        "carried_weight": "54.0",
-        "sex_age": "牝2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024108346",
-      "horse_number": "10",
-      "horse_name": "ジェリーロラム",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "マーカンド",
+        "jockey": "佐々木",
         "assessment": "unknown",
         "pending": "今回の位置取りと展開別評価は仮説として確認する"
       },
@@ -1090,8 +148,8 @@
         "source": "race.json + previous_race_analysis.json",
         "body_weight": "470",
         "body_weight_change": "0",
-        "carried_weight": "55.0",
-        "sex_age": "牝2",
+        "carried_weight": "56.0",
+        "sex_age": "牡2",
         "previous_body_weight": null,
         "previous_race_id": null,
         "assessment": "unknown",
@@ -1099,9 +157,9 @@
       }
     },
     {
-      "horse_id": "2024104682",
-      "horse_number": "11",
-      "horse_name": "ヴァシロピタ",
+      "horse_id": "2024105102",
+      "horse_number": "2",
+      "horse_name": "チェンジオブペース",
       "previous_issues": {
         "source": "previous_race_analysis.json",
         "observations": {
@@ -1182,7 +240,7 @@
           "pace_dependency": "不明"
         },
         "past_position_records": [],
-        "jockey": "田口",
+        "jockey": "菅原明",
         "assessment": "unknown",
         "pending": "今回の位置取りと展開別評価は仮説として確認する"
       },
@@ -1193,112 +251,7 @@
       },
       "body_and_burden": {
         "source": "race.json + previous_race_analysis.json",
-        "body_weight": "452",
-        "body_weight_change": "0",
-        "carried_weight": "55.0",
-        "sex_age": "牝2",
-        "previous_body_weight": null,
-        "previous_race_id": null,
-        "assessment": "unknown",
-        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
-      }
-    },
-    {
-      "horse_id": "2024108200",
-      "horse_number": "12",
-      "horse_name": "ユーキャンダンス",
-      "previous_issues": {
-        "source": "previous_race_analysis.json",
-        "observations": {
-          "race_id": null,
-          "date": null,
-          "rank": null,
-          "surface": null,
-          "distance": null,
-          "margin": null,
-          "passing": null,
-          "last3f": null,
-          "position_observations": null,
-          "margin_observations": null,
-          "condition_changes": null,
-          "unknowns": null
-        },
-        "issues": [],
-        "candidates": [],
-        "summary": "不明",
-        "cause_assessment": "unknown",
-        "late_observation": {
-          "status": "unknown",
-          "reason": "前走の終盤比較データ未接続"
-        },
-        "late_risk_check": "unknown",
-        "pending": "前走の観測値だけでは敗因を確定しない"
-      },
-      "issue_resolution": {
-        "issue_refs": [],
-        "registered_evidence": [],
-        "pending": [],
-        "summary": "不明",
-        "assessment": "unknown",
-        "reason": "根拠の登録と出典内容の確認を区別する"
-      },
-      "condition_fit": {
-        "source": "runner_analysis.json",
-        "experience": {
-          "scope": "evaluated_past_races_only",
-          "evaluated_race_count": 0,
-          "excluded_race_count": 0,
-          "surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "distance_any_surface": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "surface_and_distance": {
-            "status": "unknown",
-            "matched_race_count": 0,
-            "known_race_count": 0
-          },
-          "incompatibility_status": "unknown",
-          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
-        },
-        "reproduction_observations": {
-          "matched_run_count": 0,
-          "comparable_run_count": 0,
-          "runs": [],
-          "assessment": "unknown"
-        },
-        "observed_runs": [],
-        "assessment": "unknown",
-        "pending": "条件経験と、今回能力を出せる根拠を区別する"
-      },
-      "pace_and_position": {
-        "source": "pace_analysis functions + validated runner_history.json",
-        "hypotheses": {
-          "running_style": "不明",
-          "likely_leader": false,
-          "slow_pace": "不明",
-          "middle_pace": "不明",
-          "high_pace": "不明",
-          "pace_dependency": "不明"
-        },
-        "past_position_records": [],
-        "jockey": "川田",
-        "assessment": "unknown",
-        "pending": "今回の位置取りと展開別評価は仮説として確認する"
-      },
-      "track_fit": {
-        "shared_observation_ref": "race_track_observations",
-        "assessment": "unknown",
-        "pending": "当日傾向と各馬の走り方の適合を照合する"
-      },
-      "body_and_burden": {
-        "source": "race.json + previous_race_analysis.json",
-        "body_weight": "520",
+        "body_weight": "466",
         "body_weight_change": "0",
         "carried_weight": "56.0",
         "sex_age": "牡2",
@@ -1309,9 +262,9 @@
       }
     },
     {
-      "horse_id": "2024104924",
-      "horse_number": "13",
-      "horse_name": "レイオウロンド",
+      "horse_id": "2024106069",
+      "horse_number": "3",
+      "horse_name": "ヘルズゲート",
       "previous_issues": {
         "source": "previous_race_analysis.json",
         "observations": {
@@ -1392,7 +345,7 @@
           "pace_dependency": "不明"
         },
         "past_position_records": [],
-        "jockey": "古川吉",
+        "jockey": "大野",
         "assessment": "unknown",
         "pending": "今回の位置取りと展開別評価は仮説として確認する"
       },
@@ -1403,10 +356,10 @@
       },
       "body_and_burden": {
         "source": "race.json + previous_race_analysis.json",
-        "body_weight": "510",
+        "body_weight": "512",
         "body_weight_change": "0",
-        "carried_weight": "55.0",
-        "sex_age": "牝2",
+        "carried_weight": "56.0",
+        "sex_age": "牡2",
         "previous_body_weight": null,
         "previous_race_id": null,
         "assessment": "unknown",
@@ -1414,9 +367,9 @@
       }
     },
     {
-      "horse_id": "2024108371",
-      "horse_number": "14",
-      "horse_name": "アンソフィリア",
+      "horse_id": "2024100917",
+      "horse_number": "4",
+      "horse_name": "ティルト",
       "previous_issues": {
         "source": "previous_race_analysis.json",
         "observations": {
@@ -1497,7 +450,7 @@
           "pace_dependency": "不明"
         },
         "past_position_records": [],
-        "jockey": "Cデムーロ",
+        "jockey": "木幡巧",
         "assessment": "unknown",
         "pending": "今回の位置取りと展開別評価は仮説として確認する"
       },
@@ -1508,10 +461,10 @@
       },
       "body_and_burden": {
         "source": "race.json + previous_race_analysis.json",
-        "body_weight": "500",
+        "body_weight": "424",
         "body_weight_change": "0",
-        "carried_weight": "55.0",
-        "sex_age": "牝2",
+        "carried_weight": "56.0",
+        "sex_age": "牡2",
         "previous_body_weight": null,
         "previous_race_id": null,
         "assessment": "unknown",
@@ -1519,9 +472,9 @@
       }
     },
     {
-      "horse_id": "2024101099",
-      "horse_number": "15",
-      "horse_name": "モズノンノン",
+      "horse_id": "2024106120",
+      "horse_number": "5",
+      "horse_name": "ラディオーサ",
       "previous_issues": {
         "source": "previous_race_analysis.json",
         "observations": {
@@ -1602,7 +555,7 @@
           "pace_dependency": "不明"
         },
         "past_position_records": [],
-        "jockey": "西塚",
+        "jockey": "プーシャン",
         "assessment": "unknown",
         "pending": "今回の位置取りと展開別評価は仮説として確認する"
       },
@@ -1613,7 +566,7 @@
       },
       "body_and_burden": {
         "source": "race.json + previous_race_analysis.json",
-        "body_weight": "452",
+        "body_weight": "472",
         "body_weight_change": "0",
         "carried_weight": "55.0",
         "sex_age": "牝2",
@@ -1624,9 +577,9 @@
       }
     },
     {
-      "horse_id": "2024103841",
-      "horse_number": "16",
-      "horse_name": "スターペスアサミ",
+      "horse_id": "2024104823",
+      "horse_number": "6",
+      "horse_name": "ノーブルターゲット",
       "previous_issues": {
         "source": "previous_race_analysis.json",
         "observations": {
@@ -1707,7 +660,112 @@
           "pace_dependency": "不明"
         },
         "past_position_records": [],
-        "jockey": "太宰",
+        "jockey": "武藤",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "466",
+        "body_weight_change": "0",
+        "carried_weight": "56.0",
+        "sex_age": "牡2",
+        "previous_body_weight": null,
+        "previous_race_id": null,
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024101785",
+      "horse_number": "7",
+      "horse_name": "グランツルッカ",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": null,
+          "date": null,
+          "rank": null,
+          "surface": null,
+          "distance": null,
+          "margin": null,
+          "passing": null,
+          "last3f": null,
+          "position_observations": null,
+          "margin_observations": null,
+          "condition_changes": null,
+          "unknowns": null
+        },
+        "issues": [],
+        "candidates": [],
+        "summary": "不明",
+        "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "unknown",
+          "reason": "前走の終盤比較データ未接続"
+        },
+        "late_risk_check": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [],
+        "summary": "不明",
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 0,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "distance_any_surface": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "surface_and_distance": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "reproduction_observations": {
+          "matched_run_count": 0,
+          "comparable_run_count": 0,
+          "runs": [],
+          "assessment": "unknown"
+        },
+        "observed_runs": [],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "不明",
+          "likely_leader": false,
+          "slow_pace": "不明",
+          "middle_pace": "不明",
+          "high_pace": "不明",
+          "pace_dependency": "不明"
+        },
+        "past_position_records": [],
+        "jockey": "▲ 遠藤",
         "assessment": "unknown",
         "pending": "今回の位置取りと展開別評価は仮説として確認する"
       },
@@ -1720,8 +778,323 @@
         "source": "race.json + previous_race_analysis.json",
         "body_weight": "430",
         "body_weight_change": "0",
-        "carried_weight": "55.0",
-        "sex_age": "牝2",
+        "carried_weight": "53.0",
+        "sex_age": "牡2",
+        "previous_body_weight": null,
+        "previous_race_id": null,
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024106400",
+      "horse_number": "8",
+      "horse_name": "スターリーグロウ",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": null,
+          "date": null,
+          "rank": null,
+          "surface": null,
+          "distance": null,
+          "margin": null,
+          "passing": null,
+          "last3f": null,
+          "position_observations": null,
+          "margin_observations": null,
+          "condition_changes": null,
+          "unknowns": null
+        },
+        "issues": [],
+        "candidates": [],
+        "summary": "不明",
+        "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "unknown",
+          "reason": "前走の終盤比較データ未接続"
+        },
+        "late_risk_check": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [],
+        "summary": "不明",
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 0,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "distance_any_surface": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "surface_and_distance": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "reproduction_observations": {
+          "matched_run_count": 0,
+          "comparable_run_count": 0,
+          "runs": [],
+          "assessment": "unknown"
+        },
+        "observed_runs": [],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "不明",
+          "likely_leader": false,
+          "slow_pace": "不明",
+          "middle_pace": "不明",
+          "high_pace": "不明",
+          "pace_dependency": "不明"
+        },
+        "past_position_records": [],
+        "jockey": "横山武",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "492",
+        "body_weight_change": "0",
+        "carried_weight": "56.0",
+        "sex_age": "牡2",
+        "previous_body_weight": null,
+        "previous_race_id": null,
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024100249",
+      "horse_number": "9",
+      "horse_name": "コルシカ",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": null,
+          "date": null,
+          "rank": null,
+          "surface": null,
+          "distance": null,
+          "margin": null,
+          "passing": null,
+          "last3f": null,
+          "position_observations": null,
+          "margin_observations": null,
+          "condition_changes": null,
+          "unknowns": null
+        },
+        "issues": [],
+        "candidates": [],
+        "summary": "不明",
+        "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "unknown",
+          "reason": "前走の終盤比較データ未接続"
+        },
+        "late_risk_check": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [],
+        "summary": "不明",
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 0,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "distance_any_surface": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "surface_and_distance": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "reproduction_observations": {
+          "matched_run_count": 0,
+          "comparable_run_count": 0,
+          "runs": [],
+          "assessment": "unknown"
+        },
+        "observed_runs": [],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "不明",
+          "likely_leader": false,
+          "slow_pace": "不明",
+          "middle_pace": "不明",
+          "high_pace": "不明",
+          "pace_dependency": "不明"
+        },
+        "past_position_records": [],
+        "jockey": "内田博",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "444",
+        "body_weight_change": "0",
+        "carried_weight": "56.0",
+        "sex_age": "牡2",
+        "previous_body_weight": null,
+        "previous_race_id": null,
+        "assessment": "unknown",
+        "pending": "馬体・斤量単独では状態や能力発揮を判定しない"
+      }
+    },
+    {
+      "horse_id": "2024102684",
+      "horse_number": "10",
+      "horse_name": "ロンドンレガシー",
+      "previous_issues": {
+        "source": "previous_race_analysis.json",
+        "observations": {
+          "race_id": null,
+          "date": null,
+          "rank": null,
+          "surface": null,
+          "distance": null,
+          "margin": null,
+          "passing": null,
+          "last3f": null,
+          "position_observations": null,
+          "margin_observations": null,
+          "condition_changes": null,
+          "unknowns": null
+        },
+        "issues": [],
+        "candidates": [],
+        "summary": "不明",
+        "cause_assessment": "unknown",
+        "late_observation": {
+          "status": "unknown",
+          "reason": "前走の終盤比較データ未接続"
+        },
+        "late_risk_check": "unknown",
+        "pending": "前走の観測値だけでは敗因を確定しない"
+      },
+      "issue_resolution": {
+        "issue_refs": [],
+        "registered_evidence": [],
+        "pending": [],
+        "summary": "不明",
+        "assessment": "unknown",
+        "reason": "根拠の登録と出典内容の確認を区別する"
+      },
+      "condition_fit": {
+        "source": "runner_analysis.json",
+        "experience": {
+          "scope": "evaluated_past_races_only",
+          "evaluated_race_count": 0,
+          "excluded_race_count": 0,
+          "surface": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "distance_any_surface": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "surface_and_distance": {
+            "status": "unknown",
+            "matched_race_count": 0,
+            "known_race_count": 0
+          },
+          "incompatibility_status": "unknown",
+          "incompatibility_reason": "条件の経験有無・着順だけでは不適性の原因を確定できない"
+        },
+        "reproduction_observations": {
+          "matched_run_count": 0,
+          "comparable_run_count": 0,
+          "runs": [],
+          "assessment": "unknown"
+        },
+        "observed_runs": [],
+        "assessment": "unknown",
+        "pending": "条件経験と、今回能力を出せる根拠を区別する"
+      },
+      "pace_and_position": {
+        "source": "pace_analysis functions + validated runner_history.json",
+        "hypotheses": {
+          "running_style": "不明",
+          "likely_leader": false,
+          "slow_pace": "不明",
+          "middle_pace": "不明",
+          "high_pace": "不明",
+          "pace_dependency": "不明"
+        },
+        "past_position_records": [],
+        "jockey": "戸崎圭",
+        "assessment": "unknown",
+        "pending": "今回の位置取りと展開別評価は仮説として確認する"
+      },
+      "track_fit": {
+        "shared_observation_ref": "race_track_observations",
+        "assessment": "unknown",
+        "pending": "当日傾向と各馬の走り方の適合を照合する"
+      },
+      "body_and_burden": {
+        "source": "race.json + previous_race_analysis.json",
+        "body_weight": "470",
+        "body_weight_change": "0",
+        "carried_weight": "56.0",
+        "sex_age": "牡2",
         "previous_body_weight": null,
         "previous_race_id": null,
         "assessment": "unknown",
