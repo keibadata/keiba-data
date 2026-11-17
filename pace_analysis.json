@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-17T19:52:35.693402+09:00",
+  "updated_at": "2026-11-17T20:07:26.147487+09:00",
   "source": "runner_history.json",
   "rules": {
     "multiple_races_used": true,
@@ -11,15 +11,28 @@
     "pace_not_scored_as_independent_ability": true
   },
   "summary": {
-    "horse_count": 16,
-    "usable_horse_count": 0
+    "horse_count": 15,
+    "usable_horse_count": 15
   },
   "race_scenario": {
-    "base_pace": "ミドル",
-    "reason": "逃げ・先行構成に極端な偏りなし",
-    "leader_candidate_count": 0,
-    "front_candidate_count": 0,
-    "leader_candidates": [],
+    "base_pace": "ハイ",
+    "reason": "明確な逃げ候補が3頭以上。ハナ争い激化の可能性",
+    "leader_candidate_count": 3,
+    "front_candidate_count": 6,
+    "leader_candidates": [
+      {
+        "horse_number": "6",
+        "horse_name": "アウトザロー"
+      },
+      {
+        "horse_number": "9",
+        "horse_name": "ブラヴィーノ"
+      },
+      {
+        "horse_number": "10",
+        "horse_name": "アルサック"
+      }
+    ],
     "scenario_slow": "逃げ馬が主張せず隊列が早期に決まる",
     "scenario_middle": "標準的な先行争い",
     "scenario_high": "複数馬がハナ・好位を主張し前半加速",
@@ -27,276 +40,2254 @@
   },
   "horses": [
     {
-      "horse_id": "2024107313",
+      "horse_id": "2023107172",
       "horse_number": "1",
-      "horse_name": "エヴァートン",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "バルボアパーク",
+      "usable_race_count": 6,
+      "running_style": "先行",
+      "average_final_position": 3.17,
+      "escape_count": 1,
+      "escape_rate": 0.167,
+      "front_count": 5,
+      "front_rate": 0.833,
+      "back_count": 0,
+      "back_rate": 0.0,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "前目の位置を取れるかが重要",
+      "slow_pace": "プラス",
+      "middle_pace": "プラス",
+      "high_pace": "標準",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/08/08",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "2-2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/05/17",
+          "race_name": "3歳1勝クラス",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/03/14",
+          "race_name": "アネモネS(L)",
+          "passing": "4-4-3",
+          "first_position": 4,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2025/12/13",
+          "race_name": "2歳未勝利",
+          "passing": "1-1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2025/11/23",
+          "race_name": "2歳未勝利",
+          "passing": "6-7",
+          "first_position": 6,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2025/10/13",
+          "race_name": "2歳新馬",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        }
+      ]
     },
     {
-      "horse_id": "2024101976",
+      "horse_id": "2022101204",
       "horse_number": "2",
-      "horse_name": "インペリアルトレド",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "サツキレジーナ",
+      "usable_race_count": 19,
+      "running_style": "後方",
+      "average_final_position": 8.05,
+      "escape_count": 1,
+      "escape_rate": 0.053,
+      "front_count": 5,
+      "front_rate": 0.263,
+      "back_count": 10,
+      "back_rate": 0.526,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/24",
+          "race_name": "稲光特別(1勝クラス)",
+          "passing": "10",
+          "first_position": 10,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2026/09/20",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/08/23",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/08/08",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "12",
+          "first_position": 12,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2026/06/27",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "7-7",
+          "first_position": 7,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2026/02/15",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2026/02/01",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2025/09/06",
+          "race_name": "3歳未勝利",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2025/08/23",
+          "race_name": "3歳未勝利",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2025/08/10",
+          "race_name": "3歳未勝利",
+          "passing": "7-6",
+          "first_position": 7,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2025/07/26",
+          "race_name": "3歳未勝利",
+          "passing": "11-10",
+          "first_position": 11,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2025/07/06",
+          "race_name": "3歳未勝利",
+          "passing": "12-11",
+          "first_position": 12,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2025/06/15",
+          "race_name": "3歳未勝利",
+          "passing": "15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2025/05/24",
+          "race_name": "3歳未勝利",
+          "passing": "11-10",
+          "first_position": 11,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2025/04/05",
+          "race_name": "3歳未勝利",
+          "passing": "9-10-9-9",
+          "first_position": 9,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2025/03/06",
+          "race_name": "河渡宿特別(3歳)",
+          "passing": "5-4-4",
+          "first_position": 5,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2025/01/19",
+          "race_name": "3歳未勝利",
+          "passing": "10-11",
+          "first_position": 10,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2024/12/28",
+          "race_name": "2歳未勝利",
+          "passing": "12-11",
+          "first_position": 12,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2024/10/20",
+          "race_name": "2歳新馬",
+          "passing": "14-14",
+          "first_position": 14,
+          "final_position": 14,
+          "style": "後方"
+        }
+      ]
     },
     {
-      "horse_id": "2024106746",
+      "horse_id": "2023100831",
       "horse_number": "3",
-      "horse_name": "レーヴドプレミア",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "ミスターマーボー",
+      "usable_race_count": 13,
+      "running_style": "先行",
+      "average_final_position": 4.08,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 8,
+      "front_rate": 0.615,
+      "back_count": 0,
+      "back_rate": 0.0,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "プラス",
+      "middle_pace": "プラス",
+      "high_pace": "標準",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/09/13",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "5-5-5",
+          "first_position": 5,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2026/08/15",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "5-5",
+          "first_position": 5,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2026/07/12",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2026/06/13",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "3-4",
+          "first_position": 3,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/05/23",
+          "race_name": "3歳未勝利",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2026/03/01",
+          "race_name": "3歳未勝利",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/02/15",
+          "race_name": "3歳未勝利",
+          "passing": "7-6",
+          "first_position": 7,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2025/11/24",
+          "race_name": "2歳未勝利",
+          "passing": "3-2",
+          "first_position": 3,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2025/10/26",
+          "race_name": "2歳未勝利",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2025/10/13",
+          "race_name": "2歳未勝利",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2025/09/13",
+          "race_name": "2歳未勝利",
+          "passing": "4-4-2",
+          "first_position": 4,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2025/07/19",
+          "race_name": "2歳未勝利",
+          "passing": "6-6-7-8",
+          "first_position": 6,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2025/06/29",
+          "race_name": "2歳新馬",
+          "passing": "5-5-5-4",
+          "first_position": 5,
+          "final_position": 4,
+          "style": "先行"
+        }
+      ]
     },
     {
-      "horse_id": "2024100791",
+      "horse_id": "2020103885",
       "horse_number": "4",
-      "horse_name": "ツェアシュテーラー",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "クリノゴッホ",
+      "usable_race_count": 40,
+      "running_style": "中団後",
+      "average_final_position": 7.58,
+      "escape_count": 1,
+      "escape_rate": 0.025,
+      "front_count": 9,
+      "front_rate": 0.225,
+      "back_count": 15,
+      "back_rate": 0.375,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/09/22",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "14-12-14-12",
+          "first_position": 14,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2026/09/13",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "3-11-12",
+          "first_position": 3,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2026/08/01",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "9-8",
+          "first_position": 9,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2026/06/27",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "10-12",
+          "first_position": 10,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2026/04/25",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2026/04/19",
+          "race_name": "須賀川特別(1勝クラス)",
+          "passing": "7-8",
+          "first_position": 7,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2026/02/21",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "8-6",
+          "first_position": 8,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2026/01/25",
+          "race_name": "八幡特別(1勝クラス)",
+          "passing": "6-5",
+          "first_position": 6,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2025/11/09",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2025/09/21",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "9-9",
+          "first_position": 9,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2025/09/07",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2025/07/20",
+          "race_name": "南相馬特別(1勝クラス)",
+          "passing": "4-5",
+          "first_position": 4,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2025/07/13",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "12-13",
+          "first_position": 12,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2025/06/29",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "10-10",
+          "first_position": 10,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2025/05/31",
+          "race_name": "障害4歳以上未勝利",
+          "passing": "12-12-12-12",
+          "first_position": 12,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2025/05/18",
+          "race_name": "障害4歳以上未勝利",
+          "passing": "12-12-13-13",
+          "first_position": 12,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2025/02/02",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "17-16",
+          "first_position": 17,
+          "final_position": 16,
+          "style": "後方"
+        },
+        {
+          "date": "2024/12/08",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "3-5-7",
+          "first_position": 3,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2024/11/02",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "6-5",
+          "first_position": 6,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2024/09/15",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2024/02/24",
+          "race_name": "秋吉台特別(1勝クラス)",
+          "passing": "7-10",
+          "first_position": 7,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2024/02/10",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "9-9",
+          "first_position": 9,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2024/01/27",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "7-7",
+          "first_position": 7,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2024/01/14",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "11-11",
+          "first_position": 11,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2023/11/04",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2023/10/14",
+          "race_name": "十日町特別(1勝クラス)",
+          "passing": "2-3",
+          "first_position": 2,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2023/09/17",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "5-5",
+          "first_position": 5,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2023/07/23",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "7-7",
+          "first_position": 7,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2023/07/02",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2023/04/15",
+          "race_name": "雪うさぎ賞(1勝クラス)",
+          "passing": "11-12",
+          "first_position": 11,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2023/04/09",
+          "race_name": "3歳1勝クラス",
+          "passing": "4-6",
+          "first_position": 4,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2023/03/25",
+          "race_name": "3歳1勝クラス",
+          "passing": "6-7",
+          "first_position": 6,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2023/03/12",
+          "race_name": "3歳1勝クラス",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2023/01/08",
+          "race_name": "朱竹賞(1勝クラス)",
+          "passing": "7-5",
+          "first_position": 7,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2022/12/10",
+          "race_name": "黒松賞(1勝クラス)",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2022/11/13",
+          "race_name": "福島2歳S(OP)",
+          "passing": "10-11",
+          "first_position": 10,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2022/09/25",
+          "race_name": "2歳未勝利",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2022/08/13",
+          "race_name": "2歳未勝利",
+          "passing": "5-6",
+          "first_position": 5,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2022/06/25",
+          "race_name": "2歳未勝利",
+          "passing": "5-8",
+          "first_position": 5,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2022/06/11",
+          "race_name": "2歳新馬",
+          "passing": "3-2",
+          "first_position": 3,
+          "final_position": 2,
+          "style": "先行"
+        }
+      ]
     },
     {
-      "horse_id": "2024104752",
+      "horse_id": "2021106690",
       "horse_number": "5",
-      "horse_name": "エコロレディ",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "ペルフェツィオーネ",
+      "usable_race_count": 27,
+      "running_style": "後方",
+      "average_final_position": 10.07,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 3,
+      "front_rate": 0.111,
+      "back_count": 18,
+      "back_rate": 0.667,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/04",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "15-16",
+          "first_position": 15,
+          "final_position": 16,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/19",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/11",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "12-10",
+          "first_position": 12,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2026/05/23",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "10-11",
+          "first_position": 10,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2026/04/26",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "6-5",
+          "first_position": 6,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2026/02/28",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "8-10",
+          "first_position": 8,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2026/01/31",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "15-16",
+          "first_position": 15,
+          "final_position": 16,
+          "style": "後方"
+        },
+        {
+          "date": "2026/01/25",
+          "race_name": "八幡特別(1勝クラス)",
+          "passing": "16-15",
+          "first_position": 16,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2025/11/24",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2025/08/30",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "11-11",
+          "first_position": 11,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2025/07/06",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "7-8",
+          "first_position": 7,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2025/06/15",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "11-13",
+          "first_position": 11,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2025/04/19",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "11-9",
+          "first_position": 11,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2025/03/16",
+          "race_name": "岡崎特別(2勝クラス)",
+          "passing": "5-4",
+          "first_position": 5,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2025/03/02",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "13-11",
+          "first_position": 13,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2025/02/02",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2025/01/26",
+          "race_name": "八幡特別(1勝クラス)",
+          "passing": "16-16",
+          "first_position": 16,
+          "final_position": 16,
+          "style": "後方"
+        },
+        {
+          "date": "2024/11/17",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "11-10",
+          "first_position": 11,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2024/10/05",
+          "race_name": "聖籠特別(1勝クラス)",
+          "passing": "9-6",
+          "first_position": 9,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2024/06/22",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "13-14",
+          "first_position": 13,
+          "final_position": 14,
+          "style": "後方"
+        },
+        {
+          "date": "2024/05/26",
+          "race_name": "3歳未勝利",
+          "passing": "3-4",
+          "first_position": 3,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2024/03/03",
+          "race_name": "3歳未勝利",
+          "passing": "11-11",
+          "first_position": 11,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2024/02/03",
+          "race_name": "3歳未勝利",
+          "passing": "12-11",
+          "first_position": 12,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2024/01/27",
+          "race_name": "3歳未勝利",
+          "passing": "5-5-7-5",
+          "first_position": 5,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2023/09/24",
+          "race_name": "2歳未勝利",
+          "passing": "9-10",
+          "first_position": 9,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2023/09/03",
+          "race_name": "2歳未勝利",
+          "passing": "4-5-7",
+          "first_position": 4,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2023/07/09",
+          "race_name": "2歳新馬",
+          "passing": "3-3-3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        }
+      ]
     },
     {
-      "horse_id": "2024107258",
+      "horse_id": "2023110020",
       "horse_number": "6",
-      "horse_name": "フレンドリーキング",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
-      "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "horse_name": "アウトザロー",
+      "usable_race_count": 12,
+      "running_style": "先行",
+      "average_final_position": 3.75,
+      "escape_count": 3,
+      "escape_rate": 0.25,
+      "front_count": 8,
+      "front_rate": 0.667,
+      "back_count": 0,
+      "back_rate": 0.0,
+      "likely_leader": true,
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "プラス",
+      "middle_pace": "プラス",
+      "high_pace": "標準",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/12",
+          "race_name": "トパーズC(重賞)",
+          "passing": "2-2-2-3",
+          "first_position": 2,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2026/09/21",
+          "race_name": "3歳A",
+          "passing": "4-4-2-1",
+          "first_position": 4,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2026/06/14",
+          "race_name": "ウイナーC(重賞)",
+          "passing": "4-3-3-3",
+          "first_position": 4,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2026/05/31",
+          "race_name": "東北優駿(重賞)",
+          "passing": "3-3-2-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2026/05/05",
+          "race_name": "ダイヤモンドC(重賞)",
+          "passing": "3-3-3-5",
+          "first_position": 3,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2026/04/06",
+          "race_name": "3歳B2二組",
+          "passing": "1-1-1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2026/03/24",
+          "race_name": "3歳B2二組",
+          "passing": "2-2-2-1",
+          "first_position": 2,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2026/02/28",
+          "race_name": "3歳未勝利",
+          "passing": "8-8",
+          "first_position": 8,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2026/02/01",
+          "race_name": "3歳未勝利",
+          "passing": "5-7",
+          "first_position": 5,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2025/08/24",
+          "race_name": "2歳未勝利",
+          "passing": "4-4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2025/08/16",
+          "race_name": "2歳未勝利",
+          "passing": "6-5",
+          "first_position": 6,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2025/07/19",
+          "race_name": "2歳新馬",
+          "passing": "5-4",
+          "first_position": 5,
+          "final_position": 4,
+          "style": "先行"
+        }
+      ]
     },
     {
-      "horse_id": "2024100129",
+      "horse_id": "2021105484",
       "horse_number": "7",
-      "horse_name": "ホットイッツユー",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "ベランジェール",
+      "usable_race_count": 17,
+      "running_style": "後方",
+      "average_final_position": 9.59,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 3,
+      "front_rate": 0.176,
+      "back_count": 10,
+      "back_rate": 0.588,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/18",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "17-13",
+          "first_position": 17,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2026/08/09",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "12-12",
+          "first_position": 12,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/25",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "7-7",
+          "first_position": 7,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2026/05/09",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "13-13",
+          "first_position": 13,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2026/03/14",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "5-5-4-4",
+          "first_position": 5,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/02/22",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "17-17",
+          "first_position": 17,
+          "final_position": 17,
+          "style": "後方"
+        },
+        {
+          "date": "2025/10/25",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2025/10/11",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4-7",
+          "first_position": 4,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2025/07/27",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "9-9",
+          "first_position": 9,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2025/03/29",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "15-15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2024/12/14",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "13-14",
+          "first_position": 13,
+          "final_position": 14,
+          "style": "後方"
+        },
+        {
+          "date": "2024/08/18",
+          "race_name": "3歳未勝利",
+          "passing": "16-15",
+          "first_position": 16,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2024/07/27",
+          "race_name": "3歳未勝利",
+          "passing": "7-5",
+          "first_position": 7,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2024/04/20",
+          "race_name": "3歳未勝利",
+          "passing": "6-4",
+          "first_position": 6,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2024/01/28",
+          "race_name": "3歳未勝利",
+          "passing": "6-5",
+          "first_position": 6,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2023/10/09",
+          "race_name": "2歳未勝利",
+          "passing": "11-11",
+          "first_position": 11,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2023/07/16",
+          "race_name": "2歳新馬",
+          "passing": "10-10-10-10",
+          "first_position": 10,
+          "final_position": 10,
+          "style": "後方"
+        }
+      ]
     },
     {
-      "horse_id": "2024101232",
+      "horse_id": "2023101501",
       "horse_number": "8",
-      "horse_name": "グラスクインビー",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "マイティキングダム",
+      "usable_race_count": 9,
+      "running_style": "中団前",
+      "average_final_position": 4.78,
+      "escape_count": 1,
+      "escape_rate": 0.111,
+      "front_count": 5,
+      "front_rate": 0.556,
+      "back_count": 1,
+      "back_rate": 0.111,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "標準",
+      "middle_pace": "プラス",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/17",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "14-13",
+          "first_position": 14,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2026/08/16",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/07/26",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4-5",
+          "first_position": 4,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2026/05/02",
+          "race_name": "3歳1勝クラス",
+          "passing": "4-5",
+          "first_position": 4,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2026/04/04",
+          "race_name": "3歳未勝利",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2026/03/14",
+          "race_name": "3歳未勝利",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/01/12",
+          "race_name": "3歳未勝利",
+          "passing": "5-5",
+          "first_position": 5,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2025/12/21",
+          "race_name": "2歳未勝利",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2025/12/07",
+          "race_name": "2歳新馬",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        }
+      ]
     },
     {
-      "horse_id": "2024107097",
+      "horse_id": "2019110122",
       "horse_number": "9",
-      "horse_name": "トーアロイガル",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
-      "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "horse_name": "ブラヴィーノ",
+      "usable_race_count": 46,
+      "running_style": "後方",
+      "average_final_position": 8.09,
+      "escape_count": 7,
+      "escape_rate": 0.152,
+      "front_count": 12,
+      "front_rate": 0.261,
+      "back_count": 23,
+      "back_rate": 0.5,
+      "likely_leader": true,
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/24",
+          "race_name": "稲光特別(1勝クラス)",
+          "passing": "8",
+          "first_position": 8,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2026/08/08",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "18",
+          "first_position": 18,
+          "final_position": 18,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/19",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "12-13",
+          "first_position": 12,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/05",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "9-9",
+          "first_position": 9,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2026/04/26",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "12-10",
+          "first_position": 12,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2026/02/28",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "14-15",
+          "first_position": 14,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2026/02/14",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "13-13",
+          "first_position": 13,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2025/11/16",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "10-12",
+          "first_position": 10,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2025/11/09",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "9-9",
+          "first_position": 9,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2025/10/25",
+          "race_name": "稲光特別(1勝クラス)",
+          "passing": "5",
+          "first_position": 5,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2025/08/17",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "12-12",
+          "first_position": 12,
+          "final_position": 12,
+          "style": "後方"
+        },
+        {
+          "date": "2025/07/20",
+          "race_name": "南相馬特別(1勝クラス)",
+          "passing": "7-9",
+          "first_position": 7,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2025/06/21",
+          "race_name": "下北半島特別(1勝クラス)",
+          "passing": "10-10",
+          "first_position": 10,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2025/05/18",
+          "race_name": "飛竜特別(1勝クラス)",
+          "passing": "8",
+          "first_position": 8,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2025/03/01",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "9-13",
+          "first_position": 9,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2025/02/09",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "12-11",
+          "first_position": 12,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2024/11/10",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2024/10/14",
+          "race_name": "稲光特別(1勝クラス)",
+          "passing": "17",
+          "first_position": 17,
+          "final_position": 17,
+          "style": "後方"
+        },
+        {
+          "date": "2024/09/15",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2024/07/20",
+          "race_name": "南相馬特別(1勝クラス)",
+          "passing": "11-11",
+          "first_position": 11,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2024/06/15",
+          "race_name": "下北半島特別(1勝クラス)",
+          "passing": "5-5",
+          "first_position": 5,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2024/04/27",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "7-7",
+          "first_position": 7,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2024/04/14",
+          "race_name": "医王寺特別(1勝クラス)",
+          "passing": "14-13",
+          "first_position": 14,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2024/04/06",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "10-9",
+          "first_position": 10,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2024/02/17",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "9-9",
+          "first_position": 9,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2023/12/02",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "6-8",
+          "first_position": 6,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2023/11/11",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2023/09/15",
+          "race_name": "色取月特別(A)",
+          "passing": "2-2-1",
+          "first_position": 2,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2023/09/01",
+          "race_name": "ひるがの高原特別(A)",
+          "passing": "6-3-1",
+          "first_position": 6,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2023/08/16",
+          "race_name": "鹿ノ子百合特別(A)",
+          "passing": "2-1-1",
+          "first_position": 2,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2023/07/19",
+          "race_name": "夏木立特別(B)",
+          "passing": "1-1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2023/07/04",
+          "race_name": "秋初月特別(B)",
+          "passing": "2-2-1",
+          "first_position": 2,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2023/06/23",
+          "race_name": "C4組",
+          "passing": "1-1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2023/01/17",
+          "race_name": "C1",
+          "passing": "8-8",
+          "first_position": 8,
+          "final_position": 8,
+          "style": "中団"
+        },
+        {
+          "date": "2022/12/29",
+          "race_name": "C1",
+          "passing": "4-5",
+          "first_position": 4,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2022/12/15",
+          "race_name": "C1",
+          "passing": "12-11-11-10",
+          "first_position": 12,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2022/11/10",
+          "race_name": "C2",
+          "passing": "4-5-3-1",
+          "first_position": 4,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2022/10/18",
+          "race_name": "C2",
+          "passing": "1-1-2-2",
+          "first_position": 1,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2022/09/29",
+          "race_name": "C2二",
+          "passing": "3-3-4-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2022/08/27",
+          "race_name": "3歳未勝利",
+          "passing": "9-11",
+          "first_position": 9,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2022/07/31",
+          "race_name": "3歳未勝利",
+          "passing": "7-6",
+          "first_position": 7,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2022/03/05",
+          "race_name": "3歳未勝利",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2022/02/12",
+          "race_name": "3歳未勝利",
+          "passing": "5-3",
+          "first_position": 5,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2021/10/31",
+          "race_name": "2歳未勝利",
+          "passing": "7-7",
+          "first_position": 7,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2021/10/17",
+          "race_name": "2歳未勝利",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2021/09/18",
+          "race_name": "2歳新馬",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        }
+      ]
     },
     {
-      "horse_id": "2024102326",
+      "horse_id": "2023105125",
       "horse_number": "10",
-      "horse_name": "ライトパル",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
-      "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "horse_name": "アルサック",
+      "usable_race_count": 11,
+      "running_style": "先行",
+      "average_final_position": 1.82,
+      "escape_count": 5,
+      "escape_rate": 0.455,
+      "front_count": 11,
+      "front_rate": 1.0,
+      "back_count": 0,
+      "back_rate": 0.0,
+      "likely_leader": true,
+      "pace_dependency": "前目の位置を取れるかが重要",
+      "slow_pace": "プラス",
+      "middle_pace": "プラス",
+      "high_pace": "標準",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/04",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/07/11",
+          "race_name": "3歳未勝利",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2026/06/27",
+          "race_name": "3歳未勝利",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2026/06/13",
+          "race_name": "3歳未勝利",
+          "passing": "3-2",
+          "first_position": 3,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/03/01",
+          "race_name": "3歳未勝利",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/02/21",
+          "race_name": "3歳未勝利",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/02/10",
+          "race_name": "3歳未勝利",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2026/01/24",
+          "race_name": "3歳未勝利",
+          "passing": "4-2",
+          "first_position": 4,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2025/11/24",
+          "race_name": "2歳未勝利",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2025/11/09",
+          "race_name": "2歳未勝利",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        },
+        {
+          "date": "2025/10/18",
+          "race_name": "2歳新馬",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        }
+      ]
     },
     {
-      "horse_id": "2024103417",
+      "horse_id": "2023100421",
       "horse_number": "11",
-      "horse_name": "ラブパンダ",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "カシノリアーナ",
+      "usable_race_count": 11,
+      "running_style": "後方",
+      "average_final_position": 9.82,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 1,
+      "front_rate": 0.091,
+      "back_count": 7,
+      "back_rate": 0.636,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/09/22",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/08/29",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "17-17",
+          "first_position": 17,
+          "final_position": 17,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/04",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "15-15",
+          "first_position": 15,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2026/05/23",
+          "race_name": "はやぶさ賞(1勝クラス)",
+          "passing": "13",
+          "first_position": 13,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2026/04/25",
+          "race_name": "雪うさぎ賞(1勝クラス)",
+          "passing": "13-13",
+          "first_position": 13,
+          "final_position": 13,
+          "style": "後方"
+        },
+        {
+          "date": "2026/01/31",
+          "race_name": "3歳未勝利",
+          "passing": "8-5",
+          "first_position": 8,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2025/10/25",
+          "race_name": "2歳未勝利",
+          "passing": "10-10",
+          "first_position": 10,
+          "final_position": 10,
+          "style": "後方"
+        },
+        {
+          "date": "2025/10/18",
+          "race_name": "2歳未勝利",
+          "passing": "11-11",
+          "first_position": 11,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2025/09/14",
+          "race_name": "2歳未勝利",
+          "passing": "4-5",
+          "first_position": 4,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2025/07/12",
+          "race_name": "2歳未勝利",
+          "passing": "9-9",
+          "first_position": 9,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2025/07/05",
+          "race_name": "2歳新馬",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        }
+      ]
     },
     {
-      "horse_id": "2024105322",
+      "horse_id": "2023107545",
       "horse_number": "12",
-      "horse_name": "ウインバーミリオン",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "ウェルカムソング",
+      "usable_race_count": 8,
+      "running_style": "先行",
+      "average_final_position": 3.5,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 7,
+      "front_rate": 0.875,
+      "back_count": 0,
+      "back_rate": 0.0,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "前目の位置を取れるかが重要",
+      "slow_pace": "プラス",
+      "middle_pace": "プラス",
+      "high_pace": "標準",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/10/12",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/08/09",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/07/19",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/05/09",
+          "race_name": "3歳1勝クラス",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2026/04/18",
+          "race_name": "3歳未勝利",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/03/28",
+          "race_name": "3歳未勝利",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/02/01",
+          "race_name": "3歳未勝利",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2026/01/05",
+          "race_name": "3歳新馬",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        }
+      ]
     },
     {
-      "horse_id": "2024107111",
+      "horse_id": "2023100915",
       "horse_number": "13",
-      "horse_name": "エルカミニート",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "ララアルカー",
+      "usable_race_count": 3,
+      "running_style": "後方",
+      "average_final_position": 8.67,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 0,
+      "front_rate": 0.0,
+      "back_count": 2,
+      "back_rate": 0.667,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/04/26",
+          "race_name": "3歳未勝利",
+          "passing": "12-11",
+          "first_position": 12,
+          "final_position": 11,
+          "style": "後方"
+        },
+        {
+          "date": "2026/02/15",
+          "race_name": "3歳未勝利",
+          "passing": "10-9",
+          "first_position": 10,
+          "final_position": 9,
+          "style": "後方"
+        },
+        {
+          "date": "2026/01/10",
+          "race_name": "3歳新馬",
+          "passing": "7-6",
+          "first_position": 7,
+          "final_position": 6,
+          "style": "中団"
+        }
+      ]
     },
     {
-      "horse_id": "2024107091",
+      "horse_id": "2023106991",
       "horse_number": "14",
-      "horse_name": "アンジュオレンジ",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "グレイシエーション",
+      "usable_race_count": 5,
+      "running_style": "先行",
+      "average_final_position": 2.0,
+      "escape_count": 1,
+      "escape_rate": 0.2,
+      "front_count": 5,
+      "front_rate": 1.0,
+      "back_count": 0,
+      "back_rate": 0.0,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "前目の位置を取れるかが重要",
+      "slow_pace": "プラス",
+      "middle_pace": "プラス",
+      "high_pace": "標準",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/11/07",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2026/07/04",
+          "race_name": "3歳未勝利",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/04/12",
+          "race_name": "3歳未勝利",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2026/01/18",
+          "race_name": "3歳未勝利",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2025/11/02",
+          "race_name": "2歳新馬",
+          "passing": "1-1",
+          "first_position": 1,
+          "final_position": 1,
+          "style": "逃げ"
+        }
+      ]
     },
     {
-      "horse_id": "2024106932",
+      "horse_id": "2021105747",
       "horse_number": "15",
-      "horse_name": "ヨナグバラード",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
+      "horse_name": "プリュノワール",
+      "usable_race_count": 13,
+      "running_style": "中団後",
+      "average_final_position": 7.0,
+      "escape_count": 0,
+      "escape_rate": 0.0,
+      "front_count": 6,
+      "front_rate": 0.462,
+      "back_count": 3,
+      "back_rate": 0.231,
       "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
-    },
-    {
-      "horse_id": "2024107113",
-      "horse_number": "16",
-      "horse_name": "ハワイミソロジー",
-      "usable_race_count": 0,
-      "running_style": "不明",
-      "front_rate": null,
-      "escape_rate": null,
-      "back_rate": null,
-      "likely_leader": false,
-      "pace_dependency": "不明",
-      "high_pace": "不明",
-      "middle_pace": "不明",
-      "slow_pace": "不明",
-      "noise_flag": "未知数・減点しない",
-      "race_details": []
+      "pace_dependency": "位置取りの自由度あり",
+      "slow_pace": "注意",
+      "middle_pace": "標準",
+      "high_pace": "プラス",
+      "noise_flag": "",
+      "race_details": [
+        {
+          "date": "2026/11/07",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "8-5",
+          "first_position": 8,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2026/08/29",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "16-15",
+          "first_position": 16,
+          "final_position": 15,
+          "style": "後方"
+        },
+        {
+          "date": "2026/07/04",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "6-7",
+          "first_position": 6,
+          "final_position": 7,
+          "style": "中団"
+        },
+        {
+          "date": "2026/04/11",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "16-16",
+          "first_position": 16,
+          "final_position": 16,
+          "style": "後方"
+        },
+        {
+          "date": "2026/02/01",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "18-17",
+          "first_position": 18,
+          "final_position": 17,
+          "style": "後方"
+        },
+        {
+          "date": "2025/11/15",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2025/07/05",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "5-4",
+          "first_position": 5,
+          "final_position": 4,
+          "style": "先行"
+        },
+        {
+          "date": "2025/06/14",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "2-2",
+          "first_position": 2,
+          "final_position": 2,
+          "style": "先行"
+        },
+        {
+          "date": "2025/04/13",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "3-5",
+          "first_position": 3,
+          "final_position": 5,
+          "style": "中団"
+        },
+        {
+          "date": "2025/01/11",
+          "race_name": "4歳以上1勝クラス",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2024/11/09",
+          "race_name": "3歳以上1勝クラス",
+          "passing": "6-6",
+          "first_position": 6,
+          "final_position": 6,
+          "style": "中団"
+        },
+        {
+          "date": "2024/07/14",
+          "race_name": "3歳未勝利",
+          "passing": "3-3",
+          "first_position": 3,
+          "final_position": 3,
+          "style": "先行"
+        },
+        {
+          "date": "2024/05/18",
+          "race_name": "3歳未勝利",
+          "passing": "4-4",
+          "first_position": 4,
+          "final_position": 4,
+          "style": "先行"
+        }
+      ]
     }
   ]
 }
