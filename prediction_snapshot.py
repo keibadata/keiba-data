@@ -1,5 +1,6 @@
 import html
 import json
+import math
 import os
 import re
 from datetime import date, datetime, timedelta, timezone
@@ -16,6 +17,23 @@ JST = timezone(timedelta(hours=9))
 TIMEOUT = 20
 
 SCHEMA_VERSION = 2
+
+WIND_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
+WIND_SOURCE = "Open-Meteo (CC BY 4.0)"
+# 競馬場付近の座標とゴール前直線の概略進行方位（真北を0度とする）。
+# 方位資料: https://keibajounokaze.link/ （JRAコース図と航空写真を照合）
+RACECOURSE_WIND_LOCATIONS = {
+    "札幌": (43.0762, 141.3239, 0),
+    "函館": (41.7857, 140.7687, 125),
+    "福島": (37.7671, 140.4828, 25),
+    "新潟": (37.9476, 139.1865, 245),
+    "東京": (35.6657, 139.4856, 265),
+    "中山": (35.7259, 139.9626, 15),
+    "中京": (35.0683, 136.9870, 235),
+    "京都": (34.9077, 135.7248, 55),
+    "阪神": (34.7778, 135.3615, 285),
+    "小倉": (33.8424, 130.8725, 160),
+}
 
 
 def load_json(path):
@@ -706,6 +724,108 @@ def validate_inputs(
     return race_id
 
 
+def fetch_wind_forecast(race_context, timing):
+    if timing["evaluation_eligible"] is False:
+        return {"status": "not_applicable", "reason": "post_race_snapshot"}
+
+    start_at = parse_iso_datetime(timing["race_start_at"])
+    if start_at is None:
+        return {"status": "unknown", "reason": "start_time_unknown"}
+
+    location = RACECOURSE_WIND_LOCATIONS.get(race_context["track"])
+    if location is None:
+        return {"status": "unknown", "reason": "racecourse_unknown"}
+
+    now = datetime.now(JST)
+    if now >= start_at:
+        return {"status": "not_applicable", "reason": "start_time_passed"}
+    if (start_at.date() - now.date()).days >= 7:
+        return {"status": "unknown", "reason": "outside_forecast_window"}
+
+    latitude, longitude, straight_bearing = location
+    # 発走予定時刻に最も近い毎時値を使う。同距離の場合は早い時刻を選ぶ。
+    valid_at = start_at.replace(minute=0, second=0, microsecond=0)
+    if start_at.minute > 30 and start_at.hour < 23:
+        valid_at += timedelta(hours=1)
+    forecast_day = valid_at.date().isoformat()
+    forecast = {
+        "source": WIND_SOURCE,
+        "source_url": "https://open-meteo.com/en/docs",
+        "kind": "model_forecast",
+        "valid_at": valid_at.isoformat(),
+    }
+
+    try:
+        response = requests.get(
+            WIND_FORECAST_URL,
+            params={
+                "latitude": latitude,
+                "longitude": longitude,
+                "hourly": "wind_speed_10m,wind_direction_10m",
+                "wind_speed_unit": "ms",
+                "timezone": "Asia/Tokyo",
+                "start_date": forecast_day,
+                "end_date": forecast_day,
+            },
+            timeout=(2, 3),
+        )
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        return {**forecast, "status": "unknown", "reason": type(exc).__name__}
+
+    try:
+        data = response.json()
+        if (
+            data["utc_offset_seconds"] != 32400
+            or data["hourly_units"]["wind_speed_10m"] != "m/s"
+        ):
+            raise ValueError("unexpected forecast units")
+        hourly = data["hourly"]
+        index = hourly["time"].index(valid_at.strftime("%Y-%m-%dT%H:%M"))
+        speed = hourly["wind_speed_10m"][index]
+        direction = hourly["wind_direction_10m"][index]
+        if (
+            type(speed) not in (int, float)
+            or not math.isfinite(speed)
+            or speed < 0
+            or type(direction) not in (int, float)
+            or not 0 <= direction <= 360
+        ):
+            raise ValueError("invalid wind speed or direction")
+    except (AttributeError, IndexError, KeyError, OverflowError, TypeError, ValueError):
+        return {**forecast, "status": "unknown", "reason": "forecast_value_unavailable"}
+
+    retrieved_at = datetime.now(JST)
+    if retrieved_at >= start_at:
+        return {"status": "not_applicable", "reason": "start_time_passed"}
+
+    forecast.update(
+        status="available",
+        retrieved_at=retrieved_at.isoformat(),
+        speed_10m_mps=speed,
+        direction_from_deg=direction % 360,
+    )
+    if race_context["surface"] in {"芝", "ダート"}:
+        # 風が来る方位を使うため、進行方向成分は正が向かい風、負が追い風。
+        offset = abs((direction - straight_bearing + 180) % 360 - 180)
+        angle = math.radians(offset)
+        if speed < 0.5:
+            relation = "弱風"
+        elif offset < 45:
+            relation = "向かい風"
+        elif offset > 135:
+            relation = "追い風"
+        else:
+            relation = "横風"
+        forecast["home_straight"] = {
+            "bearing_approx_deg": straight_bearing,
+            "relation": relation,
+            "headwind_component_mps": round(speed * math.cos(angle), 1),
+            "crosswind_component_mps": round(speed * math.sin(angle), 1),
+        }
+    return forecast
+
+
 def build_snapshot(
     race,
     final_analysis,
@@ -1172,6 +1292,9 @@ def main():
         )
 
     else:
+        snapshot["wind_forecast"] = fetch_wind_forecast(
+            snapshot["race"], snapshot["timing"]
+        )
         save_json(
             output_path,
             snapshot
@@ -1180,6 +1303,7 @@ def main():
         print(
             "PREDICTION SNAPSHOT SAVED"
         )
+        print("wind_forecast_status:", snapshot["wind_forecast"]["status"])
 
     print(
         "snapshot_id:",
