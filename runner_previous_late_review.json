@@ -1,12 +1,12 @@
 {
   "version": "runner_previous_late_review_v1",
-  "target_race_id": "202608050611",
+  "target_race_id": "202608050501",
   "source_files": [
     "runner_late_review.json",
     "previous_race_analysis.json"
   ],
-  "review_source_updated_at": "2026-11-20T11:51:16.060927+09:00",
-  "previous_analysis_updated_at": "2026-11-20T11:51:16.998725+09:00",
+  "review_source_updated_at": "2026-11-20T19:26:38.990398+09:00",
+  "previous_analysis_updated_at": "2026-11-20T19:26:39.270711+09:00",
   "scoring_applied": false,
   "notes": [
     "馬ID・前走Race ID・開催日が一致した候補のみ収録。",
@@ -14,89 +14,249 @@
     "終盤の観測値は前走課題・克服根拠・採点とは別に保持。"
   ],
   "summary": {
-    "horse_count": 18,
-    "candidate_count": 16,
-    "matched_previous_run_count": 2
+    "horse_count": 15,
+    "candidate_count": 10,
+    "matched_previous_run_count": 6
   },
   "matches": [
     {
-      "horse_id": "2022105891",
-      "horse_number": "3",
-      "horse_name": "ドラゴンブースト",
-      "previous_race_id": "202605040211",
-      "previous_race_date": "2026-10-04",
+      "horse_id": "2024102756",
+      "horse_number": "2",
+      "horse_name": "ヴァニーユ",
+      "previous_race_id": "202608040501",
+      "previous_race_date": "2026-10-12",
       "existing_previous_analysis": {
         "issue_summary": "前走課題は未確認",
-        "overcoming_summary": "今回の位置取り改善材料を確認"
+        "overcoming_summary": "客観データ上の明確な克服材料なし"
       },
       "late_review_observation": {
-        "pattern": "rank_lost_gap_narrowed",
+        "pattern": "rank_gained_gap_widened",
         "gap_change_within_0_1_seconds": false,
-        "horse_id": "2022105891",
-        "horse_number": "3",
-        "horse_name": "ドラゴンブースト",
-        "past_race_id": "202605040211",
-        "past_race_date": "2026-10-04",
-        "past_race_name": "毎日王冠(GII)",
+        "horse_id": "2024102756",
+        "horse_number": "2",
+        "horse_name": "ヴァニーユ",
+        "past_race_id": "202608040501",
+        "past_race_date": "2026-10-12",
+        "past_race_name": "2歳未勝利",
         "position_change": {
           "status": "ok",
-          "comparison_count": 17,
-          "to_last_600m_rank_max": 8,
+          "comparison_count": 15,
+          "to_last_600m_rank_max": 7,
           "to_last_600m_tie_count": 2,
-          "direction": "lost",
-          "to_last_600m_rank": 7,
-          "last3f_rank": 12,
-          "finish": 11,
-          "positions_gained": -4
+          "direction": "gained",
+          "to_last_600m_rank": 6,
+          "last3f_rank": 7,
+          "finish": 5,
+          "positions_gained": 1
         },
         "gap_change": {
           "status": "ok",
-          "split_gap_to_leader_seconds": 0.8,
-          "finish_gap_to_winner_seconds": 0.6,
-          "finish_minus_split_gap_seconds": -0.2,
-          "direction": "narrowed"
+          "split_gap_to_leader_seconds": 0.5,
+          "finish_gap_to_winner_seconds": 1.9,
+          "finish_minus_split_gap_seconds": 1.4,
+          "direction": "widened"
         },
-        "race_final_minus_preceding_seconds_per_200m": -0.8
+        "race_final_minus_preceding_seconds_per_200m": 0.6
       }
     },
     {
-      "horse_id": "2022105396",
-      "horse_number": "5",
-      "horse_name": "アドマイヤズーム",
-      "previous_race_id": "202605040611",
-      "previous_race_date": "2026-10-17",
+      "horse_id": "2024105282",
+      "horse_number": "3",
+      "horse_name": "キャンディリヒト",
+      "previous_race_id": "202608050202",
+      "previous_race_date": "2026-11-08",
+      "existing_previous_analysis": {
+        "issue_summary": "課題候補あり・克服未確認（後方位置依存、着差が大きい）",
+        "overcoming_summary": "課題候補の克服未確認 / 今回の位置取り改善材料を確認"
+      },
+      "late_review_observation": {
+        "pattern": "rank_gained_gap_widened",
+        "gap_change_within_0_1_seconds": false,
+        "horse_id": "2024105282",
+        "horse_number": "3",
+        "horse_name": "キャンディリヒト",
+        "past_race_id": "202608050202",
+        "past_race_date": "2026-11-08",
+        "past_race_name": "2歳未勝利",
+        "position_change": {
+          "status": "ok",
+          "comparison_count": 13,
+          "to_last_600m_rank_max": 11,
+          "to_last_600m_tie_count": 1,
+          "direction": "gained",
+          "to_last_600m_rank": 11,
+          "last3f_rank": 9,
+          "finish": 9,
+          "positions_gained": 2
+        },
+        "gap_change": {
+          "status": "ok",
+          "split_gap_to_leader_seconds": 1.7,
+          "finish_gap_to_winner_seconds": 3.6,
+          "finish_minus_split_gap_seconds": 1.9,
+          "direction": "widened"
+        },
+        "race_final_minus_preceding_seconds_per_200m": 0.9667
+      }
+    },
+    {
+      "horse_id": "2024104647",
+      "horse_number": "6",
+      "horse_name": "クレールオーブ",
+      "previous_race_id": "202605050106",
+      "previous_race_date": "2026-11-07",
+      "existing_previous_analysis": {
+        "issue_summary": "課題候補あり・克服未確認（後方位置依存、着差が大きい）",
+        "overcoming_summary": "課題候補の克服未確認 / 今回の位置取り改善材料を確認"
+      },
+      "late_review_observation": {
+        "pattern": "rank_gained_gap_widened",
+        "gap_change_within_0_1_seconds": false,
+        "horse_id": "2024104647",
+        "horse_number": "6",
+        "horse_name": "クレールオーブ",
+        "past_race_id": "202605050106",
+        "past_race_date": "2026-11-07",
+        "past_race_name": "2歳新馬",
+        "position_change": {
+          "status": "ok",
+          "comparison_count": 16,
+          "to_last_600m_rank_max": 14,
+          "to_last_600m_tie_count": 1,
+          "direction": "gained",
+          "to_last_600m_rank": 14,
+          "last3f_rank": 8,
+          "finish": 13,
+          "positions_gained": 1
+        },
+        "gap_change": {
+          "status": "ok",
+          "split_gap_to_leader_seconds": 2.1,
+          "finish_gap_to_winner_seconds": 4.0,
+          "finish_minus_split_gap_seconds": 1.9,
+          "direction": "widened"
+        },
+        "race_final_minus_preceding_seconds_per_200m": 0.5
+      }
+    },
+    {
+      "horse_id": "2024101002",
+      "horse_number": "7",
+      "horse_name": "ホットハニーラグ",
+      "previous_race_id": "202608041101",
+      "previous_race_date": "2026-11-01",
+      "existing_previous_analysis": {
+        "issue_summary": "課題候補あり・克服未確認（やや後方からの競馬、着差が大きい）",
+        "overcoming_summary": "課題候補の克服未確認 / 今回の位置取り改善材料を確認"
+      },
+      "late_review_observation": {
+        "pattern": "rank_gained_gap_widened",
+        "gap_change_within_0_1_seconds": true,
+        "horse_id": "2024101002",
+        "horse_number": "7",
+        "horse_name": "ホットハニーラグ",
+        "past_race_id": "202608041101",
+        "past_race_date": "2026-11-01",
+        "past_race_name": "2歳未勝利",
+        "position_change": {
+          "status": "ok",
+          "comparison_count": 11,
+          "to_last_600m_rank_max": 10,
+          "to_last_600m_tie_count": 3,
+          "direction": "gained",
+          "to_last_600m_rank": 8,
+          "last3f_rank": 4,
+          "finish": 4,
+          "positions_gained": 4
+        },
+        "gap_change": {
+          "status": "ok",
+          "split_gap_to_leader_seconds": 0.9,
+          "finish_gap_to_winner_seconds": 1.0,
+          "finish_minus_split_gap_seconds": 0.1,
+          "direction": "widened"
+        },
+        "race_final_minus_preceding_seconds_per_200m": 0.8333
+      }
+    },
+    {
+      "horse_id": "2024107422",
+      "horse_number": "8",
+      "horse_name": "クリコリンダ",
+      "previous_race_id": "202608050301",
+      "previous_race_date": "2026-11-14",
       "existing_previous_analysis": {
         "issue_summary": "明確な課題なし",
         "overcoming_summary": "客観データ上の明確な克服材料なし"
       },
       "late_review_observation": {
-        "pattern": "rank_lost_gap_narrowed",
+        "pattern": "rank_gained_gap_widened",
         "gap_change_within_0_1_seconds": false,
-        "horse_id": "2022105396",
-        "horse_number": "5",
-        "horse_name": "アドマイヤズーム",
-        "past_race_id": "202605040611",
-        "past_race_date": "2026-10-17",
-        "past_race_name": "富士S(GII)",
+        "horse_id": "2024107422",
+        "horse_number": "8",
+        "horse_name": "クリコリンダ",
+        "past_race_id": "202608050301",
+        "past_race_date": "2026-11-14",
+        "past_race_name": "2歳未勝利",
         "position_change": {
           "status": "ok",
-          "comparison_count": 14,
+          "comparison_count": 13,
           "to_last_600m_rank_max": 4,
           "to_last_600m_tie_count": 1,
-          "direction": "lost",
+          "direction": "gained",
           "to_last_600m_rank": 4,
-          "last3f_rank": 7,
-          "finish": 6,
-          "positions_gained": -2
+          "last3f_rank": 3,
+          "finish": 2,
+          "positions_gained": 2
         },
         "gap_change": {
           "status": "ok",
-          "split_gap_to_leader_seconds": 0.9,
-          "finish_gap_to_winner_seconds": 0.6,
-          "finish_minus_split_gap_seconds": -0.3,
-          "direction": "narrowed"
+          "split_gap_to_leader_seconds": 0.2,
+          "finish_gap_to_winner_seconds": 0.5,
+          "finish_minus_split_gap_seconds": 0.3,
+          "direction": "widened"
         },
-        "race_final_minus_preceding_seconds_per_200m": 0.4667
+        "race_final_minus_preceding_seconds_per_200m": 0.4
+      }
+    },
+    {
+      "horse_id": "2024104713",
+      "horse_number": "9",
+      "horse_name": "サイモンククナ",
+      "previous_race_id": "202604040105",
+      "previous_race_date": "2026-10-17",
+      "existing_previous_analysis": {
+        "issue_summary": "課題候補あり・克服未確認（後方位置依存、着差が大きい）",
+        "overcoming_summary": "課題候補の克服未確認 / 今回の位置取り改善材料を確認"
+      },
+      "late_review_observation": {
+        "pattern": "rank_gained_gap_widened",
+        "gap_change_within_0_1_seconds": false,
+        "horse_id": "2024104713",
+        "horse_number": "9",
+        "horse_name": "サイモンククナ",
+        "past_race_id": "202604040105",
+        "past_race_date": "2026-10-17",
+        "past_race_name": "2歳新馬",
+        "position_change": {
+          "status": "ok",
+          "comparison_count": 15,
+          "to_last_600m_rank_max": 11,
+          "to_last_600m_tie_count": 1,
+          "direction": "gained",
+          "to_last_600m_rank": 11,
+          "last3f_rank": 8,
+          "finish": 9,
+          "positions_gained": 2
+        },
+        "gap_change": {
+          "status": "ok",
+          "split_gap_to_leader_seconds": 2.0,
+          "finish_gap_to_winner_seconds": 2.3,
+          "finish_minus_split_gap_seconds": 0.3,
+          "direction": "widened"
+        },
+        "race_final_minus_preceding_seconds_per_200m": 0.9667
       }
     }
   ]
