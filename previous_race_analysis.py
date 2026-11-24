@@ -3,11 +3,20 @@ import re
 from datetime import datetime, timezone, timedelta
 
 from analysis_evidence import actual_issues, resolution_evidence
+from runner_performance_evidence import (
+    late_observation_index,
+    previous_late_observation,
+    previous_late_risk_check,
+)
 
 
 INPUT_FILE = "runner_history.json"
 RACE_FILE = "race.json"
 OUTPUT_FILE = "previous_race_analysis.json"
+LATE_RISK_NOTE = (
+    "前走終盤で順位を落とし、先頭との時計差も拡大"
+    "（残り600m以降の推定）・原因と克服は未確認"
+)
 
 
 def now_jst():
@@ -339,7 +348,7 @@ def analyze_previous_race(race_row):
     }
 
 
-def analyze_horse(horse):
+def analyze_horse(horse, late_runs=None):
     races = horse.get("past_races", []) or []
 
     if not races:
@@ -360,6 +369,14 @@ def analyze_horse(horse):
     # runner_historyは新しい順。
     previous = races[0]
     analysis = analyze_previous_race(previous)
+    late = previous_late_observation(txt(horse.get("horse_id")), analysis, late_runs or {})
+    if previous_late_risk_check(late) == "position_lost_and_gap_widened":
+        # 観測メモのみ。課題・克服の採点件数には入れない。
+        issue_summary = analysis["issue_summary"]
+        analysis["issue_summary"] = (
+            LATE_RISK_NOTE if issue_summary == "明確な課題なし"
+            else issue_summary + " / " + LATE_RISK_NOTE
+        )
     summary_parts = []
 
     if analysis["rank"] is not None:
@@ -397,7 +414,14 @@ def horse_number_key(horse):
 
 def main():
     horses = source.get("horses", [])
-    results = [analyze_horse(horse) for horse in horses]
+    horse_ids = {txt(horse.get("horse_id")) for horse in horses}
+    try:
+        late_runs = late_observation_index(TARGET_RACE_ID, horse_ids, {})
+    except (OSError, ValueError, TypeError, AttributeError) as error:
+        # 単独実行では別レースの補助データが残る場合がある。
+        print("Previous late observation skipped:", error)
+        late_runs = {}
+    results = [analyze_horse(horse, late_runs) for horse in horses]
     results.sort(key=horse_number_key)
 
     output = {
