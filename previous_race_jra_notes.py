@@ -4,8 +4,17 @@ import os
 from datetime import date
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
 
-from jra_race_incidents import fetch_confirmed_victims, jra_result_identity
+import requests
+from bs4 import BeautifulSoup
+
+from jra_race_incidents import (
+    JRA_ORIGIN,
+    RESULT_PATH,
+    confirmed_victims,
+    jra_result_identity,
+)
 
 
 RACE_FILE = Path("race.json")
@@ -62,11 +71,84 @@ def previous_key(horse, target_date):
     return previous.get("race_id"), past_date.isoformat()
 
 
+def load_result_page(url, pages):
+    if url not in pages:
+        jra_result_identity(url)
+        response = requests.get(url, timeout=8, allow_redirects=False)
+        response.raise_for_status()
+        if response.status_code != 200:
+            raise ValueError("JRA公式結果ページを取得できません")
+        pages[url] = response.content
+    return pages[url]
+
+
+def result_links(url, pages, selector):
+    html = load_result_page(url, pages)
+    page = BeautifulSoup(html, "html.parser", from_encoding="cp932")
+    current = page.select_one("ul.race-num li.current a[href]")
+    if not current or jra_result_identity(
+        urljoin(JRA_ORIGIN, current["href"])
+    ) != jra_result_identity(url):
+        raise ValueError("JRA公式ページと指定レースが一致しません")
+    links = {}
+    for anchor in page.select(selector):
+        absolute = urljoin(JRA_ORIGIN, anchor["href"])
+        try:
+            key = jra_result_identity(absolute)
+        except ValueError:
+            continue
+        cname = parse_qs(urlsplit(absolute).query)["CNAME"][0]
+        query = urlencode({"CNAME": cname})
+        links.setdefault(key, f"{JRA_ORIGIN}{RESULT_PATH}?{query}")
+    return links
+
+
+def expand_result_urls(registered, wanted, target_date, pages):
+    urls = dict(registered)
+    pending = set(wanted) - urls.keys()
+    visited_meetings = set()
+    for seed_key, seed_url in registered.items():
+        seed_date = date.fromisoformat(seed_key[1])
+        if seed_date >= target_date or not any(
+            abs((seed_date - date.fromisoformat(key[1])).days) <= 3
+            for key in pending
+        ):
+            continue
+        try:
+            links = result_links(
+                seed_url, pages, "ul.race-num a[href], .setsu_link a[href]"
+            )
+        except (OSError, ValueError) as error:
+            print("JRA開催リンクを取得できません:", seed_key[0], error)
+            continue
+
+        pending -= links.keys()
+        for key in wanted & links.keys():
+            urls.setdefault(key, links[key])
+
+        for (race_id, race_date), meeting_url in links.items():
+            meeting = race_id[:-2], race_date
+            if meeting in visited_meetings or not any(
+                (key[0][:-2], key[1]) == meeting for key in pending
+            ):
+                continue
+            try:
+                races = result_links(meeting_url, pages, "ul.race-num a[href]")
+            except (OSError, ValueError) as error:
+                print("JRA当日レース一覧を取得できません:", race_id, error)
+                continue
+            visited_meetings.add(meeting)
+            for key in pending & races.keys():
+                urls[key] = races[key]
+            pending -= races.keys()
+    return urls
+
+
 def enrich(previous, final, database, urls, target_date):
     previous_by_race = {}
     for horse in previous["horses"]:
         key = previous_key(horse, target_date)
-        if key in urls:
+        if key is not None:
             previous_by_race.setdefault(key, []).append(horse)
 
     past_races = {}
@@ -75,15 +157,24 @@ def enrich(previous, final, database, urls, target_date):
         if key in previous_by_race:
             past_races.setdefault(key, []).append(race)
 
+    wanted = {key for key, races in past_races.items() if len(races) == 1}
+    pages = {}
+    registered = urls
+    urls = expand_result_urls(registered, wanted, target_date, pages)
+    print("公式リンクから補完した前走レース数:", len(urls.keys() - registered.keys()))
+
     final_by_id = {row["horse_id"]: row for row in final["ranking"]}
     changes = 0
     for key, horses in previous_by_race.items():
+        if key not in urls:
+            continue
         candidates = past_races.get(key, [])
         if len(candidates) != 1:
             print("JRA前走照合をスキップ:", key[0], "前走DBのレースを特定できません")
             continue
         try:
-            victims = fetch_confirmed_victims(urls[key], candidates[0])
+            url = urls[key]
+            victims = confirmed_victims(load_result_page(url, pages), url, candidates[0])
         except (OSError, ValueError, KeyError, TypeError) as error:
             print("JRA前走照合をスキップ:", key[0], error)
             continue
