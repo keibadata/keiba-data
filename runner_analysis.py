@@ -3,6 +3,8 @@ import math
 import re
 from datetime import datetime, timezone, timedelta
 
+from runner_ability_evidence import race_class
+
 
 INPUT_FILE = "runner_history.json"
 RACE_FILE = "race.json"
@@ -11,6 +13,8 @@ OUTPUT_FILE = "runner_analysis.json"
 ABILITY_VERSION = "legacy_weights_unknown_guard_v1"
 RECENCY_WEIGHTS = [1.00, 0.82, 0.67, 0.55, 0.45]
 COMPONENT_WEIGHTS = {"finish": 0.60, "last3f": 0.25, "position": 0.15}
+CLASSES_ABOVE_MAIDEN = {"1勝クラス", "2勝クラス", "3勝クラス", "OP", "L", "G3", "G2", "G1"}
+NON_START_FINISHES = {"取消", "除外", "出走取消", "競走除外"}
 
 
 def load_json(path):
@@ -222,7 +226,7 @@ def build_condition_evidence(analyzed, excluded, target):
     }
 
 
-def analyze_horse(horse, target, evidence):
+def analyze_horse(horse, target, evidence, *, above_maiden=False):
     source = horse.get("past_races", []) or []
     analyzed = []
     excluded = []
@@ -262,6 +266,15 @@ def analyze_horse(horse, target, evidence):
     flags = []
     if len(analyzed) == 1:
         flags.append("評価可能な過去走は1走のみ")
+        debut = analyzed[0]
+        if (
+            above_maiden
+            and debut["rank"] == 1
+            and race_class(debut["race_name"]) == "新馬"
+            and not horse.get("excluded_unknown_date_count")
+            and all(row["rank_raw"] in NON_START_FINISHES for row in excluded)
+        ):
+            flags.append("新馬勝ちから昇級初戦・上のクラスでの再現性未確認")
     if excluded:
         flags.append(f"数値着順なし{len(excluded)}走を採点から除外")
 
@@ -379,11 +392,16 @@ def main():
         "surface": target_surface,
         "distance": target_distance,
     }
+    above_maiden = (
+        target_surface in ("芝", "ダート")
+        and text(race.get("race_class")) in CLASSES_ABOVE_MAIDEN
+    )
     results = [
         analyze_horse(
             h,
             target,
-            facts[text(h.get("horse_id"))]
+            facts[text(h.get("horse_id"))],
+            above_maiden=above_maiden,
         )
         for h in source.get("horses", [])
     ]
