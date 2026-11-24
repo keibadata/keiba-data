@@ -783,7 +783,7 @@ def evaluate_distance_transfer(ability):
             'score': 0.0,
             'evidence': False,
             'candidate_count': 0,
-            'reasons': ['距離延長接続データなし'],
+            'reasons': ['距離延長接続データなし・減点なし'],
         }
 
     allowed_gap = max(400, int(target_distance * 0.2))
@@ -1124,10 +1124,9 @@ for runner in runners:
     # 複数根拠チェック
     # 大きな順位上昇は
     # 独立した根拠が2つ以上ある場合のみ。
+    # 条件接続と再現性は同じ過去走を参照するため、根拠は合わせて1件とする。
     promotion_evidence_count = 0
-    if condition_connection['evidence']:
-        promotion_evidence_count += 1
-    if condition_connection['reproducibility_evidence']:
+    if condition_connection['evidence'] or condition_connection['reproducibility_evidence']:
         promotion_evidence_count += 1
     if distance_transfer['evidence']:
         promotion_evidence_count += 1
