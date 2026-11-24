@@ -1,617 +1,152 @@
-name: Race Full Analysis
-on:
-  workflow_dispatch:
-    inputs:
-      race_id:
-        description: "12 digit Race ID"
-        required: false
-        type: string
-  workflow_call:
-    inputs:
-      race_id:
-        required: true
-        type: string
-      race_start_at:
-        required: true
-        type: string
-      body_weight_signature:
-        required: true
-        type: string
-permissions:
-  contents: write
-concurrency:
-  group: ${{ inputs.race_start_at && format('race-body-weight-{0}', inputs.race_id) || 'race-full-analysis' }}
-  cancel-in-progress: ${{ inputs.race_start_at == '' && inputs.body_weight_signature == '' }}
-jobs:
-  analyze:
-    runs-on: ubuntu-latest
-    env:
-      DAILY_START_AT: ${{ inputs.race_start_at }}
-      DAILY_WEIGHT_SIGNATURE: ${{ inputs.body_weight_signature }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Sync latest main
-        run: |
-          git fetch origin main
-          git reset --hard origin/main
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install packages
-        run: pip install -r requirements.txt
-      - name: Load race ID
-        env:
-          INPUT_RACE_ID: ${{ inputs.race_id }}
-        run: |
-          if [ -n "$INPUT_RACE_ID" ]; then
-            RACE_ID="$(printf '%s' "$INPUT_RACE_ID" | tr -d '[:space:]')"
-            echo "Race ID source: workflow input"
-          else
-            RACE_ID="$(tr -d '[:space:]' < race_id.txt)"
-            echo "Race ID source: race_id.txt"
-          fi
-          if ! [[ "$RACE_ID" =~ ^[0-9]{12}$ ]]; then
-            echo "ERROR: Race ID must contain exactly 12 digits"
-            exit 1
-          fi
-          echo "RACE_ID=$RACE_ID" >> "$GITHUB_ENV"
-          echo "Target race: $RACE_ID"
-      - name: Check daily reanalysis inputs
-        id: daily_check
-        if: ${{ inputs.race_start_at || inputs.body_weight_signature }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          import re
-          from datetime import datetime
-          from pathlib import Path
+import argparse
+import json
+import os
+from datetime import date
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
-          from check_daily_body_weights import fetch_body_weights
-          from prediction_snapshot import JST
+from jra_race_incidents import fetch_confirmed_victims, jra_result_identity
 
-          race_id = os.environ["RACE_ID"]
-          signature = os.environ["DAILY_WEIGHT_SIGNATURE"]
-          start_at = datetime.fromisoformat(os.environ["DAILY_START_AT"])
-          if start_at.tzinfo is None or not re.fullmatch(r"[a-f0-9]{64}", signature):
-              raise SystemExit("発走日時と馬体重識別値を確認してください。")
-          start_at = start_at.astimezone(JST)
 
-          def skip(reason):
-              print(reason)
-              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
-                  print("skip=true", file=output)
-              raise SystemExit(0)
+RACE_FILE = Path("race.json")
+PAST_DB_FILE = Path("runner_race_db.json")
+PREVIOUS_FILE = Path("previous_race_analysis.json")
+FINAL_FILE = Path("final_analysis.json")
+URL_FILE = Path("jra_result_urls.json")
+NOTE = "前走で他馬による不利あり（JRA公式記録）・着順への影響は不明"
 
-          now = datetime.now(JST)
-          if now >= start_at or now.date() != start_at.date():
-              skip("開催日当日の発走前のみ、自動再解析します。")
 
-          snapshot_dir = Path("prediction_snapshots") / str(start_at.date()) / race_id
-          versions = []
-          for path in snapshot_dir.glob("*.json"):
-              data = json.loads(path.read_text(encoding="utf-8"))
-              saved_signature = data.get("daily_body_weight_signature")
-              if data.get("timing", {}).get("evaluation_eligible") is True and saved_signature:
-                  versions.append((datetime.fromisoformat(data["prediction_saved_at"]), saved_signature))
-          if versions and max(versions)[1] == signature:
-              skip("同じ馬体重で自動再解析済みです。")
+def read_json(path):
+    return json.loads(path.read_text(encoding="utf-8"))
 
-          weights = fetch_body_weights(race_id)
-          if weights["status"] != "ready" or weights["weight_signature"] != signature:
-              skip("馬体重の発表状況が変わったため、次の判定を待ちます。")
-          if datetime.now(JST) >= start_at:
-              skip("馬体重確認中に発走時刻を経過しました。")
-          path = Path(os.environ["RUNNER_TEMP"]) / "daily-weight-analysis.json"
-          path.write_text(json.dumps(weights), encoding="utf-8")
-          PY
-      - name: Collect race
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python main_v3.py
-      - name: Validate and apply published weights
-        if: ${{ inputs.body_weight_signature && steps.daily_check.outputs.skip != 'true' }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          from datetime import datetime
-          from pathlib import Path
 
-          from prediction_snapshot import JST, parse_race_date
+def write_json(path, data):
+    with NamedTemporaryFile(
+        mode="w", encoding="utf-8", dir=path.parent, delete=False
+    ) as output:
+        temporary_path = Path(output.name)
+        try:
+            json.dump(data, output, ensure_ascii=False, indent=2)
+            output.write("\n")
+            output.close()
+            os.replace(temporary_path, path)
+        finally:
+            temporary_path.unlink(missing_ok=True)
 
-          path = Path("race.json")
-          race = json.loads(path.read_text(encoding="utf-8"))
-          weights_path = Path(os.environ["RUNNER_TEMP"]) / "daily-weight-analysis.json"
-          weights = json.loads(weights_path.read_text(encoding="utf-8"))
-          start_at = datetime.fromisoformat(os.environ["DAILY_START_AT"]).astimezone(JST)
-          if (
-              race.get("race_id") != weights["race_id"]
-              or parse_race_date(race.get("race_date")) != start_at.date()
-              or race.get("surface") not in {"芝", "ダート"}
-              or datetime.now(JST) >= start_at
-          ):
-              raise SystemExit("開催日・レースID・平地コース・発走時刻の照合に失敗しました。")
 
-          active = weights["horses"]
-          runners = []
-          for horse in race["horses"]:
-              horse_id = str(horse["horse_id"])
-              if horse_id in active:
-                  expected = active[horse_id]
-                  change = expected["body_weight_change"]
-                  collected_weight = str(horse.get("body_weight") or "").strip()
-                  collected_change = str(horse.get("body_weight_change") or "").strip()
-                  if collected_weight and int(collected_weight) != expected["body_weight"]:
-                      raise SystemExit("出馬表の馬体重が確認後に変わりました。")
-                  if collected_change and change is not None and int(collected_change) != change:
-                      raise SystemExit("出馬表の馬体重増減が確認後に変わりました。")
-                  horse["body_weight"] = str(expected["body_weight"])
-                  horse["body_weight_change"] = "" if change is None else str(change)
-                  runners.append(horse)
-          if len(runners) != len(active) or {str(h["horse_id"]) for h in runners} != active.keys():
-              raise SystemExit("馬体重と出走馬を全頭照合できません。")
-          if len(race["horses"]) - len(runners) > weights["excluded_count"]:
-              raise SystemExit("出馬表に照合できない馬がいます。")
-          race["horses"] = runners
-          race["horse_count"] = len(runners)
-          path.write_text(json.dumps(race, ensure_ascii=False, indent=2), encoding="utf-8")
-          PY
-      - name: Save pre-race win odds snapshot
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        continue-on-error: true
-        run: python race_market_snapshot.py
-      - name: Normalize race metadata
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: |
-          python - <<'PY'
-          import json
-          import re
-          import sys
-          PATH = "race.json"
-          with open(
-              PATH,
-              "r",
-              encoding="utf-8"
-          ) as f:
-              race = json.load(f)
-          current_age = str(
-              race.get(
-                  "age_condition",
-                  ""
-              )
-              or ""
-          ).strip()
-          horses = race.get(
-              "horses",
-              []
-          )
-          if not isinstance(
-              horses,
-              list
-          ):
-              horses = []
-          ages = []
-          for horse in horses:
-              if not isinstance(
-                  horse,
-                  dict
-              ):
-                  continue
-              sex_age = str(
-                  horse.get(
-                      "sex_age",
-                      ""
-                  )
-                  or ""
-              ).strip()
-              match = re.search(
-                  r"[牡牝セ騙]?\s*(\d+)",
-                  sex_age
-              )
-              if not match:
-                  continue
-              try:
-                  age = int(
-                      match.group(1)
-                  )
-              except ValueError:
-                  continue
-              if 2 <= age <= 15:
-                  ages.append(
-                      age
-                  )
-          unique_ages = sorted(
-              set(
-                  ages
-              )
-          )
-          inferred_age = ""
-          if current_age:
-              print(
-                  "age_condition already available:",
-                  current_age
-              )
-          else:
-              if unique_ages == [2]:
-                  inferred_age = "2歳"
-              elif (
-                  unique_ages
-                  and unique_ages[0] == 3
-                  and any(
-                      age >= 4
-                      for age in unique_ages
-                  )
-              ):
-                  inferred_age = "3歳以上"
-              elif (
-                  unique_ages
-                  and unique_ages[0] >= 4
-                  and len(
-                      unique_ages
-                  ) >= 2
-              ):
-                  inferred_age = "4歳以上"
-              elif (
-                  bool(
-                      race.get(
-                          "is_debut",
-                          False
-                      )
-                  )
-                  and len(
-                      unique_ages
-                  ) == 1
-              ):
-                  inferred_age = (
-                      f"{unique_ages[0]}歳"
-                  )
-              if inferred_age:
-                  race[
-                      "age_condition"
-                  ] = inferred_age
-                  print(
-                      "age_condition inferred:",
-                      inferred_age
-                  )
-              else:
-                  print(
-                      "age_condition could not be "
-                      "safely inferred."
-                  )
-          print(
-              "runner ages:",
-              unique_ages
-          )
-          print(
-              "final age_condition:",
-              race.get(
-                  "age_condition",
-                  ""
-              )
-          )
-          with open(
-              PATH,
-              "w",
-              encoding="utf-8"
-          ) as f:
-              json.dump(
-                  race,
-                  f,
-                  ensure_ascii=False,
-                  indent=2
-              )
-          if (
-              unique_ages == [2]
-              and not str(
-                  race.get(
-                      "age_condition",
-                      ""
-                  )
-                  or ""
-              ).strip()
-          ):
-              sys.exit(
-                  "ERROR: failed to infer "
-                  "2-year-old race condition"
-              )
-          PY
-      - name: Validate cached history database
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          import sys
-          path = "history_db.json"
-          if not os.path.exists(path):
-              sys.exit(
-                  "ERROR: history_db.json is missing"
-              )
-          try:
-              with open(
-                  path,
-                  encoding="utf-8"
-              ) as f:
-                  data = json.load(f)
-          except Exception as exc:
-              sys.exit(
-                  "ERROR: history_db.json cannot be loaded: "
-                  + str(exc)
-              )
-          if isinstance(data, dict):
-              races = data.get(
-                  "races",
-                  []
-              )
-          elif isinstance(data, list):
-              races = data
-          else:
-              races = []
-          if (
-              not isinstance(
-                  races,
-                  list
-              )
-              or not races
-          ):
-              sys.exit(
-                  "ERROR: history_db.json has no race data"
-              )
-          print(
-              "Cached history database OK:",
-              len(races),
-              "races"
-          )
-          PY
-      - name: Build condition history
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python condition_history.py
-      - name: Collect day races
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python day_races.py
-      - name: Build day time history
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python day_time_history.py
-      - name: Collect track condition
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python track_condition.py
-      - name: Analyze day bias
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python day_bias.py
-      - name: Collect pedigree
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python pedigree.py
-      - name: Normalize pedigree
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python normalize_pedigree.py
-      - name: Collect history pedigree
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python history_pedigree.py
-      - name: Collect runner history
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_history.py
-      - name: Collect runner race database
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_race_db.py
-      - name: Collect runner past race laps
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_past_laps.py
-      - name: Build runner ability evidence
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_ability_evidence.py
-      - name: Build runner lap features
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_lap_features.py
-      - name: Build runner pace context
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_pace_context.py
-      - name: Build runner late review
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_late_review.py
-      - name: Analyze runner time fit
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_time_fit.py
-      - name: Analyze runners
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_analysis.py
-      - name: Analyze previous race
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python previous_race_analysis.py
-      - name: Build previous runner late review
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_previous_late_review.py
-      - name: Analyze pace
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python pace_analysis.py
-      - name: Build runner performance evidence
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python runner_performance_evidence.py
-      - name: Build bloodline statistics
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python bloodline_stats.py
-      - name: Score race bloodlines
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python race_bloodline_score.py
-      - name: Run final analysis
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python final_analysis.py
-      - name: Apply newcomer pedigree-only analysis
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python newcomer_final_analysis.py
-      - name: Validate final analysis and save prediction snapshot
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: |
-          BACKUP_RACE_ID="$(mktemp)"
-          cp -p race_id.txt "$BACKUP_RACE_ID"
-          trap 'mv -- "$BACKUP_RACE_ID" race_id.txt' EXIT
-          printf '%s\n' "$RACE_ID" > race_id.txt
-          if [ -z "$DAILY_START_AT" ]; then
-            python production_snapshot_hook.py
-            exit
-          fi
+def load_result_urls(extra_urls):
+    urls = read_json(URL_FILE) if URL_FILE.exists() else []
+    if not isinstance(urls, list):
+        raise ValueError(f"{URL_FILE} は公式結果URLの配列で指定してください")
+    result = {}
+    for url in urls + extra_urls:
+        try:
+            key = jra_result_identity(url)
+        except (ValueError, TypeError, AttributeError) as error:
+            print("JRA結果URLをスキップ:", error)
+            continue
+        result[key] = url
+    return result
 
-          set -o pipefail
-          python production_snapshot_hook.py | tee "$RUNNER_TEMP/daily-snapshot.log"
-          export DAILY_SNAPSHOT_PATH
-          DAILY_SNAPSHOT_PATH="$(sed -n 's/^output: //p' "$RUNNER_TEMP/daily-snapshot.log" | tail -n 1)"
-          if git ls-files --error-unmatch -- "$DAILY_SNAPSHOT_PATH" >/dev/null 2>&1; then
-            echo "既存の予想履歴と保存先が重複しました。"
-            exit 1
-          fi
-          python - <<'PY'
-          import json
-          import os
-          from datetime import datetime
-          from pathlib import Path
 
-          from prediction_snapshot import JST
+def previous_key(horse, target_date):
+    previous = horse.get("previous_race")
+    if not previous:
+        return None
+    try:
+        past_date = date.fromisoformat(previous["date"].replace("/", "-"))
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None
+    if past_date >= target_date:
+        return None
+    return previous.get("race_id"), past_date.isoformat()
 
-          path = Path(os.environ["DAILY_SNAPSHOT_PATH"])
-          start_at = datetime.fromisoformat(os.environ["DAILY_START_AT"]).astimezone(JST)
-          expected_dir = Path("prediction_snapshots") / str(start_at.date()) / os.environ["RACE_ID"]
-          if path.parent != expected_dir or path.suffix != ".json":
-              raise SystemExit("予想スナップショットの保存先を照合できません。")
-          data = json.loads(path.read_text(encoding="utf-8"))
-          timing = data["timing"]
-          if (
-              timing["status"] != "same_day_before_start"
-              or timing["evaluation_eligible"] is not True
-              or datetime.fromisoformat(timing["race_start_at"]) != start_at
-              or datetime.now(JST) >= start_at
-          ):
-              raise SystemExit("発走時刻を照合できないか、すでに発走時刻を経過しました。")
-          data["daily_body_weight_signature"] = os.environ["DAILY_WEIGHT_SIGNATURE"]
-          path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
-              print(f"DAILY_SNAPSHOT_PATH={path}", file=env)
-          PY
-      - name: Build prediction history index
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: python build_prediction_history_index.py
-      - name: Commit analysis files, prediction snapshot and history index
-        if: ${{ steps.daily_check.outputs.skip != 'true' }}
-        run: |
-          if [ ! -s "prediction_history_index.json" ]; then
-            echo "ERROR: prediction_history_index.json was not generated"
-            exit 1
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -n "$DAILY_START_AT" ]; then
-            git add -- "$DAILY_SNAPSHOT_PATH" prediction_history_index.json
-            git restore --worktree -- .
-          else
-            GENERATED_FILES=(
-              "race.json"
-              "condition_history.json"
-              "day_races.json"
-              "day_time_history.json"
-              "track_condition.json"
-              "day_bias.json"
-              "pedigree.json"
-              "normalized_pedigree.json"
-              "history_pedigree.json"
-              "runner_history.json"
-              "runner_race_db.json"
-              "runner_ability_evidence.json"
-              "runner_past_laps.json"
-              "runner_past_laps_cache.json"
-              "runner_lap_features.json"
-              "runner_pace_context.json"
-              "runner_late_review.json"
-              "runner_time_fit.json"
-              "runner_analysis.json"
-              "previous_race_analysis.json"
-              "runner_previous_late_review.json"
-              "pace_analysis.json"
-              "runner_performance_evidence.json"
-              "bloodline_stats.json"
-              "race_bloodline_score.json"
-              "final_analysis.json"
-              "prediction_history_index.json"
-            )
-            ADDED_COUNT=0
-            for path in "${GENERATED_FILES[@]}"; do
-              if [ -f "$path" ]; then
-                echo "ADD: $path"
-                git add -- "$path"
-                ADDED_COUNT=$((ADDED_COUNT + 1))
-              else
-                echo "SKIP (not generated): $path"
-              fi
-            done
-            if [ -d "prediction_snapshots" ]; then
-              echo "ADD: prediction_snapshots"
-              git add -- prediction_snapshots
-            else
-              echo "ERROR: prediction_snapshots directory was not created"
-              exit 1
-            fi
-            for path in race_market_snapshots/*/"$RACE_ID"/*.json; do
-              if [ -f "$path" ]; then
-                echo "ADD: $path"
-                git add -- "$path"
-              fi
-            done
-            echo "Existing generated files: $ADDED_COUNT"
-          fi
-          if git diff --cached --quiet; then
-            echo "No generated changes"
-            exit 0
-          fi
-          git commit -m "Update full race analysis ${RACE_ID}"
-          PUSH_OK=false
-          for ATTEMPT in 1 2 3; do
-            echo "Push attempt: $ATTEMPT"
-            if [ -n "$DAILY_START_AT" ]; then
-              python - <<'PY'
-          import os
-          from datetime import datetime
 
-          start_at = datetime.fromisoformat(os.environ["DAILY_START_AT"])
-          if datetime.now(start_at.tzinfo) >= start_at:
-              raise SystemExit("発走時刻を経過したため、予想を公開しません。")
-          PY
-            fi
-            if git push origin main; then
-              PUSH_OK=true
-              break
-            fi
-            echo "Remote main changed during analysis."
-            echo "Fetching and rebasing..."
-            git fetch origin main
-            if ! git rebase origin/main; then
-              CONFLICT_FILES="$(git diff --name-only --diff-filter=U)"
-              if [ "$CONFLICT_FILES" != "prediction_history_index.json" ]; then
-                git rebase --abort || true
-                echo "ERROR: generated analysis rebase failed"
-                exit 1
-              fi
-              echo "Rebuilding conflicted prediction history index"
-              git checkout --ours -- prediction_history_index.json
-              python build_prediction_history_index.py
-              git add -- prediction_history_index.json
-              if ! GIT_EDITOR=true git rebase --continue; then
-                git rebase --abort || true
-                echo "ERROR: history index rebase continuation failed"
-                exit 1
-              fi
-            fi
-            python build_prediction_history_index.py
-            git add -- prediction_history_index.json
-            if ! git diff --cached --quiet; then
-              git commit --amend --no-edit
-            fi
-          done
-          if [ "$PUSH_OK" != "true" ]; then
-            echo "ERROR: generated analysis push failed after retries"
-            exit 1
-          fi
-          echo "========================================"
-          echo "ANALYSIS FILES PUSHED"
-          echo "Race ID: $RACE_ID"
-          echo "========================================"
+def enrich(previous, final, database, urls, target_date):
+    previous_by_race = {}
+    for horse in previous["horses"]:
+        key = previous_key(horse, target_date)
+        if key in urls:
+            previous_by_race.setdefault(key, []).append(horse)
+
+    past_races = {}
+    for race in database["races"]:
+        key = race["race_id"], race["race_date"]
+        if key in previous_by_race:
+            past_races.setdefault(key, []).append(race)
+
+    final_by_id = {row["horse_id"]: row for row in final["ranking"]}
+    changes = 0
+    for key, horses in previous_by_race.items():
+        candidates = past_races.get(key, [])
+        if len(candidates) != 1:
+            print("JRA前走照合をスキップ:", key[0], "前走DBのレースを特定できません")
+            continue
+        try:
+            victims = fetch_confirmed_victims(urls[key], candidates[0])
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            print("JRA前走照合をスキップ:", key[0], error)
+            continue
+        by_id = {record["horse_id"]: record for record in victims}
+        for horse in horses:
+            horse_id = horse["horse_id"]
+            record = by_id.get(horse_id)
+            ranked = final_by_id.get(horse_id)
+            if (
+                not record
+                or not ranked
+                or record["horse_name"] != horse["horse_name"]
+                or ranked["horse_name"] != horse["horse_name"]
+            ):
+                continue
+            detail = horse["previous_race"]
+            reasons = ranked["reasons"]
+            changed = detail.get("jra_interference") != record or NOTE not in reasons
+            if not changed:
+                continue
+            detail["jra_interference"] = record
+            if NOTE not in reasons:
+                reasons.append(NOTE)
+            changes += 1
+    return changes
+
+
+def main():
+    parser = argparse.ArgumentParser(description="JRA公式の前走不利を最終解析に追記")
+    parser.add_argument("--url", action="append", default=[], help="JRA公式結果URL")
+    args = parser.parse_args()
+    try:
+        urls = load_result_urls(args.url)
+        if not urls:
+            print("JRA前走照合: 公式結果URLの登録なし")
+            return
+        race = read_json(RACE_FILE)
+        previous = read_json(PREVIOUS_FILE)
+        final = read_json(FINAL_FILE)
+        database = read_json(PAST_DB_FILE)
+        race_id = race["race_id"]
+        if (
+            previous["target_race_id"] != race_id
+            or database["target_race_id"] != race_id
+            or final["race_id"] != race_id
+        ):
+            raise ValueError("今回のレースIDが解析ファイル間で一致しません")
+        if any(
+            data.get("future_race_usage") is not False
+            or data.get("leak_check_passed") is not True
+            for data in (previous, database)
+        ):
+            raise ValueError("前走データの時系列を確認できません")
+        target_date = date.fromisoformat(race["race_date"])
+        changes = enrich(previous, final, database, urls, target_date)
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
+        print("JRA前走照合をスキップ:", error)
+        return
+    if changes:
+        write_json(PREVIOUS_FILE, previous)
+        write_json(FINAL_FILE, final)
+    print("JRA前走不利を追記した頭数:", changes)
+
+
+if __name__ == "__main__":
+    main()
