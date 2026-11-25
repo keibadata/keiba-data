@@ -1022,6 +1022,38 @@ def validate_final_analysis(
     return total
 
 
+def attach_jockey_names(race, final_analysis):
+    def runner_key(horse):
+        return (
+            str(horse.get("horse_id") or "").strip(),
+            str(horse.get("horse_number") or "").strip(),
+        )
+
+    jockeys = {}
+    for horse in race.get("horses", []):
+        key = runner_key(horse)
+        if not all(key):
+            continue
+        name = horse.get("jockey")
+        # 重複や空欄は表示用の騎手名として採用しない。
+        jockeys[key] = (
+            name.strip()
+            if key not in jockeys and isinstance(name, str) and name.strip()
+            else None
+        )
+
+    changed = False
+    for horse in final_analysis["ranking"]:
+        name = jockeys.get(runner_key(horse))
+        if name and horse.get("jockey") != name:
+            horse["jockey"] = name
+            changed = True
+        elif not name and "jockey" in horse:
+            del horse["jockey"]
+            changed = True
+    return changed
+
+
 def run_prediction_snapshot():
     completed = subprocess.run(
         [
@@ -1305,6 +1337,12 @@ def main():
                 final_analysis,
             )
         )
+
+        if attach_jockey_names(race, final_analysis):
+            FINAL_FILE.write_text(
+                json.dumps(final_analysis, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
 
         output_path = (
             run_prediction_snapshot()
