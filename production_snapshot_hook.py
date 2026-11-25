@@ -4,6 +4,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+from prediction_snapshot import parse_iso_datetime, parse_race_date
+from race_market_snapshot import OUTPUT_ROOT as MARKET_ROOT
+from race_market_snapshot import horse_number, race_horses
+
 
 RACE_ID_FILE = Path("race_id.txt")
 RACE_FILE = Path("race.json")
@@ -1054,6 +1058,86 @@ def attach_jockey_names(race, final_analysis):
     return changed
 
 
+def load_current_market(race, final_analysis):
+    race_date = parse_race_date(race.get("race_date"))
+    input_time = parse_iso_datetime(race.get("updated_at"))
+    analysis_time = parse_iso_datetime(final_analysis.get("updated_at"))
+    if race_date is None or input_time is None or analysis_time is None:
+        return None
+
+    folder = MARKET_ROOT / race_date.isoformat() / race["race_id"]
+    if not folder.is_dir():
+        return None
+    try:
+        entries = race_horses(race)
+    except ValueError:
+        return None
+
+    candidates = []
+    for path in folder.glob("*.json"):
+        try:
+            market = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(market, dict):
+                continue
+            if (
+                market.get("schema_version") != 1
+                or market.get("race_id") != race["race_id"]
+                or market.get("race_date") != race_date.isoformat()
+                or market.get("source") != "netkeiba"
+                or market.get("source_status") != "middle"
+            ):
+                continue
+            captured = parse_iso_datetime(market.get("captured_at"))
+            published = parse_iso_datetime(market.get("source_updated_at"))
+            start = parse_iso_datetime(market.get("scheduled_start_at"))
+            # 出馬表取得後、この解析の発走前オッズだけを表示に使う。
+            if (
+                captured is None or published is None or start is None
+                or start.date() != race_date
+                or not input_time <= captured <= analysis_time
+                or not published <= captured < start
+                or race_horses(market) != entries
+            ):
+                continue
+        except (OSError, ValueError):
+            continue
+        candidates.append((captured, path.name, market))
+    return max(candidates, key=lambda item: item[:2])[2] if candidates else None
+
+
+def attach_win_market(race, final_analysis):
+    market = load_current_market(race, final_analysis)
+    quotes = {}
+    if market is not None:
+        for entry in market["horses"]:
+            odds = entry.get("win_odds")
+            if not isinstance(odds, str) or not re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", odds):
+                continue
+            if float(odds) < 1:
+                continue
+            popularity = entry.get("win_popularity")
+            quotes[(horse_number(entry["horse_number"]), str(entry["horse_id"]).strip())] = {
+                "odds": odds,
+                "popularity": popularity if type(popularity) is int and 1 <= popularity <= len(market["horses"]) else None,
+                "captured_at": market["captured_at"],
+            }
+
+    changed = False
+    for horse in final_analysis["ranking"]:
+        try:
+            key = (horse_number(horse.get("horse_number")), str(horse.get("horse_id") or "").strip())
+            quote = quotes.get(key)
+        except ValueError:
+            quote = None
+        if quote is not None and horse.get("win_market") != quote:
+            horse["win_market"] = quote
+            changed = True
+        elif quote is None and "win_market" in horse:
+            del horse["win_market"]
+            changed = True
+    return changed
+
+
 def run_prediction_snapshot():
     completed = subprocess.run(
         [
@@ -1338,7 +1422,9 @@ def main():
             )
         )
 
-        if attach_jockey_names(race, final_analysis):
+        jockey_changed = attach_jockey_names(race, final_analysis)
+        market_changed = attach_win_market(race, final_analysis)
+        if jockey_changed or market_changed:
             FINAL_FILE.write_text(
                 json.dumps(final_analysis, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
