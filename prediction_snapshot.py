@@ -8,6 +8,8 @@ from pathlib import Path
 
 import requests
 
+from partner_comparison import build_partner_comparison
+
 
 RACE_FILE = "race.json"
 FINAL_ANALYSIS_FILE = "final_analysis.json"
@@ -947,7 +949,7 @@ def build_snapshot(
         ),
     }
 
-    return {
+    snapshot = {
         "schema_version": (
             SCHEMA_VERSION
         ),
@@ -1048,6 +1050,11 @@ def build_snapshot(
 
         "analysis": final_analysis,
     }
+
+    partner_comparison = build_partner_comparison(snapshot)
+    if partner_comparison is not None:
+        snapshot["partner_comparison"] = partner_comparison
+    return snapshot
 
 
 def snapshot_path(snapshot):
